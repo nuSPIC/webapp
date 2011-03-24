@@ -1,0 +1,14 @@
+# Patches
+*.orig
+*.rej
+
+# Backups
+*~
+*.bak
+
+# Rest
+.DS_Store
+.installed.cfg
+*.pyc
+*.pyo
+tmp
