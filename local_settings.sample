@@ -2,12 +2,15 @@
 
 from os.path import dirname, join, realpath
 
-
+# Debug mode
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
+# Make this unique, and don't share it with anybody.
+SECRET_KEY = 'zre8*0i4@8uwh&1%!v_uq-64_b_=gobqx8k0vlfa!pby#8zf*u'
+
 ADMINS = (
-    # ('Your Name', 'your_email@domain.com'),
+    ('Yury V. Zaytsev', 'yury@shurup.com'),
 )
 
 MANAGERS = ADMINS
@@ -30,7 +33,9 @@ MEDIA_ROOT = join(dirname(realpath(__file__)), 'media')
 # URL that handles the media served from MEDIA_ROOT
 MEDIA_URL = '/media/'
 
-# URL prefix for admin media -- CSS, JavaScript and images
+# URL prefix for admin media -- CSS, JavaScript and images.
+# Make sure to use a trailing slash.
+# Examples: "http://foo.com/media/", "/media/".
 ADMIN_MEDIA_PREFIX = '/admin_media/'
 
 # List of locations of the template source files
