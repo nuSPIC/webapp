@@ -1,0 +1,39 @@
+# coding: utf-8
+
+from os.path import dirname, join, realpath
+
+
+DEBUG = True
+TEMPLATE_DEBUG = DEBUG
+
+ADMINS = (
+    # ('Your Name', 'your_email@domain.com'),
+)
+
+MANAGERS = ADMINS
+
+# Database connection settings
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.',
+        'NAME': '',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+    }
+}
+
+# Absolute path to the directory that holds media
+MEDIA_ROOT = join(dirname(realpath(__file__)), 'media')
+
+# URL that handles the media served from MEDIA_ROOT
+MEDIA_URL = '/media/'
+
+# URL prefix for admin media -- CSS, JavaScript and images
+ADMIN_MEDIA_PREFIX = '/admin_media/'
+
+# List of locations of the template source files
+TEMPLATE_DIRS = (
+    join(dirname(realpath(__file__)), 'templates').replace('\\', '/'),
+)
