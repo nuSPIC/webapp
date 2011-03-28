@@ -9,6 +9,7 @@
 # Rest
 .DS_Store
 .installed.cfg
+.idea
 *.pyc
 *.pyo
 tmp
