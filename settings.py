@@ -28,7 +28,7 @@ USE_I18N = False
 
 # If you set this to False, Django will not format dates, numbers and
 # calendars according to the current locale
-USE_L10N = False
+USE_L10N = True
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -55,12 +55,19 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
+    
+    'lib',
+    'news',
 )
 
 
 # =================================
 #   Application settings section
 # =================================
+
+# News
+CUT_TAG = '<!-- more -->'
+LATEST_NEWS_COUNT = 5
 
 
 # Import local settings depending on running environment

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}{{ flatpage.title }}{% endblock %}
+
+{% block content %}
+    <div style="float:right; width:30%">
+        {% for news in news_list %}
+            <div>
+                <strong>{{ news.pub_date|date:"DATE_FORMAT" }} &raquo; {{ news.title }}</strong>
+                <div>
+                    {{ news.summary|safe }}
+                </div>
+                <a href="{{ news.get_absolute_url }}">Continue reading</a>
+            </div>
+            <hr />
+        {% endfor %}
+        
+        <a href="{% url news_archive %}">News archive</a>
+    </div>
+    
+    <div>
+        {{ flatpage.content }}
+    </div>
+{% endblock %}
