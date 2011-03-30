@@ -9,6 +9,11 @@ TEMPLATE_DEBUG = DEBUG
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = ''
 
+# reCAPTCHA keys
+# Obtain key pair at http://recaptcha.net/api/getkey
+RECAPTCHA_PUBLIC_KEY = '' 
+RECAPTCHA_PRIVATE_KEY = ''
+
 ADMINS = (
     ('Yury V. Zaytsev', 'yury@shurup.com'),
 )
