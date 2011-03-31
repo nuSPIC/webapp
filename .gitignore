@@ -10,6 +10,7 @@
 .DS_Store
 .installed.cfg
 .idea
+local_settings.py
 *.pyc
 *.pyo
 tmp

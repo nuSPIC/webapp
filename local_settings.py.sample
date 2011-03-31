@@ -7,7 +7,7 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'zre8*0i4@8uwh&1%!v_uq-64_b_=gobqx8k0vlfa!pby#8zf*u'
+SECRET_KEY = ''
 
 ADMINS = (
     ('Yury V. Zaytsev', 'yury@shurup.com'),
@@ -18,12 +18,19 @@ MANAGERS = ADMINS
 # Database connection settings
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.',
+#        'ENGINE': 'django.db.backends.sqlite3',
+#        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': '',
         'NAME': '',
         'USER': '',
         'PASSWORD': '',
         'HOST': '',
         'PORT': '',
+#        'OPTIONS': {
+#            'ssl': {
+#                'ca': '/path/to/cacert.pem',
+#                },
+#            },
     }
 }
 
