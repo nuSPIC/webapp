@@ -8,7 +8,7 @@ from django.utils.safestring import mark_safe
 
 def get_flatpage_or_none(request):
     """
-    Returns FlatPage object of requested page or None
+    Returns a FlatPage object of requested page or None
     """
     
     url = request.path_info
