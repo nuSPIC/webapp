@@ -66,6 +66,13 @@ INSTALLED_APPS = (
 #   Application settings section
 # =================================
 
+# Accounts
+AUTH_PROFILE_MODULE = 'accounts.UserProfile'
+
+# The number of days an activation link is valid for
+REGISTRATION_TIMEOUT_DAYS = 3 
+
+
 # News
 CUT_TAG = '<!-- more -->'
 LATEST_NEWS_COUNT = 5

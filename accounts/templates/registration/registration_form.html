@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Registration{% endblock %}
+
+{% block content %}
+    <h2>Registration</h2>
+    
+    <form action="." method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        
+        <fieldset>
+            <legend>Required fields</legend>
+            
+            <div>
+                {{ form.username.errors }}
+                {{ form.username.label_tag }}: {{ form.username }}
+                <small>{{ form.username.help_text }}</small>
+            </div>
+            
+            <div>
+                {{ form.first_name.errors }}
+                {{ form.first_name.label_tag }}: {{ form.first_name }}
+                <small>{{ form.first_name.help_text }}</small>
+            </div>
+            
+            <div>
+                {{ form.last_name.errors }}
+                {{ form.last_name.label_tag }}: {{ form.last_name }}
+                <small>{{ form.last_name.help_text }}</small>
+            </div>
+            
+            <div>
+                {{ form.email.errors }}
+                {{ form.email.label_tag }}: {{ form.email }}
+                <small>{{ form.email.help_text }}</small>
+            </div>
+            
+            <div>
+                {{ form.password.errors }}
+                {{ form.password.label_tag }}: {{ form.password }}
+                <small>{{ form.password.help_text }}</small>
+            </div>
+        </fieldset>
+    
+        <fieldset>
+            <legend>Optional fields</legend>
+            
+            <div>
+                {{ form.academic_affiliation.errors }}
+                {{ form.academic_affiliation.label_tag }}: {{ form.academic_affiliation }}
+                <small>{{ form.academic_affiliation.help_text }}</small>
+            </div>
+            
+            <div>
+                {{ form.public_email.errors }}
+                {{ form.public_email.label_tag }}: {{ form.public_email }}
+                <small>{{ form.public_email.help_text }}</small>
+            </div>
+            
+            <div>
+                {{ form.web_page.errors }}
+                {{ form.web_page.label_tag }}: {{ form.web_page }}
+                <small>{{ form.web_page.help_text }}</small>
+            </div>
+            
+            <div>
+                {{ form.notes.errors }}
+                {{ form.notes.label_tag }}: {{ form.notes }}
+                <small>{{ form.notes.help_text }}</small>
+            </div>
+        </fieldset>
+        
+        <div>
+            {{ form.captcha.errors }}
+            {{ form.captcha.label_tag }}: {{ form.captcha }}
+            <small>{{ form.captcha.help_text }}</small>
+        </div>
+        
+        <input type="submit" value="Register" />
+    </form>
+{% endblock %}
