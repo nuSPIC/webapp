@@ -4,6 +4,7 @@ Requirements
  - Django 1.2 (http://www.djangoproject.com/)
  - Python 2.x (2.6+) (http://www.python.org/)
  - Any Django supported database (http://docs.djangoproject.com/en/dev/ref/databases/)
+ - recaptcha-client 1.0.5 or higher (http://pypi.python.org/pypi/recaptcha-client)
 
 
 Installation

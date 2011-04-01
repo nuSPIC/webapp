@@ -1,5 +1,8 @@
 # coding: utf-8
 
+from datetime import timedelta
+
+
 # ============================
 #   Django project settings
 # ============================
@@ -56,6 +59,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     
+    'accounts',
     'lib',
     'news',
 )
@@ -64,6 +68,17 @@ INSTALLED_APPS = (
 # =================================
 #   Application settings section
 # =================================
+
+# Accounts
+AUTH_PROFILE_MODULE = 'accounts.UserProfile'
+
+# The number of days an activation link is valid for
+REGISTRATION_TIMEOUT_DAYS = 3 
+
+# Period of time between two email requests for individual user
+# (for now using for password reset only)
+EMAIL_REQUEST_DELAY = timedelta(minutes=30)
+
 
 # News
 CUT_TAG = '<!-- more -->'
