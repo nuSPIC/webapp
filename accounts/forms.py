@@ -2,13 +2,17 @@
 
 from django import forms
 from django.conf import settings
+from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.models import User
 from django.contrib.sites.models import get_current_site
 from django.template.loader import render_to_string
 from django.utils.http import int_to_base36
+from django.utils.timesince import timeuntil
 
 from accounts.fields import ReCaptchaField
 from accounts.tokens import registration_token_generator
+
+from datetime import datetime
 
 
 class RegistrationForm(forms.Form):
@@ -98,3 +102,35 @@ class RegistrationForm(forms.Form):
         subject = u'Registration confirmation on %s' % site_name
         message = render_to_string('registration/registration_email.txt', context)
         user.email_user(subject, message)
+
+        
+class CustomPasswordResetForm(PasswordResetForm):
+    """
+    Checks the period of time between two e-mail requests and
+    and doesn't allow to send email if it is less than EMAIL_REQUEST_DELAY
+    """
+    
+    def clean_email(self):
+        email = super(CustomPasswordResetForm, self).clean_email()
+        
+        now = datetime.today()
+        for user in self.users_cache:
+            profile = user.get_profile()
+            if profile.last_email_request and ((now - profile.last_email_request) < settings.EMAIL_REQUEST_DELAY):
+                d = profile.last_email_request + settings.EMAIL_REQUEST_DELAY
+                raise forms.ValidationError(
+                    'You need to wait %s, before submitting another password reset request. '
+                    'If the e-mail with the instructions wouldn\'t come within this period of time, '
+                    'be sure to check the spam folder in your e-mail client and please try again.' % timeuntil(d)
+                )
+        
+        return email
+    
+    def save(self, *args, **kwargs):
+        super(CustomPasswordResetForm, self).save(*args, **kwargs)
+        
+        # Save last password reset request time
+        for user in self.users_cache:
+            profile = user.get_profile()
+            profile.last_email_request = datetime.today()
+            profile.save()

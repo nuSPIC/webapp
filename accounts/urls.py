@@ -4,6 +4,8 @@ from django.conf import settings
 from django.conf.urls.defaults import *
 from django.views.generic.simple import direct_to_template
 
+from accounts.forms import CustomPasswordResetForm
+
 
 # Django built-in user actions with custom templates
 urlpatterns = patterns('django.contrib.auth.views',
@@ -16,7 +18,11 @@ urlpatterns = patterns('django.contrib.auth.views',
     (r'^password_change/done/$', 'password_change_done',
         {'template_name': 'password_change/password_change_done.html'}),
     (r'^password_reset/$', 'password_reset',
-        {'template_name': 'password_reset/password_reset_form.html', 'email_template_name': 'password_reset/password_reset_email.txt'}, 'password_reset'),
+        {
+            'template_name': 'password_reset/password_reset_form.html',
+            'email_template_name': 'password_reset/password_reset_email.txt',
+            'password_reset_form': CustomPasswordResetForm,
+        }, 'password_reset'),
     (r'^password_reset/done/$', 'password_reset_done',
         {'template_name': 'password_reset/password_reset_done.html'}),
     (r'^reset/(?P<uidb36>[0-9A-Za-z]{1,13})-(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$', 'password_reset_confirm',

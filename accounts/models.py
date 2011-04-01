@@ -17,6 +17,8 @@ class UserProfile(models.Model):
     web_page = models.URLField('Publicly visible web page address', verify_exists=False, blank=True)
     notes = models.TextField('Miscellaneous notes', max_length=1500, blank=True)
     
+    last_email_request = models.DateTimeField('Last e-mail request', blank=True, null=True)
+    
     class Meta:
         verbose_name = 'User profile'
         verbose_name_plural = 'User profiles'
