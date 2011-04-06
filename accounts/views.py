@@ -1,11 +1,14 @@
 # coding: utf-8
 
+from django.conf import settings
 from django.contrib.auth.models import User
+from django.contrib.sites.models import get_current_site
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from django.utils.http import base36_to_int
+from django.template.loader import render_to_string
+from django.utils.http import base36_to_int, int_to_base36
 
-from accounts.forms import RegistrationForm
+from accounts.forms import ProfileEditForm, UserRegistrationForm
 from accounts.tokens import registration_token_generator
 from lib.decorators import render_to
 
@@ -17,15 +20,46 @@ def registration(request):
     """
     
     if request.POST:
-        form = RegistrationForm(request.POST)
-        if form.is_valid():
-            form.save(request)
+        user_form = UserRegistrationForm(request.POST, prefix='user_form')
+        profile_form = ProfileEditForm(request.POST, prefix='profile_form')
+        if user_form.is_valid() and profile_form.is_valid():
+            # Create new inactive user
+            user = user_form.save()
+            user.is_active = False
+            user.save()
+            
+            # Fill user profile with data from registration form
+            profile = user.get_profile()
+            profile_form = ProfileEditForm(request.POST, instance=profile, prefix='profile_form')
+            profile_form.save()
+            
+            # Send email with activation key to the user
+            current_site = get_current_site(request)
+            site_name = current_site.name
+            domain = current_site.domain
+            
+            context = {
+                'domain': domain,
+                'site_name': site_name,
+                'uid': int_to_base36(user.id),
+                'user': user,
+                'token': registration_token_generator.make_token(user),
+                'protocol': 'http',
+                'expire': settings.REGISTRATION_TIMEOUT_DAYS,
+            }
+            
+            subject = u'Registration confirmation on %s' % site_name
+            message = render_to_string('registration/registration_email.txt', context)
+            user.email_user(subject, message)
+            
             return HttpResponseRedirect(reverse('registration_done'))
     else:
-        form = RegistrationForm()
+        user_form = UserRegistrationForm(prefix='user_form')
+        profile_form = ProfileEditForm(prefix='profile_form')
     
     return {
-        'form': form,
+        'user_form': user_form,
+        'profile_form': profile_form,
     }
 
 

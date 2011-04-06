@@ -15,6 +15,72 @@ div.centered-404 {
 }
 
 
+/* Forms and fields
+*************************/
+
+#login-form, #password-change-form,
+#password-reset-form {
+    width: 500px;
+}
+
+#registration-form {
+    width: 850px;
+}
+
+ul.errorlist {
+    padding: 0;
+    margin: 0;
+}
+
+    ul.errorlist li {
+        color           : #FFFFFF;
+        background-color: #FF7F7F;
+        display         : block;
+        font-size       : 0.85em;
+        font-weight     : bold;
+        margin-bottom   : 3px;
+        padding         : 3px 7px;
+        list-style      : none;
+    }
+
+.field-wrapper {
+    margin-bottom: 5px;
+}
+
+    .field-wrapper label {
+        font-weight: bold;
+        display    : block;
+    }
+
+    .field-wrapper input {
+        width           : 98%;
+        font-weight     : bold;
+        background-color: #EEEEEE;
+        display         : block;
+        border          : 1px solid #BBBBBB;
+        padding         : 4px;
+    }
+
+    .field-wrapper select {
+        font-weight     : bold;
+        background-color: #EEEEEE;
+        display         : block;
+        border          : 1px solid #BBBBBB;
+        padding         : 2px;
+    }
+
+        .field-wrapper select option {
+            padding         : 1px 5px;
+        }
+
+    .field-wrapper textarea {
+        width			: 99%;
+        background-color: #EEEEEE;
+        border          : 1px solid #BBBBBB;
+        padding         : 4px;
+    }
+
+
 /* Pagination
 ******************/
 
