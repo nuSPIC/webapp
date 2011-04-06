@@ -13,3 +13,36 @@ div.centered-404 {
     margin-left: -380px;
     margin-top: -250px;
 }
+
+
+/* Pagination
+******************/
+
+#page-navigation {
+    margin-top: 15px;
+    text-align: center;
+}
+
+        #page-navigation .pages .prev {
+            float: left;
+        }
+
+        #page-navigation .pages .next {
+            float: right;
+        }
+
+        #page-navigation .pages .page {
+            padding: 5px;
+        }
+
+        #page-navigation .pages .current {
+            font-weight: bold;
+        }
+    
+        #page-navigation .pages .inactive {
+            color: #BBBBBB;
+        }
+
+    #page-navigation .total {
+        color     : #BBBBBB;
+    }

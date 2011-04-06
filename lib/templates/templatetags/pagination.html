@@ -1,0 +1,53 @@
+{% load humanize %}
+
+{% if page.has_other_pages %}
+    <div id="page-navigation">
+        <div class="pages">
+            <div class="prev">
+                {% if page.has_previous %}
+                    <a href="?page={{ page.previous_page_number }}{{ query_string }}" class="page">&lt; Previous page</a>
+                {% else %}
+                    <span class="page inactive">&lt; Previous page</span>
+                {% endif %}
+            </div>
+            
+            <div class="next">
+                {% if page.has_next %}
+                    <a href="?page={{ page.next_page_number }}{{ query_string }}" class="page">Next page &gt;</a>
+                {% else %}
+                    <span class="page inactive">Next page &gt;</span>
+                {% endif %}
+            </div>
+            
+            {% if left_range %}
+                {% for i in left_range %}
+                    <a href="?page={{ i }}{{ query_string }}" class="page">{{ i }}</a>
+                {% endfor %}
+                
+                <span class="break">...</span>
+            {% endif %}
+            
+            {% for i in main_range %}
+                {% if page.number == i %}
+                    <span class="page current">
+                        {{ i }}
+                    </span>
+                {% else %}
+                    <a href="?page={{ i }}{{ query_string }}" class="page">{{ i }}</a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if right_range %}
+                <span class="break">...</span>
+                
+                {% for i in right_range %}
+                    <a href="?page={{ i }}{{ query_string }}" class="page">{{ i }}</a>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <div class="total">
+            ({{ page.paginator.count|intcomma }} {{ objects_caption }}{{ page.paginator.count|pluralize }})
+        </div>
+    </div>
+{% endif %}

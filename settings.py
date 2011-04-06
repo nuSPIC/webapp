@@ -55,6 +55,7 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.flatpages',
+    'django.contrib.humanize',
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
@@ -83,6 +84,16 @@ EMAIL_REQUEST_DELAY = timedelta(minutes=30)
 # News
 CUT_TAG = '<!-- more -->'
 LATEST_NEWS_COUNT = 5
+
+
+# Pagination
+#
+# 1 2 ... 6 7 [8] 9 10 ... 91 92
+# |_|     |_|     |__|     |___|
+# tail     ^padding^        tail
+
+PAGINATION_PADDING = 3
+PAGINATION_TAIL = 2
 
 
 # Import local settings depending on running environment
