@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}{{ profile.user.get_full_name }} &raquo; Edit profile{% endblock %}
+
+{% block content %}
+    <h2>Edit profile</h2>
+    
+    <form action="." method="post" id="profile-edit-form">
+        {% csrf_token %}
+        
+        <fieldset>
+            <legend>Required fields</legend>
+            
+            {{ user_form.non_field_errors }}
+            {{ user_form.as_div }}
+        </fieldset>
+    
+        <fieldset>
+            <legend>Optional fields</legend>
+            
+            {{ profile_form.non_field_errors }}
+            {{ profile_form.as_div }}
+        </fieldset>
+        
+        <input type="submit" value="Save" />
+    </form>
+{% endblock %}

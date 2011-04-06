@@ -12,6 +12,21 @@ from accounts.models import UserProfile
 from datetime import datetime
 
 
+class UserEditForm(forms.ModelForm):
+    """
+    User edit form.
+    
+    Used at profile edit page.
+    """
+    
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name',)
+    
+    def as_div(self):
+        return self._html_output(u'<div class="field-wrapper">%(label)s %(errors)s %(field)s%(help_text)s</div>', u'%s', '</div>', u'<span class="help_text">%s</span>', False)
+
+
 class UserRegistrationForm(forms.ModelForm):
     """
     User registration form
@@ -95,3 +110,13 @@ class CustomPasswordResetForm(PasswordResetForm):
             profile = user.get_profile()
             profile.last_email_request = datetime.today()
             profile.save()
+
+            
+class AccountSearchForm(forms.Form):
+    """
+    Account search form.
+    
+    Used on community page.
+    """
+    
+    term = forms.RegexField(label='', regex=r'\w+', required=False)

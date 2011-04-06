@@ -32,6 +32,7 @@ urlpatterns = patterns('django.contrib.auth.views',
 )
 
 urlpatterns += patterns('accounts.views',
+    # Registration
     url(r'^registration/$', 'registration', name='registration'),
     url(r'^registration/done/$', direct_to_template,
         {'template': 'registration/registration_done.html'}, name='registration_done'),
@@ -40,4 +41,12 @@ urlpatterns += patterns('accounts.views',
         {'template': 'registration/registration_failed.html', 'extra_context': {'expire': settings.REGISTRATION_TIMEOUT_DAYS}}, name='registration_failed'),
     url(r'^registration/complete/$', direct_to_template,
         {'template': 'registration/registration_complete.html'}, name='registration_complete'),
+    
+    # Community
+    url(r'^$', 'accounts', {'sort_order': 'user__last_name'}, name='accounts'),
+    url(r'^by_date/$', 'accounts', {'sort_order': ['user__date_joined', '-id']}, name='accounts_by_date'),
+    
+    # User profile
+    url(r'^(?P<profile_id>\d+)/$', 'profile', name='profile'),
+    url(r'^(?P<profile_id>\d+)/edit/$', 'profile_edit', name='profile_edit'),
 )

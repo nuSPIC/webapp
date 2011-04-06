@@ -15,6 +15,46 @@ div.centered-404 {
 }
 
 
+/* Community page
+*********************/
+
+#accounts {
+    overflow: hidden;
+}
+
+    #accounts .column {
+        float: left;
+        width: 33%;
+    }
+
+        #accounts .column .profile {
+            padding: 10px;
+        }
+
+            #accounts .column .profile .username {
+                display: block;
+            }
+
+
+/* User profile
+*******************/
+
+#profile {
+    
+}
+
+    #profile .row {
+        overflow: hidden;
+        padding: 5px 0px;
+    }
+
+        #profile .row .title {
+            font-weight: bold;
+            width: 300px;
+            float: left;
+        }
+
+
 /* Forms and fields
 *************************/
 
@@ -23,7 +63,7 @@ div.centered-404 {
     width: 500px;
 }
 
-#registration-form {
+#registration-form, #profile-edit-form {
     width: 850px;
 }
 

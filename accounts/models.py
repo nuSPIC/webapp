@@ -26,6 +26,10 @@ class UserProfile(models.Model):
     
     def __unicode__(self):
         return self.user.username
+    
+    @models.permalink
+    def get_absolute_url(self):
+        return ('profile', (), {'profile_id': self.id})
 
 
 @signals.post_save(sender=User)
