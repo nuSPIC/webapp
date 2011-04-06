@@ -15,6 +15,33 @@ div.centered-404 {
 }
 
 
+/* Layout
+***********************/
+
+#header {
+    padding: 10px;
+}
+
+    #header .top_links {
+        text-align: right;
+    }
+
+    #header .navigation {
+        overflow: hidden;
+        font-size: 200%;
+    }
+
+#content {
+    padding: 10px;
+    overflow: hidden;
+}
+
+#footer {
+    margin-top: 25px;
+    text-align: center;
+}
+
+
 /* Community page
 *********************/
 
