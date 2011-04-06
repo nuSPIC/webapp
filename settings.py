@@ -55,6 +55,7 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.flatpages',
+    'django.contrib.humanize',
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
@@ -71,6 +72,7 @@ INSTALLED_APPS = (
 
 # Accounts
 AUTH_PROFILE_MODULE = 'accounts.UserProfile'
+LOGIN_REDIRECT_URL = '/'
 
 # The number of days an activation link is valid for
 REGISTRATION_TIMEOUT_DAYS = 3 
@@ -79,10 +81,23 @@ REGISTRATION_TIMEOUT_DAYS = 3
 # (for now using for password reset only)
 EMAIL_REQUEST_DELAY = timedelta(minutes=30)
 
+# Community page
+ACCOUNTS_PER_PAGE = 15
+
 
 # News
 CUT_TAG = '<!-- more -->'
 LATEST_NEWS_COUNT = 5
+
+
+# Pagination
+#
+# 1 2 ... 6 7 [8] 9 10 ... 91 92
+# |_|     |_|     |__|     |___|
+# tail     ^padding^        tail
+
+PAGINATION_PADDING = 3
+PAGINATION_TAIL = 2
 
 
 # Import local settings depending on running environment

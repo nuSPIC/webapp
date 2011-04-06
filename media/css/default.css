@@ -13,3 +13,169 @@ div.centered-404 {
     margin-left: -380px;
     margin-top: -250px;
 }
+
+
+/* Layout
+***********************/
+
+#header {
+    padding: 10px;
+}
+
+    #header .top_links {
+        text-align: right;
+    }
+
+    #header .navigation {
+        overflow: hidden;
+        font-size: 200%;
+    }
+
+#content {
+    padding: 10px;
+    overflow: hidden;
+}
+
+#footer {
+    margin-top: 25px;
+    text-align: center;
+}
+
+
+/* Community page
+*********************/
+
+#accounts {
+    overflow: hidden;
+}
+
+    #accounts .column {
+        float: left;
+        width: 33%;
+    }
+
+        #accounts .column .profile {
+            padding: 10px;
+        }
+
+            #accounts .column .profile .username {
+                display: block;
+            }
+
+
+/* User profile
+*******************/
+
+#profile {
+    
+}
+
+    #profile .row {
+        overflow: hidden;
+        padding: 5px 0px;
+    }
+
+        #profile .row .title {
+            font-weight: bold;
+            width: 300px;
+            float: left;
+        }
+
+
+/* Forms and fields
+*************************/
+
+#login-form, #password-change-form,
+#password-reset-form {
+    width: 500px;
+}
+
+#registration-form, #profile-edit-form {
+    width: 850px;
+}
+
+ul.errorlist {
+    padding: 0;
+    margin: 0;
+}
+
+    ul.errorlist li {
+        color           : #FFFFFF;
+        background-color: #FF7F7F;
+        display         : block;
+        font-size       : 0.85em;
+        font-weight     : bold;
+        margin-bottom   : 3px;
+        padding         : 3px 7px;
+        list-style      : none;
+    }
+
+.field-wrapper {
+    margin-bottom: 5px;
+}
+
+    .field-wrapper label {
+        font-weight: bold;
+        display    : block;
+    }
+
+    .field-wrapper input {
+        width           : 98%;
+        font-weight     : bold;
+        background-color: #EEEEEE;
+        display         : block;
+        border          : 1px solid #BBBBBB;
+        padding         : 4px;
+    }
+
+    .field-wrapper select {
+        font-weight     : bold;
+        background-color: #EEEEEE;
+        display         : block;
+        border          : 1px solid #BBBBBB;
+        padding         : 2px;
+    }
+
+        .field-wrapper select option {
+            padding         : 1px 5px;
+        }
+
+    .field-wrapper textarea {
+        width			: 99%;
+        background-color: #EEEEEE;
+        border          : 1px solid #BBBBBB;
+        padding         : 4px;
+    }
+
+
+/* Pagination
+******************/
+
+#page-navigation {
+    margin-top: 15px;
+    text-align: center;
+}
+
+        #page-navigation .pages .prev {
+            float: left;
+        }
+
+        #page-navigation .pages .next {
+            float: right;
+        }
+
+        #page-navigation .pages .page {
+            padding: 5px;
+        }
+
+        #page-navigation .pages .current {
+            font-weight: bold;
+        }
+    
+        #page-navigation .pages .inactive {
+            color: #BBBBBB;
+        }
+
+    #page-navigation .total {
+        color     : #BBBBBB;
+    }
