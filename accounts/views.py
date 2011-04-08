@@ -92,10 +92,10 @@ def registration_confirm(request, uidb36, token):
 @render_to('community/accounts.html')
 def accounts(request, sort_order):
     """
-    Shows user list sorted by last name and splited into 3 columns
+    Shows registered user list, which can be searched and sorted according to several criteria
     """
     
-    profiles = UserProfile.objects.select_related('user')
+    profiles = UserProfile.objects.exclude(user__is_active=False).select_related('user')
     if isinstance(sort_order, (list, tuple)):
         profiles = profiles.order_by(*sort_order)
     else:
