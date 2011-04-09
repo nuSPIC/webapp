@@ -21,7 +21,7 @@ class UserEditForm(forms.ModelForm):
     
     class Meta:
         model = User
-        fields = ('first_name', 'last_name',)
+        fields = ('first_name', 'last_name', 'email',)
     
     def as_div(self):
         return self._html_output(u'<div class="field-wrapper">%(label)s %(errors)s %(field)s%(help_text)s</div>', u'%s', '</div>', u'<span class="help_text">%s</span>', False)
