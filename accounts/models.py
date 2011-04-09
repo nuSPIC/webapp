@@ -18,6 +18,7 @@ class UserProfile(models.Model):
     notes = models.TextField('Miscellaneous notes', max_length=1500, blank=True)
     
     last_email_request = models.DateTimeField('Last e-mail request', blank=True, null=True)
+    temporary_email = models.EmailField('Temporary field for primary e-mail about to change', blank=True)
     
     class Meta:
         verbose_name = 'User profile'

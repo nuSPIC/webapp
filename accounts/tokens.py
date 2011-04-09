@@ -6,21 +6,23 @@ from django.utils.hashcompat import sha_constructor
 from django.utils.http import int_to_base36, base36_to_int
 
 
-class RegistrationTokenGenerator(object):
+class TokenGenerator(object):
     """
-    Strategy object used to generate and check tokens for the registration mechanism.
+    Strategy object used to generate and check tokens.
     """
+    
+    def __init__(self, timeout):
+        self.timeout = timeout
     
     def make_token(self, user):
         """
-        Returns a token that can be used once to do a registration activation
-        for the given user.
+        Returns a token that can be used once to do a activation for the given user.
         """
         return self._make_token_with_timestamp(user, self._num_days(self._today()))
 
     def check_token(self, user, token):
         """
-        Check that a registration token is correct for a given user.
+        Check that a token is correct for a given user.
         """
         
         # Parse the token
@@ -39,7 +41,7 @@ class RegistrationTokenGenerator(object):
             return False
 
         # Check the timestamp is within limit
-        if (self._num_days(self._today()) - ts) > settings.REGISTRATION_TIMEOUT_DAYS:
+        if (self._num_days(self._today()) - ts) > self.timeout:
             return False
 
         return True
@@ -56,7 +58,7 @@ class RegistrationTokenGenerator(object):
         # invalid as soon as it is used.
         # We limit the hash to 20 chars to keep URL short
         hash = sha_constructor(settings.SECRET_KEY + unicode(user.id) +
-                               user.password + user.last_login.strftime('%Y-%m-%d %H:%M:%S') +
+                               user.password + user.date_joined.strftime('%Y-%m-%d %H:%M:%S') +
                                unicode(timestamp)).hexdigest()[::2]
         return "%s-%s" % (ts_b36, hash)
 
@@ -65,5 +67,3 @@ class RegistrationTokenGenerator(object):
 
     def _today(self):
         return date.today()
-
-registration_token_generator = RegistrationTokenGenerator()

@@ -49,4 +49,13 @@ urlpatterns += patterns('accounts.views',
     # User profile
     url(r'^(?P<profile_id>\d+)/$', 'profile', name='profile'),
     url(r'^(?P<profile_id>\d+)/edit/$', 'profile_edit', name='profile_edit'),
+    
+    # Primary e-mail change
+    url(r'^email_change/done/$', direct_to_template,
+        {'template': 'email_change/email_change_done.html', 'extra_context': {'expire': settings.EMAIL_CHANGE_TIMEOUT_DAYS}}, name='email_change_done'),
+    url(r'^email_change/(?P<uidb36>[0-9A-Za-z]{1,13})-(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$', 'email_change_confirm', name='email_change_confirm'),
+    url(r'^email_change/complete/$', direct_to_template,
+        {'template': 'email_change/email_change_complete.html'}, name='email_change_complete'),
+    url(r'^email_change/failed/$', direct_to_template,
+        {'template': 'email_change/email_change_failed.html', 'extra_context': {'expire': settings.EMAIL_CHANGE_TIMEOUT_DAYS}}, name='email_change_failed'),
 )

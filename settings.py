@@ -75,7 +75,8 @@ AUTH_PROFILE_MODULE = 'accounts.UserProfile'
 LOGIN_REDIRECT_URL = '/'
 
 # The number of days an activation link is valid for
-REGISTRATION_TIMEOUT_DAYS = 3 
+REGISTRATION_TIMEOUT_DAYS = 3
+EMAIL_CHANGE_TIMEOUT_DAYS = 3
 
 # Period of time between two email requests for individual user
 # (for now using for password reset only)

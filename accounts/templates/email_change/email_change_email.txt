@@ -1,0 +1,12 @@
+Confirm your new e-mail address for the {{ site_name }}
+
+You have requested to alter the primary e-mail for your account with the login name {{ user.username }} at {{ site_name }}. If you have changed your mind, you can ignore this email and continue using your account with the old e-mail address; the link below will expire in {{ expire }} days.
+
+Otherwise, here is the link to confirm your new e-mail address:
+
+{{ protocol }}://{{ domain }}{% url email_change_confirm uidb36=uid token=token %}
+
+Please follow it in your browser to change your primary e-mail address.
+
+Thanks,
+{{ site_name }}
