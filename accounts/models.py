@@ -18,7 +18,7 @@ class UserProfile(models.Model):
     notes = models.TextField('Miscellaneous notes', max_length=1500, blank=True)
     
     last_email_request = models.DateTimeField('Last e-mail request', blank=True, null=True)
-    temporary_email = models.EmailField('Temporary field for primary e-mail about to change', blank=True)
+    temporary_email = models.EmailField('Field for temporary storage of the new primary e-mail', blank=True)
     
     class Meta:
         verbose_name = 'User profile'
@@ -36,7 +36,7 @@ class UserProfile(models.Model):
 @signals.post_save(sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     """
-    Create associated user profile when new user created
+    Create associated user profile when a new user is created
     """
     if created:
         UserProfile.objects.create(user=instance)

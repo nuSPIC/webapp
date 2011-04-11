@@ -158,8 +158,9 @@ def profile_edit(request, profile_id):
         
         if user_form.is_valid() and profile_form.is_valid():
             if 'email' in user_form.changed_data:
-                # If user has changed his primary e-mail address, save the new on in the temporary field 
-                # and send an e-mail with the confirmation link to the new address  
+                # If the user has changed his primary e-mail address,
+                # save the new one in the temporary field and send an e-mail
+                # with the confirmation link to the new address
                 new_email = user_form.cleaned_data['email']
                 
                 user = user_form.save(commit=False)
@@ -171,7 +172,7 @@ def profile_edit(request, profile_id):
                 profile.temporary_email = new_email
                 profile.save()
                 
-                # Send email with confirmation link to the user
+                # Send the email with the confirmation link to the user
                 current_site = get_current_site(request)
                 site_name = current_site.name
                 domain = current_site.domain
@@ -210,7 +211,7 @@ def profile_edit(request, profile_id):
 
 def email_change_confirm(request, uidb36, token):
     """
-    Сhange the primary email in the case if the hash
+    Change the primary email in the case if the hash
     in the link the user clicked was correct
     """
     

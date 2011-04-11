@@ -14,9 +14,9 @@ from datetime import datetime
 
 class UserEditForm(forms.ModelForm):
     """
-    User edit form.
+    User edit form
     
-    Used at profile edit page.
+    Used on the "Edit profile" page
     """
     
     class Meta:
@@ -50,7 +50,7 @@ class UserRegistrationForm(forms.ModelForm):
 
     def clean_email(self):
         """
-        Validate that the email is not already in use
+        Check that the email is not already in use
         """
         
         email = self.cleaned_data.get('email')
@@ -64,9 +64,9 @@ class UserRegistrationForm(forms.ModelForm):
 
 class ProfileEditForm(forms.ModelForm):
     """
-    User profile edit form.
+    User profile edit form
     
-    Used at registration and edit profile pages.
+    Used on the registration and edit profile pages
     """
     
     class Meta:
@@ -79,7 +79,7 @@ class ProfileEditForm(forms.ModelForm):
 
 class CustomPasswordResetForm(PasswordResetForm):
     """
-    Checks the period of time between two e-mail requests and
+    Checks what is the period of time between two e-mail requests and
     and doesn't allow to send email if it is less than EMAIL_REQUEST_DELAY
     """
     
@@ -114,9 +114,9 @@ class CustomPasswordResetForm(PasswordResetForm):
             
 class AccountSearchForm(forms.Form):
     """
-    Account search form.
+    Account search form
     
-    Used on community page.
+    Used on the community page
     """
     
     term = forms.RegexField(label='', regex=r'\w+', required=False)

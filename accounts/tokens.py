@@ -8,7 +8,7 @@ from django.utils.http import int_to_base36, base36_to_int
 
 class TokenGenerator(object):
     """
-    Strategy object used to generate and check tokens.
+    Generates and validates confirmation tokens
     """
     
     def __init__(self, timeout):
@@ -16,13 +16,13 @@ class TokenGenerator(object):
     
     def make_token(self, user):
         """
-        Returns a token that can be used once to do a activation for the given user.
+        Returns a token that can be used once to perform activation for a given user
         """
         return self._make_token_with_timestamp(user, self._num_days(self._today()))
 
     def check_token(self, user, token):
         """
-        Check that a token is correct for a given user.
+        Check that the token is correct for a given user
         """
         
         # Parse the token
@@ -36,18 +36,19 @@ class TokenGenerator(object):
         except ValueError:
             return False
 
-        # Check that the timestamp/uid has not been tampered with
+        # Check that the timestamp/uid have not been tampered
         if self._make_token_with_timestamp(user, ts) != token:
             return False
 
-        # Check the timestamp is within limit
+        # Check that the timestamp is within limits
         if (self._num_days(self._today()) - ts) > self.timeout:
             return False
 
         return True
 
     def _make_token_with_timestamp(self, user, timestamp):
-        # timestamp is number of days since 2001-1-1.  Converted to
+
+        # Timestamp is number of days since 2001-1-1.  Converted to
         # base 36, this gives us a 3 digit string until about 2121
         ts_b36 = int_to_base36(timestamp)
         

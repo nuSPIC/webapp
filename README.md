@@ -11,6 +11,10 @@ Installation
 ------------
 
     $ pip install Django
+    $ pip install recaptcha-client
+
+For SQLite:
+
     $ pip install pysqlite
 
 For mySQL, install development libraries first (if mysql_config is missing):

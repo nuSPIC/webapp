@@ -11,8 +11,9 @@ from lib.helpers import get_flatpage_or_none
 @render_to('mainpage.html')
 def mainpage(request):
     """
-    Site main page.
-    Shows content from flatpage and latest news list.
+    Site main page
+    
+    Shows content from flatpage and latest news list
     """
     
     flatpage = get_flatpage_or_none(request)
