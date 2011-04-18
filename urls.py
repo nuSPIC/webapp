@@ -12,6 +12,7 @@ urlpatterns = patterns('',
     (r'^', include('news.urls')),
     (r'^accounts/', include('accounts.urls')),
     (r'^admin/', include(admin.site.urls)),
+    (r'^forum/', include('forum.urls')),
 )
 
 # Serve static files in Django development server mode

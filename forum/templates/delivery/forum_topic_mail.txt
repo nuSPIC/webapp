@@ -1,0 +1,9 @@
+You are receiving this email because you are watching the forum "{{ topic.forum.name }}" at {{ site_name }}.
+
+The user {{ topic.first_post.profile }} created a new topic {{ topic.name }} in the forum "{{ topic.forum.name }}":
+
+{{ topic.name }}
+
+{{ topic.first_post.message_html|safe }}
+
+http://{{ domain }}{{ topic.get_absolute_url }}

@@ -1,0 +1,36 @@
+<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.textarearesizer.compressed.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.bbcodeeditor-1.0.js"></script>
+<script type="text/javascript" language="javascript">
+//<![CDATA[
+	$(document).ready(function(){
+        $('textarea.resizable:not(.processed)').TextAreaResizer();
+        $('textarea.bbcode').bbcodeeditor(
+        {
+            bold:$('.bold'),italic:$('.italic'),underline:$('.underline'),hidden_text:$('.hidden_text'),link:$('.link'),quote:$('.quote'),
+            video:$('.video'),image:$('.image'),usize:$('.usize'),dsize:$('.dsize'),nlist:$('.nlist'),blist:$('.blist'),litem:$('.litem'),
+            back:$('.back'),forward:$('.forward'),back_disable:'btn back_disable',forward_disable:'btn forward_disable',
+            exit_warning:false
+        });
+    });
+//]]>
+</script>
+
+<div style="padding: 3px 0; overflow:hidden">
+    <div class="btn bold" title="Bold"></div>
+    <div class="btn italic" title="Italic"></div>
+    <div class="btn underline" title="Underline"></div>
+    <div class="btn hidden_text" title="Hidden text"></div>
+    <div class="btn link" title="Link"></div>
+    <div class="btn quote" title="Quote"></div>
+    <div class="btn image" title="Image"></div>
+    <div class="btn video" title="Video"></div>
+    <div class="btn usize" title="Increase fornt size"></div>
+    <div class="btn dsize" title="Decrease font size"></div>
+    <div class="btn nlist" title="Numbered list"></div>
+    <div class="btn blist" title="Bulleted list"></div>
+    <div class="btn litem" title="List item"></div>
+    <div class="btn back" title="Undo last action"></div>
+    <div class="btn forward" title="Redo last action"></div>
+</div>
+{{ post_form.non_field_errors }}
+{{ post_form.as_div }}

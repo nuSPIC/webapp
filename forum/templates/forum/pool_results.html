@@ -1,0 +1,42 @@
+<div class="pool_title">
+    {{ pool.title }}
+</div>
+
+<div class="choices">
+    {% for choice in pool.choices.all %}
+        <div class="choice">
+            <div class="choice_title{% ifequal pool.user_vote choice.id %} user_vote{% endifequal %}">
+                {{ choice.title }}
+            </div>
+            
+            <div>
+                <div class="votes_count">
+                    ({{ choice.votes_count }})
+                </div>
+                
+                <div class="bar" style="width:{% widthratio choice.votes_count pool.max_votes_count 650 %}px">
+                    &nbsp;
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<div class="total">
+    {{ pool.total_votes }} vote{{ pool.total_votes|pluralize }}
+    {% if pool.expired %}
+        <br />Pool expires
+    {% else %}
+        {% if pool.expires %}
+            <br />Pool expire at {{ pool.expires|date:"DATE_FORMAT" }}
+        {% endif %}
+    {% endif %}
+</div>
+
+{% if pool.user_can_vote %}
+    <div class="buttons">
+        <a href="#" class="show_pool_voting" rel="{{ pool.id }}">
+            Show pool choices
+        </a>
+    </div>
+{% endif %}

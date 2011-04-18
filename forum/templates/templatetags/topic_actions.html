@@ -1,0 +1,39 @@
+{% if can_change %}
+    <a href="{% url topic_edit topic.id %}" class="topic_action" title="Edit topic">Edit</a> &middot;
+{% endif %}
+
+{% if can_move_topic %}
+    <a href="{% url topic_move topic.id %}" class="topic_action" title="Move topic">Move</a> &middot;
+{% endif %}
+
+{% if can_move_post %}
+    <a href="{% url post_move topic.id %}" class="topic_action" title="Move posts">Move posts</a> &middot;
+{% endif %}
+
+{% if can_split %}
+    <a href="{% url topic_split topic.id %}" class="topic_action" title="Split topic">Split</a> &middot;
+{% endif %}
+
+{% if can_stick %}
+    <a href="{% url topic_stick topic.id %}" class="topic_action" title="Stick/unstick topic">
+    {% if topic.is_sticked %}
+        Unstick
+    {% else %}
+        Stick
+    {% endif %}
+    </a> &middot;
+{% endif %}
+
+{% if can_close %}
+    <a href="{% url topic_close topic.id %}" class="topic_action" title="Close/open topic">
+    {% if topic.is_closed %}
+        Open
+    {% else %}
+        Close
+    {% endif %}
+    </a> &middot;
+{% endif %}
+
+{% if can_delete %}
+    <a href="{% url topic_delete topic.id %}" class="topic_action" title="Delete topic" onclick="return confirm('Delete topic?');">Delete</a>
+{% endif %}

@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% load lib_tags %}
+{% load forum_tags %}
+{% load humanize %}
+
+{% block title %}Discussion &raquo; {{ forum.name }}{% endblock %}
+
+{% block extrahead %}
+<link href="{{ MEDIA_URL }}css/forum.css" type="text/css" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+    <div id="topic_list">
+        <h2 class="delimiter">{{ forum.name }}</h2>
+        
+        {% if user.is_authenticated %}
+            <div class="forum_menu">
+                <a href="{% url subscribe_forum forum.id %}">
+                    {% if subscribed %}
+                        <span title="Unsubscribe forum">Unsubscribe</span>
+                    {% else %}
+                        <span title="Subscribe forum">Subscribe</span>
+                    {% endif %}
+                </a>
+                &middot; <a href="{% url forum_mark_read forum.id %}" class="mark_read">Mark forum read</a>
+            </div>
+        {% endif %}
+        
+        <div class="breadcrumbs">
+            <a href="{% url forum %}">Discussion</a>
+        </div>
+        
+        {% if forum_perms.can_add_topic %}
+            <div class="headline">
+                <a href="{% url topic_add forum.id %}">
+                    New topic
+                </a>
+            </div>
+        {% endif %}
+        
+        <div class="header delimiter">
+            <div class="topic_icon">
+                &nbsp;
+            </div>
+            
+            <div class="topic_name">
+                <strong>Topics</strong>
+            </div>
+            
+            <div class="posts_count">
+                <strong>Posts</strong>
+            </div>
+            
+            <div>
+                <strong>Last post</strong>
+            </div>
+        </div>
+        
+        <div class="topics">
+            {% for topic in topic_list.object_list %}
+                <div class="row{% if not forloop.last %} delimiter{% endif %}{% if topic.is_sticked %} sticked{% endif %}">
+                    <div class="topic_icon">
+                        {% if topic.unread %}
+                            <a href="{% url unread_post_redirect topic.id %}" title="Go to first unread post" class="status_icon topic_unread{% if topic.is_sticked %}_sticked{% endif %}{% if topic.is_closed %}_closed{% endif %}"></a>
+                        {% else %}
+                            <a href="{{ topic.get_absolute_url }}" title="No new posts" class="status_icon topic_read{% if topic.is_sticked %}_sticked{% endif %}{% if topic.is_closed %}_closed{% endif %}"></a>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="topic_name">
+                        <div class="name"><a href="{{ topic.get_absolute_url }}">{{ topic.name }}</a></div>
+                        
+                        <div class="first_post">
+                            <div class="topic_pagination">
+                                {% topic_pagination topic %}
+                            </div>
+                            <a href="{{ topic.first_post.profile.get_absolute_url }}">{{ topic.first_post.profile }}</a> &raquo;
+                            {{ topic.first_post.date|timesince }} ago
+                        </div>
+                    </div>
+                    
+                    <div class="posts_count">
+                        <div class="count">{{ topic.posts_count|intcomma }}</div>
+                    </div>
+                    
+                    <div class="last_post">
+                        <strong>{{ topic.last_post.profile }}</strong><br />
+                        <a href="{{ topic.last_post.get_absolute_url }}" title="Go to last post">{{ topic.last_post.date|timesince }} ago</a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="empty_forum">
+                    There is no topics in the forum
+                </div>
+            {% endfor %}
+        </div>
+        
+        {% pagination topic_list "topic" %}
+    </div>
+{% endblock %}
