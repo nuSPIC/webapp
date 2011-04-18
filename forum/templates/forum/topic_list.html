@@ -4,6 +4,11 @@
 {% load forum_tags %}
 {% load humanize %}
 
+{% block feeds %}
+    <link rel="alternate" type="application/atom+xml" title="New topics in forum" href="{% url forum_topics_feed forum.id %}" />
+    <link rel="alternate" type="application/atom+xml" title="New posts in forum" href="{% url forum_posts_feed forum.id %}" />
+{% endblock %}
+
 {% block title %}Discussion &raquo; {{ forum.name }}{% endblock %}
 
 {% block extrahead %}

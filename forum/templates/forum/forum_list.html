@@ -3,6 +3,11 @@
 {% load forum_tags %}
 {% load humanize %}
 
+{% block feeds %}
+    <link rel="alternate" type="application/atom+xml" title="New topics" href="{% url topics_feed %}" />
+    <link rel="alternate" type="application/atom+xml" title="New posts" href="{% url posts_feed %}" />
+{% endblock %}
+
 {% block title %}Discussion{% endblock %}
 
 {% block extrahead %}

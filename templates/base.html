@@ -10,6 +10,7 @@
         <link rel="shortcut icon" href="{{ MEDIA_URL }}favicon.ico" type="image/x-icon" />
         <link href="{{ MEDIA_URL }}css/default.css" type="text/css" rel="stylesheet" />
         
+        {% block feeds %}{% endblock %}
         {% block extrahead %}{% endblock %}
     </head>
     
