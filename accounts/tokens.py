@@ -53,13 +53,10 @@ class TokenGenerator(object):
         ts_b36 = int_to_base36(timestamp)
         
         # By hashing on the internal state of the user and using state
-        # that is sure to change (the password salt will change as soon as
-        # the password is set, at least for current Django auth, and
-        # last_login will also change), we produce a hash that will be
+        # that is sure to change , we produce a hash that will be
         # invalid as soon as it is used.
         # We limit the hash to 20 chars to keep URL short
-        hash = sha_constructor(settings.SECRET_KEY + unicode(user.id) +
-                               user.password + user.date_joined.strftime('%Y-%m-%d %H:%M:%S') +
+        hash = sha_constructor(settings.SECRET_KEY + unicode(user.id) + user.is_active + user.email +
                                unicode(timestamp)).hexdigest()[::2]
         return "%s-%s" % (ts_b36, hash)
 
