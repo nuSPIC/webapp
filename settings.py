@@ -61,6 +61,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     
     'accounts',
+    'forum',
     'lib',
     'news',
 )
@@ -70,7 +71,8 @@ INSTALLED_APPS = (
 #   Application settings section
 # =================================
 
-# Accounts
+#  Accounts
+# ===================
 AUTH_PROFILE_MODULE = 'accounts.UserProfile'
 LOGIN_REDIRECT_URL = '/'
 
@@ -86,17 +88,39 @@ EMAIL_REQUEST_DELAY = timedelta(minutes=30)
 ACCOUNTS_PER_PAGE = 15
 
 
-# News
+#  Forum
+# ===================
+TOPICS_PER_PAGE = 10
+POSTS_PER_PAGE = 10
+
+POPULAR_TOPICS_PERIOD = timedelta(days=7)
+POPULAR_TOPICS_COUNT = 7
+
+NEW_TOPICS_COUNT = 7
+
+TOPIC_PAGINATION_LEFT_TAIL = 3
+TOPIC_PAGINATION_RIGHT_TAIL = 5
+
+GLUE_MESSAGE_TIMEOUT = 10*60
+GLUE_MESSAGE = u'\n\n[color=#BBBBBB][small]Added %s[/small] later[/color]\n%s'
+
+FORUM_UNREAD_DEPTH = 100
+
+FORUM_FEED_ITEMS_COUNT = 30
+
+
+#  News
+# ===================
 CUT_TAG = '<!-- more -->'
 LATEST_NEWS_COUNT = 5
 
 
-# Pagination
-#
+#  Pagination
+# ===================
+
 # 1 2 ... 6 7 [8] 9 10 ... 91 92
 # |_|     |_|     |__|     |___|
 # tail     ^padding^        tail
-
 PAGINATION_PADDING = 3
 PAGINATION_TAIL = 2
 

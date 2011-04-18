@@ -1,0 +1,21 @@
+{% if can_change %}
+    {% if post == post.topic.first_post %}
+        <a href="{% url topic_edit post.topic.id %}" title="Edit topic">Edit</a> &middot;
+    {% else %}
+        <a href="{% url post_edit post.id %}" title="Edit post">Edit</a> &middot;
+    {% endif %}
+{% endif %}
+
+{% if can_delete %}
+    {% if post == post.topic.first_post %}
+        <a href="{% url topic_delete post.topic.id %}" title="Delete topic" onclick="return confirm('Delete topic?');">Delete</a> &middot;
+    {% else %}
+        <a href="{% url post_delete post.id %}" title="Delete post" onclick="return confirm('Delete post?');">Delete</a> &middot;
+    {% endif %}
+{% endif %}
+
+<a href="{{ post.get_absolute_url }}" title="Permanent link">Link</a>
+
+<span class="quote_selected" style="display:none">
+    &middot; <a href="#" title="Quote selected text">Quote</a>
+</span>

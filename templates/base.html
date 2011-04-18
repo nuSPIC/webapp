@@ -10,6 +10,7 @@
         <link rel="shortcut icon" href="{{ MEDIA_URL }}favicon.ico" type="image/x-icon" />
         <link href="{{ MEDIA_URL }}css/default.css" type="text/css" rel="stylesheet" />
         
+        {% block feeds %}{% endblock %}
         {% block extrahead %}{% endblock %}
     </head>
     
@@ -28,6 +29,7 @@
                 <a href="{% url news_archive %}">News</a> |
                 <a href="/about/">About</a> |
                 <a href="{% url accounts %}">Community</a> |
+                <a href="{% url forum %}">Discussion</a> |
                 <a href="/contact/">Contact</a>
             </div>
         </div>
@@ -41,6 +43,7 @@
             <a href="{% url news_archive %}">News</a> |
             <a href="/about/">About</a> |
             <a href="{% url accounts %}">Community</a> |
+            <a href="{% url forum %}">Discussion</a> |
             <a href="/contact/">Contact</a>
         </div>
     </body>

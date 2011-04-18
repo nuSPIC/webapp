@@ -1,0 +1,282 @@
+{% extends "base.html" %}
+
+{% load lib_tags %}
+{% load forum_tags %}
+{% load humanize %}
+
+{% block feeds %}
+    <link rel="alternate" type="application/atom+xml" title="New posts" href="{% url topic_posts_feed topic.id %}" />
+{% endblock %}
+
+{% block title %}Discussion &raquo; {{ forum.name }} &raquo; {{ topic.name }}{% endblock %}
+
+{% block extrahead %}
+<link href="{{ MEDIA_URL }}css/forum.css" type="text/css" rel="stylesheet" />
+
+<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.min.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/effects.core.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/effects.highlight.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.scrollto.js"></script>
+
+<script type="text/javascript" language="javascript">
+//<![CDATA[
+	$(document).ready(function(){
+        // Hidden text collapse toggle
+        $('.hidden-header').live('click', function(e){
+            $(this).next('.hidden-text').toggle();
+        });
+        
+        // Quote selected text
+        function getSelectedText() { 
+            if(window.getSelection){ 
+                return window.getSelection().toString(); 
+            } 
+            else if(document.getSelection){ 
+                return document.getSelection(); 
+            } 
+            else if(document.selection){ 
+                return document.selection.createRange().text; 
+            } 
+        }
+        
+        $('.post .body').mouseup(function(e) {
+            if (getSelectedText().length > 0) {
+                $(this).find('.quote_selected').show();
+            }
+        });
+        
+        $('body').mouseup(function() {
+            if (getSelectedText().length == 0) {
+                $('.quote_selected').hide();
+            }
+        });
+        
+        $('.quote_selected a').click(function(e){
+            e.preventDefault();
+            var selectedText = getSelectedText();
+            var textarea = $('#add_post_form textarea');
+            var username = $(this).parents('.post').find('.username a').text();
+            
+            if (selectedText.length > 0) {
+                textarea.val(textarea.val() + '[quote=' + username + ']' + selectedText + '[/quote]\n').focus();
+                $('.quote_selected').hide();
+            }
+        });
+        
+        // Scroll to and post highlight
+		var hash = location.hash.substr(1); 
+		var postHash = /post\d+/;
+		
+		if (postHash.test(hash)) {
+			$("#"+hash).parent().effect("highlight", {}, 3000).scrollTo(500);
+		};
+        
+        // Insert username in new post form on click on his name
+        $('.insert_username').click(function(e){
+            e.preventDefault();
+            var username = $(this).text();
+            var message = $('#add_post_form textarea').val();
+            
+            $('#add_post_form textarea').val(message+'[b]'+username+'[/b], ').focus();
+        });
+        
+        // Preview
+        $('#preview_button').click(function(e){
+            e.preventDefault();
+            $(this).addClass('disabled');
+            $(this).text('Wait...');
+            
+            $.post(
+                '{% url post_preview %}',
+                $('#add_post_form').serialize(),
+                function(data){
+                    $('#preview').html(data).scrollTo(500);
+                    $('#preview_button').removeClass('disabled');
+                    $('#preview_button').text('Preview');
+                    $('#preview_button').data('executing', false);
+                },
+                'html'
+            );
+        });
+        
+        // Show / hide pool results
+        $('a.show_pool_voting, a.show_pool_results').click(function(e){
+            e.preventDefault();
+            var pool_id = $(this).attr('rel');
+            var pool = $('div.pool_'+pool_id);
+            
+            pool.find('div.pool_voting').toggle();
+            pool.find('div.pool_results').toggle();
+        });
+        
+        // On pool choice click enable pool vote button
+        $('input[name^=pool_]').click(function(e){
+            $(this).parents('div.pool_voting').find('a.pool_vote').removeClass('disabled');
+        });
+        
+        // Pool voting
+        $('a.pool_vote').click(function(e){
+            e.preventDefault();
+            var pool_id = $(this).attr('rel');
+            var choice = $('input[name=pool_'+pool_id+']:checked');
+            
+            if (!choice) return;
+            var choice_id = choice.val();
+            
+            $(this).addClass('disabled');
+            $(this).text('Wait...');
+            
+            $.getJSON(
+                '/forum/pool/vote/' + choice_id + '/',
+                function(data) {
+                    var pool = $('div.pool_'+data.pool_id);
+                    pool.find('div.pool_results').html(data.responseHTML);
+                    pool.find('div.pool_voting').remove();
+                    pool.find('div.pool_results').show();
+                }
+            );
+        });
+	});
+//]]>
+</script>
+{% endblock %}
+
+{% block content %}
+    <div id="post_list">
+        <h2 class="delimiter">{{ topic.name }}</h2>
+        
+        {% if user.is_authenticated %}
+            <div class="topic_actions">
+                {% topic_actions topic forum_perms user %}
+            </div>
+            
+            <div class="topic_menu">
+                <a href="{% url subscribe_topic topic.id %}">
+                    {% if subscribed %}
+                        <span title="Unsubscribe topic">Unsubscribe</span>
+                    {% else %}
+                        <span title="Subscribe topic">Subscribe</span>
+                    {% endif %}
+                </a>
+                &middot; <a href="{% url topic_mark_read topic.id %}" class="mark_read">Mark topic read</a>
+            </div>
+        {% endif %}
+        
+        <div class="breadcrumbs"><a href="{% url forum %}">Discussion</a> &raquo; <a href="{{ forum.get_absolute_url }}">{{ forum.name }}</a></div>
+        
+        <div class="posts">
+            {% for post in post_list.object_list %}
+                <div class="post{% if not forloop.last or not user.is_anonymous %} delimiter{% endif %}">
+                    <div id="post{{ post.id }}" class="anchor">&nbsp;</div>
+                    
+                    <div class="date">
+                        {{ post.date|timesince }} ago
+                    </div>
+    
+                    <div class="profile">
+                        <div class="username">
+                            <a href="#" class="insert_username" title="Insert username in the new post form">{{ post.profile.user.username }}</a>
+                        </div>
+                        
+                        <div class="status">
+                            <span class="member_{{ post.profile.forum_group.slug }}">{{ post.profile.forum_group.member_title }}</span><br />
+                            Posts count: {{ post.profile.post_count|intcomma }}
+                        </div>
+                        
+                        <div class="links">
+                            <a href="{{ post.profile.get_absolute_url }}" title="Go to profile">Profile</a>
+                        </div>
+                    </div>
+                    
+                    <div class="body">
+                        {{ post.message_html|safe }}
+                        
+                        {% if pools and topic.first_post == post %}
+                            <div class="pool_list">
+                                {% for pool in pools %}
+                                    <div class="pool_{{ pool.id }}">
+                                        {% if pool.user_can_vote %}
+                                            <div class="pool_voting">
+                                                <div class="pool_title">
+                                                    {{ pool.title }}
+                                                </div>
+                                
+                                                <div class="choices">
+                                                    {% for choice in pool.choices.all %}
+                                                        <div class="choice">
+                                                            <label>
+                                                                <input type="radio" name="pool_{{ pool.id }}" value="{{ choice.id }}" />
+                                                                {{ choice.title }}
+                                                            </label>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                                
+                                                <div class="total">
+                                                    {{ pool.total_votes }} vote{{ pool.total_votes|pluralize }}
+                                                    {% if pool.expires %}
+                                                        <br />Pool expire at {{ pool.expires|date:"DATE_FORMAT" }}
+                                                    {% endif %}
+                                                </div>
+                                                
+                                                <div class="buttons">
+                                                    <a href="#" class="pool_vote disabled" rel="{{ pool.id }}">Vote</a> &middot;
+                                                    <a href="#" class="show_pool_results" rel="{{ pool.id }}">Show results</a>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="pool_results" style="display:none;">
+                                                {% include "forum/pool_results.html" %}
+                                            </div>
+                                        {% else %}
+                                            <div class="pool_results">
+                                                {% include "forum/pool_results.html" %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="actions">
+                            {% post_actions post forum_perms user %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        {% if post_form %}
+            <div id="preview"></div>
+            
+            <div class="post">
+                <div class="profile offset">
+                    {% with user.get_profile as profile %}
+                        <div class="username">
+                            <a href="{{ profile.get_absolute_url }}">{{ profile.user.username }}</a>
+                        </div>
+            
+                        <div class="status">
+                            <span class="member_{{ profile.forum_group.slug }}">{{ profile.forum_group.member_title }}</span><br />
+                            Posts count: {{ profile.post_count|intcomma }}
+                        </div>
+                    {% endwith %}
+                </div>
+                
+                <div class="body">
+                    <form action="." method="post" id="add_post_form">
+                        {% csrf_token %}
+                        {% post_editor post_form %}
+                        
+                        <div class="buttons">
+                            <input type="submit" value="Submit" />
+                            <input type="submit" value="Preview" id="preview_button" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        {% endif %}
+        
+        {% pagination post_list "post" %}
+    </div>
+{% endblock %}

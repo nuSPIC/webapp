@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% load lib_tags %}
+{% load forum_tags %}
+{% load humanize %}
+
+{% block title %}Discussion &raquo; {{ forum.name }} &raquo; {{ topic.name }} &raquo; Post edit{% endblock %}
+
+{% block extrahead %}
+<link href="{{ MEDIA_URL }}css/forum.css" type="text/css" rel="stylesheet" />
+
+<script type="text/javascript" src="{{ MEDIA_URL }}js/effects.core.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/effects.highlight.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.scrollto.js"></script>
+
+<script type="text/javascript" language="javascript">
+//<![CDATA[
+	$(document).ready(function(){
+        // Hidden text collapse toggle
+        $('.hidden-header').live('click', function(e){
+            $(this).next('.hidden-text').toggle();
+        });
+        
+        // Preview
+        $('#preview_button').click(function(e){
+            e.preventDefault();
+            $(this).addClass('disabled');
+            $(this).text('Wait...');
+            
+            $.post(
+                '{% url post_preview %}',
+                $('#edit_post_form').serialize(),
+                function(data){
+                    $('#preview').html(data).scrollTo(500);
+                    $('#preview_button').removeClass('disabled');
+                    $('#preview_button').text('Preview');
+                    $('#preview_button').data('executing', false);
+                },
+                'html'
+            );
+        });
+	});
+//]]>
+</script>
+{% endblock %}
+
+{% block content %}
+    <h2 class="delimiter">Edit post</h2>
+    <div class="breadcrumbs"><a href="{% url forum %}">Discussion</a> &raquo; <a href="{{ forum.get_absolute_url }}">{{ forum.name }}</a> &raquo; <a href="{{ topic.get_absolute_url }}">{{ topic.name }}</a></div>
+    
+    <div id="preview"></div>
+    
+    <div class="post">
+        <div class="profile offset">
+            <div class="username">
+                <a href="{{ post.profile.get_absolute_url }}">{{ post.profile.user.username }}</a>
+            </div>
+
+            <div class="status">
+                <strong>{{ post.profile.forum_group.member_title }}</strong><br />
+                Posts count: {{ post.profile.post_count|intcomma }}
+            </div>
+        </div>
+        
+        <div class="body">
+            <form action="." method="post" id="edit_post_form">
+                {% csrf_token %}
+                {% post_editor post_form %}
+                
+                <div class="buttons">
+                    <input type="submit" value="Save post" />
+                    <input type="submit" value="Preview" id="preview_button" />
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

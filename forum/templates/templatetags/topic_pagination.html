@@ -1,0 +1,7 @@
+{% for page in pages_range %}
+    {% if page %}
+        <a href="{{ topic.get_absolute_url }}?page={{ page }}" class="page_link" title="Go to page {{ page }}">{{ page }}</a>
+    {% else %}
+        <strong>...</strong>
+    {% endif %}
+{% endfor %}

@@ -1,0 +1,20 @@
+{% load humanize %}
+
+<div class="post delimiter">
+    <div class="date">0 minutes ago</div>
+    
+    <div class="profile">
+        <div class="username">
+            <a href="{{ profile.get_absolute_url }}">{{ profile.user.username }}</a>
+        </div>
+        
+        <div class="status">
+            <span class="member_{{ profile.forum_group.slug }}">{{ profile.forum_group.member_title }}</span><br />
+            Posts: {{ profile.post_count|intcomma }}
+        </div>
+    </div>
+    
+    <div class="body">
+        {{ message_html|safe }}
+    </div>
+</div>
