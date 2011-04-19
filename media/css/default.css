@@ -116,7 +116,6 @@ ul.errorlist {
 
     .field-wrapper label {
         font-weight: bold;
-        display    : block;
     }
 
     .field-wrapper input {
@@ -126,6 +125,11 @@ ul.errorlist {
         display         : block;
         border          : 1px solid #BBBBBB;
         padding         : 4px;
+    }
+
+    .field-wrapper input[type="checkbox"] {
+        width: auto;
+        float: right;
     }
 
     .field-wrapper select {

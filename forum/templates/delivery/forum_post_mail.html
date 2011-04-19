@@ -1,0 +1,20 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>Topic Reply Notification - "{{ post.topic.name }}"</title>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    </head>
+    <body>
+
+        <p>You are receiving this email because you are watching the topic "{{ post.topic.name }}" at {{ site_name }}.</p>
+
+        <p>The user <a href="http://{{ domain }}{{ post.profile.get_absolute_url }}">{{ post.profile }}</a> added a reply to the topic "<a href="http://{{ domain }}{{ post.topic.get_absolute_url }}">{{ post.topic.name }}</a>":</p>
+
+        <blockquote>
+            {{ post.message_html|safe }}
+        </blockquote>
+
+        <a href="http://{{ domain }}{{ post.get_absolute_url }}">Reply</a>
+    </body>
+</html>

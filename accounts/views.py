@@ -12,7 +12,7 @@ from django.template.loader import render_to_string
 from django.utils.http import base36_to_int, int_to_base36
 from django.views.decorators.csrf import csrf_exempt
 
-from accounts.forms import AccountSearchForm, ProfileEditForm, UserEditForm, UserRegistrationForm
+from accounts.forms import *
 from accounts.models import UserProfile
 from accounts.tokens import TokenGenerator
 from lib.decorators import render_to
@@ -27,7 +27,7 @@ def registration(request):
     
     if request.POST:
         user_form = UserRegistrationForm(request.POST, prefix='user_form')
-        profile_form = ProfileEditForm(request.POST, prefix='profile_form')
+        profile_form = ProfileRegistrationForm(request.POST, prefix='profile_form')
         if user_form.is_valid() and profile_form.is_valid():
             # Create new inactive user
             user = user_form.save()
@@ -37,7 +37,7 @@ def registration(request):
             
             # Fill user profile with data from registration form
             profile = user.get_profile()
-            profile_form = ProfileEditForm(request.POST, instance=profile, prefix='profile_form')
+            profile_form = ProfileRegistrationForm(request.POST, instance=profile, prefix='profile_form')
             profile_form.save()
             
             # Send email with activation key to the user
@@ -63,7 +63,7 @@ def registration(request):
             return HttpResponseRedirect(reverse('registration_done'))
     else:
         user_form = UserRegistrationForm(prefix='user_form')
-        profile_form = ProfileEditForm(prefix='profile_form')
+        profile_form = ProfileRegistrationForm(prefix='profile_form')
     
     return {
         'user_form': user_form,
