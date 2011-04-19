@@ -16,7 +16,7 @@ from forum.helpers import get_group_perms_or_404
 __all__ = ('TopicsFeed', 'PostsFeed', 'ForumTopicsFeed', 'ForumPostsFeed', 'TopicPostsFeed',)
 
 
-# Get current site and retrive site name
+# Get current site and retrieve the site name
 current_site = Site.objects.get_current()
 site_name = current_site.name
 
@@ -27,14 +27,14 @@ class TopicsFeed(Feed):
     """
     
     title = u'%s > Discussion > New topics' % site_name
-    description = u'New topics at %s discussion forum' % site_name
+    description = u'New topics in %s discussion forum' % site_name
     
     def link(self):
         return reverse('forum')
     
     def items(self):
         """
-        Returns new topics from forums, where anonymous user have access
+        Returns new topics in forums, which anonymous users can access
         """
         
         group = Group.anonymous_group()
@@ -59,14 +59,14 @@ class PostsFeed(Feed):
     """
     
     title = u'%s > Discussion > New posts' % site_name
-    description = u'New posts at %s discussion forum' % site_name
+    description = u'New posts in %s discussion forum' % site_name
     
     def link(self):
         return reverse('forum')
     
     def items(self):
         """
-        Returns new posts from forums, where anonymous user have access
+        Returns new posts in forums, which anonymous users can access
         """
         
         group = Group.anonymous_group()
@@ -104,7 +104,7 @@ class ForumTopicsFeed(Feed):
     
     def items(self, forum):
         """
-        Returns new topics from specified forum, if anonymous user have permission access to it
+        Returns new topics in the specified forum, if anonymous users can access it
         """
         
         get_group_perms_or_404(AnonymousUser(), forum)
@@ -138,7 +138,7 @@ class ForumPostsFeed(Feed):
     
     def items(self, forum):
         """
-        Returns new posts from specified forum, if anonymous user have permission access to it
+        Returns new posts in the specified forum, if anonymous users can access it
         """
         
         get_group_perms_or_404(AnonymousUser(), forum)
@@ -172,7 +172,7 @@ class TopicPostsFeed(Feed):
     
     def items(self, topic):
         """
-        Returns new posts from specified topic, if anonymous user have permission access to it
+        Returns new posts in the specified topic, if anonymous user can access it
         """
         
         get_group_perms_or_404(AnonymousUser(), topic.forum)
