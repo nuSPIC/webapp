@@ -2,6 +2,7 @@
 
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
+from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
 from forum.models import Forum, Permission, Topic, Subscription
@@ -38,8 +39,12 @@ def inform_new_topic(topic):
                 # Inform the user by email about the new post
                 if profile.forum_email_notification:
                     subject = u'New topic in forum "%s"' % topic.forum.name
-                    message = render_to_string('delivery/forum_topic_mail.txt', context)
-                    profile.user.email_user(subject, message)
+                    text_content = render_to_string('delivery/forum_topic_mail.txt', context)
+                    html_content = render_to_string('delivery/forum_topic_mail.html', context)
+                    
+                    msg = EmailMultiAlternatives(subject, text_content, to=[profile.user.email])
+                    msg.attach_alternative(html_content, "text/html")
+                    msg.send()
 
 def inform_new_post(post):
     """
@@ -72,5 +77,9 @@ def inform_new_post(post):
                 # Inform the user by email about the new post
                 if profile.forum_email_notification:
                     subject = u'New post in topic "%s"' % post.topic.name
-                    message = render_to_string('delivery/forum_post_mail.txt', context)
-                    profile.user.email_user(subject, message)
+                    text_content = render_to_string('delivery/forum_post_mail.txt', context)
+                    html_content = render_to_string('delivery/forum_post_mail.html', context)
+                    
+                    msg = EmailMultiAlternatives(subject, text_content, to=[profile.user.email])
+                    msg.attach_alternative(html_content, "text/html")
+                    msg.send()
