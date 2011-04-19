@@ -9,7 +9,7 @@ from forum.models import Forum, Permission, Topic, Subscription
 
 def inform_new_topic(topic):
     """
-    Inform users about new topic in subscribed forum
+    Inform the users about a new topic in the subscribed forum
     """
     
     forum_type = ContentType.objects.get_for_model(Forum)
@@ -29,13 +29,13 @@ def inform_new_topic(topic):
     for subscription in subscriptions:
         profile = subscription.profile
         if topic_author != profile:
-            # Check user access to subscribed forum
+            # Check user access to the subscribed forum
             try:
                 profile.forum_group.permission_set.get(forum=topic.forum)
             except Permission.DoesNotExist:
                 pass
             else:
-                # Inform user by email about new post
+                # Inform the user by email about the new post
                 if profile.forum_email_notification:
                     subject = u'New topic in forum "%s"' % topic.forum.name
                     message = render_to_string('delivery/forum_topic_mail.txt', context)
@@ -43,7 +43,7 @@ def inform_new_topic(topic):
 
 def inform_new_post(post):
     """
-    Inform users about new post in subscribed topic
+    Inform the users about a new post in the subscribed topic
     """
     
     topic_type = ContentType.objects.get_for_model(Topic)
@@ -63,13 +63,13 @@ def inform_new_post(post):
     for subscription in subscriptions:
         profile = subscription.profile
         if post_author != profile:
-            # Check user access to subscribed forum
+            # Check user access to the subscribed forum
             try:
                 profile.forum_group.permission_set.get(forum=post.topic.forum)
             except Permission.DoesNotExist:
                 pass
             else:
-                # Inform user by email about new post
+                # Inform the user by email about the new post
                 if profile.forum_email_notification:
                     subject = u'New post in topic "%s"' % post.topic.name
                     message = render_to_string('delivery/forum_post_mail.txt', context)

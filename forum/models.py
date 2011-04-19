@@ -20,7 +20,7 @@ from datetime import date
 class Forum(models.Model):
     name = models.CharField('Forum title', max_length=250)
     description = models.CharField('Forum description', max_length=250)
-    priority = models.PositiveSmallIntegerField('Priority in forum list', default=0, help_text='Less value is higher position')
+    priority = models.PositiveSmallIntegerField('Forum list priority', default=0, help_text='Smaller the value, higher the position')
     topics_count = models.PositiveIntegerField('Number of topics', default=0)
     posts_count = models.PositiveIntegerField('Number of posts', default=0)
     last_post = models.ForeignKey('Post', verbose_name='Last post', blank=True, null=True)
@@ -122,7 +122,7 @@ class Topic(models.Model):
 @signals.post_save(sender=Topic)
 def update_forum_on_topic_save(sender, instance, created, **kwargs):
     """
-    Update forum topics and posts count and last post
+    Update forum topics, post count and last post
     """
     
     forum = instance.forum
@@ -296,12 +296,12 @@ class Permission(models.Model):
     can_delete_group_post = models.BooleanField(u'Can delete any post', default=False)
     
     # User level permissions
-    can_add_own_topic = models.BooleanField(u'Can add topic', default=False)
+    can_add_own_topic = models.BooleanField(u'Can add topics', default=False)
     can_change_own_topic = models.BooleanField(u'Can change own topic', default=False)
     can_delete_own_topic = models.BooleanField(u'Can delete own topic', default=False)
     can_close_own_topic = models.BooleanField(u'Can close own topic', default=False)
     
-    can_add_own_post = models.BooleanField(u'Can add post', default=False)
+    can_add_own_post = models.BooleanField(u'Can add posts', default=False)
     can_change_own_post = models.BooleanField(u'Can chage own post', default=False)
     can_delete_own_post = models.BooleanField(u'Can delete own post', default=False)
     
@@ -313,8 +313,10 @@ class Permission(models.Model):
     
     def _has_priority(self, owner_profile, user_profile):
         """
-        Returns True, if one user (user_profile) forum group priority more than other (owner_profile).
-        Using as additional level of protection for higher priority group.
+        Returns True, if one user (user_profile) forum group priority is higher
+        than the other (owner_profile)
+
+        Used as an additional level of protection for higher priority group
         """
         
         if owner_profile.forum_group.priority <= user_profile.forum_group.priority:
@@ -331,9 +333,11 @@ class Permission(models.Model):
     
     def can_change_topic(self, user, topic):
         """
-        Редактировать любую тему может пользователь с правами уровня группы, в которую входит
-        пользователь ее создавший. Свою тему и первое сообщение в ней - пользователь с правами
-        на редактирование своих тем.
+        Any topic can only be edited by the users, that have group permissions
+        higher or equal to those of the user, who created this topic.
+
+        Only the users that are permitted to edit their own topics would be
+        able to edit their topics and the first posts in these topics.
         """
         
         if self.can_change_group_topic:
@@ -347,6 +351,7 @@ class Permission(models.Model):
     
     def can_move_topic(self, user, topic):
         """
+
         Переместить любую тему может пользователь с правами группы, в которую входит
         пользователь ее создавший.
         """
@@ -457,7 +462,7 @@ class Permission(models.Model):
 
 class ReadTracking(models.Model):
     """
-    Forum read tracker.
+    Forum read tracker
     
     last_read saves serialized dictionary of pairs `topic id` -> `last read post id`
     """

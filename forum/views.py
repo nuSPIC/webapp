@@ -28,7 +28,7 @@ from datetime import datetime
 @render_to('forum/forum_list.html')
 def forum_list(request):
     """
-    Shows forum list user have permission to view
+    Shows the list of forums that the user is permitted to view
     """
     
     group = Group.group_for_user(request.user)
@@ -68,7 +68,7 @@ def forum_list(request):
 @render_to('forum/topic_list.html')
 def topic_list(request, forum_id):
     """
-    Shows topic list in specified forum
+    Shows the list of topics in the specified forum
     """
     
     forum = get_object_or_404(Forum, id=forum_id)
@@ -92,8 +92,8 @@ def topic_list(request, forum_id):
 @login_required
 def forum_mark_read(request, forum_id):
     """
-    Mark all topics in specified forum as read and
-    redirect to forum main page
+    Marks all topics in the specified forum as read and
+    redirects to the forum main page
     """
     
     forum = get_object_or_404(Forum, id=forum_id)
@@ -112,7 +112,7 @@ def forum_mark_read(request, forum_id):
 @login_required
 def topic_add(request, forum_id):
     """
-    Adds new topic
+    Adds a new topic
     """
     
     forum = get_object_or_404(Forum, id=forum_id)
@@ -369,7 +369,7 @@ def topic_delete(request, topic_id):
 def topic_mark_read(request, topic_id):
     """
     Mark all posts in specified topic as read and
-    redirect to topic list page
+    redirect to the topic list page
     """
     
     topic = get_object_or_404(Topic, id=topic_id)
@@ -385,7 +385,7 @@ def topic_mark_read(request, topic_id):
 @login_required
 def unread_post_redirect(request, topic_id):
     """
-    Redirect to the first unread post in specified topic
+    Redirect to the first unread post in the specified topic
     """
     
     topic = get_object_or_404(Topic, id=topic_id)
@@ -613,7 +613,7 @@ def pool_vote(request, choice_id):
 @never_cache
 def subscribe_forum(request, forum_id):
     """
-    Subscribe specified forum for new topics notification
+    Subscribe to the specified forum for new topics notification
     """
     
     forum = get_object_or_404(Forum, id=forum_id)
@@ -627,7 +627,7 @@ def subscribe_forum(request, forum_id):
 @never_cache
 def subscribe_topic(request, topic_id):
     """
-    Subscribe specified topic for new posts notification
+    Subscribe to the specified topic for new posts notification
     """
     
     topic = get_object_or_404(Topic, id=topic_id)

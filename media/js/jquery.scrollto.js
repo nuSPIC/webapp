@@ -1,4 +1,4 @@
-// Функция скроллинга к нужному элементу
+// Scrolls to the specified element
 jQuery.fn.extend({
   scrollTo : function(speed, offset) {
   	var offset = offset || 250;
