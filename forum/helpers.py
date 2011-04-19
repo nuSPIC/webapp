@@ -10,7 +10,7 @@ from forum.models import Group, Subscription
 
 def get_group_perms_or_404(user, forum):
     """
-    Returns user group and group permissions for forum
+    Returns user's group and group permissions for the specific forum
     """
     
     group = Group.group_for_user(user)
@@ -23,8 +23,8 @@ def get_group_perms_or_404(user, forum):
 
 def mark_unread_forums(user, forums):
     """
-    Returns forum list with unread flag set to True
-    for forums having unreaded topic by specified user
+    Returns the list of the forums with unread flag set to True
+    for forums that have unread topics for specified user
     """
     
     if user.is_authenticated():
@@ -52,8 +52,8 @@ def mark_unread_forums(user, forums):
 
 def mark_unread_topics(user, topics):
     """
-    Returns topic list with unread flag set to True
-    for topics having unreaded posts by specified user
+    Returns the list of the topics with unread flag set to True
+    for topics that have unread posts for specified user
     """
     
     if user.is_authenticated():
@@ -66,7 +66,7 @@ def mark_unread_topics(user, topics):
 
 def mark_read(user, posts):
     """
-    Saves id of last post in posts list in user readtracking
+    Saves the id of the last post in the list of posts in user readtracking
     """
     
     if user.is_authenticated():
@@ -82,7 +82,7 @@ def mark_read(user, posts):
 
 def is_subscribed(user, object):
     """
-    Returns flag is user subscribed for an object
+    Returns whether the user is subscribed to an object or not
     """
     
     if user.is_authenticated():
@@ -98,7 +98,7 @@ def is_subscribed(user, object):
 
 def do_subscribe(profile, object):
     """
-    Subscribe user to object. Next function call unsubscribe user.
+    Subscribe the user to the object. Next function call unsubscribes the user.
     Returns created `Subscription` object or None.
     """
     

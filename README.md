@@ -26,6 +26,9 @@ Then install the bindings themselves:
 
     $ pip install MySQL-python
 
+Installation instructions for django-bbmarkup:
+
+    ln -s `pwd`/bbmarkup ~/.virtualenv/nuspic/lib/python2.7/site-packages
 
 License
 -------

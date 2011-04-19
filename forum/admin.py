@@ -36,7 +36,7 @@ class TopicForm(forms.ModelForm):
     
     def save(self, commit=True):
         """
-        Remove or restore topic on is_removed flag changing
+        Remove or restore the topic when is_removed flag changes
         """
         
         topic = super(TopicForm, self).save(commit=True)
@@ -70,7 +70,7 @@ class PostForm(forms.ModelForm):
     
     def save(self, commit=True):
         """
-        Remove or restore post on is_removed flag changing
+        Remove or restore the post when is_removed flag changes
         """
         
         post = super(PostForm, self).save(commit=True)

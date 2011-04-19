@@ -32,8 +32,8 @@ class TopicMoveForm(forms.ModelForm):
     
     def save(self, commit=True):
         """
-        Recalculation posts and topics count on topic move
-        in the source and destination forums
+        Recalculate the number of posts and topics in the source and
+        destination forums when a topic is moved
         """
         
         topic = super(TopicMoveForm, self).save(commit)
@@ -58,31 +58,31 @@ class TopicSplitForm(forms.Form):
             raise forms.ValidationError(u'Posts to move not selected')
         
         if len(self.cleaned_data['posts']) == len(self.fields['posts'].choices):
-            raise forms.ValidationError(u'Not allowed to move all posts to new topic')
+            raise forms.ValidationError(u'Not allowed to move all posts to the new topic')
         
         return self.cleaned_data
     
     def save(self):
-        # Create new topic
+        # Create the new topic
         new_topic = Topic(forum=self.topic.forum, name=self.cleaned_data['name'])
         new_topic.save()
         
-        # Move posts to new topic
+        # Move posts to the new topic
         self.topic.posts.filter(pk__in=self.cleaned_data['posts']).update(topic=new_topic)
         
-        # Update new topic stats
+        # Update the new topic stats
         new_topic.first_post = new_topic.posts.order_by('date')[0]
         new_topic.update_posts_count()
         new_topic.update_last_post()
         new_topic.save()
         
-        # Update old topic stats
+        # Update the old topic stats
         self.topic.first_post = self.topic.posts.order_by('date')[0]
         self.topic.update_posts_count()
         self.topic.update_last_post()
         self.topic.save()
         
-        # Inform subscribed to forum users about new topic
+        # Inform subscribed users about the new topic
         inform_new_topic(new_topic)
         
         return new_topic
@@ -97,7 +97,7 @@ class PostMoveForm(forms.Form):
         self.topic_src = kwargs.pop('topic_src')
         super(PostMoveForm, self).__init__(*args, **kwargs)
         
-        # Create topic list based on user permissions
+        # Create the topic list based on user permissions
         group = Group.group_for_user(self.user)
         visible_forums_ids = list(group.permission_set.values_list('forum_id', flat=True))
         topic_list = Topic.objects.get_visible_topics().filter(forum__in=visible_forums_ids).order_by('forum__priority', 'name')
@@ -111,7 +111,7 @@ class PostMoveForm(forms.Form):
             )
         self.fields['topic_dest'].choices = topic_dest_choices
         
-        # Create posts list
+        # Create the list of posts
         posts = self.topic_src.posts.order_by('date').select_related('profile', 'profile__user', 'profile__group', 'topic', 'topic__first_post')
         self.fields['posts'].choices = [(post.id, post) for post in posts]
     
@@ -125,20 +125,20 @@ class PostMoveForm(forms.Form):
         return self.cleaned_data
     
     def save(self):
-        # Get destination topic
+        # Get the destination topic
         topic_dest_pk = self.cleaned_data['topic_dest']
         topic_dest = Topic.objects.get(pk=topic_dest_pk)
         
-        # Move posts to destination topic
+        # Move the posts to the destination topic
         self.topic_src.posts.filter(pk__in=self.cleaned_data['posts']).update(topic=topic_dest)
         
-        # Update stats of destination topic
+        # Update the stats of the destination topic
         topic_dest.first_post = topic_dest.posts.order_by('date')[0]
         topic_dest.update_posts_count()
         topic_dest.update_last_post()
         topic_dest.save()
         
-        # Update stats of source topic
+        # Update the stats of the source topic
         self.topic_src.first_post = self.topic_src.posts.order_by('date')[0]
         self.topic_src.update_posts_count()
         self.topic_src.update_last_post()
