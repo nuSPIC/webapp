@@ -56,7 +56,7 @@ class TokenGenerator(object):
         # that is sure to change , we produce a hash that will be
         # invalid as soon as it is used.
         # We limit the hash to 20 chars to keep URL short
-        hash = sha_constructor(settings.SECRET_KEY + unicode(user.id) + user.is_active + user.email +
+        hash = sha_constructor(settings.SECRET_KEY + unicode(user.id) + unicode(user.is_active) + user.email +
                                unicode(timestamp)).hexdigest()[::2]
         return "%s-%s" % (ts_b36, hash)
 
