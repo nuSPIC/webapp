@@ -9,11 +9,20 @@
         <h3>{{ group.grouper }}</h3>
         
         {% for news in group.list %}
-            <div>
-                {{ news.pub_date|date:"DATE_FORMAT" }}
-                <a href="{{ news.get_absolute_url }}">
-                    {{ news.title }}
-                </a>
+            <div class="news-block">
+
+                <div class="news-date">
+                    {{ news.pub_date|date:"DATE_FORMAT" }}
+                </div>
+
+                <div class="news-separator">&raquo;</div>
+
+                <div class="news-link">
+                    <a href="{{ news.get_absolute_url }}">
+                        {{ news.title }}
+                    </a>
+                </div>
+
             </div>
         {% endfor %}
     {% endfor %}
