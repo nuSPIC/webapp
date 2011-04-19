@@ -31,6 +31,7 @@ def registration(request):
         if user_form.is_valid() and profile_form.is_valid():
             # Create new inactive user
             user = user_form.save()
+            user.set_password(user_form.cleaned_data['password'])
             user.is_active = False
             user.save()
             
