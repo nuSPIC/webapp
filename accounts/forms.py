@@ -12,6 +12,10 @@ from accounts.models import UserProfile
 from datetime import datetime
 
 
+__all__ = ('AccountSearchForm', 'ProfileEditForm', 'ProfileRegistrationForm', 'CustomPasswordResetForm',
+           'UserEditForm', 'UserRegistrationForm',)
+
+
 class UserEditForm(forms.ModelForm):
     """
     User edit form
@@ -66,7 +70,22 @@ class ProfileEditForm(forms.ModelForm):
     """
     User profile edit form
     
-    Used on the registration and edit profile pages
+    Used on the "Edit profile" page
+    """
+    
+    class Meta:
+        model = UserProfile
+        fields = ('academic_affiliation', 'public_email', 'web_page', 'notes', 'forum_email_notification',)
+    
+    def as_div(self):
+        return self._html_output(u'<div class="field-wrapper">%(label)s %(errors)s %(field)s%(help_text)s</div>', u'%s', '</div>', u'<span class="help_text">%s</span>', False)
+        
+
+class ProfileRegistrationForm(forms.ModelForm):
+    """
+    User profile form
+    
+    Used on the registration page
     """
     
     class Meta:
