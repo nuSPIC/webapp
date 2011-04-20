@@ -35,7 +35,7 @@
         }
 
     #forum_list .topics_count {
-        float: left;
+        float: right;
         width: 75px;
         text-align: center;
     }
@@ -46,7 +46,7 @@
         }
 
     #forum_list .posts_count {
-        float: left;
+        float: right;
         width: 125px;
         text-align: center;
     }
@@ -57,8 +57,8 @@
         }
 
     #forum_list .last_post {
-        clear: right;
-        overflow: hidden;
+        width: 200px;
+        float: right;
     }
     
         #forum_list .last_post .empty {

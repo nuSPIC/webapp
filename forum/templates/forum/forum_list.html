@@ -24,18 +24,19 @@
             <div class="forum_name">
                 <h3>Forum</h3>
             </div>
-            
-            <div class="topics_count">
-                <h3>Topics count</h3>
-            </div>
-            
+
             <div class="posts_count">
                 <h3>Posts count</h3>
             </div>
-            
-            <div>
+
+            <div class="topics_count">
+                <h3>Topics count</h3>
+            </div>
+
+            <div class="last_post">
                 <h3>Last post</h3>
             </div>
+
         </div>
         
         {% for forum in forum_list %}
@@ -53,14 +54,14 @@
                     <div class="description">{{ forum.description }}</div>
                 </div>
                 
-                <div class="topics_count">
-                    <div class="count">{{ forum.topics_count|intcomma }}</div>
-                </div>
-                
                 <div class="posts_count">
                     <div class="count">{{ forum.posts_count|intcomma }}</div>
                 </div>
-                
+
+                <div class="topics_count">
+                    <div class="count">{{ forum.topics_count|intcomma }}</div>
+                </div>
+
                 <div class="last_post">
                     {% if forum.last_post %}
                         <strong>{{ forum.last_post.profile }}</strong><br />
@@ -70,6 +71,7 @@
                         <div class="empty">No posts</div>
                     {% endif %}
                 </div>
+
             </div>
         {% endfor %}
         

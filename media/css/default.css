@@ -41,6 +41,23 @@ div.centered-404 {
     text-align: center;
 }
 
+/* News
+*********************/
+
+.news-block {
+
+}
+
+    .news-block .news-date {
+        float: left;
+        width: 150px;
+    }
+
+    .news-block .news-separator {
+        float: left;
+        padding-left: 0;
+        padding-right: 25px;
+    }
 
 /* Community page
 *********************/
