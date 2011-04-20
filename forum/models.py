@@ -81,10 +81,10 @@ class Topic(models.Model):
         verbose_name_plural = 'Topics'
         ordering = ['-is_sticky', '-last_post__date']
         permissions = (
-            ('move_topic', 'Can move topic to another forum'),
-            ('split_topic', 'Can split topic'),
-            ('stick_topic', 'Can stick topic'),
-            ('close_topic', 'Can close topic'),
+            ('move_topic', 'Can move topics to another forum'),
+            ('split_topic', 'Can split topics'),
+            ('stick_topic', 'Can stick topics'),
+            ('close_topic', 'Can close topics'),
         )
     
     def __unicode__(self):
@@ -140,7 +140,7 @@ class Post(models.Model):
     date = models.DateTimeField('Post date', auto_now_add=True)
     topic = models.ForeignKey(Topic, verbose_name='Topic')
     profile = models.ForeignKey(UserProfile, verbose_name='User')
-    ip_address = models.IPAddressField('IP', blank=True, null=True)
+    ip_address = models.IPAddressField('IP Address', blank=True, null=True)
     message = models.TextField('Original bbCode message', max_length=32000)
     message_html = models.TextField('Compiled HTML message')
     is_removed = models.BooleanField('Is removed', default=False)
@@ -152,7 +152,7 @@ class Post(models.Model):
         verbose_name_plural = 'Posts'
         ordering = ['date']
         permissions = (
-            ('move_post', 'Can move post to another topic'),
+            ('move_post', 'Can move posts to another topic'),
         )
     
     def __unicode__(self):
@@ -184,6 +184,7 @@ class Post(models.Model):
 
 @signals.post_save(sender=Post)
 def update_forum_on_post_save(sender, instance, created, **kwargs):
+
     # Update user posts count
     profile = instance.profile
     profile.update_posts_count()
@@ -202,7 +203,6 @@ def update_forum_on_post_save(sender, instance, created, **kwargs):
     forum.save()
 
 
-
 # =============
 #   Polls
 # =============
@@ -210,8 +210,8 @@ def update_forum_on_post_save(sender, instance, created, **kwargs):
 class Poll(models.Model):
     topic = models.ForeignKey(Topic, verbose_name='Topic', related_name='polls')
     title = models.CharField('title', max_length=250)
-    total_votes = models.PositiveIntegerField('Total votes count', default=0)
-    expires = models.DateField('Poll expire date', null=True, blank=True)
+    total_votes = models.PositiveIntegerField('Total number of votes', default=0)
+    expires = models.DateField('Poll expiration date', null=True, blank=True)
     
     class Meta:
         verbose_name = 'Poll'
@@ -235,7 +235,7 @@ class Poll(models.Model):
 class PollChoice(models.Model):
     poll = models.ForeignKey(Poll, verbose_name='Poll', related_name='choices')
     title = models.CharField('Choice', max_length=250)
-    votes_count = models.PositiveIntegerField('Votes count', default=0)
+    votes_count = models.PositiveIntegerField('Number of votes', default=0)
     
     class Meta:
         verbose_name = 'Poll choice'
@@ -264,6 +264,7 @@ class PollVote(models.Model):
 @signals.post_save(sender=PollVote)
 @signals.post_delete(sender=PollVote)
 def update_poll_on_pollvote_save(sender, instance, **kwargs):
+
     # Update poll total votes count
     poll = instance.poll
     poll.update_total_votes()
@@ -284,26 +285,26 @@ class Permission(models.Model):
     forum = models.ForeignKey(Forum, verbose_name=u'Forum')
     
     # Group level permissions
-    can_change_group_topic = models.BooleanField(u'Can change any topic', default=False)
-    can_move_group_topic = models.BooleanField(u'Can move any topic', default=False)
-    can_split_group_topic = models.BooleanField(u'Can split any topic', default=False)
-    can_delete_group_topic = models.BooleanField(u'Can delete any topic', default=False)
-    can_stick_group_topic = models.BooleanField(u'Can stick any topic', default=False)
-    can_close_group_topic = models.BooleanField(u'Can close any topic', default=False)
+    can_change_group_topic = models.BooleanField(u'Can change any topics', default=False)
+    can_move_group_topic = models.BooleanField(u'Can move any topics', default=False)
+    can_split_group_topic = models.BooleanField(u'Can split any topics', default=False)
+    can_delete_group_topic = models.BooleanField(u'Can delete any topics', default=False)
+    can_stick_group_topic = models.BooleanField(u'Can stick any topics', default=False)
+    can_close_group_topic = models.BooleanField(u'Can close any topics', default=False)
     
-    can_change_group_post = models.BooleanField(u'Can change any post', default=False)
-    can_move_group_post = models.BooleanField(u'Can move any post', default=False)
-    can_delete_group_post = models.BooleanField(u'Can delete any post', default=False)
+    can_change_group_post = models.BooleanField(u'Can change any posts', default=False)
+    can_move_group_post = models.BooleanField(u'Can move any posts', default=False)
+    can_delete_group_post = models.BooleanField(u'Can delete any posts', default=False)
     
     # User level permissions
     can_add_own_topic = models.BooleanField(u'Can add topics', default=False)
-    can_change_own_topic = models.BooleanField(u'Can change own topic', default=False)
-    can_delete_own_topic = models.BooleanField(u'Can delete own topic', default=False)
-    can_close_own_topic = models.BooleanField(u'Can close own topic', default=False)
+    can_change_own_topic = models.BooleanField(u'Can change own topics', default=False)
+    can_delete_own_topic = models.BooleanField(u'Can delete own topics', default=False)
+    can_close_own_topic = models.BooleanField(u'Can close own topics', default=False)
     
     can_add_own_post = models.BooleanField(u'Can add posts', default=False)
-    can_change_own_post = models.BooleanField(u'Can chage own post', default=False)
-    can_delete_own_post = models.BooleanField(u'Can delete own post', default=False)
+    can_change_own_post = models.BooleanField(u'Can chage own posts', default=False)
+    can_delete_own_post = models.BooleanField(u'Can delete own posts', default=False)
     
     class Meta:
         verbose_name = u'Permission'
@@ -313,10 +314,10 @@ class Permission(models.Model):
     
     def _has_priority(self, owner_profile, user_profile):
         """
-        Returns True, if one user (user_profile) forum group priority is higher
-        than the other (owner_profile)
+        Returns True, if one user's (user_profile) forum group priority
+        is higher or equal to other one (owner_profile)
 
-        Used as an additional level of protection for higher priority group
+        Used as an additional level of protection for higher priority groups
         """
         
         if owner_profile.forum_group.priority <= user_profile.forum_group.priority:
@@ -326,18 +327,19 @@ class Permission(models.Model):
     
     def can_add_topic(self):
         """
-        User can add new topic only if he has specified permission
+        Users can add new topics only if they have the permission to do so
         """
         
         return self.can_add_own_topic
     
     def can_change_topic(self, user, topic):
         """
-        Any topic can only be edited by the users, that have group permissions
-        higher or equal to those of the user, who created this topic.
+        Users can edit topics if they belong to a group with the priority
+        that is higher or equal to the group priority of the user,
+        that created this topic AND have required group level permissions
 
         Only the users that are permitted to edit their own topics would be
-        able to edit their topics and the first posts in these topics.
+        able to edit their topics and the first posts in these topics
         """
         
         if self.can_change_group_topic:
@@ -351,9 +353,9 @@ class Permission(models.Model):
     
     def can_move_topic(self, user, topic):
         """
-
-        Переместить любую тему может пользователь с правами группы, в которую входит
-        пользователь ее создавший.
+        Users can move topics if they belong to a group with the priority
+        that is higher of equal to the group priority of the user that
+        created this topic AND have required group level permissions
         """
         
         if self.can_move_group_topic:
@@ -361,8 +363,9 @@ class Permission(models.Model):
     
     def can_split_topic(self, user, topic):
         """
-        Расщепить любую тему может пользователь с правами группы, в которую входит
-        пользователь ее создавший.
+        Users can split topics if they belong to a group with the priority
+        that is higher of equal to the group priority of the user that
+        created this topic AND have required group level permissions
         """
         
         if self.can_split_group_topic:
@@ -370,8 +373,9 @@ class Permission(models.Model):
     
     def can_stick_topic(self, user, topic):
         """
-        Закрепить любую тему может пользователь с правами группы, в которую входит
-        пользователь ее создавший.
+        Users can stick topics if they belong to a group with the priority
+        that is higher of equal to the group priority of the user that
+        created this topic AND have required group level permissions
         """
         
         if self.can_stick_group_topic:
@@ -379,8 +383,12 @@ class Permission(models.Model):
     
     def can_close_topic(self, user, topic):
         """
-        Закрыть любую тему может пользователь с правами уровня группы, в которую входит
-        пользователь ее создавший. Свою тему - любой пользователь с правами на закрытие собственных тем.
+        Users can close topics if they belong to a group with the priority
+        that is higher of equal to the group priority of the user that
+        created this topic AND have required group level permissions
+
+        Only the users that are permitted to close their own topics would be
+        able to do so
         """
         
         if self.can_close_group_topic:
@@ -394,9 +402,12 @@ class Permission(models.Model):
     
     def can_delete_topic(self, user, topic):
         """
-        Удалить любую тему может пользователь с правами уровня группы, в которую входит
-        пользователь ее создавший. Свою тему - любой пользователь с правами на удаление
-        собственных тем при условии, что она пуста (за исключением первого сообщения).
+        Users can delete topics if they belong to a group with the priority
+        that is higher of equal to the group priority of the user that
+        created this topic AND have required group level permissions
+
+        Only the users that are permitted to delete their own topics would be
+        able to do so and only if the topic consists of only one (first) post
         """
         
         if self.can_delete_group_topic:
@@ -410,16 +421,20 @@ class Permission(models.Model):
     
     def can_add_post(self, topic):
         """
-        User can add new post if he has specified permission and topic not closed
+        Users can add new posts only if they have the permission to do so and
+        the topic is not closed
         """
         
         return self.can_add_own_post and not topic.is_closed
     
     def can_change_post(self, user, post):
         """
-        Редактировать любое сообщение может пользователь с правами уровня группы, в которую входит
-        пользователь его создавший. Свои сообщения - пользователь с правами на редактирование
-        своих сообщений при условии, что сообщение последнее в теме.
+        Users can edit posts if they belong to a group with the priority
+        that is higher of equal to the group priority of the user that
+        created this topic AND have required group level permissions
+
+        Only the users that are permitted to edit their own posts would be
+        able to do so and only if it is the last post in the topic
         """
         
         if self.can_change_group_post:
@@ -433,17 +448,21 @@ class Permission(models.Model):
     
     def can_move_post(self, user, topic):
         """
-        Расщепить любую тему может пользователь с правами группы, в которую входит
-        пользователь ее создавший.
+        Users can move posts if they belong to a group with the priority
+        that is higher of equal to the group priority of the user that
+        created this topic AND have required group level permissions
         """
         
         return self.can_move_group_post
     
     def can_delete_post(self, user, post):
         """
-        Удалить любое сообщение может пользователь с правами уровня группы, в которую входит
-        пользователь его создавший. Свои сообщения - пользователь с правами на удаление своих
-        сообщений при условии, что сообщение последнее в теме.
+        Users can delete posts if they belong to a group with the priority
+        that is higher of equal to the group priority of the user that
+        created this post AND have required group level permissions
+
+        Only the users that are permitted to delete their own posts would be
+        able to do so and only if it is the last post in the topic
         """
         
         if self.can_delete_group_post:
@@ -483,7 +502,7 @@ def create_readtracking_on_userprofile_create(sender, instance, created, **kwarg
 class SubscriptionManager(models.Manager):
     def load_related(self):
         """
-        Load related objects using 1 sql query instead of len(qs) queries
+        Load related objects using 1 SQL query instead of len(qs) queries
         """
         qs = self.get_query_set()
         return load_content_objects(qs, cache_field='object', field='object_id', ct_field='content_type')
