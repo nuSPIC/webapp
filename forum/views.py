@@ -16,7 +16,7 @@ from django.utils.timesince import timesince
 from accounts.models import UserProfile
 from forum.forms import *
 from forum.inform import inform_new_topic, inform_new_post
-from forum.models import Forum, Group, Post, Pool, PoolChoice, PoolVote, Topic
+from forum.models import Forum, Group, Post, Poll, PollChoice, PollVote, Topic
 from forum.helpers import get_group_perms_or_404, is_subscribed, mark_read, mark_unread_forums, mark_unread_topics, do_subscribe
 from lib.decorators import render_to
 from lib.helpers import paginate
@@ -119,14 +119,14 @@ def topic_add(request, forum_id):
     group, perms = get_group_perms_or_404(request.user, forum)
     
     if perms.can_add_topic():
-        PoolFormset = inlineformset_factory(Topic, Pool, fk_name='topic', form=PoolForm, max_num=10, extra=10)
+        PollFormset = inlineformset_factory(Topic, Poll, fk_name='topic', form=PollForm, max_num=10, extra=10)
         
         if request.method == 'POST':
             topic_form = TopicForm(request.POST, prefix='topic_form')
             post_form = PostForm(request.POST, prefix='post_form')
-            pool_formset = PoolFormset(request.POST)
+            poll_formset = PollFormset(request.POST)
             
-            if topic_form.is_valid() and post_form.is_valid() and pool_formset.is_valid():
+            if topic_form.is_valid() and post_form.is_valid() and poll_formset.is_valid():
                 profile = request.user.get_profile()
                 ip_address = request.META.get('REMOTE_ADDR', None)
                 
@@ -143,15 +143,15 @@ def topic_add(request, forum_id):
                 topic.first_post = post
                 topic.save()
                 
-                # Save pool
-                pool_formset.instance = topic
-                for form in pool_formset.forms:
+                # Save poll
+                poll_formset.instance = topic
+                for form in poll_formset.forms:
                     if hasattr(form, 'cleaned_data') and form.cleaned_data:
                         form.cleaned_data['topic'] = topic
-                pool_formset.save()
+                poll_formset.save()
                 
-                # Save pool choices
-                for form in pool_formset.forms:
+                # Save poll choices
+                for form in poll_formset.forms:
                     form.save_choices()
                 
                 # Inform subscribed users about new topic
@@ -164,7 +164,7 @@ def topic_add(request, forum_id):
         else:
             topic_form = TopicForm(prefix='topic_form')
             post_form = PostForm(prefix='post_form')
-            pool_formset = PoolFormset()
+            poll_formset = PollFormset()
     else:
         raise Http404
     
@@ -172,7 +172,7 @@ def topic_add(request, forum_id):
         'forum': forum,
         'topic_form': topic_form,
         'post_form': post_form,
-        'pool_formset': pool_formset,
+        'poll_formset': poll_formset,
     }
 
 @render_to('forum/topic_edit.html')
@@ -189,21 +189,21 @@ def topic_edit(request, topic_id):
     group, perms = get_group_perms_or_404(request.user, forum)
     
     if perms.can_change_topic(request.user, topic):
-        PoolFormset = inlineformset_factory(Topic, Pool, fk_name='topic', form=PoolForm, max_num=10, extra=10)
+        PollFormset = inlineformset_factory(Topic, Poll, fk_name='topic', form=PollForm, max_num=10, extra=10)
         
         if request.method == 'POST':
             topic_form = TopicForm(request.POST, instance=topic, prefix='topic_form')
             post_form = PostForm(request.POST, instance=post, prefix='post_form')
-            pool_formset = PoolFormset(request.POST, instance=topic)
+            poll_formset = PollFormset(request.POST, instance=topic)
             
-            if topic_form.is_valid() and post_form.is_valid() and pool_formset.is_valid():
+            if topic_form.is_valid() and post_form.is_valid() and poll_formset.is_valid():
                 topic = topic_form.save()
                 post = post_form.save()
-                pool_formset.save()
+                poll_formset.save()
                 
-                # Save pool choices
-                for form in pool_formset.forms:
-                    if form in pool_formset.deleted_forms:
+                # Save poll choices
+                for form in poll_formset.forms:
+                    if form in poll_formset.deleted_forms:
                         continue
                     if form.instance.total_votes == 0:
                         form.save_choices()
@@ -212,7 +212,7 @@ def topic_edit(request, topic_id):
         else:
             topic_form = TopicForm(instance=topic, prefix='topic_form')
             post_form = PostForm(instance=post, prefix='post_form')
-            pool_formset = PoolFormset(instance=topic)
+            poll_formset = PollFormset(instance=topic)
     else:
         return HttpResponseRedirect(topic.get_absolute_url())
     
@@ -222,7 +222,7 @@ def topic_edit(request, topic_id):
         'post': post,
         'topic_form': topic_form,
         'post_form': post_form,
-        'pool_formset': pool_formset,
+        'poll_formset': poll_formset,
     }
 
 @render_to('forum/topic_move.html')
@@ -459,34 +459,34 @@ def post_list(request, topic_id):
     posts = topic.posts.order_by('date').select_related('profile', 'profile__user', 'profile__group', 'topic', 'topic__first_post')
     post_list = paginate(request, posts, settings.POSTS_PER_PAGE)
     
-    # Generate pool list for the first topic page
+    # Generate poll list for the first topic page
     if post_list.number == 1:
-        pools = topic.pools.annotate(max_votes_count=Max('choices__votes_count'))
-        pools_ids = list(pools.values_list('id', flat=True))
+        polls = topic.polls.annotate(max_votes_count=Max('choices__votes_count'))
+        polls_ids = list(polls.values_list('id', flat=True))
         
-        # Select dictionary of user choices for topic pools
+        # Select dictionary of user choices for topic polls
         if request.user.is_authenticated():
             profile = request.user.get_profile()
-            pool_votes = dict(PoolVote.objects.filter(profile=profile, pool__in=pools_ids).values_list('pool', 'choice'))
+            poll_votes = dict(PollVote.objects.filter(profile=profile, poll__in=polls_ids).values_list('poll', 'choice'))
         else:
-            pool_votes = {}
+            poll_votes = {}
         
-        # For every pool in sequence set:
-        #  - user_can_vote, ability user to vote in specified pool
-        #  - user_vote, user vote for specified pool
-        for pool in pools:
-            pool.user_can_vote = not bool(pool.expired() or request.user.is_anonymous() or bool(pool.id in pool_votes.keys()))
-            if pool.id in pool_votes.keys():
-                pool.user_vote = pool_votes[pool.id]
+        # For every poll in sequence set:
+        #  - user_can_vote, ability user to vote in specified poll
+        #  - user_vote, user vote for specified poll
+        for poll in polls:
+            poll.user_can_vote = not bool(poll.expired() or request.user.is_anonymous() or bool(poll.id in poll_votes.keys()))
+            if poll.id in poll_votes.keys():
+                poll.user_vote = poll_votes[poll.id]
     else:
-        pools = []
+        polls = []
     
     mark_read(request.user, post_list.object_list)
     
     return {
         'forum': forum,
         'topic': topic,
-        'pools': pools,
+        'polls': polls,
         'subscribed': subscribed,
         'forum_perms': perms,
         'post_list': post_list,
@@ -575,34 +575,34 @@ def post_preview(request):
 
 @login_required
 @never_cache
-def pool_vote(request, choice_id):
+def poll_vote(request, choice_id):
     """
-    Pool voting. Works only with AJAX requests.
+    Poll voting. Works only with AJAX requests.
     Returns JSON with poll vote results.
     """
     
-    choice = get_object_or_404(PoolChoice, id=choice_id)
+    choice = get_object_or_404(PollChoice, id=choice_id)
     
     if request.is_ajax():
         profile = request.user.get_profile()
         
-        if choice.pool.expired():
+        if choice.poll.expired():
             return HttpResponse()
         
-        PoolVote.objects.get_or_create(profile=profile, pool=choice.pool, choice=choice)
-        pool = Pool.objects.filter(id=choice.pool.id).annotate(max_votes_count=Max('choices__votes_count'))[0]
-        pool.user_vote = choice.id
-        pool.user_can_vote = False
+        PollVote.objects.get_or_create(profile=profile, poll=choice.poll, choice=choice)
+        poll = Poll.objects.filter(id=choice.poll.id).annotate(max_votes_count=Max('choices__votes_count'))[0]
+        poll.user_vote = choice.id
+        poll.user_can_vote = False
         
-        # Compile HTML pool results
-        responseHTML = render_to_string('forum/pool_results.html', {'pool': pool})
+        # Compile HTML poll results
+        responseHTML = render_to_string('forum/poll_results.html', {'poll': poll})
         response = {
-            'pool_id': pool.id,
+            'poll_id': poll.id,
             'responseHTML': responseHTML
         }
         return HttpResponse(simplejson.dumps(response), mimetype='application/json')
     else:
-        return HttpResponseRedirect(choice.pool.topic.get_absolute_url())
+        return HttpResponseRedirect(choice.poll.topic.get_absolute_url())
 
 
 # ======================

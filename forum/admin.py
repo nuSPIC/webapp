@@ -4,7 +4,7 @@ from django import forms
 from django.contrib import admin
 
 from accounts.models import Group
-from forum.models import Forum, Topic, Permission, Post, Pool, PoolChoice, PoolVote
+from forum.models import Forum, Topic, Permission, Post, Poll, PollChoice, PollVote
 
 
 
@@ -102,26 +102,26 @@ class PostAdmin(admin.ModelAdmin):
 admin.site.register(Post, PostAdmin)
 
 
-class PoolChoiceInline(admin.TabularInline):
+class PollChoiceInline(admin.TabularInline):
     def queryset(self, request):
-        return self.model._default_manager.select_related('pool')
+        return self.model._default_manager.select_related('poll')
     
-    model = PoolChoice
+    model = PollChoice
     
     fieldsets = (
-        (None, {'fields': ('pool', 'title', 'votes_count',)}),
+        (None, {'fields': ('poll', 'title', 'votes_count',)}),
     )
-    list_display = ('pool', 'title', 'votes_count',)
-    list_display_links = ('pool', 'title',)
-    raw_id_fields = ('pool',)
-    search_fields = ( 'pool__title', 'title',)
+    list_display = ('poll', 'title', 'votes_count',)
+    list_display_links = ('poll', 'title',)
+    raw_id_fields = ('poll',)
+    search_fields = ( 'poll__title', 'title',)
     ordering = ['-id']
 
-class PoolAdmin(admin.ModelAdmin):
+class PollAdmin(admin.ModelAdmin):
     def queryset(self, request):
         return self.model._default_manager.select_related('topic')
     
-    inlines = [PoolChoiceInline,]
+    inlines = [PollChoiceInline,]
     
     fieldsets = (
         (None, {'fields': ('topic', 'title', 'total_votes', 'expires',)}),
@@ -132,23 +132,23 @@ class PoolAdmin(admin.ModelAdmin):
     search_fields = ( 'topic__name', 'title',)
     ordering = ['-id']
 
-admin.site.register(Pool, PoolAdmin)
+admin.site.register(Poll, PollAdmin)
 
 
-class PoolVoteAdmin(admin.ModelAdmin):
+class PollVoteAdmin(admin.ModelAdmin):
     def queryset(self, request):
-        return self.model._default_manager.select_related('profile', 'profile__user', 'pool', 'choice',)
+        return self.model._default_manager.select_related('profile', 'profile__user', 'poll', 'choice',)
     
     fieldsets = (
-        (None, {'fields': ('profile', 'pool', 'choice',)}),
+        (None, {'fields': ('profile', 'poll', 'choice',)}),
     )
-    list_display = ('date', 'profile', 'pool', 'choice',)
-    list_display_links = ('profile', 'pool',)
-    raw_id_fields = ('profile', 'pool', 'choice')
-    search_fields = ( 'profile__user__username', 'pool__title', 'choice__title',)
+    list_display = ('date', 'profile', 'poll', 'choice',)
+    list_display_links = ('profile', 'poll',)
+    raw_id_fields = ('profile', 'poll', 'choice')
+    search_fields = ( 'profile__user__username', 'poll__title', 'choice__title',)
     ordering = ['-date']
 
-admin.site.register(PoolVote, PoolVoteAdmin)
+admin.site.register(PollVote, PollVoteAdmin)
 
 
 class PermissionAdmin(admin.ModelAdmin):

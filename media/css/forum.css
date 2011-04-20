@@ -199,44 +199,44 @@
     }
 
 
-/* Pools
+/* Polls
 **********************/
 
-.pool_edit {
+.poll_edit {
     padding: 10px;
     margin: 10px 0px;
     width: 97%;
     border: 1px solid #777777;
 }
 
-    .pool_edit .choices {
+    .poll_edit .choices {
         padding: 0px 0px 10px 10px;
         width: 75%;
     }
 
-        .pool_edit .choices .choices_title {
+        .poll_edit .choices .choices_title {
             font-weight: bold;
             padding-bottom: 10px;
         }
 
-            .pool_edit .choices .choice .counter {
+            .poll_edit .choices .choice .counter {
                 float: left;
                 width: 20px;
                 font-weight: bold;
                 padding: 5px;
             }
 
-.pool_list {
+.poll_list {
     overflow: hidden;
     padding-top: 10px;
 }
 
-    .pool_list .pool_voting {
+    .poll_list .poll_voting {
         margin: 10px 0px;
         background-color: #EEEEEE;
     }
 
-        .pool_list .pool_voting .pool_title {
+        .poll_list .poll_voting .poll_title {
             padding: 5px 10px;
             background-color: #777777;
             color: #FFFFFF;
@@ -244,27 +244,27 @@
             font-size: larger;
         }
 
-        .pool_list .pool_voting .choices {
+        .poll_list .poll_voting .choices {
             padding: 5px 10px;
         }
 
-            .pool_list .pool_voting .choices .choice {
+            .poll_list .poll_voting .choices .choice {
                 padding: 5px 7px;
                 margin: 8px;
                 background-color: #FFFFFF;
             }
 
-        .pool_list .pool_voting .total {
+        .poll_list .poll_voting .total {
             font-size: smaller;
             padding: 0px 20px 15px 20px;
         }
 
-.pool_results {
+.poll_results {
     margin: 10px 0px;
     background-color: #EEEEEE;
 }
 
-    .pool_results .pool_title {
+    .poll_results .poll_title {
         padding: 5px 10px;
         background-color: #777777;
         color: #FFFFFF;
@@ -272,23 +272,23 @@
         font-size: larger;
     }
 
-    .pool_results .choices {
+    .poll_results .choices {
         padding: 5px 10px;
     }
 
-        .pool_results .choices .choice {
+        .poll_results .choices .choice {
             margin: 8px;
         }
 
-            .pool_results .choices .choice .choice_title {
+            .poll_results .choices .choice .choice_title {
                 margin-left: 40px;
             }
 
-            .pool_results .choices .choice .user_vote {
+            .poll_results .choices .choice .user_vote {
                 font-weight: bold;
             }
 
-            .pool_results .choices .choice .votes_count {
+            .poll_results .choices .choice .votes_count {
                 width: 28px;
                 float: left;
                 text-align: right;
@@ -296,13 +296,13 @@
                 font-size: small;
             }
 
-            .pool_results .choices .choice .bar {
+            .poll_results .choices .choice .bar {
                 margin-left: 40px;
                 padding: 5px;
                 background-color: #CCCCCC;
             }
 
-    .pool_results .total {
+    .poll_results .total {
         font-size: smaller;
         padding: 0px 20px 15px 60px;
     }

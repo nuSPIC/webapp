@@ -1,0 +1,42 @@
+<div class="poll_title">
+    {{ poll.title }}
+</div>
+
+<div class="choices">
+    {% for choice in poll.choices.all %}
+        <div class="choice">
+            <div class="choice_title{% ifequal poll.user_vote choice.id %} user_vote{% endifequal %}">
+                {{ choice.title }}
+            </div>
+            
+            <div>
+                <div class="votes_count">
+                    ({{ choice.votes_count }})
+                </div>
+                
+                <div class="bar" style="width:{% widthratio choice.votes_count poll.max_votes_count 650 %}px">
+                    &nbsp;
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<div class="total">
+    {{ poll.total_votes }} vote{{ poll.total_votes|pluralize }}
+    {% if poll.expired %}
+        <br />Poll expires
+    {% else %}
+        {% if poll.expires %}
+            <br />Poll expire at {{ poll.expires|date:"DATE_FORMAT" }}
+        {% endif %}
+    {% endif %}
+</div>
+
+{% if poll.user_can_vote %}
+    <div class="buttons">
+        <a href="#" class="show_poll_voting" rel="{{ poll.id }}">
+            Show poll choices
+        </a>
+    </div>
+{% endif %}

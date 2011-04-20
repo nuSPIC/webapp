@@ -38,64 +38,64 @@
             );
         });
         
-        // Hide delete pool checkbox
+        // Hide delete poll checkbox
         $('input[id$=-DELETE]').hide();
         
-        // Hide all pools forms except filled
-        $('div.pool_edit').each(function(){
-            var pool = $(this);
+        // Hide all polls forms except filled
+        $('div.poll_edit').each(function(){
+            var poll = $(this);
             
-            // Hide pool only if it has only empty fields
+            // Hide poll only if it has only empty fields
             var empty = true;
-            pool.find('input:text').each(function(){
+            poll.find('input:text').each(function(){
                 if ($(this).val() != '')
                     empty = false;
             });
-            if (empty || pool.find('input[name$=-DELETE]:checked').length) pool.hide();
+            if (empty || poll.find('input[name$=-DELETE]:checked').length) poll.hide();
             
-            // Hide all pool chices rows except first two or filled
-            pool.find('div.choice').each(function(index){
+            // Hide all poll chices rows except first two or filled
+            poll.find('div.choice').each(function(index){
                 if ((index >= 2) && ($(this).find('input:text').val() == '')) {
                     $(this).hide();
                 }
             });
         });
         
-        // Add pool
-        $('#add_pool_button').click(function(e){
+        // Add poll
+        $('#add_poll_button').click(function(e){
             e.preventDefault();
-            var pool = $('div.pool_edit:not(:visible):first');
+            var poll = $('div.poll_edit:not(:visible):first');
             
-            // Hide pool choices except first two
-            pool.find('div.choice').each(function(index){
+            // Hide poll choices except first two
+            poll.find('div.choice').each(function(index){
                 if (index >= 2) {
                     $(this).hide();
                 }
             });
             
             // Reset all fields
-            pool.find('input:text').val('');
-            pool.find('input[name$=-DELETE]').removeAttr('checked');
-            pool.show();
+            poll.find('input:text').val('');
+            poll.find('input[name$=-DELETE]').removeAttr('checked');
+            poll.show();
             
-            if (!pool.next('.pool_edit').length) {
+            if (!poll.next('.poll_edit').length) {
                 $(this).hide()
             }
         });
         
-        // Delete pool
-        $('input.delete_pool').click(function(e){
+        // Delete poll
+        $('input.delete_poll').click(function(e){
             e.preventDefault();
-            var pool = $(this).parents('div.pool_edit');
-            pool.find('input[name$=DELETE]').attr('checked', 'checked');
-            pool.hide();
+            var poll = $(this).parents('div.poll_edit');
+            poll.find('input[name$=DELETE]').attr('checked', 'checked');
+            poll.hide();
         });
         
-        // Add pool choice
+        // Add poll choice
         $('input.add_choice').click(function(e){
             e.preventDefault();
-            var pool = $(this).parents('div.pool_edit');
-            var choice = pool.find('div.choice:not(:visible):first');
+            var poll = $(this).parents('div.poll_edit');
+            var choice = poll.find('div.choice:not(:visible):first');
             choice.show();
             
             if (!choice.next('.choice').length) {
@@ -103,9 +103,9 @@
             }
         });
         
-        // Block pools having answers
-        $('div.pool_disabled').find('input:text').attr('disabled', 'disabled');
-        $('div.pool_disabled').find('div.buttons').hide();
+        // Block polls having answers
+        $('div.poll_disabled').find('input:text').attr('disabled', 'disabled');
+        $('div.poll_disabled').find('div.buttons').hide();
 	});
 //]]>
 </script>
@@ -125,49 +125,49 @@
         
         {% post_editor post_form %}
         
-        {{ pool_formset.management_form }}
-        {{ pool_formset.non_form_errors }}
+        {{ poll_formset.management_form }}
+        {{ poll_formset.non_form_errors }}
         
-        {% for pool_form in pool_formset.forms %}
-            <div class="pool_edit{% if pool_form.instance.total_votes %} pool_disabled{% endif %}">
-                {% if pool_form.instance.total_votes %}
+        {% for poll_form in poll_formset.forms %}
+            <div class="poll_edit{% if poll_form.instance.total_votes %} poll_disabled{% endif %}">
+                {% if poll_form.instance.total_votes %}
                     <div class="information" style="margin-bottom:7px">
-                        Pool edit disabled because it has one or more answers
+                        Poll edit disabled because it has one or more answers
                     </div>
                 {% endif %}
                 
-                {{ pool_form.non_field_errors }}
-                {{ pool_form.id }}
-                {{ pool_form.topic }}
-                {{ pool_form.DELETE }}
+                {{ poll_form.non_field_errors }}
+                {{ poll_form.id }}
+                {{ poll_form.topic }}
+                {{ poll_form.DELETE }}
                 
                 <div class="field-wrapper">
-                    {{ pool_form.title.label_tag }}
-                    {{ pool_form.title.errors }}
-                    {{ pool_form.title }}
-                    {% if pool_form.title.help_text %}<span class="help_text">{{ pool_form.title.help_text }}</span>{% endif %}
+                    {{ poll_form.title.label_tag }}
+                    {{ poll_form.title.errors }}
+                    {{ poll_form.title }}
+                    {% if poll_form.title.help_text %}<span class="help_text">{{ poll_form.title.help_text }}</span>{% endif %}
                 </div>
                 
                 <div class="field-wrapper">
-                    {{ pool_form.expires.label_tag }}
-                    {{ pool_form.expires.errors }}
-                    {{ pool_form.expires }}
-                    {% if pool_form.expires.help_text %}<span class="help_text">{{ pool_form.expires.help_text }}</span>{% endif %}
+                    {{ poll_form.expires.label_tag }}
+                    {{ poll_form.expires.errors }}
+                    {{ poll_form.expires }}
+                    {% if poll_form.expires.help_text %}<span class="help_text">{{ poll_form.expires.help_text }}</span>{% endif %}
                 </div>
                 
                 <div class="choices">
                     <div class="choices_title">
-                        Pool choices
+                        Poll choices
                     </div>
                 
-                    {{ pool_form.choice_formset.management_form }}
-                    {{ pool_form.choice_formset.non_form_errors }}
+                    {{ poll_form.choice_formset.management_form }}
+                    {{ poll_form.choice_formset.non_form_errors }}
                     
-                    {% for choice_form in pool_form.choice_formset.forms %}
+                    {% for choice_form in poll_form.choice_formset.forms %}
                         <div class="choice">
                             {{ choice_form.non_field_errors }}
                             {{ choice_form.id }}
-                            {{ choice_form.pool }}
+                            {{ choice_form.poll }}
 
                             <div class="field-wrapper">
                                 <div class="counter">{{ forloop.counter }}.</div>
@@ -179,15 +179,15 @@
                 </div>
             
                 <div class="buttons">
-                    <input type="submit" value="Add pool choice" class="add_choice" />
-                    <input type="submit" value="Delete pool" class="delete_pool" />
+                    <input type="submit" value="Add poll choice" class="add_choice" />
+                    <input type="submit" value="Delete poll" class="delete_poll" />
                 </div>
             </div>
         {% endfor %}
         
         <div class="buttons">
             <input type="submit" value="Save topic" />
-            <input type="submit" value="Add pool" id="add_pool_button" />
+            <input type="submit" value="Add poll" id="add_poll_button" />
             <input type="submit" value="Preview" id="preview_button" />
         </div>
     </form>

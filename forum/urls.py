@@ -27,5 +27,5 @@ urlpatterns = patterns('forum.views',
     url(r'^post/(?P<post_id>\d+)/delete/$', 'post_delete', name='post_delete'),
     url(r'^post/preview/', 'post_preview', name='post_preview'),
     
-    url(r'^pool/vote/(?P<choice_id>\d+)/', 'pool_vote', name='pool_vote'),
+    url(r'^poll/vote/(?P<choice_id>\d+)/', 'poll_vote', name='poll_vote'),
 )

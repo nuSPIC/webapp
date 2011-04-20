@@ -204,18 +204,18 @@ def update_forum_on_post_save(sender, instance, created, **kwargs):
 
 
 # =============
-#   Pools
+#   Polls
 # =============
 
-class Pool(models.Model):
-    topic = models.ForeignKey(Topic, verbose_name='Topic', related_name='pools')
+class Poll(models.Model):
+    topic = models.ForeignKey(Topic, verbose_name='Topic', related_name='polls')
     title = models.CharField('title', max_length=250)
     total_votes = models.PositiveIntegerField('Total votes count', default=0)
-    expires = models.DateField('Pool expire date', null=True, blank=True)
+    expires = models.DateField('Poll expire date', null=True, blank=True)
     
     class Meta:
-        verbose_name = 'Pool'
-        verbose_name_plural = 'Pools'
+        verbose_name = 'Poll'
+        verbose_name_plural = 'Polls'
         ordering = ['id']
     
     def __unicode__(self):
@@ -232,14 +232,14 @@ class Pool(models.Model):
         self.total_votes = self.votes.count()
 
 
-class PoolChoice(models.Model):
-    pool = models.ForeignKey(Pool, verbose_name='Pool', related_name='choices')
+class PollChoice(models.Model):
+    poll = models.ForeignKey(Poll, verbose_name='Poll', related_name='choices')
     title = models.CharField('Choice', max_length=250)
     votes_count = models.PositiveIntegerField('Votes count', default=0)
     
     class Meta:
-        verbose_name = 'Pool choice'
-        verbose_name_plural = 'Pool choices'
+        verbose_name = 'Poll choice'
+        verbose_name_plural = 'Poll choices'
         ordering = ['id']
     
     def __unicode__(self):
@@ -249,25 +249,25 @@ class PoolChoice(models.Model):
         self.votes_count = self.votes.count()
 
 
-class PoolVote(models.Model):
+class PollVote(models.Model):
     date = models.DateTimeField('Vote date', auto_now_add=True)
     profile = models.ForeignKey(UserProfile, verbose_name='User')
-    pool = models.ForeignKey(Pool, verbose_name='Pool', related_name='votes')
-    choice = models.ForeignKey(PoolChoice, verbose_name='Pool choice', related_name='votes')
+    poll = models.ForeignKey(Poll, verbose_name='Poll', related_name='votes')
+    choice = models.ForeignKey(PollChoice, verbose_name='Poll choice', related_name='votes')
     
     class Meta:
-        verbose_name = 'Pool vote'
-        verbose_name_plural = 'Pool votes'
+        verbose_name = 'Poll vote'
+        verbose_name_plural = 'Poll votes'
         ordering = ['-id']
 
 
-@signals.post_save(sender=PoolVote)
-@signals.post_delete(sender=PoolVote)
-def update_pool_on_poolvote_save(sender, instance, **kwargs):
-    # Update pool total votes count
-    pool = instance.pool
-    pool.update_total_votes()
-    pool.save()
+@signals.post_save(sender=PollVote)
+@signals.post_delete(sender=PollVote)
+def update_poll_on_pollvote_save(sender, instance, **kwargs):
+    # Update poll total votes count
+    poll = instance.poll
+    poll.update_total_votes()
+    poll.save()
     
     # Update choice votes count
     choice = instance.choice

@@ -99,26 +99,26 @@
             );
         });
         
-        // Show / hide pool results
-        $('a.show_pool_voting, a.show_pool_results').click(function(e){
+        // Show / hide poll results
+        $('a.show_poll_voting, a.show_poll_results').click(function(e){
             e.preventDefault();
-            var pool_id = $(this).attr('rel');
-            var pool = $('div.pool_'+pool_id);
+            var poll_id = $(this).attr('rel');
+            var poll = $('div.poll_'+poll_id);
             
-            pool.find('div.pool_voting').toggle();
-            pool.find('div.pool_results').toggle();
+            poll.find('div.poll_voting').toggle();
+            poll.find('div.poll_results').toggle();
         });
         
-        // On pool choice click enable pool vote button
-        $('input[name^=pool_]').click(function(e){
-            $(this).parents('div.pool_voting').find('a.pool_vote').removeClass('disabled');
+        // On poll choice click enable poll vote button
+        $('input[name^=poll_]').click(function(e){
+            $(this).parents('div.poll_voting').find('a.poll_vote').removeClass('disabled');
         });
         
-        // Pool voting
-        $('a.pool_vote').click(function(e){
+        // Poll voting
+        $('a.poll_vote').click(function(e){
             e.preventDefault();
-            var pool_id = $(this).attr('rel');
-            var choice = $('input[name=pool_'+pool_id+']:checked');
+            var poll_id = $(this).attr('rel');
+            var choice = $('input[name=poll_'+poll_id+']:checked');
             
             if (!choice) return;
             var choice_id = choice.val();
@@ -127,12 +127,12 @@
             $(this).text('Wait...');
             
             $.getJSON(
-                '/forum/pool/vote/' + choice_id + '/',
+                '/forum/poll/vote/' + choice_id + '/',
                 function(data) {
-                    var pool = $('div.pool_'+data.pool_id);
-                    pool.find('div.pool_results').html(data.responseHTML);
-                    pool.find('div.pool_voting').remove();
-                    pool.find('div.pool_results').show();
+                    var poll = $('div.poll_'+data.poll_id);
+                    poll.find('div.poll_results').html(data.responseHTML);
+                    poll.find('div.poll_voting').remove();
+                    poll.find('div.poll_results').show();
                 }
             );
         });
@@ -191,21 +191,21 @@
                     <div class="body">
                         {{ post.message_html|safe }}
                         
-                        {% if pools and topic.first_post == post %}
-                            <div class="pool_list">
-                                {% for pool in pools %}
-                                    <div class="pool_{{ pool.id }}">
-                                        {% if pool.user_can_vote %}
-                                            <div class="pool_voting">
-                                                <div class="pool_title">
-                                                    {{ pool.title }}
+                        {% if polls and topic.first_post == post %}
+                            <div class="poll_list">
+                                {% for poll in polls %}
+                                    <div class="poll_{{ poll.id }}">
+                                        {% if poll.user_can_vote %}
+                                            <div class="poll_voting">
+                                                <div class="poll_title">
+                                                    {{ poll.title }}
                                                 </div>
                                 
                                                 <div class="choices">
-                                                    {% for choice in pool.choices.all %}
+                                                    {% for choice in poll.choices.all %}
                                                         <div class="choice">
                                                             <label>
-                                                                <input type="radio" name="pool_{{ pool.id }}" value="{{ choice.id }}" />
+                                                                <input type="radio" name="poll_{{ poll.id }}" value="{{ choice.id }}" />
                                                                 {{ choice.title }}
                                                             </label>
                                                         </div>
@@ -213,24 +213,24 @@
                                                 </div>
                                                 
                                                 <div class="total">
-                                                    {{ pool.total_votes }} vote{{ pool.total_votes|pluralize }}
-                                                    {% if pool.expires %}
-                                                        <br />Pool expire at {{ pool.expires|date:"DATE_FORMAT" }}
+                                                    {{ poll.total_votes }} vote{{ poll.total_votes|pluralize }}
+                                                    {% if poll.expires %}
+                                                        <br />Poll expire at {{ poll.expires|date:"DATE_FORMAT" }}
                                                     {% endif %}
                                                 </div>
                                                 
                                                 <div class="buttons">
-                                                    <a href="#" class="pool_vote disabled" rel="{{ pool.id }}">Vote</a> &middot;
-                                                    <a href="#" class="show_pool_results" rel="{{ pool.id }}">Show results</a>
+                                                    <a href="#" class="poll_vote disabled" rel="{{ poll.id }}">Vote</a> &middot;
+                                                    <a href="#" class="show_poll_results" rel="{{ poll.id }}">Show results</a>
                                                 </div>
                                             </div>
                                             
-                                            <div class="pool_results" style="display:none;">
-                                                {% include "forum/pool_results.html" %}
+                                            <div class="poll_results" style="display:none;">
+                                                {% include "forum/poll_results.html" %}
                                             </div>
                                         {% else %}
-                                            <div class="pool_results">
-                                                {% include "forum/pool_results.html" %}
+                                            <div class="poll_results">
+                                                {% include "forum/poll_results.html" %}
                                             </div>
                                         {% endif %}
                                     </div>

@@ -3,12 +3,12 @@
 from django import forms
 from django.forms.models import inlineformset_factory
 
-from forum.models import Group, Topic, Post, Pool, PoolChoice
+from forum.models import Group, Topic, Post, Poll, PollChoice
 from forum.inform import inform_new_topic
 
 from itertools import groupby
 
-__all__ = ('TopicForm', 'TopicMoveForm', 'TopicSplitForm', 'PostForm', 'PostMoveForm', 'PoolChoiceForm', 'PoolForm',)
+__all__ = ('TopicForm', 'TopicMoveForm', 'TopicSplitForm', 'PostForm', 'PostMoveForm', 'PollChoiceForm', 'PollForm',)
 
 
 class TopicForm(forms.ModelForm):
@@ -158,26 +158,26 @@ class PostForm(forms.ModelForm):
         return self._html_output(u'<div class="field-wrapper">%(label)s %(errors)s %(field)s%(help_text)s</div>', u'%s', '</div>', u'<span class="help_text">%s</span>', False)
 
 
-class PoolChoiceForm(forms.ModelForm):
+class PollChoiceForm(forms.ModelForm):
     class Meta:
-        model = PoolChoice
+        model = PollChoice
         fields = ('title',)
 
-PoolChoiceFormset = inlineformset_factory(Pool, PoolChoice, fk_name='pool', form=PoolChoiceForm, can_delete=False, max_num=10, extra=10)
+PollChoiceFormset = inlineformset_factory(Poll, PollChoice, fk_name='poll', form=PollChoiceForm, can_delete=False, max_num=10, extra=10)
 
-class PoolForm(forms.ModelForm):
+class PollForm(forms.ModelForm):
     class Meta:
-        model = Pool
+        model = Poll
         fields = ('title', 'expires',)
     
     expires = forms.DateField(required=False, widget=forms.DateInput())
     
     def __init__(self, *args, **kwargs):
-        super(PoolForm, self).__init__(*args, **kwargs)
+        super(PollForm, self).__init__(*args, **kwargs)
         params = {'prefix': self.prefix}
         if self.instance: params['instance'] = self.instance
         if self.data: params['data'] = self.data
-        self.choice_formset = PoolChoiceFormset(**params)
+        self.choice_formset = PollChoiceFormset(**params)
     
     def clean(self):
         cleaned_data = self.cleaned_data
@@ -195,24 +195,24 @@ class PoolForm(forms.ModelForm):
         return cleaned_data
     
     def is_valid(self):
-        form_valid = super(PoolForm, self).is_valid()
+        form_valid = super(PollForm, self).is_valid()
         choices_valid = self.choice_formset.is_valid()
         
         return form_valid and choices_valid
     
     def save(self, commit=True):
-        # Don't allow to edit pool with votes
+        # Don't allow to edit poll with votes
         if self.instance and self.instance.total_votes > 0:
             return self.instance
         
-        pool = super(PoolForm, self).save(commit)
-        self.choice_formset.instance = pool
-        return pool
+        poll = super(PollForm, self).save(commit)
+        self.choice_formset.instance = poll
+        return poll
     
     def save_choices(self):
         self.choice_formset.full_clean()
-        pool = self.choice_formset.instance
+        poll = self.choice_formset.instance
         for form in self.choice_formset.forms:
             if form.cleaned_data:
-                form.cleaned_data['pool'] = pool
+                form.cleaned_data['poll'] = poll
         self.choice_formset.save()
