@@ -64,12 +64,12 @@
         
         <div class="topics">
             {% for topic in topic_list.object_list %}
-                <div class="row{% if not forloop.last %} delimiter{% endif %}{% if topic.is_sticked %} sticked{% endif %}">
+                <div class="row{% if not forloop.last %} delimiter{% endif %}{% if topic.is_sticky %} sticky{% endif %}">
                     <div class="topic_icon">
                         {% if topic.unread %}
-                            <a href="{% url unread_post_redirect topic.id %}" title="Go to first unread post" class="status_icon topic_unread{% if topic.is_sticked %}_sticked{% endif %}{% if topic.is_closed %}_closed{% endif %}"></a>
+                            <a href="{% url unread_post_redirect topic.id %}" title="Go to first unread post" class="status_icon topic_unread{% if topic.is_sticky %}_sticky{% endif %}{% if topic.is_closed %}_closed{% endif %}"></a>
                         {% else %}
-                            <a href="{{ topic.get_absolute_url }}" title="No new posts" class="status_icon topic_read{% if topic.is_sticked %}_sticked{% endif %}{% if topic.is_closed %}_closed{% endif %}"></a>
+                            <a href="{{ topic.get_absolute_url }}" title="No new posts" class="status_icon topic_read{% if topic.is_sticky %}_sticky{% endif %}{% if topic.is_closed %}_closed{% endif %}"></a>
                         {% endif %}
                     </div>
                     

@@ -53,11 +53,11 @@ class TopicAdmin(admin.ModelAdmin):
     form = TopicForm
     
     fieldsets = (
-        (None, {'fields': ('forum', 'name', 'is_sticked', 'is_closed', 'is_removed',)}),
+        (None, {'fields': ('forum', 'name', 'is_sticky', 'is_closed', 'is_removed',)}),
     )
-    list_display = ('forum', 'name', 'posts_count', 'is_sticked', 'is_closed', 'is_removed',)
+    list_display = ('forum', 'name', 'posts_count', 'is_sticky', 'is_closed', 'is_removed',)
     list_display_links = ('name',)
-    list_filter = ('is_sticked', 'is_closed', 'is_removed',)
+    list_filter = ('is_sticky', 'is_closed', 'is_removed',)
     raw_id_fields = ('forum',)
     ordering = ['-id']
 

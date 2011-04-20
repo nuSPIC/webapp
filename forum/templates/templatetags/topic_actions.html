@@ -16,7 +16,7 @@
 
 {% if can_stick %}
     <a href="{% url topic_stick topic.id %}" class="topic_action" title="Stick/unstick topic">
-    {% if topic.is_sticked %}
+    {% if topic.is_sticky %}
         Unstick
     {% else %}
         Stick

@@ -70,7 +70,7 @@ class Topic(models.Model):
     first_post = models.ForeignKey('Post', verbose_name='First post', related_name='first_for_topic', null=True, blank=True)
     last_post = models.ForeignKey('Post', verbose_name='Last post', related_name='last_for_topic', null=True, blank=True)
     
-    is_sticked = models.BooleanField('Is sticked', default=False)
+    is_sticky = models.BooleanField('Is sticky', default=False)
     is_closed = models.BooleanField('Is closed', default=False)
     is_removed = models.BooleanField('Is removed', default=False)
     
@@ -79,7 +79,7 @@ class Topic(models.Model):
     class Meta:
         verbose_name = 'Topic'
         verbose_name_plural = 'Topics'
-        ordering = ['-is_sticked', '-last_post__date']
+        ordering = ['-is_sticky', '-last_post__date']
         permissions = (
             ('move_topic', 'Can move topic to another forum'),
             ('split_topic', 'Can split topic'),

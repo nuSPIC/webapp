@@ -189,7 +189,7 @@
             line-height: 2.2em;
         }
             
-        #topic_list .topics .sticked {
+        #topic_list .topics .sticky {
             background-color: #EEEEEE;
         }
 
@@ -386,19 +386,19 @@
     background-position: 0px -96px;
 }
 
-.topic_read_sticked {
+.topic_read_sticky {
     background-position: 0px -128px;
 }
 
-.topic_unread_sticked {
+.topic_unread_sticky {
     background-position: 0px -160px;
 }
 
-.topic_read_sticked_closed {
+.topic_read_sticky_closed {
     background-position: 0px -192px;
 }
 
-.topic_unread_sticked_closed {
+.topic_unread_sticky_closed {
     background-position: 0px -224px;
 }
 

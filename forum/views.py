@@ -76,7 +76,7 @@ def topic_list(request, forum_id):
     
     subscribed = is_subscribed(request.user, forum)
     
-    topics = forum.topics.order_by('-is_sticked', '-last_post__date').\
+    topics = forum.topics.order_by('-is_sticky', '-last_post__date').\
                    select_related('last_post', 'last_post__profile', 'last_post__profile__user',
                                   'first_post', 'first_post__profile', 'first_post__profile__user')
     topic_list = paginate(request, topics, settings.TOPICS_PER_PAGE)
@@ -331,7 +331,7 @@ def topic_stick(request, topic_id):
     group, perms = get_group_perms_or_404(request.user, topic.forum)
     
     if perms.can_stick_topic(request.user, topic):
-        topic.is_sticked = not topic.is_sticked
+        topic.is_sticky = not topic.is_sticky
         topic.save()
     
     return HttpResponseRedirect(topic.get_absolute_url())
