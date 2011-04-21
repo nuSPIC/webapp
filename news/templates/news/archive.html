@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block feeds %}
+    <link rel="alternate" type="application/atom+xml" title="Latest news" href="{% url news_feed %}" />
+{% endblock %}
+
 {% block title %}News archive{% endblock %}
 
 {% block content %}

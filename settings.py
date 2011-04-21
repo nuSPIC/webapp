@@ -119,6 +119,7 @@ BBMARKUP_EXTRA_RULES = [
 # ===================
 CUT_TAG = '<!-- more -->'
 LATEST_NEWS_COUNT = 5
+NEWS_FEED_ITEMS_COUNT = 15
 
 
 #  Pagination
