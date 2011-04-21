@@ -108,6 +108,12 @@ class CustomPasswordResetForm(PasswordResetForm):
     def clean_email(self):
         email = super(CustomPasswordResetForm, self).clean_email()
         
+        # Doesn't allow inactive users to request a password reset
+        self.users_cache = self.users_cache.filter(is_active=True)
+        if len(self.users_cache) == 0:
+            raise forms.ValidationError('This account is inactive! Please contact the administrator directly for the details.')
+        
+        # Password reset request allowed once in EMAIL_REQUEST_DELAY period
         now = datetime.today()
         for user in self.users_cache:
             profile = user.get_profile()
