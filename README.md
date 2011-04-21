@@ -28,7 +28,7 @@ Then install the bindings themselves:
 
 Installation instructions for django-bbmarkup:
 
-    ln -s `pwd`/bbmarkup ~/.virtualenv/nuspic/lib/python2.7/site-packages
+    ln -s `pwd`/bbmarkup ~/.virtualenv/nuspic/lib/pythonX.Y/site-packages
 
 License
 -------
