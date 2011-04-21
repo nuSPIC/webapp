@@ -108,11 +108,18 @@ FORUM_UNREAD_DEPTH = 100
 
 FORUM_FEED_ITEMS_COUNT = 30
 
+BBMARKUP_EXTRA_RULES = [
+    {'pattern': r'\[hidden\](.*?)\[/hidden\]', 'repl': ur'<div class="hidden-header">Hidden text</div><div class="hidden-text" style="display: none">\1</div>'},
+    {'pattern': r'\[hidden title=(.*?)\](.*?)\[/hidden\]', 'repl': ur'<div class="hidden-header">\1</div><div class="hidden-text" style="display: none">\2</div>'},
+    {'pattern': r'\[video\]http://www\.youtube\.com/watch\?v=([a-z\d_-]+)\[/video\]', 'repl': r'<div class="video"><iframe class="youtube-player" type="text/html" width="748" height="455" src="http://www.youtube.com/embed/\1?hl=ru_RU" frameborder="0"></iframe></div>'},
+]
+
 
 #  News
 # ===================
 CUT_TAG = '<!-- more -->'
 LATEST_NEWS_COUNT = 5
+NEWS_FEED_ITEMS_COUNT = 15
 
 
 #  Pagination

@@ -26,18 +26,18 @@
 		}
 		if($.browser.msie || $.browser.opera) lb = '\r\n';
 			
-		if(options.bold != false) options.bold.click(function() {print_bbc('жирный','[b]','[/b]')});
-		if(options.italic != false) options.italic.click(function() {print_bbc('курсив','[i]','[/i]')});
-		if(options.underline != false) options.underline.click(function() {print_bbc('подчеркнутый','[u]','[/u]')});
-        if(options.hidden_text != false) options.hidden_text.click(function() {print_bbc('скрытый текст','[hidden title=Скрытый текст]','[/hidden]')});
+		if(options.bold != false) options.bold.click(function() {print_bbc('Bold','[b]','[/b]')});
+		if(options.italic != false) options.italic.click(function() {print_bbc('Italic','[i]','[/i]')});
+		if(options.underline != false) options.underline.click(function() {print_bbc('Underline','[u]','[/u]')});
+        if(options.hidden_text != false) options.hidden_text.click(function() {print_bbc('Hidden text','[hidden title=Hidden text]','[/hidden]')});
 		if(options.link != false) options.link.click(add_link);
-		if(options.quote != false) options.quote.click(function() {print_bbc('цитата','[quote]','[/quote]',false)});
+		if(options.quote != false) options.quote.click(function() {print_bbc('Quote','[quote]','[/quote]',false)});
 		if(options.code != false) options.code.click(function() {print_bbc('function(event) {','[code]','[/code]',true)});
 		if(options.image != false) options.image.click(add_image);
-        if(options.video != false) options.video.click(function() {print_bbc('ссылка на видео','[video]','[/video]')});
-		if(options.nlist != false) options.nlist.click(function() {print_bbc('элемент списка','[list=1]' + lb + '[*]','[/list]',true)});
-		if(options.blist != false) options.blist.click(function() {print_bbc('элемент списка','[list]' + lb + '[*]','[/list]',true)});
-		if(options.litem != false) options.litem.click(function() {print_bbc('элемент списка','[*]','',true)});
+        if(options.video != false) options.video.click(function() {print_bbc('Link to video on YouTube','[video]','[/video]')});
+		if(options.nlist != false) options.nlist.click(function() {print_bbc('List item','[list=1]' + lb + '[*]','[/list]',true)});
+		if(options.blist != false) options.blist.click(function() {print_bbc('List item','[list]' + lb + '[*]','[/list]',true)});
+		if(options.litem != false) options.litem.click(function() {print_bbc('List item','[*]','',true)});
 		if(options.usize != false) options.usize.click(function() {font_size(true)});
 		if(options.dsize != false) options.dsize.click(function() {font_size(false)});
 		

@@ -2,6 +2,6 @@ You are receiving this email because you are watching the topic "{{ post.topic.n
 
 The user {{ post.profile }} added a reply to the topic "{{ post.topic.name }}":
 
-{{ post.message_html|safe }}
+{{ post.message|safe }}
 
 http://{{ domain }}{{ post.get_absolute_url }}

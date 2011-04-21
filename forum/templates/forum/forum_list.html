@@ -150,3 +150,8 @@
         </div>
     </div>
 {% endblock %}
+
+{% block footer_feeds %}
+    <a href="{% url topics_feed %}">New topics</a> |
+    <a href="{% url posts_feed %}">New posts</a>
+{% endblock %}

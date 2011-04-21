@@ -80,12 +80,6 @@ class Topic(models.Model):
         verbose_name = 'Topic'
         verbose_name_plural = 'Topics'
         ordering = ['-is_sticky', '-last_post__date']
-        permissions = (
-            ('move_topic', 'Can move topics to another forum'),
-            ('split_topic', 'Can split topics'),
-            ('stick_topic', 'Can stick topics'),
-            ('close_topic', 'Can close topics'),
-        )
     
     def __unicode__(self):
         if self.is_removed:
@@ -151,9 +145,6 @@ class Post(models.Model):
         verbose_name = 'Post'
         verbose_name_plural = 'Posts'
         ordering = ['date']
-        permissions = (
-            ('move_post', 'Can move posts to another topic'),
-        )
     
     def __unicode__(self):
         if self.is_removed:
