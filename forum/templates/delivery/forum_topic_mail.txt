@@ -4,6 +4,6 @@ The user {{ topic.first_post.profile }} created a new topic {{ topic.name }} in 
 
 {{ topic.name }}
 
-{{ topic.first_post.message_html|safe }}
+{{ topic.first_post.message|safe }}
 
 http://{{ domain }}{{ topic.get_absolute_url }}
