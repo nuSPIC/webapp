@@ -41,6 +41,7 @@ class UserRegistrationForm(forms.ModelForm):
     last_name = forms.CharField(required=True)
     email = forms.EmailField(required=True, help_text='You will shortly receive an e-mail containing the instructions on how to activate your account at the specified e-mail address.')
     password = forms.CharField(widget=forms.PasswordInput, help_text='')
+    password_confirmation = forms.CharField(label='Confirm password', widget=forms.PasswordInput, help_text='Please type your password again')
     
     # Protection against automatic registration
     captcha = ReCaptchaField(label='')
@@ -65,6 +66,19 @@ class UserRegistrationForm(forms.ModelForm):
         
         raise forms.ValidationError('This email address is already in use. Please supply a different email address.')
 
+    def clean(self):
+        """
+        Check if passwords match
+        """
+        
+        password = self.cleaned_data.get('password')
+        password_confirmation = self.cleaned_data.get('password_confirmation')
+        
+        if password != password_confirmation:
+            raise forms.ValidationError('The passwords you entered did not match.')
+        
+        return self.cleaned_data
+    
 
 class ProfileEditForm(forms.ModelForm):
     """
