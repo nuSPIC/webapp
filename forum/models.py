@@ -363,14 +363,15 @@ class Permission(models.Model):
     
     def can_split_topic(self, user, topic):
         """
-        Users can split topics if they belong to a group with the priority
-        that is higher of equal to the group priority of the user that
-        created this topic AND have required group level permissions
+        Users can split topics if they have required group level permissions
+
+        The group priorities are not taken into account here so that the
+        moderators would be able to split the topics that were created
+        by the administrators as well
         """
         
-        if self.can_split_group_topic:
-            return True
-    
+        return self.can_split_group_topic
+
     def can_stick_topic(self, user, topic):
         """
         Users can stick topics if they belong to a group with the priority
@@ -448,9 +449,11 @@ class Permission(models.Model):
     
     def can_move_post(self, user, topic):
         """
-        Users can move posts if they belong to a group with the priority
-        that is higher of equal to the group priority of the user that
-        created this topic AND have required group level permissions
+        Users can move posts if they have required group level permissions
+
+        The group priorities are not taken into account here so that the
+        moderators would be able to move the posts that were created
+        by the administrators as well
         """
         
         return self.can_move_group_post
