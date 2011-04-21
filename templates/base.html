@@ -39,12 +39,18 @@
         </div>
         
         <div id="footer">
-            <a href="{% url mainpage %}">Home</a> |
-            <a href="{% url news_archive %}">News</a> |
-            <a href="/about/">About</a> |
-            <a href="{% url accounts %}">Community</a> |
-            <a href="{% url forum %}">Discussions</a> |
-            <a href="/contact/">Contact</a>
+            <div class="navigation">
+                <a href="{% url mainpage %}">Home</a> |
+                <a href="{% url news_archive %}">News</a> |
+                <a href="/about/">About</a> |
+                <a href="{% url accounts %}">Community</a> |
+                <a href="{% url forum %}">Discussions</a> |
+                <a href="/contact/">Contact</a>
+            </div>
+            
+            <div class="feeds">
+                {% block footer_feeds %}{% endblock %}
+            </div>
         </div>
     </body>
 </html>

@@ -280,3 +280,7 @@
         {% pagination post_list "post" %}
     </div>
 {% endblock %}
+
+{% block footer_feeds %}
+    <a href="{% url topic_posts_feed topic.id %}">New posts</a>
+{% endblock %}
