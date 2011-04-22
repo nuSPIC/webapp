@@ -8,9 +8,10 @@
 
 # Rest
 .DS_Store
-.installed.cfg
 .idea
+.installed.cfg
 local_settings.py
 *.pyc
 *.pyo
+*.sqlite
 tmp
