@@ -20,4 +20,4 @@ class SerializedField(models.TextField):
     
     def get_db_prep_save(self, value, connection):
         value = dumps(value)
-        return super(SerializedField, self).get_db_prep_save(value, connection)
+        return super(SerializedField, self).get_db_prep_save(value)
