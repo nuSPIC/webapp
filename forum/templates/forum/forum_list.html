@@ -152,6 +152,6 @@
 {% endblock %}
 
 {% block footer_feeds %}
-    <a href="{% url topics_feed %}">New topics</a> |
-    <a href="{% url posts_feed %}">New posts</a>
+    <div class="rss-link"><a href="{% url topics_feed %}">New topics</a></div> |
+    <div class="rss-link"><a href="{% url posts_feed %}">New posts</a></div>
 {% endblock %}

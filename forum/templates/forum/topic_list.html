@@ -106,6 +106,6 @@
 {% endblock %}
 
 {% block footer_feeds %}
-    <a href="{% url forum_topics_feed forum.id %}">New topics in forum</a> |
-    <a href="{% url forum_posts_feed forum.id %}">New posts in forum</a>
+    <div class="rss-link"><a href="{% url forum_topics_feed forum.id %}">New topics in forum</a></div> |
+    <div class="rss-link"><a href="{% url forum_posts_feed forum.id %}">New posts in forum</a></div>
 {% endblock %}

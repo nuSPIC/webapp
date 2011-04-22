@@ -200,3 +200,14 @@ ul.errorlist {
     #page-navigation .total {
         color     : #BBBBBB;
     }
+
+.feeds {
+    padding: 25px 0;
+}
+
+div.rss-link {
+    background: url(/media/images/icons/rss-16x16.png) no-repeat 16px center;
+    padding-right: 16px;
+    padding-left: 40px;
+    display: inline;
+}
