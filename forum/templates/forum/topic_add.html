@@ -115,7 +115,6 @@
     <form action="." method="post" id="add_topic_form">
         {% csrf_token %}
         
-        {{ topic_form.non_field_errors }}
         {{ topic_form.as_div }}
         
         {% post_editor post_form %}
