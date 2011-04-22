@@ -122,7 +122,9 @@ class CustomPasswordResetForm(PasswordResetForm):
     def clean_email(self):
         email = super(CustomPasswordResetForm, self).clean_email()
         
-        # Doesn't allow inactive users to request a password reset
+        # Do not allow inactive users to request a password reset
+        # (ref: https://github.com/nuSPIC/webapp/wiki/Design-decisions)
+        #
         self.users_cache = self.users_cache.filter(is_active=True)
         if len(self.users_cache) == 0:
             raise forms.ValidationError('This account is inactive! Please contact the administrator directly for the details.')
