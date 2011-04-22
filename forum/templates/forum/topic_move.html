@@ -15,7 +15,6 @@
     <form action="." method="post" id="move_topic_form">
         {% csrf_token %}
         
-        {{ topic_form.non_field_errors }}
         {{ topic_form.as_div }}
         
         <input type="submit" value="Move topic" />
