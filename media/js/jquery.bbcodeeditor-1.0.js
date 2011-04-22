@@ -2,7 +2,6 @@
 	var textarea;
 	var options;
 	var disable_buttons = new Object();
-	var store_event;
 	var store_data = new Array('');
 	var undo_pos = 0;
 	var ie_cache = null; // fixes select start / end problem in IE
@@ -34,9 +33,9 @@
 		if(options.quote != false) options.quote.click(function() {print_bbc('Quote','[quote]','[/quote]',false)});
 		if(options.code != false) options.code.click(function() {print_bbc('function(event) {','[code]','[/code]',true)});
 		if(options.image != false) options.image.click(add_image);
-        if(options.video != false) options.video.click(function() {print_bbc('Link to video on YouTube','[video]','[/video]')});
-		if(options.nlist != false) options.nlist.click(function() {print_bbc('List item','[list=1]' + lb + '[*]','[/list]',true)});
-		if(options.blist != false) options.blist.click(function() {print_bbc('List item','[list]' + lb + '[*]','[/list]',true)});
+        if(options.video != false) options.video.click(function() {print_bbc('Link video on YouTube','[video]','[/video]')});
+		if(options.nlist != false) options.nlist.click(function() {print_bbc('Numbered list','[list=1]' + lb + '[*]','[/list]',true)});
+		if(options.blist != false) options.blist.click(function() {print_bbc('Bulleted list','[list]' + lb + '[*]','[/list]',true)});
 		if(options.litem != false) options.litem.click(function() {print_bbc('List item','[*]','',true)});
 		if(options.usize != false) options.usize.click(function() {font_size(true)});
 		if(options.dsize != false) options.dsize.click(function() {font_size(false)});
@@ -66,7 +65,7 @@
 	{
 		if(!bool)
 		{
-			if(options.back_disable == false)
+			if(!options.back_disable)
 			{
 				options.back.css('opacity', 0.5);
 			}
@@ -77,7 +76,7 @@
 		}
 		else
 		{
-			if(options.back_disable == false)
+			if(!options.back_disable)
 			{
 				options.back.css('opacity', 1);
 			}
@@ -92,7 +91,7 @@
 	{
 		if(!bool)
 		{
-			if(options.forward_disable == false)
+			if(!options.forward_disable)
 			{
 				options.forward.css('opacity', 0.5);
 			}
@@ -103,7 +102,7 @@
 		}
 		else
 		{
-			if(options.forward_disable == false)
+			if(!options.forward_disable)
 			{
 				options.forward.css('opacity', 1);
 			}
@@ -608,8 +607,7 @@
 	};
 	
 	$.fn.bbcodeeditor.pause = function() {
-		if(!pause) pause = true;
-		else pause = false;
+		pause = !pause;
 	};
 
 })(jQuery);
