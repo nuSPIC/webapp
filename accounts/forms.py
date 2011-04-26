@@ -89,7 +89,11 @@ class ProfileEditForm(forms.ModelForm):
     
     class Meta:
         model = UserProfile
-        fields = ('academic_affiliation', 'public_email', 'web_page', 'notes', 'forum_email_notification',)
+        fields = ('present_occupation', 'academic_affiliation', 'public_email', 'web_page', 'notes', 'forum_email_notification',)
+        widgets = {
+            'present_occupation': forms.RadioSelect(attrs={'class': 'radio-select'}),
+            'forum_email_notification': forms.CheckboxInput(attrs={'class': 'checkbox'}),
+        }
     
     def as_div(self):
         return self._html_output(u'<div class="field-wrapper">%(label)s %(errors)s %(field)s%(help_text)s</div>', u'%s', '</div>', u'<span class="help_text">%s</span>', False)
@@ -104,7 +108,10 @@ class ProfileRegistrationForm(forms.ModelForm):
     
     class Meta:
         model = UserProfile
-        fields = ('academic_affiliation', 'public_email', 'web_page', 'notes',)
+        fields = ('present_occupation', 'academic_affiliation', 'public_email', 'web_page', 'notes',)
+        widgets = {
+            'present_occupation': forms.RadioSelect(attrs={'class': 'radio-select'}),
+        }
     
     def as_div(self):
         return self._html_output(u'<div class="field-wrapper">%(label)s %(errors)s %(field)s%(help_text)s</div>', u'%s', '</div>', u'<span class="help_text">%s</span>', False)
@@ -146,10 +153,14 @@ class CustomPasswordResetForm(PasswordResetForm):
     def save(self, *args, **kwargs):
         super(CustomPasswordResetForm, self).save(*args, **kwargs)
         
-        # Save last password reset request time
+        request = kwargs.get('request', None)
+        
+        # Save last password reset request time and IP
         for user in self.users_cache:
             profile = user.get_profile()
             profile.last_email_request = datetime.today()
+            if request:
+                profile.ip_address = request.META.get('REMOTE_ADDR', None)
             profile.save()
 
             

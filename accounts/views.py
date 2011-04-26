@@ -38,7 +38,11 @@ def registration(request):
             # Fill user profile with data from registration form
             profile = user.get_profile()
             profile_form = ProfileRegistrationForm(request.POST, instance=profile, prefix='profile_form')
-            profile_form.save()
+            profile = profile_form.save()
+            
+            # Save IP address
+            profile.ip_address = request.META.get('REMOTE_ADDR', None)
+            profile.save()
             
             # Send email with activation key to the user
             current_site = get_current_site(request)
@@ -171,6 +175,7 @@ def profile_edit(request, profile_id):
                 # Save new email address in temporary field
                 profile = profile_form.save()
                 profile.temporary_email = new_email
+                profile.ip_address = request.META.get('REMOTE_ADDR', None)
                 profile.save()
                 
                 # Send the email with the confirmation link to the user
@@ -196,7 +201,9 @@ def profile_edit(request, profile_id):
                 return HttpResponseRedirect(reverse('email_change_done'))
             else:
                 user_form.save()
-                profile_form.save()
+                profile = profile_form.save()
+                profile.ip_address = request.META.get('REMOTE_ADDR', None)
+                profile.save()
                 
                 return HttpResponseRedirect(reverse('profile', kwargs={'profile_id': profile.id}))
     else:

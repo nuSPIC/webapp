@@ -359,7 +359,7 @@
     display: block;
     width: 32px;
     height: 32px;
-    background: #FFFFFF url(/media/images/icons/forum.png) no-repeat;
+    background: transparent url(/media/images/icons/forum.gif) no-repeat;
 }
 
 .forum_read  {
@@ -387,19 +387,19 @@
 }
 
 .topic_read_sticky {
-    background-position: 0px -128px;
+    background-position: 0px 0px;
 }
 
 .topic_unread_sticky {
-    background-position: 0px -160px;
+    background-position: 0px -32px;
 }
 
 .topic_read_sticky_closed {
-    background-position: 0px -192px;
+    background-position: 0px -64px;
 }
 
 .topic_unread_sticky_closed {
-    background-position: 0px -224px;
+    background-position: 0px -96px;
 }
 
 

@@ -46,7 +46,16 @@ class UserProfile(models.Model):
     User profile stores additional user information
     """
     
+    OCCUPATIONS = (
+        (0, 'Unspecified'),
+        (1, 'High school'),
+        (2, 'University'),
+        (3, 'Industry'),
+        (4, 'Other'),
+    )
+    
     user = models.OneToOneField(User, related_name='profile')
+    present_occupation = models.SmallIntegerField('Present occupation', choices=OCCUPATIONS, default=0)
     academic_affiliation = models.CharField('Present academic affiliation', max_length=150, blank=True)
     public_email = models.EmailField('Public e-mail address', blank=True)
     web_page = models.URLField('Publicly visible web page address', verify_exists=False, blank=True)
@@ -56,6 +65,7 @@ class UserProfile(models.Model):
     post_count = models.PositiveIntegerField(u'Forum posts count', default=0)
     forum_email_notification = models.BooleanField(u'Notify by email about updates in subscribed topics and forums', default=True)
     
+    ip_address  = models.IPAddressField(u'IP', blank=True, null=True)
     last_email_request = models.DateTimeField('Last e-mail request', blank=True, null=True)
     temporary_email = models.EmailField('Field for temporary storage of the new primary e-mail', blank=True)
     
