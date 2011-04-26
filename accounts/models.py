@@ -65,6 +65,7 @@ class UserProfile(models.Model):
     post_count = models.PositiveIntegerField(u'Forum posts count', default=0)
     forum_email_notification = models.BooleanField(u'Notify by email about updates in subscribed topics and forums', default=True)
     
+    ip_address  = models.IPAddressField(u'IP', blank=True, null=True)
     last_email_request = models.DateTimeField('Last e-mail request', blank=True, null=True)
     temporary_email = models.EmailField('Field for temporary storage of the new primary e-mail', blank=True)
     

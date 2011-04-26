@@ -153,10 +153,14 @@ class CustomPasswordResetForm(PasswordResetForm):
     def save(self, *args, **kwargs):
         super(CustomPasswordResetForm, self).save(*args, **kwargs)
         
-        # Save last password reset request time
+        request = kwargs.get('request', None)
+        
+        # Save last password reset request time and IP
         for user in self.users_cache:
             profile = user.get_profile()
             profile.last_email_request = datetime.today()
+            if request:
+                profile.ip_address = request.META.get('REMOTE_ADDR', None)
             profile.save()
 
             
