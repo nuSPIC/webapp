@@ -144,7 +144,18 @@ ul.errorlist {
         padding         : 4px;
     }
 
-    .field-wrapper input[type="checkbox"] {
+    .field-wrapper ul {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+    }
+
+    .field-wrapper .radio-select {
+        width: auto;
+        float: left;
+    }
+
+    .field-wrapper .checkbox {
         width: auto;
         float: right;
     }
