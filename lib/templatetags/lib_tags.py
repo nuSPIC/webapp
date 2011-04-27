@@ -17,7 +17,7 @@ def pagination(page, objects_caption, query_string=''):
                       every link as additional query parameter
     """
     
-    if not page.has_other_pages():
+    if not hasattr(page, 'has_other_pages') or not page.has_other_pages():
         return {
             'page_object': page,
         }

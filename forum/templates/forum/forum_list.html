@@ -16,6 +16,13 @@
 
 {% block content %}
     <div id="forum_list">
+        <div class="forum_search">
+            <form action="{% url search %}" method="get">
+                {{ search_form.term }}
+                <input type="submit" value="Search" />
+            </form>
+        </div>
+        
         <div class="header delimiter">
             <div class="forum_icon">
                 &nbsp;

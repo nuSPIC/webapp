@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% load lib_tags %}
+{% load forum_tags %}
+{% load forum_filters %}
+{% load humanize %}
+
+{% block title %}Discussion &raquo; Search{% endblock %}
+
+{% block extrahead %}
+<link href="{{ MEDIA_URL }}css/forum.css" type="text/css" rel="stylesheet" />
+<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.min.js"></script>
+
+<script type="text/javascript" language="javascript">
+//<![CDATA[
+	$(document).ready(function(){
+        // Hidden text collapse toggle
+        $('.hidden-header').live('click', function(e){
+            $(this).next('.hidden-text').toggle();
+        });
+	});
+//]]>
+</script>
+{% endblock %}
+
+{% block content %}
+    <div id="search_results">
+        <h2 class="delimiter">Search results</h2>
+        <div class="breadcrumbs"><a href="{% url forum %}">Discussion</a></div>
+        
+        <div class="forum_search">
+            <form action="{% url search %}" method="get">
+                {{ search_form.non_field_errors }}
+                {{ search_form.term.errors }}
+                {{ search_form.term }}
+                <input type="submit" value="Search" class="submit" />
+            </form>
+        </div>
+                
+        <div class="posts">
+            {% for post in post_list.object_list %}
+                {% ifchanged %}
+                    <h3>{{ post.topic }}</h3>
+                {% endifchanged %}
+                
+                <div class="post{% if not forloop.last or not user.is_anonymous %} delimiter{% endif %}">
+                    <div id="post{{ post.id }}" class="anchor">&nbsp;</div>
+                    
+                    <div class="date">
+                        {{ post.date|timesince }} ago
+                    </div>
+    
+                    <div class="profile">
+                        <div class="username">
+                            <a href="#" class="insert_username">{{ post.profile.user.username }}</a>
+                        </div>
+                        
+                        <div class="status">
+                            <span class="member_{{ post.profile.forum_group.slug }}">{{ post.profile.forum_group.member_title }}</span><br />
+                            Posts count: {{ post.profile.post_count|intcomma }}
+                        </div>
+                        
+                        <div class="links">
+                            <a href="{{ post.profile.get_absolute_url }}" title="Go to profile">Profile</a>
+                        </div>
+                    </div>
+                    
+                    <div class="body">
+                        {{ post.message_html|highlight:search_term|safe }}
+                        
+                        <div class="actions">
+                            <a href="{{ post.get_absolute_url }}" title="Permanent link">Link</a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="empty">
+                    No posts met your search criteria
+                </div>
+            {% endfor %}
+        </div>
+        
+        {% pagination post_list "post" search_term %}
+    </div>
+{% endblock %}
