@@ -37,14 +37,14 @@ def forum_list(request):
                                select_related('last_post', 'last_post__topic', 'last_post__profile', 'last_post__topic__last_post')
     mark_unread_forums(request.user, forum_list)
     
+    search_form = ForumSearchForm()
+    
     # Popular topics
-    visible_forums_ids = list(group.permission_set.values_list('forum_id', flat=True))
     popular_topics = Topic.objects.filter(post__date__gte=datetime.today()-settings.POPULAR_TOPICS_PERIOD, forum__id__in=visible_forums_ids, post__is_removed=False).\
                                    annotate(count=Count('post')).\
                                    order_by('-count')[:settings.POPULAR_TOPICS_COUNT]
     
     # New topics
-    visible_forums_ids = list(group.permission_set.values_list('forum_id', flat=True))
     new_topics = Topic.objects.get_visible_topics().filter(forum__id__in=visible_forums_ids).order_by('-id')[:settings.NEW_TOPICS_COUNT]
     
     # Forum statistics
@@ -55,6 +55,7 @@ def forum_list(request):
     
     return {
         'forum_list': forum_list,
+        'search_form': search_form,
         
         'popular_topics': popular_topics,
         'new_topics': new_topics,
@@ -636,3 +637,39 @@ def subscribe_topic(request, topic_id):
     do_subscribe(profile, topic)
     
     return HttpResponseRedirect(topic.get_absolute_url())
+
+
+# =========================
+#   Forum search results
+# =========================
+
+@render_to('forum/search.html')
+def search(request):
+    """
+    Shows forum search results as post list
+    """
+    
+    if request.GET:
+        search_form = ForumSearchForm(request.GET)
+        search_term = ''
+        post_list = []
+        
+        if search_form.is_valid():
+            search_term = search_form.cleaned_data['term']
+            
+            group = Group.group_for_user(request.user)
+            visible_forums_ids = list(group.permission_set.values_list('forum_id', flat=True))
+            
+            posts = Post.objects.get_visible_posts().\
+                                 filter(topic__forum__in=visible_forums_ids, message__icontains=search_term).\
+                                 select_related('profile', 'profile__user', 'profile__group', 'topic', 'topic__first_post').\
+                                 order_by('-date')
+            post_list = paginate(request, posts, settings.POSTS_PER_PAGE)
+        
+        return {
+            'search_form': search_form,
+            'search_term': search_term,
+            'post_list': post_list,
+        }
+    
+    return HttpResponseRedirect(reverse('forum'))

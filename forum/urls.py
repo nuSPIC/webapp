@@ -28,4 +28,6 @@ urlpatterns = patterns('forum.views',
     url(r'^post/preview/', 'post_preview', name='post_preview'),
     
     url(r'^poll/vote/(?P<choice_id>\d+)/', 'poll_vote', name='poll_vote'),
+    
+    url(r'^search/', 'search', name='search'),
 )

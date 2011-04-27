@@ -8,7 +8,8 @@ from forum.inform import inform_new_topic
 
 from itertools import groupby
 
-__all__ = ('TopicForm', 'TopicMoveForm', 'TopicSplitForm', 'PostForm', 'PostMoveForm', 'PollChoiceForm', 'PollForm',)
+__all__ = ('TopicForm', 'TopicMoveForm', 'TopicSplitForm', 'PostForm', 'PostMoveForm',
+           'PollChoiceForm', 'PollForm', 'ForumSearchForm')
 
 
 class TopicForm(forms.ModelForm):
@@ -216,3 +217,12 @@ class PollForm(forms.ModelForm):
             if form.cleaned_data:
                 form.cleaned_data['poll'] = poll
         self.choice_formset.save()
+
+
+
+class ForumSearchForm(forms.Form):
+    """
+    Forum search form
+    """
+    
+    term = forms.CharField(label='', min_length=1, required=True, widget=forms.TextInput(attrs={'class': 'search_term'}))

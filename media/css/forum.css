@@ -5,6 +5,14 @@
 #forum_list {
 }
     
+    #forum_list .forum_search {
+        overflow: hidden;
+    }
+        
+        #forum_list .forum_search form {
+            float: right;
+        }
+    
     #forum_list .headline {
         padding: 2px 0px 10px 0px;
         text-align: right;
@@ -105,6 +113,45 @@
     
     #forum_list .footer .statistics {
     }
+
+
+/* Search results
+**********************/
+
+#search_results {
+    
+}
+
+    #search_results .forum_search {
+        text-align: center;
+    }
+
+        #search_results .forum_search form {
+            width: 33%;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+            #search_results .forum_search form .search_term {
+                width: 80%;
+                float:left;
+            }
+
+            #search_results .forum_search form .submit {
+                width: 18%;
+                float: right;
+            }
+
+    #search_results .highlight {
+        background-color: #FFFFA0;
+    }
+
+        #search_results .posts .empty {
+            font-size: x-large;
+            font-weight: bold;
+            text-align: center;
+            padding: 15px;
+        }
 
 
 /* Topics list
@@ -423,11 +470,6 @@
 
     #post_list .topic_menu {
         float: right;
-    }
-
-    #post_list .tags {
-        overflow: hidden;
-        padding: 2px 0px;
     }
 
 .post {
