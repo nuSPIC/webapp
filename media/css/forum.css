@@ -723,6 +723,51 @@
 }
 
 
+/* Subscription
+**********************/
+
+.subscription {
+    
+}
+
+    .subscription .header {
+        font-size: medium;
+        font-weight: bold;
+        border-bottom: 1px solid #CCCCCC;
+    }
+
+        .subscription .header div {
+            padding: 5px 0;
+        }
+
+    .subscription .row {
+        padding: 10px;
+        overflow: hidden;
+    }
+
+        .subscription .date {
+            float: left;
+            width: 15%;
+        }
+        
+        .subscription .topic {
+            float: left;
+            width: 35%;
+        }
+        
+        .subscription .forum {
+            float: left;
+            width: 35%;
+        }
+
+    .subscription .empty {
+        font-size: x-large;
+        font-weight: bold;
+        text-align: center;
+        padding: 15px;
+    }
+
+
 /* Form buttons
 **********************/
 
@@ -743,11 +788,6 @@
     font-size: 1.2em;
     text-align: center;
     padding: 10px;
-}
-
-.empty_list {
-	text-align: center;
-	margin: 20px auto 10px auto;
 }
 
 #add_topic_form, #edit_topic_form, #move_topic_form, #split_topic_form {

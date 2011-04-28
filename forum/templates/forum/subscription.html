@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% load lib_tags %}
+
+{% block title %}Discussion &raquo; Subscription{% endblock %}
+
+{% block extrahead %}
+<link href="{{ MEDIA_URL }}css/forum.css" type="text/css" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+    <div id="subscription_list">
+        <h2 class="delimiter">Subscription</h2>
+        <div class="breadcrumbs"><a href="{% url forum %}">Discussion</a></div>
+        
+        <div class="subscription">
+            <div class="header">
+                <div class="date">Date</div>
+                <div class="topic">Topic</div>
+                <div class="forum">Forum</div>
+                <div>Action</div>
+            </div>
+            
+            {% for subscription in subscription_list.object_list %}
+                <div class="row">
+                    <div class="date">
+                        {{ subscription.date|date:"DATE_FORMAT" }}
+                    </div>
+                    
+                    <div class="topic">
+                        {% if subscription.content_type.model == "topic" %}
+                            <a href="{{ subscription.content_object.get_absolute_url }}">{{ subscription.content_object }}</a>
+                        {% else %}
+                            &nbsp;
+                        {% endif %}
+                    </div>
+                    
+                    <div class="forum">
+                        {% if subscription.content_type.model == "topic" %}
+                            <a href="{{ subscription.content_object.forum.get_absolute_url }}">{{ subscription.content_object.forum }}</a>
+                        {% else %}
+                            <a href="{{ subscription.content_object.get_absolute_url }}">{{ subscription.content_object }}</a>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        {% if subscription.content_type.model == "topic" %}
+                            <a href="{% url subscribe_topic subscription.content_object.id %}">Unsubscribe</a>
+                        {% else %}
+                            <a href="{% url subscribe_forum subscription.content_object.id %}">Unsubscribe</a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% empty %}
+                <div class="empty">
+                    You have no subscriptions
+                </div>
+            {% endfor %}
+        </div>
+        
+        {% pagination subscription_list "subscription" %}
+    </div>
+{% endblock %}

@@ -19,7 +19,7 @@ from forum.inform import inform_new_topic, inform_new_post
 from forum.models import Forum, Group, Post, Poll, PollChoice, PollVote, Topic
 from forum.helpers import get_group_perms_or_404, is_subscribed, mark_read, mark_unread_forums, mark_unread_topics, do_subscribe
 from lib.decorators import render_to
-from lib.helpers import paginate
+from lib.helpers import load_content_objects, paginate
 
 from bbmarkup import bbcode
 from datetime import datetime
@@ -415,7 +415,7 @@ def post_list(request, topic_id):
     Shows posts list in specified topic and process add new post 
     """
     
-    topic = get_object_or_404(Topic, id=topic_id)
+    topic = get_object_or_404(Topic.objects.get_visible_topics(), id=topic_id)
     forum = topic.forum
     group, perms = get_group_perms_or_404(request.user, forum)
     
@@ -548,7 +548,7 @@ def post_redirect(request, post_id):
     Redirect to page with specified post
     """
     
-    post = get_object_or_404(Post, id=post_id)
+    post = get_object_or_404(Post.objects.get_visible_posts(), id=post_id)
     
     posts_before = post.topic.posts.filter(date__lt=post.date).count()
     page = 1 + posts_before / settings.POSTS_PER_PAGE
@@ -622,7 +622,7 @@ def subscribe_forum(request, forum_id):
     profile = request.user.get_profile()
     do_subscribe(profile, forum)
     
-    return HttpResponseRedirect(forum.get_absolute_url())
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
 @login_required
 @never_cache
@@ -636,7 +636,22 @@ def subscribe_topic(request, topic_id):
     profile = request.user.get_profile()
     do_subscribe(profile, topic)
     
-    return HttpResponseRedirect(topic.get_absolute_url())
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+
+@login_required
+@render_to('forum/subscription.html')
+def forum_subscription(request):
+    """
+    Shows forum subscriptions
+    """
+    
+    profile = request.user.get_profile()
+    subscription = load_content_objects(profile.forum_subscription.order_by('-date'))
+    subscription_list = paginate(request, subscription, settings.SUBSCRIPTIONS_PER_PAGE)
+    
+    return {
+        'subscription_list': subscription_list,
+    }
 
 
 # =========================
