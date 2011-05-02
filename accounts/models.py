@@ -27,11 +27,17 @@ class Group(models.Model):
     
     @classmethod
     def default_group(cls):
-        return cls.objects.get(is_default=True)
+        try:
+            return cls.objects.get(is_default=True)
+        except Group.DoesNotExist:
+            return None
     
     @classmethod
     def anonymous_group(cls):
-        return cls.objects.get(is_anonymous=True)
+        try:
+            return cls.objects.get(is_anonymous=True)
+        except Group.DoesNotExist:
+            return None
 
     @classmethod
     def group_for_user(cls, user):
