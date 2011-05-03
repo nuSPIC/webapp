@@ -107,6 +107,15 @@ div.centered-404 {
     width: 500px;
 }
 
+.forgot-password {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.login-form-submit {
+    margin-top: 5px;
+}
+
 #registration-form, #profile-edit-form {
     width: 850px;
 }
