@@ -26,7 +26,7 @@ class TopicsFeed(Feed):
     New topics
     """
     
-    title = u'%s > Discussion > New topics' % site_name
+    title = u'%s > Discussions > New topics' % site_name
     description = u'New topics in %s discussion forum' % site_name
     
     def link(self):
@@ -58,7 +58,7 @@ class PostsFeed(Feed):
     New posts
     """
     
-    title = u'%s > Discussion > New posts' % site_name
+    title = u'%s > Discussions > New posts' % site_name
     description = u'New posts in %s discussion forum' % site_name
     
     def link(self):
@@ -91,7 +91,7 @@ class ForumTopicsFeed(Feed):
     """
     
     def title(self, forum):
-        return u'%s > Discussion > %s > New topics' % (site_name, forum.name)
+        return u'%s > Discussions > %s > New topics' % (site_name, forum.name)
     
     def description(self, forum):
         return u'New topics in %s' % forum.name
@@ -125,7 +125,7 @@ class ForumPostsFeed(Feed):
     """
     
     def title(self, forum):
-        return u'%s > Discussion > %s > New posts' % (site_name, forum.name)
+        return u'%s > Discussions > %s > New posts' % (site_name, forum.name)
     
     def description(self, forum):
         return u'New posts in %s' % forum.name
@@ -159,7 +159,7 @@ class TopicPostsFeed(Feed):
     """
     
     def title(self, topic):
-        return u'%s > Discussion > %s > %s > New posts' % (site_name, topic.forum.name, topic.name)
+        return u'%s > Discussions > %s > %s > New posts' % (site_name, topic.forum.name, topic.name)
     
     def description(self, topic):
         return u'New posts in %s' % topic.name

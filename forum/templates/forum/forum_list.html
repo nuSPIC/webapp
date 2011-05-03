@@ -8,7 +8,7 @@
     <link rel="alternate" type="application/atom+xml" title="New posts" href="{% url posts_feed %}" />
 {% endblock %}
 
-{% block title %}Discussion{% endblock %}
+{% block title %}Discussions{% endblock %}
 
 {% block extrahead %}
 <link href="{{ MEDIA_URL }}css/forum.css" type="text/css" rel="stylesheet" />
@@ -16,6 +16,13 @@
 
 {% block content %}
     <div id="forum_list">
+
+        {% if user.is_authenticated %}
+            <div class="forum_list_menu">
+                <a href="{% url forum_subscription %}">My subscriptions</a>
+            </div>
+        {% endif %}
+
         <div class="forum_search">
             <form action="{% url search %}" method="get">
                 {{ search_form.term }}

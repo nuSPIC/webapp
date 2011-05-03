@@ -5,7 +5,7 @@
 {% load forum_filters %}
 {% load humanize %}
 
-{% block title %}Discussion &raquo; Search{% endblock %}
+{% block title %}Discussions &raquo; Search{% endblock %}
 
 {% block extrahead %}
 <link href="{{ MEDIA_URL }}css/forum.css" type="text/css" rel="stylesheet" />
@@ -26,7 +26,7 @@
 {% block content %}
     <div id="search_results">
         <h2 class="delimiter">Search results</h2>
-        <div class="breadcrumbs"><a href="{% url forum %}">Discussion</a></div>
+        <div class="breadcrumbs">&raquo; <a href="{% url forum %}">Discussions</a></div>
         
         <div class="forum_search">
             <form action="{% url search %}" method="get">

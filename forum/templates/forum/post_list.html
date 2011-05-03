@@ -8,7 +8,7 @@
     <link rel="alternate" type="application/atom+xml" title="New posts" href="{% url topic_posts_feed topic.id %}" />
 {% endblock %}
 
-{% block title %}Discussion &raquo; {{ forum.name }} &raquo; {{ topic.name }}{% endblock %}
+{% block title %}Discussions &raquo; {{ forum.name }} &raquo; {{ topic.name }}{% endblock %}
 
 {% block extrahead %}
 <link href="{{ MEDIA_URL }}css/forum.css" type="text/css" rel="stylesheet" />
@@ -144,7 +144,9 @@
 {% block content %}
     <div id="post_list">
         <h2 class="delimiter">{{ topic.name }}</h2>
-        
+
+        <div class="breadcrumbs">&raquo; <a href="{% url forum %}">Discussions</a> &raquo; <a href="{{ forum.get_absolute_url }}">{{ forum.name }}</a></div>
+
         {% if user.is_authenticated %}
             <div class="topic_actions">
                 {% topic_actions topic forum_perms user %}
@@ -158,11 +160,9 @@
                         <span title="Subscribe topic">Subscribe</span>
                     {% endif %}
                 </a>
-                &middot; <a href="{% url topic_mark_read topic.id %}" class="mark_read">Mark topic read</a>
+                &middot; <a href="{% url topic_mark_read topic.id %}" class="mark_read">Mark topic as read</a>
             </div>
         {% endif %}
-        
-        <div class="breadcrumbs"><a href="{% url forum %}">Discussion</a> &raquo; <a href="{{ forum.get_absolute_url }}">{{ forum.name }}</a></div>
         
         <div class="posts">
             {% for post in post_list.object_list %}

@@ -2,7 +2,7 @@
 
 {% load lib_tags %}
 
-{% block title %}Discussion &raquo; Subscription{% endblock %}
+{% block title %}Discussions &raquo; Subscriptions{% endblock %}
 
 {% block extrahead %}
 <link href="{{ MEDIA_URL }}css/forum.css" type="text/css" rel="stylesheet" />
@@ -10,8 +10,8 @@
 
 {% block content %}
     <div id="subscription_list">
-        <h2 class="delimiter">Subscription</h2>
-        <div class="breadcrumbs"><a href="{% url forum %}">Discussion</a></div>
+        <h2 class="delimiter">Subscriptions</h2>
+        <div class="breadcrumbs">&raquo; <a href="{% url forum %}">Discussions</a></div>
         
         <div class="subscription">
             <div class="header">

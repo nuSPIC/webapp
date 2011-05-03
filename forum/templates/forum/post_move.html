@@ -3,7 +3,7 @@
 {% load humanize %}
 {% load forum_tags %}
 
-{% block title %}Discussion &raquo; {{ forum.name }} &raquo; Move posts{% endblock %}
+{% block title %}Discussions &raquo; {{ forum.name }} &raquo; Move posts{% endblock %}
 
 {% block extrahead %}
 <link href="{{ MEDIA_URL }}css/forum.css" type="text/css" rel="stylesheet" />
@@ -11,7 +11,7 @@
 
 {% block content %}
     <h2 class="delimiter">Move posts</h2>
-    <div class="breadcrumbs"><a href="{% url forum %}">Discussion</a> &raquo; <a href="{{ forum.get_absolute_url }}">{{ forum.name }}</a> &raquo; <a href="{{ topic.get_absolute_url }}">{{ topic.name }}</a></div>
+    <div class="breadcrumbs">&raquo; <a href="{% url forum %}">Discussions</a> &raquo; <a href="{{ forum.get_absolute_url }}">{{ forum.name }}</a> &raquo; <a href="{{ topic.get_absolute_url }}">{{ topic.name }}</a></div>
 	
     <form action="." method="post" id="post_move_form">
         {% csrf_token %}

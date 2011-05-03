@@ -9,7 +9,7 @@
     <link rel="alternate" type="application/atom+xml" title="New posts in forum" href="{% url forum_posts_feed forum.id %}" />
 {% endblock %}
 
-{% block title %}Discussion &raquo; {{ forum.name }}{% endblock %}
+{% block title %}Discussions &raquo; {{ forum.name }}{% endblock %}
 
 {% block extrahead %}
 <link href="{{ MEDIA_URL }}css/forum.css" type="text/css" rel="stylesheet" />
@@ -28,12 +28,12 @@
                         <span title="Subscribe forum">Subscribe</span>
                     {% endif %}
                 </a>
-                &middot; <a href="{% url forum_mark_read forum.id %}" class="mark_read">Mark forum read</a>
+                &middot; <a href="{% url forum_mark_read forum.id %}" class="mark_read">Mark forum as read</a>
             </div>
         {% endif %}
         
         <div class="breadcrumbs">
-            <a href="{% url forum %}">Discussion</a>
+            &raquo; <a href="{% url forum %}">Discussions</a>
         </div>
         
         {% if forum_perms.can_add_topic %}

@@ -2,7 +2,7 @@
 
 {% load forum_tags %}
 
-{% block title %}Discussion &raquo; {{ forum.name }} &raquo; Topic edit{% endblock %}
+{% block title %}Discussions &raquo; {{ forum.name }} &raquo; Topic edit{% endblock %}
 
 {% block extrahead %}
 {{ block.super }}
@@ -113,7 +113,7 @@
 
 {% block content %}
     <h2 class="delimiter">Edit topic</h2>
-    <div class="breadcrumbs"><a href="{% url forum %}">Discussion</a> &raquo; <a href="{{ forum.get_absolute_url }}">{{ forum.name }}</a> &raquo; <a href="{{ topic.get_absolute_url }}">{{ topic.name }}</a></div>
+    <div class="breadcrumbs">&raquo; <a href="{% url forum %}">Discussions</a> &raquo; <a href="{{ forum.get_absolute_url }}">{{ forum.name }}</a> &raquo; <a href="{{ topic.get_absolute_url }}">{{ topic.name }}</a></div>
 	
     <div id="preview"></div>
     

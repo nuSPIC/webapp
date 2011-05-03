@@ -46,7 +46,7 @@
         {% if user == profile.user %}
             <a href="{% url profile_edit profile.id %}">Edit profile</a> |
             <a href="{% url password_change %}">Change password</a> |
-            <a href="{% url forum_subscription %}">Forum subscription</a>
+            <a href="{% url forum_subscription %}">Forum subscriptions</a>
         {% endif %}
     </div>
 {% endblock %}
