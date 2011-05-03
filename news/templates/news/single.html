@@ -10,14 +10,26 @@
 
 {% block content %}
     <h2>{{ news.title }}</h2>
-    <strong>{{ news.pub_date|date:"DATE_FORMAT" }}</strong>
+
+    <div class="news-date">
+        <strong>{{ news.pub_date|date:"DATE_FORMAT" }}</strong>
+    </div>
+
     <div>
+
         {{ news.content|safe }}
 
-        <span class='st_stumbleupon'></span><span class='st_slashdot'></span><span class='st_reddit'></span><span
-            class='st_myspace'></span><span class='st_linkedin'></span><span class='st_blogger'></span><span
-            class='st_digg'></span><span class='st_delicious'></span><span class='st_twitter'></span><span
-            class='st_facebook'></span><span class='st_yahoo'></span><span class='st_gbuzz'></span><span
-            class='st_email'></span><span class='st_sharethis'></span>
+        <div class="share-in-social-media">
+
+            Share this article in social media:
+
+            <span class='st_stumbleupon'></span><span class='st_slashdot'></span><span class='st_reddit'></span><span
+                class='st_myspace'></span><span class='st_linkedin'></span><span class='st_blogger'></span><span
+                class='st_digg'></span><span class='st_delicious'></span><span class='st_twitter'></span><span
+                class='st_facebook'></span><span class='st_yahoo'></span><span class='st_gbuzz'></span><span
+                class='st_email'></span><span class='st_sharethis'></span>
+
+        </div>
+
     </div>
 {% endblock %}
