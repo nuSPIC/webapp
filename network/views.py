@@ -21,12 +21,6 @@ from result.models import Result
 from result.forms import CommentForm
 
 
-@revision.create_on_success
-def revision_create(obj, result=False, **kwargs):
-    obj.save()
-    if result:
-	revision.add_meta(Result, **kwargs)
-
 # Define models with its label, modeltypes and form
 MODELS = [
     {'id_label': 'iaf_neuron', 		'model_type': 'neuron', 'form': DeviceForm,},
@@ -38,6 +32,12 @@ MODELS = [
     {'id_label': 'spike_detector', 	'model_type': 'output', 'form': SpikeDetectorForm,},
     {'id_label': 'voltmeter', 		'model_type': 'output', 'form': DeviceForm,},
 ]
+
+@revision.create_on_success
+def revision_create(obj, result=False, **kwargs):
+    obj.save()
+    if result:
+	revision.add_meta(Result, **kwargs)
 
 
 @render_to('network.html')
@@ -108,14 +108,14 @@ def network(request, SPIC_id, local_network_id):
     else:
 	version_id = 0
 
-    # If result exist, then get form for comment
+    # If result exist, then get form for comment.
     try:
 	result_obj = version.revision.result
 	comment_form = CommentForm(instance=result_obj)
     except:
 	result_obj = None
 
-    # Create an image of network layout and get its url
+    # Create an image of network layout and get its url.
     try:
 	networkx_url = networkx(network_obj.pk)
     except:
@@ -150,10 +150,14 @@ def device_preview(request, network_id):
 	    id_labels = [device['id_label'] for device in MODELS]
 	    device = MODELS[id_labels.index(id_label)]
 	    form = device['form'](network_obj, request.POST)
+	    
+	    # check if form is valid.
 	    if form.is_valid():
 		data = form.data.copy()
 		data.pop('csrfmiddlewaretoken')
 		label = data.pop('model')[0]
+		
+		# get modeltype of device.
 		if 'generator' in label:
 		    modeltype = 'input'
 		elif 'meter' in label or 'detector' in label:
@@ -162,14 +166,19 @@ def device_preview(request, network_id):
 		    modeltype = 'neuron'
 		model = {'label':label, 'type':modeltype}
 		
+		# in case sources is found, it doesn't save weight and delay.
 		if 'targets' in data:
 		    params = {'targets': data.pop('targets')[0], 'weight': data.pop('weight')[0], 'delay': data.pop('delay')[0]}
 		elif 'sources' in data:
 		    params = {'sources': data.pop('sources')[0]}
 		status = {}
+		
+		# save status of each divices.
 		for key, value in data.items():
 		    status[key] = value
+		    
 		response = {'valid': 1, 'device':[None, model, status, params]}
+		
 	    else:
 		response = {'valid': -1, 'id_label':id_label}
 	
@@ -181,7 +190,7 @@ def device_preview(request, network_id):
 
 def device_commit(request, network_id):
     """
-    Extend targets/sources and write devices in database
+    Extend targets/sources and write devices in database.
     """
     
     network_obj = get_object_or_404(Network, pk=network_id)
@@ -191,22 +200,23 @@ def device_commit(request, network_id):
 	devices = {}
 	for k in post.keys():
 	    
-	    # execute only if the key starts with device_list
+	    # execute only if the key starts with device_list.
 	    if k.startswith('device_list'):
 		rest = k[len('device_list'):]
-		# split the string into different components
+		
+		# split the string into different components.
 		parts = [p[:-1] for p in rest.split('[')][1:]
 
-		# add a new device in dictionary if it still doesn't exist
+		# add a new device in dictionary if it still doesn't exist.
 		device_id = int(parts[0])+1
 		if device_id not in devices:
 		    devices[device_id] = device_id, {}, {}, {}
 		    
-		# prevent from adding device_id
+		# prevent from adding device_id.
 		if len(parts) > 2:
 		    values = post.get(k)
 		    
-		    # extend targets or sources and add its values 
+		    # extend targets or sources and add its values .
 		    if 'targets' in parts[2] or 'sources' in parts[2]:
 			try:
 			    extended_list = values_extend(values, unique=True, toString=True)
@@ -215,7 +225,7 @@ def device_commit(request, network_id):
 
 			devices[device_id][int(parts[1])][parts[2]] = ','.join(extended_list)
 		
-		    # execute only if status value or model label exists		    
+		    # execute only if status value or model label exists.		    
 		    elif values:
 			    devices[device_id][int(parts[1])][parts[2]] = values
 		    
@@ -243,7 +253,7 @@ def simulate(request, network_id, version_id):
 	    versions = Version.objects.get_for_object(network_obj).reverse()
 	    form = NetworkForm(request.POST, instance=network_obj)
 	    
-	    # check if network form is valid
+	    # check if network form is valid.
 	    if form.is_valid():
 		
 		# if network form is changed or version_id is 0, a new version will be created. 
@@ -255,6 +265,7 @@ def simulate(request, network_id, version_id):
 		    except:
 			revision_create(form, result=True)
 		    task = Simulation.delay(network_id=network_id)
+		    
 		else:
 		    version_obj = Version.objects.get(pk=version_id)
 		    
@@ -265,9 +276,7 @@ def simulate(request, network_id, version_id):
 		    else:
 			task = Simulation.delay(network_id=network_id, version_id=version_id)
 		    
-		task_id = task.task_id
-			
-		response = {'task_id':task_id}
+		response = {'task_id':task.task_id}
 		return HttpResponse(simplejson.dumps(response), mimetype='application/json')
 		    
 	    else:
