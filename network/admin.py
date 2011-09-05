@@ -1,6 +1,7 @@
 from django.contrib import admin
-from models import Network
 from reversion.admin import VersionAdmin
+
+from network.models import Network
 
 class NetworkAdmin(VersionAdmin):
     """
