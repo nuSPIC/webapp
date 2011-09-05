@@ -4,6 +4,7 @@ from django.db import models
 
 import cjson
 
+__all__ = ["Network"]
 
 SPIC_CHOICES = (('1','SPIC1'),
                 ('2','SPIC2'),
@@ -27,7 +28,7 @@ class Network(models.Model):
 
     def user(self):
         """
-        Gets user object from the django model 'auth' by user_id.
+        Get user object from the django model 'auth' by user_id.
         CAUTION: the model 'auth' might be stored in other database.
         """
         if self.user_id == 0:
@@ -43,7 +44,7 @@ class Network(models.Model):
 
     def device_list(self, term='visible', modeltype=None, label=None):
         """
-        Returns a list of devices by loading JSON from the field devices_json.
+        Return a list of devices by loading JSON from the field devices_json.
         Argument modeltype is for filtering devices by its type,
         its default is None, choices are 'neuron', 'input' or 'output'.
         """
@@ -63,7 +64,7 @@ class Network(models.Model):
     
     def last_device_id(self):
         """
-        Returns in case of existing devices the last ID of device 
+        Return in case of existing devices the last ID of device 
         as a marker for adding new device. Otherwise it returns None.
         """
         device_list = self.device_list()
@@ -80,7 +81,7 @@ class Network(models.Model):
 
     def neuron_ids(self):
         """
-        Gets a list of neuron ID for connectivity matrix and
+        Get a list of neuron ID for connectivity matrix and
         validation check of targets/sources.
         """
         neuron_list = self.device_list(modeltype='neuron')
@@ -90,7 +91,7 @@ class Network(models.Model):
         
     def _get_param_list(self, term):
         """
-        Gets a listed tuple of device ID and list of values 
+        Get a listed tuple of device ID and list of values 
         for connectivity matrix for weight or delay.
         """
         device_list = self.device_list()
@@ -118,16 +119,16 @@ class Network(models.Model):
         return value_list
         
     def weight_list(self):
-        """ Gets a listed tuple for weight."""
+        """ Get a listed tuple for weight. """
         return self._get_param_list('weight')
         
     def delay_list(self):
-        """ Gets a listed tuple of delay."""
+        """ Get a listed tuple of delay. """
         return self._get_param_list('delay')
 
     def connections(self, term='visible', data=False, modeltype=None):
         """
-        Gets a listed tuple of source and target in each connection.
+        Get a listed tuple of source and target in each connection.
         If data is True, it also returns dictionary of weight and delay.
         modeltype default is None, choices are 'neuron', 'input' or 'output'.
         -> see the method device_list.
@@ -176,11 +177,11 @@ class Network(models.Model):
         return connections
         
     def edgelist(self):
-        """ Gets a list of neoron edges for graph."""
+        """ Get a list of neoron edges for graph. """
         return self.connections(data=True, modeltype='neuron')
 
     def _connect_to(self, modeltype):
-        """ Gets a list of devices of one type, which the neurons are connected to."""
+        """ Get a list of devices of one type, which the neurons are connected to. """
         device_list = self.device_list(modeltype=modeltype)
         neurons = []
         for model, status, params in device_list:
@@ -193,33 +194,33 @@ class Network(models.Model):
         return list(set(neurons))
         
     def connect_to_input(self):
-        """ List of connections of neurons are connected to input."""
+        """ List of connections of neurons are connected to input. """
         return self._connect_to('input')
         
     def connect_to_output(self):
-        """ List of connections of neurons are connected to output."""
+        """ List of connections of neurons are connected to output. """
         return self._connect_to('output')        
         
     def neurons(self):
-        """ Returns a readable string of all meurons."""        
+        """ Return a readable string of all meurons. """        
         neuron_list = self.device_list(modeltype='neuron')
         if neuron_list:
             neuron_list = [(nn[0]['label'], nn[0]['id']) for nn in neuron_list]
             if len(neuron_list) < 20:
                 return ", ".join(["%s [%s]"% neuron for neuron in neuron_list])
             else:
-                return '%s neurons' % len(neuron_list)
+                return "%s neurons" % len(neuron_list)
         return ""
 
     def inputs(self):
-        """ Returns a readable string of all inputs."""        
+        """ Return a readable string of all inputs. """        
         input_list = self.device_list(modeltype='input')
         if input_list:
             return ", ".join(["%s [%s]"%(ii[0]['label'],ii[0]['id']) for ii in input_list])
         return ""
         
     def outputs(self):
-        """ Returns a readable string of all outputs."""        
+        """ Return a readable string of all outputs. """        
         output_list = self.device_list(modeltype='output')
         if output_list:
             return ", ".join(["%s [%s]"%(oo[0]['label'],oo[0]['id']) for oo in output_list])
