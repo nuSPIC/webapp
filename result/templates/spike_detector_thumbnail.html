@@ -1,0 +1,120 @@
+<html>
+  <head>
+    <title>Scatterplot</title>
+    <link rel="stylesheet" href="/media/css/result.css"></link>
+    <script type="text/javascript" src="/media/js/protovis-d3.2.js"></script>
+    <style type="text/css">
+
+#fig {
+  width: 220px;
+  height: 200px;
+}
+
+    </style>
+  </head>
+  <body>
+  <div id="center"><div id="fig">
+    <script type="text/javascript+protovis">
+    var start = new Date().getTime();
+    
+    var senders = {{senders|safe}},
+	times = {{times|safe}}
+	simTime = {{simTime|safe}},
+	neurons = {{ neurons|safe }};
+    
+    
+    var data = pv.range(0, senders.length).map(function(i) {
+	//return {x: times[i], y: senders[i]};
+	return {x: times[i], y: senders[i]};
+    });
+
+/* Sizing and scales. */
+var w = 200,
+    h1 = neurons.length * 15,
+    h2 = 30,
+    dx = 10,
+    x = pv.Scale.linear(0, simTime).range(0, w)
+    y = pv.Scale.linear(1, neurons.length).range(0, h1);
+    x_bins = pv.histogram(times).bins(x.ticks(dx)),
+    y_bins = pv.Scale.linear(0, pv.max(x_bins, function(d) d.y)).range(0, h2)
+    
+/* The root panel. */
+var vis = new pv.Panel()
+    .width(w)
+    .height(h1 + 30 + h2)
+    .bottom(20)
+    .left(20)
+    .right(20)
+    .top(5);
+
+/* The spike panel. */
+var spikes = vis.add(pv.Panel)
+    .top(0)
+    .height(h1);    
+
+/* Y-axis and ticks. */
+spikes.add(pv.Rule)
+    .data(neurons)
+    .bottom(y)
+    .strokeStyle(function(d) d ? "#eee" : "#000")
+  .anchor("left").add(pv.Label)
+    .text(y.tickFormat);
+  //function(d) d.toFixed(1)
+    //.text(neurons[parseInt(y)]);
+
+
+/* X-axis and ticks. */
+spikes.add(pv.Rule)
+    .data(x.ticks(dx))
+    .left(x)
+    .strokeStyle(function(d) d ? "#eee" : "#000")
+
+/* The dot plot! */
+spikes.add(pv.Dot)
+    .data(data)
+    .left(function(d) x(d.x))
+    .bottom(function(d) y(d.y))
+    .strokeStyle("#000")
+    .size(1);
+
+/* X-axis label */
+spikes.add(pv.Label)
+    .bottom(-1)
+    .textBaseline("top")
+    .left(w/2)
+    .textAlign("center")
+    .text("Times (ms)");
+
+/* The PSTH panel */
+var psth = vis.add(pv.Panel)
+    .bottom(0)
+    .height(h2)
+    .events("all")
+    .event("mousemove", pv.Behavior.point());
+
+/* the bar plot! */
+psth.add(pv.Bar)
+    .def("active", -1)
+    .data(x_bins)
+    .bottom(0)
+    .left(function(d) x(d.x))
+    .width(function(d) x(d.dx))
+    .height(function(d) y_bins(d.y))
+    .fillStyle("#000")
+    .strokeStyle("rgba(255, 255, 255, .2)")
+    .lineWidth(1)
+    .event("mouseover", function() this.active(this.index).parent)
+    .event("mouseout", function() this.active(-1).parent)
+  .anchor("top").add(pv.Label)
+    .bottom(function(d) y_bins(d.y))
+    .textBaseline("bottom")
+    .visible(function() this.anchorTarget().active() == this.index)
+    .text(function(d) d.y);
+
+vis.render();
+
+// alert(new Date().getTime() - start + 'ms')
+
+    </script>
+  </div></div></body>
+</html>

@@ -1,0 +1,26 @@
+
+<html>
+  <head>
+    <title>Protovis</title>
+    <link rel="stylesheet" href="/media/css/result.css"></link>
+    
+    <script type="text/javascript" src="/media/js/jquery-1.5.1.min.js"></script>
+    <script type="text/javascript" src="/media/js/protovis-d3.2.js"></script>
+    <script type="text/javascript" src="/media/js/output_view.js"></script>
+    <script type="text/javascript+protovis">
+
+	var voltmeter = {{result_obj.voltmeter_data|safe}};
+	
+	for (var i=0; i<voltmeter['V_m'].length; i++) {
+	    Voltmeter('neuron-'+ (i+1)).data(voltmeter['V_m'][i]).draw()
+	    }
+
+    </script>
+  </head>
+  <body>
+ 
+    {% for target, model, status, params in result_obj.voltmeter_targets %}
+	<div class="voltmeter" id="neuron-{{target|safe}}"></div>       
+    {% endfor %}
+  </body>
+</html>
