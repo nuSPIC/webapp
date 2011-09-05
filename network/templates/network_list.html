@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}{{ flatpage.title }}{% endblock %}
+
+{% block content %}
+<div>
+    {{ flatpage.content }}
+</div>
+
+{% regroup network_list|dictsort:"SPIC_id" by SPIC_id as network_by_SPIC %}
+{% for group in network_by_SPIC %}
+    <h3>SPIC {{ group.grouper }}</h3>
+    <ul>
+	{% for network in group.list %}
+	    <li id="{{network.local_id}}">
+		<a href="{% url network network.SPIC_id network.local_id %}">
+		    {{network.title|default_if_none:"Network"}}
+		</a>
+		: {{network.description}}
+	    </li>
+	{% endfor %}
+    </ul>
+{% endfor %}
+
+{% endblock %}

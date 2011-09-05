@@ -1,0 +1,36 @@
+{% load network_filters %}
+
+<div class="portlet-header"><span id="selected_device_id"></span> - {{id_label|readable}}</div>
+<div class="portlet-content">
+    
+    {% if form.fieldsets %}
+	{% for fieldset in form.fieldsets %}
+	    <div class="{{ fieldset.classes }}">
+	    {% if fieldset.description %}
+		<p class="description">{{ fieldset.description }}</p>
+	    {% endif %}
+	    {% for field in fieldset %}
+		{% if field.is_hidden %}
+		{{ field }}
+		{% else %}
+		<div class="field-wrapper" title="{{ field.help_text }}">
+		    {{ field.label_tag }}
+		    {{ field.errors }}
+		    {{ field }}
+		</div>
+		{% endif %}
+	    {% endfor %}
+	    </div>
+	{% endfor %}
+    {% else %}
+	{{ form.as_div }}
+    {% endif %}
+
+    <div class="buttons">
+	<button type="submit" class="check" id="submit-device-form">Apply</button>
+	<button type="reset" class="reset" id="reset-device-form">Reset</button>
+	{% if form.fieldsets|length > 1 %}
+	    <button class="toggle" id="toggle-device-form">More</button>
+	{% endif %}
+    </div>
+</div>
