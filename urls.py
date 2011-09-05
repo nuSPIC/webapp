@@ -1,4 +1,4 @@
-# coding: utf-8
+# -*- coding: utf-8 -*-
 
 from django.conf import settings
 from django.conf.urls.defaults import *
@@ -14,6 +14,8 @@ urlpatterns = patterns('',
     (r'^admin/', include(admin.site.urls)),
     (r'^feed/', include('feed.urls')),
     (r'^forum/', include('forum.urls')),
+    (r'^network/', include('network.urls')),
+    (r'^result/', include('result.urls')),
 )
 
 # Serve static files in Django development server mode

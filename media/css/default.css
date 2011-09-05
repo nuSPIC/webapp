@@ -1,4 +1,7 @@
 html, body {
+    font: 12px sans-serif;
+    color: #2B2924;
+    background-color: #FAFAF9 ;
     height: 100%;
     padding: 0;
     margin: 0;
@@ -14,24 +17,36 @@ div.centered-404 {
     margin-top: -250px;
 }
 
+a {
+    color: #000;
+}
 
 /* Layout
 ***********************/
 
 #header {
+    color: #FAFAF9;
+    background-color: #2B2924;
     padding: 10px;
 }
 
     #header .top_links {
+	float: right;
         text-align: right;
     }
 
     #header .navigation {
-        overflow: hidden;
-        font-size: 200%;
+	overflow: hidden;
+        font-size: 100%;
+    }
+    
+    #header a {
+	color:  #FAFAF9;
+	text-decoration: none;
     }
 
 #content {
+    font: 16px times;
     padding: 10px;
     overflow: hidden;
 }
