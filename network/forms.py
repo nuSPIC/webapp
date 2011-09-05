@@ -13,10 +13,7 @@ __all__ = ["NetworkForm",
           "SpikeDetectorForm", "VoltmeterForm"]
 
 class NetworkForm(BetterModelForm):
-    """
-    Form for network object
-    """
-    
+    """ Form for network object """
     duration = forms.FloatField(help_text="Enter value, which is divisible by 50.")
     seed = forms.IntegerField(required=False, help_text="Enter only positive value.")  
     resolution = forms.FloatField(required=False,)
@@ -39,10 +36,7 @@ class NetworkForm(BetterModelForm):
                     ('Advanced', {'fields': ['seed', 'resolution'], 'classes': ['advanced', 'collapse']}))
 
 class DeviceForm(BetterForm):
-    """
-    Parent form for input and neuron devices.
-    """    
-    
+    """ Parent form for input and neuron devices """    
     def __init__(self, network_obj=None, *args, **kwargs):
         self.instance = network_obj
         super(DeviceForm, self).__init__(*args, **kwargs)
