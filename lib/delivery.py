@@ -108,7 +108,7 @@ def NEST_to_nuSPIC(SPIC_id):
 		
 	    device_list.append([gid, model, status, connections])
 	    
-	pos, holder = networkx(network_obj.pk, 'neuron', 'circo')
+	pos = networkx(network_obj.pk, 'neuron', 'circo')
 	for gid,value in pos.items():
 	    if device_list[gid-1][0]['id'] == gid:
 		device_list[gid-1][0]['position'] = value	    
