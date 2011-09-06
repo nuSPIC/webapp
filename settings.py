@@ -49,10 +49,6 @@ MIDDLEWARE_CLASSES = (
     #'debug_toolbar.middleware.DebugToolbarMiddleware',    
 )
 
-#import socket
-#if socket.gethostname() == 'mayflower':
-  #MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
-
 ROOT_URLCONF = 'urls'
 
 DATABASE_ROUTERS = ['lib.db_routers.AppRouter']
