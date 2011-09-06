@@ -21,23 +21,11 @@ STATUS_FIELDS = {
 	'voltmeter': (),
 }
 
-def networkx(network_id, modeltype='neuron', layout='neato'):
+def networkx(edgelist, layout='neato'):
     """ Return position of neurons in network. """      
-    
-    network_obj = Network.objects.get(pk=network_id)
-    if not network_obj.devices_json:
-	return [], []
-
     G = nx.DiGraph()
-    edgelist = network_obj.connections(modeltype=modeltype)
-    
     G.add_edges_from(edgelist)
-    pos = nx.graphviz_layout(G, layout)
-    
-    for key, val in pos.items():
-	pos[key] = list(val)
-	
-    return pos
+    return nx.graphviz_layout(G, layout)
 
 def NEST_to_nuSPIC(SPIC_id):
     """transfer status informations
@@ -56,7 +44,6 @@ def NEST_to_nuSPIC(SPIC_id):
     if created:
 	network_obj.duration = root_status['time']
 	
-	device_list = []
 	
 	for sd_gid in range(1,root_status['network_size']):
 	    if nest.GetStatus([sd_gid])[0]['model'] == 'spike_detector':
@@ -64,7 +51,7 @@ def NEST_to_nuSPIC(SPIC_id):
 	else:
 	    sd_gid = -1
 		
-	sd_sources = []
+	device_list, sd_sources = [], []
 	for gid in range(1,root_status['network_size']):
 	    device_status = nest.GetStatus([gid])[0]
 	    
@@ -75,7 +62,7 @@ def NEST_to_nuSPIC(SPIC_id):
 	    else:
 		modeltype = 'neuron'
 	    
-	    model = {'label':device_status['model'], 'type':modeltype}
+	    model = {'label':device_status['model'], 'type':modeltype, 'id':gid}
 	    
 	    status = {}
 	    for field in STATUS_FIELDS[device_status['model']]:
@@ -108,13 +95,14 @@ def NEST_to_nuSPIC(SPIC_id):
 		
 	    device_list.append([gid, model, status, connections])
 	    
-	pos = networkx(network_obj.pk, 'neuron', 'circo')
+	edgelist = network_obj.connections(modeltype='neuron')
+	pos = networkx(edgelist, layout='circo')
+
 	for gid,value in pos.items():
 	    if device_list[gid-1][0]['id'] == gid:
-		device_list[gid-1][0]['position'] = value	    
+		device_list[gid-1][0]['position'] = list(value)	    
 		
 	network_obj.devices_json = simplejson.dumps(device_list)
-	
 	network_obj.save()
 
     return network_obj, created
