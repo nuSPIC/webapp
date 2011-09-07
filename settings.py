@@ -76,7 +76,6 @@ INSTALLED_APPS = (
     'network',
     'reversion',
     'djcelery',
-    'djkombu',
     'result',
 )
 
@@ -152,7 +151,7 @@ PAGINATION_TAIL = 2
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'test_default',
+        'NAME': 'test3_default',
         'USER': 'sysad',
         'PASSWORD': '',
         'HOST': '',
@@ -166,14 +165,14 @@ DATABASES = {
 
     'network': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'test2_network',
+        'NAME': 'test3_network',
         'USER': 'sysad',
         'PASSWORD': '',
     },
 
     'simulation': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'test2_simulation',
+        'NAME': 'test3_simulation',
         'USER': 'sysad',
         'PASSWORD': '',
     },
