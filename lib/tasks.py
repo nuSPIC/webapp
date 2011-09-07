@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from celery.contrib.abortable import AbortableTask
 
 from reversion import revision
@@ -26,8 +27,8 @@ class Simulation(AbortableTask):
     """
 
     def run(self, *args, **kwargs):
-	logger = self.get_logger(**kwargs)
-	
+        logger = self.get_logger(**kwargs)
+        
         network_id = kwargs['network_id']
         network_obj = Network.objects.get(pk=network_id)
 
@@ -38,19 +39,18 @@ class Simulation(AbortableTask):
         nest.SetDefaults('voltmeter', {'withgid':False, 'withtime':False})
         
         # Set root status of network
-        # TODO it should return failed instead of success
         root_status = network_obj.root_status()
         
         if 'seed' in root_status:
-	    seed = int(root_status.pop('seed'))
-	    nest.SetStatus([0], {'grng_seed': seed, 'rng_seeds':[seed]})
+            seed = int(root_status.pop('seed'))
+            nest.SetStatus([0], {'grng_seed': seed, 'rng_seeds':[seed]})
         
         if root_status:
-	    try:
-		nest.SetStatus([0], root_status)
-	    except:
-		logger.warning("Task failed due to setting root status.")
-		return
+            try:
+                nest.SetStatus([0], root_status)
+            except:
+                logger.warning("Task failed due to setting root status.")
+                return
         
         
         # Create models in NEST and set its status
@@ -60,17 +60,17 @@ class Simulation(AbortableTask):
             if dev_status:
                 params = {}
                 for param_key, param_value in dev_status.items():
-		    if param_value:
-			if ',' in param_value:
-			    param_list = param_value.split(',')
-			    params[str(param_key)] = param_list
-			else:
-			    params[str(param_key)] = float(param_value)
+                    if param_value:
+                        if ',' in param_value:
+                            param_list = param_value.split(',')
+                            params[str(param_key)] = param_list
+                        else:
+                            params[str(param_key)] = float(param_value)
                 gid = nest.Create(dev_model['label'], params=params)
             else:
                 gid = nest.Create(dev_model['label'])
             if 'id' in dev_model:
-		assert gid == [int(dev_model['id'])]
+                assert gid == [int(dev_model['id'])]
     
         # Make connections in nest
         connections = network_obj.connections('all', data=True)
@@ -84,26 +84,30 @@ class Simulation(AbortableTask):
         # and checks, if producer is aborted, else simulation goes on.
         duration = network_obj.duration
         if duration > 5000.0:
-	    dt = duration/20
+            dt = 5000.0
             for t in xrange(0, duration, dt):
                 if self.is_aborted(**kwargs):
                     # Respect the aborted status and terminate gracefully
+                    # TODO it should return failed instead of success
                     logger.warning("Task aborted.")
-                    return 
+                    return None
                 nest.Simulate(dt)
+            dt_last = duration % dt
+            if dt_last:
+                nest.Simulate(dt_last)
         else:
             nest.Simulate(duration)
 
-	# Get data from output devices
+        # Get data from output devices
         data = {}
         outputs = network_obj.device_list(modeltype='output')
         for model, dev_status, connections in outputs:
-	    gid = [int(model['id'])]
-	    output_status = nest.GetStatus(gid)[0]['events']
-	    events = {}
-	    for key,value in output_status.items():
-		events[key] = value.tolist()
-	    data[model['label']] = events
+            gid = [int(model['id'])]
+            output_status = nest.GetStatus(gid)[0]['events']
+            events = {}
+            for key,value in output_status.items():
+                events[key] = value.tolist()
+            data[model['label']] = events
             
             
         # Get result object in latest version or in selected version
@@ -118,9 +122,9 @@ class Simulation(AbortableTask):
         # Write results and simulating date in database and reconfigure the existence of output devices
         result.has_spike_detector, result.has_voltmeter = False, False
         for label, value in data.items():
-	    data_json = cjson.encode(value)
-	    result.__setattr__("%s_json" %label, data_json)
-	    result.__setattr__("has_%s" %label, True)
+            data_json = cjson.encode(value)
+            result.__setattr__("%s_json" %label, data_json)
+            result.__setattr__("has_%s" %label, True)
         result.date_simulated = datetime.datetime.now()
         
         # Save result object
