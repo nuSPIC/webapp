@@ -7,6 +7,7 @@ Requirements
  - recaptcha-client 1.0.5 or higher (http://pypi.python.org/pypi/recaptcha-client)
  - django-bbmarkup (http://bitbucket.org/offline/django-bbmarkup)
 
+
  - RabbitMQ, Broker for Celery (http://jazstudios.blogspot.com/2010/11/setup-django-rabbitmq-and-celery.html)
  - Celery integration for Django 2.3.3 (https://github.com/ask/django-celery)
  - Reversion integration for Django 1.5 (https://github.com/etianen/django-reversion)
@@ -37,21 +38,22 @@ Installation instructions for django-bbmarkup:
 
     ln -s `pwd`/bbmarkup ~/.virtualenv/nuspic/lib/pythonX.Y/site-packages
 
+
+for Network/Simulation
 --------------
-from Sebastian
---------------
- primary
+primary
+    # For Django
     $ pip install django-form-utils
     $ pip install django-reversion
 
     $ pip install python-cjson
     $ pip install networkx
 
-    # For Celery
+    # For Django-celery
     $ sudo apt-get install rabbitmq-server
     $ pip install django-celery
 
- optional (useful for developer)
+optional (useful for developer)
     $ pip install django-extensions #(0.6)
     $ pip install django-evolution #(0.6.5)
     $ pip install django-debug-toolbar # (0.8.5)
@@ -60,30 +62,30 @@ from Sebastian
 Synchronizing multiple databases
 ------------
  
- insert DATABASE_ROUTERS in settings
+insert DATABASE_ROUTERS in settings
  
- for default database
- $ ./manage.py sqlall reversion | ./manage.py dbshell
- $ ./manage.py syncdb
+for default database
+    $ ./manage.py sqlall reversion | ./manage.py dbshell
+    $ ./manage.py syncdb
  
- for network database
- $ ./manage.py sqlall auth | ./manage.py dbshell --database=network
- $ ./manage.py sqlall django_evolution | ./manage.py dbshell --database=network
- $ ./manage.py syncdb --database=network
+for network database
+    $ ./manage.py sqlall auth | ./manage.py dbshell --database=network
+    $ ./manage.py sqlall django_evolution | ./manage.py dbshell --database=network
+    $ ./manage.py syncdb --database=network
 
- for simulation database
- $ ./manage.py sqlall auth | ./manage.py dbshell --database=simulation
- $ ./manage.py sqlall django_evolution | ./manage.py dbshell --database=simulation
- $ ./manage.py sqlall network | ./manage.py dbshell --database=simulation
- $ ./manage.py syncdb --database=simulation
+for simulation database
+    $ ./manage.py sqlall auth | ./manage.py dbshell --database=simulation
+    $ ./manage.py sqlall django_evolution | ./manage.py dbshell --database=simulation
+    $ ./manage.py sqlall network | ./manage.py dbshell --database=simulation
+    $ ./manage.py syncdb --database=simulation
 
 
 Starting Celery integration for Django
 ------------
  
- $./manage.py celeryd -E
- $./manage.py celerycam
- $./manage.py celeryev
+    $./manage.py celeryd -E
+    $./manage.py celerycam
+    $./manage.py celeryev
 
 
 License
