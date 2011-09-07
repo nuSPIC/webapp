@@ -17,7 +17,7 @@ class Network(models.Model):
     local_id = models.IntegerField()
     
     title = models.CharField(max_length=32)
-    description = models.TextField(blank=True)    
+    description = models.TextField(blank=True)
     
     duration = models.FloatField(null=True, default=1000.0)
     status_json = models.TextField(blank=True, verbose_name='Root status')
