@@ -2,38 +2,56 @@
   <head>
     <title>Scatterplot</title>
     <link rel="stylesheet" href="/media/css/result.css"></link>
-        <link rel="stylesheet" href="/media/css/tipsy.css"></link>
-    <script type="text/javascript" src="/media/js/protovis-d3.2.js"></script>
-    <script type="text/javascript" src="/media/js/jquery.tipsy.js" ></script>
-    <script type="text/javascript" src="/media/js/tipsy.js" ></script>
+    <script type="text/javascript" src="/media/js/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="/media/js/protovis.min.js"></script>
+<style type="text/css">
+
+        #fig {
+          width: 800px;
+          height: 500px;
+        }
+
+    </style>
+
   </head>
   <body>
   <div id="center">
     <div id="fig">
+
     <script type="text/javascript+protovis">
     var senders = {{senders|safe}},
 	times = {{times|safe}}
 	simTime = {{simTime|safe}},
-	neurons = {{ neurons|safe }};
+	neurons = {{ neurons|safe }},
+	nr_bins = {{ nr_bins|safe }};
+
+	$(function() {
+		  $( "#"+ nr_bins +"_bins").attr('checked', true);
+	  });
+
+	  $( "form#nr_bins" ).live('change',function(e) {
+			$(this).submit();
+		});
     
     var data = pv.range(0, senders.length).map(function(i) {
 	return {x: times[i], y: senders[i]};
     });
 
+var draw = function(nr_bins) {
+
 /* Sizing and scales. */
 var w = 710,
-    h1 = 300,
+    h1 = neurons.length * 40,
     h2 = 50,
-    dx = 50,
     x = pv.Scale.linear(0, simTime).range(0, w),
     y = pv.Scale.linear(1, pv.max(neurons)).range(0, h1),
-    x_bins = pv.histogram(times).bins(x.ticks(dx)),
-    y_bins = pv.Scale.linear(0, pv.max(x_bins, function(d) d.y)).range(0, h2);
+    bins = pv.histogram(times).bins(x.ticks(nr_bins)),
+    bin_height = pv.Scale.linear(0, pv.max(bins, function(d) d.y)).range(0, h2);
 
 /* The root panel. */
 var vis = new pv.Panel()
     .width(w)
-    .height(h1 + 30 + h2)
+    .height(h1 + 50 + h2)
     .bottom(20)
     .left(20)
     .right(10)
@@ -44,68 +62,89 @@ var spikes = vis.add(pv.Panel)
     .top(0)
     .height(h1);    
 
-/* Y-axis and ticks. */
-spikes.add(pv.Rule)
-    .data(neurons)
-    .bottom(y)
-    .strokeStyle(function(d) d ? "#eee" : "#000")
-  .anchor("left").add(pv.Label)
-    .text(y.tickFormat);
 
+          spikes.add(pv.Rule)
+                  .data(neurons)
+                  .top(y)
+                  .strokeStyle(function(d) d ? "#eee" : "#000")
+                .anchor("left").add(pv.Label)
+                  .text(y.tickFormat);
 
-/* X-axis and ticks. */
-spikes.add(pv.Rule)
-    .data(x.ticks(dx))
-    .left(x)
-    .strokeStyle(function(d) d ? "#eee" : "#000")
-//     .anchor("left").add(pv.Label)
-// 	.text(x.tickFormat);
+          /* X-axis and ticks. */
+          spikes.add(pv.Rule)
+                  .data(x.ticks(nr_bins))
+                  .left(x)
+                  .strokeStyle(function(d) d ? "#eee" : "#000")
 
 /* The dot plot! */
 spikes.add(pv.Dot)
     .data(data)
     .left(function(d) x(d.x))
-    .bottom(function(d) y(d.y))
+    .top(function(d) y(d.y))
     .strokeStyle("#000")
     .size(3)
     .fillStyle("#000");
 
 /* X-axis label */
-spikes.add(pv.Label)
-    .bottom(-1)
-    .textBaseline("top")
-    .left(w/2)
-    .textAlign("center")
-    .text("Times (ms)");
+          spikes.add(pv.Label)
+                  .bottom(-1)
+                  .textBaseline("top")
+                  .left(w/2)
+                  .textAlign("center")
+                  .text("Time (ms)")
+                .add(pv.Label)
+                  .bottom(-1)
+                  .textBaseline("top")
+                  .left(0)
+                  .textAlign("left")
+                  .text(senders.length +" spikes");
 
-/* The PSTH panel */
-var psth = vis.add(pv.Panel)
-    .bottom(0)
-    .height(h2)
-    .events("all")
-    .event("mousemove", pv.Behavior.point());
+          /* The PSTH panel */
+          var psth = vis.add(pv.Panel)
+                  .bottom(10)
+                  .height(h2);
 
-/* the bar plot! */
-psth.add(pv.Bar)
-    .def("active", -1)
-    .data(x_bins)
-    .bottom(0)
-    .left(function(d) x(d.x))
-    .width(function(d) x(d.dx))
-    .height(function(d) y_bins(d.y))
-    .fillStyle("#000")
-    .strokeStyle("rgba(255, 255, 255, .2)")
-    .lineWidth(1)
-    .event("mouseover", function() this.active(this.index).parent)
-    .event("mouseout", function() this.active(-1).parent)
-  .anchor("top").add(pv.Label)
-    .bottom(function(d) y_bins(d.y))
-    .textBaseline("bottom")
-    .visible(function() this.anchorTarget().active() == this.index)
-    .text(function(d) d.y);
+          /* the bar plot! */
+          psth.add(pv.Bar)
+                  .data(bins)
+                  .bottom(0)
+                  .left(function(d) x(d.x))
+                  .width(function(d) x(d.dx))
+                  .height(function(d) bin_height(d.y))
+                  .fillStyle("#000")
+                  .strokeStyle("rgba(255, 255, 255, .2)")
+                  .lineWidth(1)
+                .anchor("top").add(pv.Label)
+                  .textBaseline("bottom")
+                  .text(function(d) d.y);
+
+          psth.add(pv.Line)
+                  .data(bins)
+                  .left(function(d) x(d.x) + x(d.dx)/2)
+                  .bottom(function(d) bin_height(d.y));
+
+          psth.add(pv.Label)
+                  .bottom(-1)
+                  .textBaseline("top")
+                  .left(w/2)
+                  .textAlign("center")
+                  .text("PSTH of " + senders.length + " spikes");
 
 vis.render();
 
+}
+
+        draw(nr_bins);
+
     </script>
+
+<form method="GET" id="nr_bins">
+        <input type="radio" name="nr_bins" value="5" id="5_bins"> 5 
+        <input type="radio" name="nr_bins" value="10" id="10_bins"> 10
+        <input type="radio" name="nr_bins" value="20" id="20_bins"> 20
+        <input type="radio" name="nr_bins" value="50" id="50_bins"> 50
+        bins
+    </form>
+
   </div></div></body>
 </html>

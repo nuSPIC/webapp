@@ -2,7 +2,7 @@
   <head>
     <title>Voltmeter</title>
     <link rel="stylesheet" href="/media/css/result.css"></link>
-    <script type="text/javascript" src="/media/js/protovis-d3.2.js"></script>
+    <script type="text/javascript" src="/media/js/protovis.min.js"></script>
   </head>
   
   <body>
@@ -71,18 +71,49 @@
 		focus.add(pv.Rule)
 		    .data(function() fy.ticks(7))
 		    .bottom(fy)
-		    .strokeStyle(function(d) d ? "#aaa" : "#000")
+		    .strokeStyle("#eee")
 		.anchor("left").add(pv.Label)
 		    .text(fy.tickFormat);
 
 		/* Focus area chart. */
 		focus.add(pv.Panel)
-		    .overflow("hidden")
-		.add(pv.Line)
+		    .overflow("hidden");
+
+		var line = focus.add(pv.Line)
 		    .data(function() focus.init())
 		    .left(function(d) fx(d.x))
 		    .bottom(function(d) fy(d.y));
-		    
+
+		var j = -1;
+		var dot = line.add(pv.Dot)
+			.visible(function() j >= 0)
+			.data(function() [data[j]])
+			.fillStyle("#ff7f0e")
+			.strokeStyle("#000")
+			.size(20)
+			.lineWidth(1);
+
+		dot.add(pv.Dot)
+			.left(10)
+			.bottom(10)
+		  .anchor("right").add(pv.Label)
+			.text(function(d) d.x.toFixed(2) +"ms: "+ d.y.toFixed(2) +"mV");
+
+
+	focus.add(pv.Bar)
+		.fillStyle("rgba(0,0,0,.001)")
+		.event("mouseout", function() {
+			j = -1;
+			return focus;
+		  })
+		.event("mousemove", function() {
+			var mx = fx.invert(focus.mouse().x);
+			j = pv.search(data.map(function(d) d.x), mx);
+			j = j < 0 ? (-j - 2) : j;
+			return focus;
+		  });
+
+
 
 		/* Context panel (zoomed out). */
 		var context = vis.add(pv.Panel)
