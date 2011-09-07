@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="/media/css/tipTip.css"></link>
 
 
-<script type="text/javascript" src="/media/js/jquery-1.5.1.min.js"></script>
+<script type="text/javascript" src="/media/js/jquery-1.6.2.min.js"></script>
 <script type="text/javascript" src="/media/js/jquery-ui-1.8.14.custom.min.js"></script>
 <!-- <script type="text/javascript" src="http://jqueryui.com/themeroller/themeswitchertool/"></script> -->
 <script type="text/javascript" src="/media/js/json2.js"></script>
@@ -32,263 +32,263 @@
     task_id;
     
     {% if network_obj.devices_json %}
-	var device_list = {{ network_obj.device_list|safe }},
-	edgelist = {{ network_obj.edgelist|safe }},
-	connect_to_input = {{ network_obj.connect_to_input }},
-	connect_to_output = {{ network_obj.connect_to_output }};
+        var device_list = {{ network_obj.device_list|safe }},
+        edgelist = {{ network_obj.edgelist|safe }},
+        connect_to_input = {{ network_obj.connect_to_input }},
+        connect_to_output = {{ network_obj.connect_to_output }};
     {% endif %}
     
     $(function() {
-	    $( ".column" ).sortable({
-		    cancel: ".portlet-content",
-		    connectWith: ".column",
-		    opacity: 0.7,
-	    });
-	    
-	    load_theme( ".portlet" );
- 	    
-	    $( "div#connections-tabs" ).tabs();
-	    $( "div#results-tabs" ).tabs();
-	    $( "ul#history-list" ).quickPager();
-	    
-	    $( "button#toggle-device-form" ).click(function(e) {
-		    e.preventDefault()
-		    $( this ).toggleClass( "ui-state-highlight" )
-		    $( this ).parents( ".portlet-content" ).find( ".advanced" ).toggle();
-		    if ($(this).hasClass( "ui-state-highlight" )) {
-			$(this).button("option", "icons", { primary: 'ui-icon-circle-arrow-n' })
-			.button("option", "label", "Less");
-			
-		    } else {
-			$(this).button("option", "icons", { primary: 'ui-icon-circle-arrow-s' })
-			.button("option", "label", "More");
-		    };	
-	    });  
-	    
-	    $( "span#device_id" ).html(selected_device_id);
-	    $( "span#last_device_id" ).html(last_device_id);
-	    $( "span#version_id" ).html(version_id);
-	    
-	    $( "div#step-helper" ).dialog({
-				   title: 'How to use it?',
-				   resizable: false,
-				   height: 450,
-				   width: 420,
-			    }).parent().hide();
-			    
-	    $( "div#layout-legend" ).dialog({
-				   title: 'Legend for Layout',
-				   resizable: false,
-				   height: 150,
-				   width: 380,
-			    }).parent().hide();
+            $( ".column" ).sortable({
+                    cancel: ".portlet-content",
+                    connectWith: ".column",
+                    opacity: 0.7,
+            });
+            
+            load_theme( ".portlet" );
+             
+            $( "div#connections-tabs" ).tabs();
+            $( "div#results-tabs" ).tabs();
+            $( "ul#history-list" ).quickPager();
+            
+            $( "button#toggle-device-form" ).click(function(e) {
+                    e.preventDefault()
+                    $( this ).toggleClass( "ui-state-highlight" )
+                    $( this ).parents( ".portlet-content" ).find( ".advanced" ).toggle();
+                    if ($(this).hasClass( "ui-state-highlight" )) {
+                        $(this).button("option", "icons", { primary: 'ui-icon-circle-arrow-n' })
+                        .button("option", "label", "Collapse");
+                        
+                    } else {
+                        $(this).button("option", "icons", { primary: 'ui-icon-circle-arrow-s' })
+                        .button("option", "label", "Expand");
+                    };        
+            });  
+            
+            $( "span#device_id" ).html(selected_device_id);
+            $( "span#last_device_id" ).html(last_device_id);
+            $( "span#version_id" ).html(version_id);
+            
+            $( "div#step-helper" ).dialog({
+                                   title: 'How to use it?',
+                                   resizable: false,
+                                   height: 450,
+                                   width: 420,
+                            }).parent().hide();
+                            
+            $( "div#layout-legend" ).dialog({
+                                   title: 'Legend for Layout',
+                                   resizable: false,
+                                   height: 150,
+                                   width: 380,
+                            }).parent().hide();
     });
 
     var load_theme = function (portlet) {
-	    $( portlet ).addClass( "ui-widget ui-helper-clearfix ui-corner-top ui-shadow" )
-		.find( ".portlet-header" )
-			.addClass( "ui-widget-header ui-corner-top tipTip-top" )
-			.prepend( "<span class='ui-icon toggle ui-icon-minusthick'></span>")
-// 			.prepend( "<span class='ui-icon dialog ui-icon-newwin'></span>")
-			.end()
-		.find( ".portlet-content" )
-			.addClass( "ui-widget-content" );
-			
-			
-	    $( portlet ).find( ".portlet-header .toggle" ).click(function() {
-		    $( this ).toggleClass( "ui-icon-minusthick" ).toggleClass( "ui-icon-plusthick" );
-		    $( this ).parents( ".portlet:first" ).find( ".portlet-content" ).slideToggle();
-	    });
-	    
-	    $( portlet ).find( ".buttons")
-		.find( "button" ).button().end()
-		.find( ".delete" ).button({
-			icons: {
-			    primary: "ui-icon-trash"
-			},})
-		    .end()
-		.find( ".check" ).button({
-			icons: {
-			    primary: "ui-icon-check"
-			},})
-		    .end()
-		.find( ".reset" ).button({
-			icons: {
-			    primary: "ui-icon-arrowreturnthick-1-w"
-			},})
-		    .end()
-		.find( ".play" ).button({
-			icons: {
-			    primary: "ui-icon-play"
-			},})
-		    .end()
-		.find( ".zoomin" ).button({
-			icons: {
-			    primary: "ui-icon-zoomin"
-			}})
-		    .end()
-		.find( ".help" ).button({
-			icons: {
-			    primary: "ui-icon-help"
-			}})
-		    .end()	
-		.find( ".toggle" ).button({
-			icons: {
-			    primary: "ui-icon-circle-arrow-s"
-			}})
-		    .end()
-		.find( ".document" ).button({
-			icons: {
-			    primary: "ui-icon-document"
-			}})
-		    .end()
-		.find( ".favorite" ).button({
-			icons: {
-			    primary: "ui-icon-star"
-			}})
-		    .end();
-		    
-	    $( portlet ).find( "div.field-wrapper" ).tipTip({
-		    defaultPosition: 'right',
-		    delay: 1000,
-	    });
+            $( portlet ).addClass( "ui-widget ui-helper-clearfix ui-corner-top ui-shadow" )
+                .find( ".portlet-header" )
+                        .addClass( "ui-widget-header ui-corner-top tipTip-top" )
+                        .prepend( "<span class='ui-icon toggle ui-icon-minusthick'></span>")
+//                         .prepend( "<span class='ui-icon dialog ui-icon-newwin'></span>")
+                        .end()
+                .find( ".portlet-content" )
+                        .addClass( "ui-widget-content" );
+                        
+                        
+            $( portlet ).find( ".portlet-header .toggle" ).click(function() {
+                    $( this ).toggleClass( "ui-icon-minusthick" ).toggleClass( "ui-icon-plusthick" );
+                    $( this ).parents( ".portlet:first" ).find( ".portlet-content" ).slideToggle();
+            });
+            
+            $( portlet ).find( ".buttons")
+                .find( "button" ).button().end()
+                .find( ".delete" ).button({
+                        icons: {
+                            primary: "ui-icon-trash"
+                        },})
+                    .end()
+                .find( ".check" ).button({
+                        icons: {
+                            primary: "ui-icon-check"
+                        },})
+                    .end()
+                .find( ".reset" ).button({
+                        icons: {
+                            primary: "ui-icon-arrowreturnthick-1-w"
+                        },})
+                    .end()
+                .find( ".play" ).button({
+                        icons: {
+                            primary: "ui-icon-play"
+                        },})
+                    .end()
+                .find( ".zoomin" ).button({
+                        icons: {
+                            primary: "ui-icon-zoomin"
+                        }})
+                    .end()
+                .find( ".help" ).button({
+                        icons: {
+                            primary: "ui-icon-help"
+                        }})
+                    .end()        
+                .find( ".toggle" ).button({
+                        icons: {
+                            primary: "ui-icon-circle-arrow-s"
+                        }})
+                    .end()
+                .find( ".document" ).button({
+                        icons: {
+                            primary: "ui-icon-document"
+                        }})
+                    .end()
+                .find( ".favorite" ).button({
+                        icons: {
+                            primary: "ui-icon-star"
+                        }})
+                    .end();
+                    
+            $( portlet ).find( "div.field-wrapper" ).tipTip({
+                    defaultPosition: 'right',
+                    delay: 1000,
+            });
     };
 
     var device_list_preview = function (data) {
-	var label = data[0]['label'].replace("_", " "),
-	title = [], status = data[1];
-	for (var i in status) {
-	    title.push(' '+ i.toString() +': '+ status[i].toString());
-	    }
+        var label = data[0]['label'].replace("_", " "),
+        title = [], status = data[1];
+        for (var i in status) {
+            title.push(' '+ i.toString() +': '+ status[i].toString());
+            }
 
-// 	Add new device to the list
-	if (selected_device_id == last_device_id + 1) {
-	    var device = $( "#device-table > tbody tr:last" );
-	    $(device).after( $(device).clone() );
-	    $(device).attr('id', selected_device_id).addClass('enabled');
-	    
-	    $(device).find( "td.id" ).html(selected_device_id).end()
-		.find(" td.model" ).html(label);
-	    
-	    var term = 'added';
-	    last_device_id++;
-	} else {
-	    var device = $( "#"+ selected_device_id );
-	    var term = 'changed';
-	}
-	
-	if ('targets' in data[2]) { $(device).find( "td.targets" ).html(data[2]['targets'])}
-	else if ('sources' in data[2]) { $(device).find( "td.targets" ).html(data[2]['sources'])};
-	
-	if ('weight' in data[2]) {$(device).find( "td.weight" ).html(data[2]['weight'])}
-	if ('delay' in data[2]) {$(device).find( "td.delay" ).html(data[2]['delay'])};
-	
-	$(device).attr('title', title).tipTip({defaultPosition: 'right',}).show();
-	$( "#device-message" ).html("<li>"+ label +" ["+ selected_device_id +"] was "+ term +" successfully.</li>");
+//         Add new device to the list
+        if (selected_device_id == last_device_id + 1) {
+            var device = $( "#device-table > tbody tr:last" );
+            $(device).after( $(device).clone() );
+            $(device).attr('id', selected_device_id).addClass('enabled');
+            
+            $(device).find( "td.id" ).html(selected_device_id).end()
+                .find(" td.model" ).html(label);
+            
+            var term = 'added';
+            last_device_id++;
+        } else {
+            var device = $( "#"+ selected_device_id );
+            var term = 'changed';
+        }
+        
+        if ('targets' in data[2]) { $(device).find( "td.targets" ).html(data[2]['targets'])}
+        else if ('sources' in data[2]) { $(device).find( "td.targets" ).html(data[2]['sources'])};
+        
+        if ('weight' in data[2]) {$(device).find( "td.weight" ).html(data[2]['weight'])}
+        if ('delay' in data[2]) {$(device).find( "td.delay" ).html(data[2]['delay'])};
+        
+        $(device).attr('title', title).tipTip({defaultPosition: 'right',}).show();
+        $( "#device-message" ).html("<li>"+ label +" ["+ selected_device_id +"] was "+ term +" successfully.</li>");
     };
     
     var save_and_simulate = function () { 
-	var form = $( "#network-form" ).serialize();
-	var devices_json = JSON.stringify(device_list);
-	var post_data = form.concat('&devices_json='+ devices_json);
-// 	var post_data = {'csrfmiddlewaretoken':"{{ csrf_token }}", 'form': form, 'devices_json': devices_json};
-	
-	$.post('/network/ajax/'+ {{ network_obj.id }} +'/'+ version_id +'/simulate/',
-	    post_data, function(data){
-		if (data.valid == -1) {
-		    $( ".network-form-content" ).html(data.responseHTML);
-		} else if (data.recorded == 1) {
-		    $( "#dialog-simulating" ).dialog({
-			    title: "This network is already simulated.",
-			    resizable: false,
-			    width: 400,
-			    modal: true,
-			    buttons: {
-				ok: function() {
-				    $( this ).dialog( "close" );
-				}
-			    },
-		    });
-		} else {
-// 		    $( "#submit-network-form" ).attr("disabled", true);
-		    $( "#dialog-simulating" ).dialog({
-			    title: "Simulation has started.",
-			    resizable: false,
-			    height: 0,
-			    width: 400,
-			    buttons: {
-				'Abort': function() {
-				    $.getJSON('/network/ajax/'+ {{ network_obj.id }} +'/'+ version_id +'/simulate/',
-					{'task_id': task_id},
-					function() {
-					    $( this ).dialog( "close" );
-					    get_task_status();
-				    });
-				}
-			    }
-		    });
-		    task_id = data.task_id;
-		    $( "#task_id" ).html(task_id);
-		    get_task_status();
-		};
-	}, 'json');
+        var form = $( "#network-form" ).serialize();
+        var devices_json = JSON.stringify(device_list);
+        var post_data = form.concat('&devices_json='+ devices_json);
+//         var post_data = {'csrfmiddlewaretoken':"{{ csrf_token }}", 'form': form, 'devices_json': devices_json};
+        
+        $.post('/network/ajax/'+ {{ network_obj.id }} +'/'+ version_id +'/simulate/',
+            post_data, function(data){
+                if (data.valid == -1) {
+                    $( ".network-form-content" ).html(data.responseHTML);
+                } else if (data.recorded == 1) {
+                    $( "#dialog-simulating" ).dialog({
+                            title: "This network is already simulated.",
+                            resizable: false,
+                            width: 400,
+                            modal: true,
+                            buttons: {
+                                ok: function() {
+                                    $( this ).dialog( "close" );
+                                }
+                            },
+                    });
+                } else {
+//                     $( "#submit-network-form" ).attr("disabled", true);
+                    $( "#dialog-simulating" ).dialog({
+                            title: "Simulation has started.",
+                            resizable: false,
+                            height: 0,
+                            width: 400,
+                            buttons: {
+                                'Abort': function() {
+                                    $.getJSON('/network/ajax/'+ {{ network_obj.id }} +'/'+ version_id +'/simulate/',
+                                        {'task_id': task_id},
+                                        function() {
+                                            $( this ).dialog( "close" );
+                                            get_task_status();
+                                    });
+                                }
+                            }
+                    });
+                    task_id = data.task_id;
+                    $( "#task_id" ).html(task_id);
+                    get_task_status();
+                };
+        }, 'json');
     };
     
 //     LOOPING REQUEST FOR SIMULATION PROGRESS
     var get_task_status = function() {
-	$.getJSON('/'+task_id+'/status/?', function(data) {
-		var task = data['task'];
-		var status = task['status'];
-		$( "#task_status" ).html(status);
-		if (status == 'PENDING') {
-		    $( "#task_status" ).html('...simulating. Please wait.');
-		    window.setTimeout(function() {get_task_status()}, 1000);
-		} else {
-		    if (status == 'ABORTED') {
-			$( "#dialog-simulating" ).dialog({
-				title:"Simulation was aborted.",
-				buttons: {
-				    ok: function() {
-					$( this ).dialog( "close" );
-					$( "#dialog-loading" ).dialog({
-						title: 'Loading... please wait.',
-						resizable: false,
-						modal: true,
-					});
-					window.setTimeout(function() { window.location.reload() });
-				    }
-				},
-			});
-			$( "#task_status" ).html('Simulation aborted.').effect("highlight", {}, 1000);
-		    } else if (status == 'FAILURE') {
-			$( "#dialog-simulating" ).dialog({
-				title:"Simulation was failed.",
-				buttons: {
-				    ok: function() {
-					$( this ).dialog( "close" );
-					$( "#dialog-loading" ).dialog({
-						title: 'Loading... please wait.',
-						resizable: false,
-						modal: true,
-					});
-					window.setTimeout(function() { window.location.reload() });
-				    }
-				},
-			});
-			$( "#task_status" ).html('Simulation failure.').effect("highlight", {}, 1000);
-		    } else if (status == 'SUCCESS') {
-			$( "#dialog-simulating" ).dialog( {
-				title:"Simulation was finished successfully.",
-				buttons: {},
-			});
-			var result = task['result'];
-			$( "#task_status" ).html('Simulation finished successfully.').effect("highlight", {}, 1000);
-			window.setTimeout(function() {
-				window.location.href = '/network/'+ {{ network_obj.SPIC_id }} +'/'+ {{ network_obj.local_id }} +'/?version_id='+ result['version_id']
-			}, 1000);
-		    };
-		}
-	});
+        $.getJSON('/status/'+task_id+'/?', function(data) {
+                var task = data['task'];
+                var status = task['status'];
+                $( "#task_status" ).html(status);
+                if (status == 'PENDING') {
+                    $( "#task_status" ).html('...simulating. Please wait.');
+                    window.setTimeout(function() {get_task_status()}, 5000);
+                } else {
+                    if (status == 'ABORTED') {
+                        $( "#dialog-simulating" ).dialog({
+                                title:"Simulation was aborted.",
+                                buttons: {
+                                    ok: function() {
+                                        $( this ).dialog( "close" );
+                                        $( "#dialog-loading" ).dialog({
+                                                title: 'Loading... please wait.',
+                                                resizable: false,
+                                                modal: true,
+                                        });
+                                        window.location.reload();
+                                    }
+                                },
+                        });
+                        $( "#task_status" ).html('Simulation aborted.').effect("highlight", {}, 1000);
+                    } else if (status == 'FAILURE') {
+                        $( "#dialog-simulating" ).dialog({
+                                title:"Simulation was failed.",
+                                buttons: {
+                                    ok: function() {
+                                        $( this ).dialog( "close" );
+                                        $( "#dialog-loading" ).dialog({
+                                                title: 'Loading... please wait.',
+                                                resizable: false,
+                                                modal: true,
+                                        });
+                                        window.setTimeout(function() { window.location.reload() });
+                                    }
+                                },
+                        });
+                        $( "#task_status" ).html('Simulation failure.').effect("highlight", {}, 1000);
+                    } else if (status == 'SUCCESS') {
+                        $( "#dialog-simulating" ).dialog( {
+                                title:"Simulation was finished successfully.",
+                                buttons: {},
+                        });
+                        var result = task['result'];
+                        $( "#task_status" ).html('Simulation finished successfully.').effect("highlight", {}, 1000);
+                        window.setTimeout(function() {
+                                window.location.href = '/network/'+ {{ network_obj.SPIC_id }} +'/'+ {{ network_obj.local_id }} +'/?version_id='+ result['version_id']
+                        }, 1000);
+                    };
+                }
+        });
     };
     
     
@@ -296,303 +296,309 @@
 
 //     SELECT DEVICE TO CHANGE STATUS AND PARAMETERS
     $( "tr.enabled" ).find( "td.selectable" ).live('click',function(e) {
-	    e.preventDefault();
-	    $( "ul.errorlist" ).remove();
-	    $( ".device-form" ).find( "input:text" ).val("");
-	    $( "option:first" ).show().attr('selected', 'selected');
-	    selected_device_id = $(this).parent( ".enabled" ).attr('id')
-	    var device = device_list[selected_device_id-1];
-	    if ($( "#"+device[0].label ).is(":visible") && $( "#device_id" ).html() == selected_device_id) {
-		$( "#device_id" ).html("")
-		$( "#"+device[0].label ).toggle()
-	    } else {
-		$( "#device_id" ).html(selected_device_id)
-		$( "tr.enabled" ).each(function() {
-			if ($(this).attr('id') != selected_device_id && $(this).children("td").hasClass("ui-state-highlight")) {
-			    $(this).children("td").toggleClass("ui-state-highlight");
-			}
-		});
-		$( ".device-form:visible" ).toggle();
-		var form = $( "#"+device[0].label ).children();
-		$(form).find( "#selected_device_id" ).html(selected_device_id).end()
-		    .find( "#id_model" ).val(device[0]['label']);
-		for (var key in device[1]) {
-		    $(form).find( "#id_"+ key ).val(device[1][key]);
-		};
-		for (var key in device[2]) {
-		    $(form).find( "#id_"+ key ).val(device[2][key]);
-		};
-		$( "#"+device[0].label).toggle();
-	    }
+            e.preventDefault();
+            $( "ul.errorlist" ).remove();
+            $( ".device-form" ).find( "input:text" ).val("");
+            $( "option:first" ).show().attr('selected', 'selected');
+            selected_device_id = $(this).parent( ".enabled" ).attr('id')
+            var device = device_list[selected_device_id-1];
+            if ($( "#"+device[0].label ).is(":visible") && $( "#device_id" ).html() == selected_device_id) {
+                $( "#device_id" ).html("")
+                $( "#"+device[0].label ).toggle()
+            } else {
+                $( "#device_id" ).html(selected_device_id)
+                $( "tr.enabled" ).each(function() {
+                        if ($(this).attr('id') != selected_device_id && $(this).children("td").hasClass("ui-state-highlight")) {
+                            $(this).children("td").toggleClass("ui-state-highlight");
+                        }
+                });
+                $( ".device-form:visible" ).toggle();
+                var form = $( "#"+device[0].label ).children();
+                $(form).find( "#selected_device_id" ).html(selected_device_id).end()
+                    .find( "#id_model" ).val(device[0]['label']);
+                for (var key in device[1]) {
+                    $(form).find( "#id_"+ key ).val(device[1][key]);
+                };
+                for (var key in device[2]) {
+                    $(form).find( "#id_"+ key ).val(device[2][key]);
+                };
+                $( "#"+device[0].label).toggle();
+            }
     });
 
 //     COMMIT TO WRITE DEVICES INTO DATABASE
     $( "button#delete-devices" ).live('click', function(e) {
-	    e.preventDefault();
-	    $( this ).toggleClass( "ui-state-highlight" )
-    	    if ($( "table#device-table .delete" ).is(":visible") && $( "table#device-table .delete" ).find( "input" ).is(":checked")) {
-		$(".devices-form").submit();
-	    } else {
-		$( "table#device-table .delete" ).toggle();
-	    };
+            e.preventDefault();
+            $( this ).toggleClass( "ui-state-highlight" )
+                if ($( "table#device-table .delete" ).is(":visible") && $( "table#device-table .delete" ).find( "input" ).is(":checked")) {
+                $(".devices-form").submit();
+            } else {
+                $( "table#device-table .delete" ).toggle();
+            };
     });
 
     $( "button#save-devices" ).live('click', function(e) {
-	    e.preventDefault();
-	    $( ".device-form" ).hide();
-	    var devices_json = JSON.stringify(device_list);
-	    $.post('{% url device_commit network_obj.id %}',
-		    {'csrfmiddlewaretoken':"{{ csrf_token }}", 'devices_json':devices_json},
-		    function() {
-			    $( "#dialog-loading" ).dialog({
-				    title: 'Loading... please wait.',
-				    resizable: false,
-				    modal: true,
-			    });
-			    window.setTimeout(function() { 
-				    window.location.href = '{% url network network_obj.SPIC_id network_obj.local_id %}' 
-			    }, 1000);
-	    }, 'json');
+            e.preventDefault();
+            $( ".device-form" ).hide();
+            var devices_json = JSON.stringify(device_list);
+            $.post('{% url device_commit network_obj.id %}',
+                    {'csrfmiddlewaretoken':"{{ csrf_token }}", 'devices_json':devices_json},
+                    function() {
+                            $( "#dialog-loading" ).dialog({
+                                    title: 'Loading... please wait.',
+                                    resizable: false,
+                                    modal: true,
+                            });
+                            window.setTimeout(function() { 
+                                    window.location.href = '{% url network network_obj.SPIC_id network_obj.local_id %}' 
+                            }, 1000);
+            }, 'json');
     });
 
     $( "button#help-network" ).live('click',function(e) {
-	    e.preventDefault();
-	    $( "#step-helper" ).parent().slideToggle();	    
+            e.preventDefault();
+            $( "#step-helper" ).parent().slideToggle();            
     });     
     
 //     SELECT A DEVICE TO ADD
     $( "select#id_label" ).live('change', function(e) {
-	    e.preventDefault()
-	    $( "ul.errorlist" ).remove();
-	    selected_device_id = last_device_id+1
-	    $( "span#device_id" ).html(selected_device_id);
-	    $( "tr.enabled" ).each(function() {
-			if ($(this).attr('id') != selected_device_id && $(this).children("td").hasClass("ui-state-highlight")) {
-			    $(this).children("td").toggleClass("ui-state-highlight");
-			}
-		});
-	    $( ".device-form:visible" ).toggle();
-	    $( "#"+ $(this).val() )
-		.find( "#selected_device_id" ).html(selected_device_id).end()
-		.find( "#id_model" ).attr('value', $(this).val()).end()
-		.show()
+            e.preventDefault()
+            $( "ul.errorlist" ).remove();
+            selected_device_id = last_device_id+1
+            $( "span#device_id" ).html(selected_device_id);
+            $( "tr.enabled" ).each(function() {
+                        if ($(this).attr('id') != selected_device_id && $(this).children("td").hasClass("ui-state-highlight")) {
+                            $(this).children("td").toggleClass("ui-state-highlight");
+                        }
+                });
+            $( ".device-form:visible" ).toggle();
+            $( "#"+ $(this).val() )
+                .find( "#selected_device_id" ).html(selected_device_id).end()
+                .find( "#id_model" ).attr('value', $(this).val()).end()
+                .show()
     });
     
     
     $( "form.device-form" ).live('submit',  function(e) {
-	    e.preventDefault();
-	    $.post('{% url device_preview network_obj.id %}',
-		$(this).serialize(), function(data){
-		    var form = $( "#"+ data.id_label +"-form-content" )
-		    $(form).html(data.responseHTML).find( "#selected_device_id" ).html(selected_device_id);
-		    load_theme( $(form).parent() );
-		    if (data.valid != -1) {
-			version_id = 0;
-			if ($( "select#id_label" ).val() == 'voltmeter' || $("select#id_label" ).val() == 'spike_detector') {
-			    $( "select#id_label option:selected" ).hide()
-			};
-			$( "option:first" ).attr('selected', 'selected');
-			data.device[0]["id"] = selected_device_id
-			if (selected_device_id > device_list.length) {
-			    device_list.push(data.device)
-			} else {
-			    device_list[selected_device_id-1] = data.device
-			};
-			device_list_preview(data.device);
-		    };
-	    }, 'json');
+            e.preventDefault();
+            $.post('{% url device_preview network_obj.id %}',
+                $(this).serialize(), function(data){
+                    var form = $( "#"+ data.id_label +"-form-content" )
+                    $(form).html(data.responseHTML).find( "#selected_device_id" ).html(selected_device_id);
+                    load_theme( $(form).parent() );
+                    if (data.valid != -1) {
+                        version_id = 0;
+                        if ($( "select#id_label" ).val() == 'voltmeter' || $("select#id_label" ).val() == 'spike_detector') {
+                            $( "select#id_label option:selected" ).hide()
+                        };
+                        $( "option:first" ).attr('selected', 'selected');
+                        data.device[0]["id"] = selected_device_id
+                        if (selected_device_id > device_list.length) {
+                            device_list.push(data.device)
+                        } else {
+                            device_list[selected_device_id-1] = data.device
+                        };
+                        device_list_preview(data.device);
+                    };
+            }, 'json');
     });
     
     $( "#help-steps #device-add" ).live('click', function() {
-	    $( "#device-select" ).find( ".ui-widget-content" ).effect("highlight", {}, 1000);
+            $( "#device-select" ).find( ".ui-widget-content" ).effect("highlight", {}, 1000);
     });
-	    
+            
     $( "#help-steps #devices-save" ).live('click', function() {
-	    $( "#device-list" ).find( ".buttons" ).effect("highlight", {}, 1000);
+            $( "#device-list" ).find( ".buttons" ).effect("highlight", {}, 1000);
     });
-	    
+            
     $( "#help-steps #layout-explore" ).live('click', function() {
-	    $( "#network_layout" ).find( ".ui-widget-header" ).effect("highlight", {}, 1000);
+            $( "#network_layout" ).find( ".ui-widget-header" ).effect("highlight", {}, 1000);
     });
-	    
+            
     $( "#help-steps #matrix-check" ).live('click', function() {
-	    $( "#connectivity_matrix" ).find( "tr" ).effect("highlight", {}, 1000);
+            $( "#connectivity_matrix" ).find( "tr" ).effect("highlight", {}, 1000);
     });
-	    
+            
     $( "#help-steps #device-change" ).live('click', function() {
-	    $( "#device-list" ).find( "tr.enabled" ).effect("highlight", {}, 1000);
-    });	    
+            $( "#device-list" ).find( "tr.enabled" ).effect("highlight", {}, 1000);
+    });            
 
     $( "#help-steps #status-run" ).live('click', function() {
-	    $( "#network-form" ).find( ".ui-widget-header" ).effect("highlight", {}, 1000);
+            $( "#network-form" ).find( ".ui-widget-header" ).effect("highlight", {}, 1000);
     });
     
   
     $( "form#network-form" ).live('submit',  function(e) {
-	    e.preventDefault();
-	    if ($( "#id_duration" ).val() > 5000.0) {
-		$( "#dialog-confirmSimulation" ).dialog({
-			resizable: false,
-			height: 200,
-			modal: true,
-			buttons: {
-			    "Yeah": function() {
-				$( this ).dialog( "close" );
-				save_and_simulate();
-			    },
-			    Cancel: function() {
-				    $( this ).dialog( "close" );
-			    },
-			},
-		});
-	    } else {
-		save_and_simulate()
-	    }
+            e.preventDefault();
+            if ($( "#id_duration" ).val() > 5000.0) {
+                $( "#dialog-confirmSimulation" ).dialog({
+                        resizable: false,
+                        height: 210,
+                        width: 380,
+                        modal: true,
+                        buttons: {
+                            "Yeah": function() {
+                                $( this ).dialog( "close" );
+                                save_and_simulate();
+                            },
+                            Cancel: function() {
+                                    $( this ).dialog( "close" );
+                            },
+                        },
+                });
+            } else {
+                save_and_simulate()
+            }
     });
-	    
+            
 
 // NETWORK LAYOUT
     {% if holder %}
-	$( ".portlet-header" ).find( ".dialog" ).live('click', function(e) {
-		e.preventDefault();
-		var popup = $( this ).parents( ".portlet" )
-		$( popup ).find( ".portlet-content" )
-		    .clone()
-		    .dialog({
-			title: "Network layout",
-			width: holder[0]+60,
-			height: holder[1]+125,
-			close: function(ev, ui) { 
-			    $( this ).remove();
-			    $( popup ).show()
-			}
-		});	  
-		$( popup ).hide();
-	});
+        $( ".portlet-header" ).find( ".dialog" ).live('click', function(e) {
+                e.preventDefault();
+                var popup = $( this ).parents( ".portlet" )
+                $( popup ).find( ".portlet-content" )
+                    .clone()
+                    .dialog({
+                        title: "Network layout",
+                        width: holder[0]+60,
+                        height: holder[1]+125,
+                        close: function(ev, ui) { 
+                            $( this ).remove();
+                            $( popup ).show()
+                        }
+                });          
+                $( popup ).hide();
+        });
     {% endif %}
+
+    $( "button#default-devices" ).live('click', function(e) {
+            e.preventDefault();
+            window.location.href = '{% url network network_obj.SPIC_id network_obj.local_id %}?layout=default'
+    });
     
     $( "button#layout-legend" ).live('click',function(e) {
-	    e.preventDefault();
-	    $( "div#layout-legend" ).parent().slideToggle();	    
+            e.preventDefault();
+            $( "div#layout-legend" ).parent().slideToggle();            
     });
 
 // COMMENT 
     {% if comment_form %}
-	$( "form#comment-form" ).live('submit',  function(e) {
-		e.preventDefault();
-		$.post('{% url result_comment result_obj.id %}',
-		    $( this ).serialize(), function(data){
-			$( "#history_{{version_id}} a" ).attr('title',data).tipTip({defaultPosition:'left'});
-		}, 'html');		
-	});
+        $( "form#comment-form" ).live('submit',  function(e) {
+                e.preventDefault();
+                $.post('{% url result_comment result_obj.id %}',
+                    $( this ).serialize(), function(data){
+                        $( "#history_{{version_id}} a" ).attr('title',data).tipTip({defaultPosition:'left'});
+                }, 'html');                
+        });
     {% endif %}
 
 // HISTORY LIST
     $( "ul#history-list div.version-link" ).live('click', function (e) {
-	    $(".ui-dialog-content" ).html($( this ).attr('title'));
-	    $( "#dialog-loading" ).dialog({
-		    title: 'Loading... please wait.',
-		    resizable: false,
-		    modal: true,
-	    });
-	    window.location.href = $( this ).find( "a" ).attr('href')
+            $(".ui-dialog-content" ).html($( this ).attr('title'));
+            $( "#dialog-loading" ).dialog({
+                    title: 'Loading... please wait.',
+                    resizable: false,
+                    modal: true,
+            });
+            window.location.href = $( this ).find( "a" ).attr('href')
     });
     
-    $( "button#delete-versions" ).live('click', function(e) {
-	    e.preventDefault();
-	    if ($( "ul#history-list input" ).is(":checked")) {
-		$( ".versions-form" ).submit();
-	    };
-    });	
+    $( "button#go-versions" ).live('click', function(e) {
+            e.preventDefault();
+            if ($( "ul#history-list input" ).is(":checked")) {
+                $( ".versions-form" ).submit();
+            };
+    });
     
 // RESULTS
     {% if result_obj.has_voltmeter %}
-	$( "button#reload" ).live('click', function(e) {
-		$( "div#VoltmeterThumbnail" ).html('<iframe src="{% url voltmeter_thumbnail result_obj.id %}"> </iframe>');
-	});
+        $( "button#reload" ).live('click', function(e) {
+                $( "div#VoltmeterThumbnail" ).html('<iframe src="{% url voltmeter_thumbnail result_obj.id %}"> </iframe>');
+        });
 
-	$( "select#voltmeter-select" ).live('change',function(e) {
-		$( ".resultView" ).attr('src', $( this ).val());
-		$( "#dialog-resultView" ).dialog({
-			title: 'Voltmeter view of '+ $( this ).find( "option:selected" ).attr('name'),
-			height: 550,
-			width: 800,
-			modal: true,
-		});
-		$( "#voltmeter-select option:first" ).attr('selected', 'selected');
-	});
+        $( "select#voltmeter-select" ).live('change',function(e) {
+                $( ".resultView" ).attr('src', $( this ).val());
+                $( "#dialog-resultView" ).dialog({
+                        title: 'Voltmeter view of '+ $( this ).find( "option:selected" ).attr('name'),
+                        height: 550,
+                        width: 800,
+                        modal: true,
+                });
+                $( "#voltmeter-select option:first" ).attr('selected', 'selected');
+        });
     {% endif %}
     
 //     $("#VoltmeterThumbnail").contents().find(".voltmeter").live('click', function() {
-// 		$( ".resultView" ).attr('src', $( this ).val());
-// 		$( "#dialog-resultView" ).dialog({
-// 			title: 'Voltmeter view of '+ $( this ).find( "option:selected" ).attr('name'),
-// 			height: 550,
-// 			width: 800,
-// 			modal: true,
-// 		});
-// 	});
-	
+//                 $( ".resultView" ).attr('src', $( this ).val());
+//                 $( "#dialog-resultView" ).dialog({
+//                         title: 'Voltmeter view of '+ $( this ).find( "option:selected" ).attr('name'),
+//                         height: 550,
+//                         width: 800,
+//                         modal: true,
+//                 });
+//         });
+        
     {% if result_obj.has_spike_detector %}
-	$( "button#spike_detector-link" ).live('click',function(e) {
-		$( ".resultView" ).attr('src', "{% url spike_detector result_obj.id %}");
-		$( "#dialog-resultView" ).dialog({
-			title: 'Spike Detector view of all sources',
-			height: 550,
-			width: 800,
-			modal: true,
-		});
-	});
+        $( "button#spike_detector-link" ).live('click',function(e) {
+                $( ".resultView" ).attr('src', "{% url spike_detector result_obj.id %}");
+                $( "#dialog-resultView" ).dialog({
+                        title: 'Spike Detector view of all sources',
+                        height: 550,
+                        width: 800,
+                        modal: true,
+                });
+        });
     {% endif %}
     
     $(document).ready(function() {
-// 	    $('#switcher').themeswitcher();
-	    
-	    $( "table tr" ).each(function(){
-		    $( this ).addClass("tipTip-right");
-	    });
-	    $( "table th" ).each(function(){
-		    $( this ).addClass("ui-state-default");
-	    });
-	    $( "table td" ).each(function(){
-		    $( this ).addClass("ui-widget-content");
-	    });
-	    $( "table tr.enabled" ).hover(
-		    function(){
-			$( this ).children("td").addClass("ui-state-hover");
-		    },function(){
-			$( this ).children("td").removeClass("ui-state-hover");
-	    });
-	    $( "table tr.enabled" ).click(function(){
-		    $( this ).children( "td" ).toggleClass("ui-state-highlight");
-	    });
-	    
-	    $( "ul#history-list li" ).each(function(){
-		    $( this ).addClass("ui-widget-content");
-	    });
-	    
-	    $( "li" ).hover(
-		    function(){
-			$( this ).addClass("ui-state-hover");
-		    },function(){
-			$( this ).removeClass("ui-state-hover");
-	    });
-	    
-	    $( ".ui-tabs .ui-tabs-nav" ).removeClass("ui-widget-header");
-	    
-	    $( ".tipTip-top" ).tipTip({
-		    delay: 1000,
-		    defaultPosition: 'top',
-	    });
-	    
-	    $( ".tipTip-right" ).tipTip({
-		    defaultPosition: 'right',
-	    });
-	    
-	    $( ".tipTip-left" ).tipTip({
-		    defaultPosition: 'left',
-	    });
-	    
+//             $('#switcher').themeswitcher();
+            
+            $( "table tr" ).each(function(){
+                    $( this ).addClass("tipTip-right");
+            });
+            $( "table th" ).each(function(){
+                    $( this ).addClass("ui-state-default");
+            });
+            $( "table td" ).each(function(){
+                    $( this ).addClass("ui-widget-content");
+            });
+            $( "table tr.enabled" ).hover(
+                    function(){
+                        $( this ).children("td").addClass("ui-state-hover");
+                    },function(){
+                        $( this ).children("td").removeClass("ui-state-hover");
+            });
+            $( "table tr.enabled" ).click(function(){
+                    $( this ).children( "td" ).toggleClass("ui-state-highlight");
+            });
+            
+            $( "ul#history-list li" ).each(function(){
+                    $( this ).addClass("ui-widget-content");
+            });
+            
+            $( "li" ).hover(
+                    function(){
+                        $( this ).addClass("ui-state-hover");
+                    },function(){
+                        $( this ).removeClass("ui-state-hover");
+            });
+            
+            $( ".ui-tabs .ui-tabs-nav" ).removeClass("ui-widget-header");
+            
+            $( ".tipTip-top" ).tipTip({
+                    delay: 1000,
+                    defaultPosition: 'top',
+            });
+            
+            $( ".tipTip-right" ).tipTip({
+                    defaultPosition: 'right',
+            });
+            
+            $( ".tipTip-left" ).tipTip({
+                    defaultPosition: 'left',
+            });
+            
     });
     
     
@@ -631,448 +637,455 @@
 
     <!-- DEVICES -->
     <div class="column" id="devices">
-	
-	<!-- DEVICE LIST -->
-	<div class="portlet" id="device-list">
-	    <div class="portlet-header" title="Hover a device to get more parameters or click a enabled device to modify it.">
-		Devices
-	    </div>
-	    
-	    <div class="portlet-content">
-		
-		<form action="." method="POST" class="devices-form">
-		    {% csrf_token %}
-		    <table id="device-table">
-			<thead>
-			    <tr>
-				<th class="delete collapse"></th>
-				<th>Id</th>
-				<th>Device</th>
-				<th>Targets</th>
-				<th>Weight</th>
-				<th>Delay</th>
-			    </tr>
-			</thead>
-			
-			<tbody>
-			    {% if network_obj.device_list|length > 0 %}
-				{% for model, status, connections in network_obj.device_list %}
+        
+        <!-- DEVICE LIST -->
+        <div class="portlet" id="device-list">
+            <div class="portlet-header" title="Hover a device to get more parameters or click a enabled device to modify it.">
+                Devices
+            </div>
+            
+            <div class="portlet-content">
+                
+                <form action="." method="POST" class="devices-form">
+                    {% csrf_token %}
+                    <table id="device-table">
+                        <thead>
+                            <tr>
+                                <th class="delete collapse"></th>
+                                <th>Id</th>
+                                <th>Device</th>
+                                <th>Targets</th>
+                                <th>Weight</th>
+                                <th>Delay</th>
+                            </tr>
+                        </thead>
+                        
+                        <tbody>
+                            {% if network_obj.device_list|length > 0 %}
+                                {% for model, status, connections in network_obj.device_list %}
                                     <tr {% if network_obj.SPIC_id == "1" %}
-					    {% if model.type != "neuron" %} class="enabled" {% endif %}"
-					{% else %} class="enabled" {% endif %}"
-					title="{{ status|itemize|default_if_none:'no status' }}" id="{{ model.id }}">
-					<td class="delete collapse"><input type="checkbox" name="device_ids" value="{{model.id}}" {% if network_obj.SPIC_id == "1" and model.type == "neuron" %} disabled {% endif %}></td>
-					<td class="selectable id"><b>{{ model.id }}</b></td>
-					<td class="selectable model {% if network_obj.SPIC_id == "1" and model.type == "neuron" %} disabled {% endif %}">{{ model.label|readable }}</td>
-					<td class="selectable targets">
-					{% if connections.targets %}
-						{{ connections.targets|truncate:"15"}}
-					{% else %}
-						{{ connections.sources|truncate:"15"}}
-					{% endif %}
-					</td>
-					<td class="selectable weight">{{ connections.weight|truncate:"9" }}</td>
-					<td class="selectable delay">{{ connections.delay|truncate:"9" }}</td>
-				    </tr>
+                                            {% if model.type != "neuron" %} class="enabled" {% endif %}"
+                                        {% else %} class="enabled" {% endif %}"
+                                        title="{{ status|itemize|default_if_none:'no status' }}" id="{{ model.id }}">
+                                        <td class="delete collapse"><input type="checkbox" name="device_ids" value="{{model.id}}" {% if network_obj.SPIC_id == "1" and model.type == "neuron" %} disabled {% endif %}></td>
+                                        <td class="selectable id"><b>{{ model.id }}</b></td>
+                                        <td class="selectable model {% if network_obj.SPIC_id == "1" and model.type == "neuron" %} disabled {% endif %}">{{ model.label|readable }}</td>
+                                        <td class="selectable targets">
+                                        {% if connections.targets %}
+                                                {{ connections.targets|truncate:"15"}}
+                                        {% else %}
+                                                {{ connections.sources|truncate:"15"}}
+                                        {% endif %}
+                                        </td>
+                                        <td class="selectable weight">{{ connections.weight|truncate:"9" }}</td>
+                                        <td class="selectable delay">{{ connections.delay|truncate:"9" }}</td>
+                                    </tr>
                                  {% endfor %}
-			    {% endif %}
-			    
-			    <tr class="collapse">
-				<td class="delete collapse"></td>
-				<td class="selectable id"></td>
-				<td class="selectable model"></td>
-				<td class="selectable targets"></td>
-				<td class="selectable weight"></td>
-				<td class="selectable delay"></td>
-			    </tr>
-			    
-			</tbody>
-			
-		    </table>
+                            {% endif %}
+                            
+                            <tr class="collapse">
+                                <td class="delete collapse"></td>
+                                <td class="selectable id"></td>
+                                <td class="selectable model"></td>
+                                <td class="selectable targets"></td>
+                                <td class="selectable weight"></td>
+                                <td class="selectable delay"></td>
+                            </tr>
+                            
+                        </tbody>
+                        
+                    </table>
 
-		    <div class="buttons">
-			<button class="delete" id="delete-devices">Delete</button>
-			<button class="check" id="save-devices">Save</button>
-			<button class="help" id="help-network">Help</button>
-		    </div>
-		    
-		    <ul class="messagelist" id="device-message"></ul>
-		    
-		</form>
-	    </div>
-	</div>
+                    <div class="buttons">
+                        <button class="delete" id="delete-devices">Delete</button>
+                        <button class="check" id="save-devices">Save</button>
+                        <button class="help" id="help-network">Help</button>
+                    </div>
+                    
+                    <ul class="messagelist" id="device-message"></ul>
+                    
+                </form>
+            </div>
+        </div>
 
-	<!-- DEVICE SELECT -->
-	<div class="portlet" id="device-select">
-	    <div class="portlet-content">
-		<div class="field-wrapper">
-		    <label for="device-select">Add a device:</label>
-		    <select id="id_label">
-			<option value="">--- select a device ---</option>
-			{% for device in device_choices %}
-			    <option value="{{device.id_label}}">{{device.id_label|readable}}</option>
-			{% endfor %}
-		    </select>
-		</div>
-	    </div>
-	</div>
+        <!-- DEVICE SELECT -->
+        <div class="portlet" id="device-select">
+            <div class="portlet-content">
+                <div class="field-wrapper">
+                    <label for="device-select">Add a device:</label>
+                    <select id="id_label">
+                        <option value="">--- select a device ---</option>
+                        {% for device in device_choices %}
+                            <option value="{{device.id_label}}">{{device.id_label|readable}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
 
-	<!-- DEVICE FORMS -->
-	{% for forms in device_formsets %}
-	    <form action="." method="POST" class="portlet device-form" id="{{forms.id_label}}">
-		{% csrf_token %}
-		<div id="{{forms.id_label}}-form-content">
-		    {{forms.formsHTML}}
-		</div>
-		
-	    </form>
-	{% endfor %}
-	
-	</div>
+        <!-- DEVICE FORMS -->
+        {% for forms in device_formsets %}
+            <form action="." method="POST" class="portlet device-form" id="{{forms.id_label}}">
+                {% csrf_token %}
+                <div id="{{forms.id_label}}-form-content">
+                    {{forms.formsHTML}}
+                </div>
+                
+            </form>
+        {% endfor %}
+        
+        </div>
     </div>
     
     <!-- NETWORK -->
     <div class="column" id="network">
-	{% if network_obj.devices_json %} 
-	<!--     CONNECTIVITY MATRIX  -->
-	    {% if network_obj.neuron_ids|length <= 10 %}
-		<div class="portlet" id="connectivity_matrix">
-		    <div class="portlet-header">
-			Connectivity matrix
-		    </div>
-		    
-		    <div class="portlet-content">
-			<div id="connections-tabs">
-			    <ul>
-				{% if network_obj.weight_list %}<li><a href="#weights-tab">Weights (pA)</a></li>{% endif %}
-				{% if network_obj.delay_list %}<li><a href="#delays-tab">Delays (ms)</a></li>{% endif %}
-			    </ul>
-			    
-	    <!-- 		WEIGHT TAB -->
-			    {% if network_obj.weight_list %}
-				<div id="weights-tab">
-				    <table class="connections-table" id="weight-table">
-					<thead>
-					<tr><td colspan="{{network_obj.neuron_ids|length|add:2}}"><span class="connections-tabs" id="target_title">Target</span></td></tr>
-					<tr>
-					    <th></th><th>Id</th>
-					    <th>{{network_obj.neuron_ids|join:"</th><th>"}}</th>
-					</tr>
-					</thead>
-					
-					<tbody>
-					    {% for id, weights in network_obj.weight_list %}
-						<tr>
-						    {% if forloop.first %}
-							<td class="first-col" rowspan="{{network_obj.weight_list|length}}">
-							    <span class="connections-tabs {% if network_obj.weight_list|length > 3 %}verticaltext{% endif %}" id="source_title">Source</span>
-							</td>
-						    {% endif %}
-						    <td class="connections-table"><b>{{id}}</b></td>
-						    <td class="connections-table">{{weights|join:'</td><td class="connections-table">'}}</td>
-						</tr>
-					    {% endfor %}
-					<tbody>
-				    </table>
-				</div>
-			    {% endif %}
-			    
-			    
-	    <!-- 		DELAY TAB -->
-			    {% if network_obj.delay_list %}
-				<div id="delays-tab">
-				    <table class="connections-table" id="weight-table">
-					<thead>
-					<tr><td colspan="{{network_obj.neuron_ids|length|add:2}}"><span class="connections-tabs" id="target_title">Target</span></td></tr>
-					<tr>
-					    <th></th><th>Id</th>
-					    <th>{{network_obj.neuron_ids|join:"</th><th>"}}</th>
-					</tr>
-					</thead>
-					
-					<tbody>
-					    {% for id, delays in network_obj.delay_list %}
-						<tr>
-						    {% if forloop.first %}
-							<td class="first-col" rowspan="{{network_obj.delay_list|length}}">
-							    <span class="connections-tabs {% if network_obj.delay_list|length > 3 %}verticaltext{% endif %}" id="source_title">Source</span>
-							</td>
-						    {% endif %}
-						    <td class="connections-table"><b>{{id}}</b></td>
-						    <td class="connections-table">{{delays|join:'</td><td class="connections-table">'}}</td>
-						</tr>
-					    {% endfor %}
-					<tbody>
-				    </table>
-				</div>
-			    {% endif %}
-			</div>
-		    </div>
-		</div>
-	    {% endif %}
-	    
+        {% if network_obj.devices_json %} 
+        <!--     CONNECTIVITY MATRIX  -->
+            {% if network_obj.neuron_ids|length <= 10 %}
+                <div class="portlet" id="connectivity_matrix">
+                    <div class="portlet-header">
+                        Connectivity matrix
+                    </div>
+                    
+                    <div class="portlet-content">
+                        <div id="connections-tabs">
+                            <ul>
+                                {% if network_obj.weight_list %}<li><a href="#weights-tab">Weights (pA)</a></li>{% endif %}
+                                {% if network_obj.delay_list %}<li><a href="#delays-tab">Delays (ms)</a></li>{% endif %}
+                            </ul>
+                            
+            <!--                 WEIGHT TAB -->
+                            {% if network_obj.weight_list %}
+                                <div id="weights-tab">
+                                    <table class="connections-table" id="weight-table">
+                                        <thead>
+                                        <tr><td colspan="{{network_obj.neuron_ids|length|add:2}}"><span class="connections-tabs" id="target_title">Target</span></td></tr>
+                                        <tr>
+                                            <th></th><th>Id</th>
+                                            <th>{{network_obj.neuron_ids|join:"</th><th>"}}</th>
+                                        </tr>
+                                        </thead>
+                                        
+                                        <tbody>
+                                            {% for id, weights in network_obj.weight_list %}
+                                                <tr>
+                                                    {% if forloop.first %}
+                                                        <td class="first-col" rowspan="{{network_obj.weight_list|length}}">
+                                                            <span class="connections-tabs {% if network_obj.weight_list|length > 3 %}verticaltext{% endif %}" id="source_title">Source</span>
+                                                        </td>
+                                                    {% endif %}
+                                                    <td class="connections-table"><b>{{id}}</b></td>
+                                                    <td class="connections-table">{{weights|join:'</td><td class="connections-table">'}}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        <tbody>
+                                    </table>
+                                </div>
+                            {% endif %}
+                            
+                            
+            <!--                 DELAY TAB -->
+                            {% if network_obj.delay_list %}
+                                <div id="delays-tab">
+                                    <table class="connections-table" id="weight-table">
+                                        <thead>
+                                        <tr><td colspan="{{network_obj.neuron_ids|length|add:2}}"><span class="connections-tabs" id="target_title">Target</span></td></tr>
+                                        <tr>
+                                            <th></th><th>Id</th>
+                                            <th>{{network_obj.neuron_ids|join:"</th><th>"}}</th>
+                                        </tr>
+                                        </thead>
+                                        
+                                        <tbody>
+                                            {% for id, delays in network_obj.delay_list %}
+                                                <tr>
+                                                    {% if forloop.first %}
+                                                        <td class="first-col" rowspan="{{network_obj.delay_list|length}}">
+                                                            <span class="connections-tabs {% if network_obj.delay_list|length > 3 %}verticaltext{% endif %}" id="source_title">Source</span>
+                                                        </td>
+                                                    {% endif %}
+                                                    <td class="connections-table"><b>{{id}}</b></td>
+                                                    <td class="connections-table">{{delays|join:'</td><td class="connections-table">'}}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        <tbody>
+                                    </table>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            
 
-	<!--     SIMULATION -->
-	    <form action="." method="POST" class="portlet" id="network-form">
-		<div class="portlet-header" title="Before you start it, be sure that you have saved devices.">
-		    Simulation
-		</div>
-		
-		<div class="portlet-content">
-		    {% csrf_token %}
-		    
-		    <div class="network-form-content">
-			{% if network_form.fieldsets %}
-			    {% for fieldset in network_form.fieldsets %}
-				<div class="{{ fieldset.classes }}">
-				{% if fieldset.description %}
-				    <p class="description">{{ fieldset.description }}</p>
-				{% endif %}
-				{% for field in fieldset %}
-				    {% if field.is_hidden %}
-				    {{ field }}
-				    {% else %}
-				    <div class="field-wrapper" title="{{ field.help_text }}" >
-					{{ field.errors }}
-					{{ field.label_tag }}
-					{{ field }}
-				    </div>
-				    {% endif %}
-				{% endfor %}
-				</div>
-			    {% endfor %}
-			{% else %}
-			    {{ network_form.as_div }}
-			{% endif %}
-		    </div>
-		    
-		    <div class="buttons">
-			<button type="submit" class="play" id="submit-network-form">Save & simulate</button>
-			<button class="toggle" id="toggle-device-form">More</button>
-			<span id="task_status"></span>
-		    </div>
-		</div>
-	    </form>
-	{% endif %}
-	
+        <!--     SIMULATION -->
+            <form action="." method="POST" class="portlet" id="network-form">
+                <div class="portlet-header" title="Before you start it, be sure that you have saved devices.">
+                    Simulation
+                </div>
+                
+                <div class="portlet-content">
+                    {% csrf_token %}
+                    
+                    <div class="network-form-content">
+                        {% if network_form.fieldsets %}
+                            {% for fieldset in network_form.fieldsets %}
+                                <div class="{{ fieldset.classes }}">
+                                {% if fieldset.description %}
+                                    <p class="description">{{ fieldset.description }}</p>
+                                {% endif %}
+                                {% for field in fieldset %}
+                                    {% if field.is_hidden %}
+                                    {{ field }}
+                                    {% else %}
+                                    <div class="field-wrapper" title="{{ field.help_text }}" >
+                                        {{ field.errors }}
+                                        {{ field.label_tag }}
+                                        {{ field }}
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            {{ network_form.as_div }}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="buttons">
+                        <button type="submit" class="play" id="submit-network-form">Save & simulate</button>
+                        <button class="toggle" id="toggle-device-form">Expand</button>
+                        <span id="task_status"></span>
+                    </div>
+                </div>
+            </form>
+        {% endif %}
+        
     </div>
 
     <!-- GUI -->
     {% if network_obj.devices_json %}
-	<div class="column" id="GUI">
-	    <div class="portlet" id="network_layout">
-		<div class="portlet-header" title="Click on popup icon to get a larger view.">
-		    Network layout
-		    <span class="ui-icon dialog ui-icon-newwin" style="float:right"></span>
-		</div>
-		
-		<div class="portlet-content">
-		    <div id=holder></div>
-		    
-		    <div class="buttons">
-		    	<button class="check" id="save-devices">Save</button>
-			<button id="layout-legend">Legend</button>
-		    </div>
+        <div class="column" id="GUI">
+            <div class="portlet" id="network_layout">
+                <div class="portlet-header" title="Click on popup icon to get a larger view.">
+                    Network layout
+                    <span class="ui-icon dialog ui-icon-newwin" style="float:right"></span>
+                </div>
+                
+                <div class="portlet-content">
+                    <div id=holder></div>
+                    
+                    <div class="buttons">
+                        <button class="check" id="save-devices">Save</button>
+                        <button class="reset" id="default-devices">Default</button>
+                        <button id="layout-legend">Legend</button>
+                    </div>
 
-		</div>
-	    </div>
-	    
-	    {% if comment_form %}
-		<form action="." method="POST" class="portlet" id="comment-form">
-		    <div class="portlet-header" title="Click on popup icon to get a larger view.">
-			Comment
-		    </div>
-		    
-		    <div class="portlet-content">
-			{% csrf_token %}
-			
-			<div class="comment-form-content field-wrapper">
-			    {{ comment_form.comment }}
-			</div>
+                </div>
+            </div>
+            
+            {% if comment_form %}
+                <form action="." method="POST" class="portlet" id="comment-form">
+                    <div class="portlet-header" title="Click on popup icon to get a larger view.">
+                        Comment
+                    </div>
+                    
+                    <div class="portlet-content">
+                        {% csrf_token %}
+                        
+                        <div class="comment-form-content field-wrapper">
+                            {{ comment_form.comment }}
+                        </div>
 
-			<div class="buttons">
-			    <button type="submit" class="check" id="submit-comment-form">Save</button>
-			</div>
-		    </div>
-		</form>
-	    {% endif %}
-	</div>
+                        <div class="buttons">
+                            <button type="submit" class="check" id="submit-comment-form">Save</button>
+                        </div>
+                    </div>
+                </form>
+            {% endif %}
+        </div>
     {% endif %}
     
     <!-- RESULTS -->
     <div class="column" >
 
     <!--     SIMULATION HISTORY -->
-	<div class="portlet" id="history">
-	    <div class="portlet-header" title="Click a simulated network version to load it.">
-		History
-	    </div>
-	    
-	    <div class="portlet-content">
-		
-		<form action="." method="POST" class="versions-form">
-		    {% csrf_token %}
-		    <ul class="pager" id="history-list">
-			{% for version in versions %}
-			    {% with version.revision.result as result %}
-			    <li class="{% if version_id == version.id %} selected {% endif %} {% if result.favorite %} ui-state-active {% endif %} tipTip-left" 
-				title="{{version.revision.result.comment|default_if_none:'no comment'}}" id="history_{{version.id}}">
-				<input style="float:right" type="checkbox" name="version_ids" value="{{version.id}}" {% if forloop.last %} disabled {% endif %}>
-<!-- 				<div class="ui-icon ui-icon-star" style="float:right"></div> -->
-				<div class="version-link">
-				    <a href="/network/{{network_obj.SPIC_id}}/{{network_obj.local_id}}/?version_id={{version.id}}" id="{{version.id}}">
-					{% if forloop.last %}
-					    Initial version of network
-					{% else %}  
-					    {% if result %}
-						<b>{{ result.local_id }}</b> - 
-						{% if result.date_simulated %}
-						    {% if result.has_spike_detector %} [Sd] {% endif %}
-						    {% if result.has_voltmeter %} [Vm] {% endif %} -
-						    {{ result.date_simulated|timesince }} ago
-						{% else %}
-						    no simulation
-						{% endif %}
-					    {% else %}
-						NaN - no result found
-					    {% endif %}
-					{% endif %}
-				    </a>
-				</div>
-			    </li>
-			    {% endwith %}
-			{% endfor %}
-		    </ul>
-		    
-		    <div class="buttons">
-			<button class="delete" id="delete-versions">Delete</button>
-<!-- 			<button class="favorite" id="favorite-versions">Favorite</button> -->
-		    </div>
-		</form>
-	    </div>
-	</div>
-	
+        <div class="portlet" id="history">
+            <div class="portlet-header" title="Click a simulated network version to load it.">
+                History
+            </div>
+            
+            <div class="portlet-content">
+                
+                <form action="." method="POST" class="versions-form">
+                    {% csrf_token %}
+                    <ul class="pager" id="history-list">
+                        {% for version in versions %}
+                            {% with version.revision.result as result %}
+                            <li class="{% if version_id == version.id %} selected {% endif %} tipTip-left" 
+                                title="{{version.revision.result.comment|default_if_none:'no comment'}}" id="history_{{version.id}}">
+                                <input style="float:right" type="checkbox" name="version_ids" value="{{version.id}}" {% if forloop.last %} disabled {% endif %}>
+                                {% if result.favorite %}<div class="ui-icon ui-icon-star" style="float:right"></div>{% endif %}
+                                <div class="version-link">
+                                    <a href="/network/{{network_obj.SPIC_id}}/{{network_obj.local_id}}/?version_id={{version.id}}" id="{{version.id}}">
+                                        {% if forloop.last %}
+                                            Initial version of network
+                                        {% else %}  
+                                            {% if result %}
+                                                <b>{{ result.local_id }}</b> - 
+                                                {% if result.date_simulated %}
+                                                    {% if result.has_spike_detector %} [Sd] {% endif %}
+                                                    {% if result.has_voltmeter %} [Vm] {% endif %} -
+                                                    {{ result.date_simulated|timesince }} ago
+                                                {% else %}
+                                                    no simulation
+                                                {% endif %}
+                                            {% else %}
+                                                NaN - no result found
+                                            {% endif %}
+                                        {% endif %}
+                                    </a>
+                                </div>
+                            </li>
+                            {% endwith %}
+                        {% endfor %}
+                    </ul>
+                    
+                    <div class="buttons">
+                        <select id="versions-select" name="action">
+                                            <option>--- Select an action ---</option>
+                                            <option value="delete">Delete</option>
+                                            <option value="favorite">Mark as favorite</option>
+                                            <option value="unfavorite">Unmark as favorite</option>
+                        </select>
+                        <button class="go" id="go-versions">Go</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
     <!--     RESULT_DATA -->
-	{% if result_obj.has_spike_detector or result_obj.has_voltmeter %}
-	    <div class="portlet">
-		<div class="portlet-header" title="Simulation was succeed. So you can explore the view of results.">
-		    Results ({{result_obj.local_id}})
-		</div>
-		
-		<div class="portlet-content">
-		    <div id="results-tabs">
-			<ul>
-			    {% if result_obj.has_spike_detector %}
-				<li><a href="#spike_detector-tab" class="spike_detector-tab">Spike Detector</a></li>
-			    {% endif %}
-			    {% if result_obj.has_voltmeter %}
-				<li><a href="#voltmeter-tab" class="voltmeter-tab-header">Voltmeter</a></li>
-			    {% endif %}
-			</ul>
+        {% if result_obj.has_spike_detector or result_obj.has_voltmeter %}
+            <div class="portlet">
+                <div class="portlet-header" title="Simulation was succeed. So you can explore the view of results.">
+                    Results ({{result_obj.local_id}})
+                </div>
+                
+                <div class="portlet-content">
+                    <div id="results-tabs">
+                        <ul>
+                            {% if result_obj.has_spike_detector %}
+                                <li><a href="#spike_detector-tab" class="spike_detector-tab">Spike Detector</a></li>
+                            {% endif %}
+                            {% if result_obj.has_voltmeter %}
+                                <li><a href="#voltmeter-tab" class="voltmeter-tab-header">Voltmeter</a></li>
+                            {% endif %}
+                        </ul>
 
-	    <!-- 	    SPIKE DETECTOR TAB -->
-			<div id="spike_detector-tab">
-			    {% if result_obj.has_spike_detector %}
-				<div>
-				    <iframe scrolling="no" src="{% url spike_detector_thumbnail result_obj.id %}" id="SpikeDetectorThumbnail"></iframe>
-				</div>
-				
-				<div class="buttons">
-				    <button class="zoomin" id="spike_detector-link">View larger screen</button>
-				</div>
-			    {% endif %}
-			</div>
+            <!--             SPIKE DETECTOR TAB -->
+                        <div id="spike_detector-tab">
+                            {% if result_obj.has_spike_detector %}
+                                <div>
+                                    <iframe scrolling="no" src="{% url spike_detector_thumbnail result_obj.id %}" id="SpikeDetectorThumbnail"></iframe>
+                                </div>
+                                
+                                <div class="buttons">
+                                    <button class="zoomin" id="spike_detector-link">View larger screen</button>
+                                </div>
+                            {% endif %}
+                        </div>
 
-	    <!-- 	    VOLTMETER TAB -->
-			<div id="voltmeter-tab">
-			    {% if result_obj.has_voltmeter %}
-				<div>
-				    {% if result_obj.voltmeter_points < 15000 %}
-					<iframe src="{% url voltmeter_thumbnail result_obj.id %}" id="VoltmeterThumbnail"></iframe>
-				    {% else %}
-					The number of points is too big.
-				    {% endif %}
-				</div>
-				    <div class="field-wrapper">
-					<label for="field-wrapper">View larger screen</label>
-					<select id="voltmeter-select">
-					    <option>--- Select a neuron ---</option>
-					    {% for model, status, params in result_obj.voltmeter_targets %}
-						<option value="/result/{{result_obj.id}}/voltmeter/?neuron={{model.id}}" name="{{model.label|readable}} [{{model.id}}]">
-						    {{model.label|readable}} [{{model.id}}]
-						</option>
-					    {% endfor %}
-					</select>
-					</div>
-					<div class="buttons">
-					    <button class="reset" id="reload">Reload</button>
-					</div>
-				</div>
-			    {% endif %}
-			</div>
-			
-			<div class="buttons">
-			    <a class="document" href="{% url data result_obj.id %}">Download Results</a>
-			    
-			</div>
-		    </div>
-		</div>
-	    </div>
-	{% endif %}
+            <!--             VOLTMETER TAB -->
+                        <div id="voltmeter-tab">
+                            {% if result_obj.has_voltmeter %}
+                                <div>
+                                    {% if result_obj.voltmeter_points < 15000 %}
+                                        <iframe src="{% url voltmeter_thumbnail result_obj.id %}" id="VoltmeterThumbnail"></iframe>
+                                    {% else %}
+                                        The number of points is too big.
+                                    {% endif %}
+                                </div>
+                                    <div class="field-wrapper">
+                                        <label for="field-wrapper">View larger screen</label>
+                                        <select id="voltmeter-select">
+                                            <option>--- Select a neuron ---</option>
+                                            {% for model, status, params in result_obj.voltmeter_targets %}
+                                                <option value="/result/{{result_obj.id}}/voltmeter/?neuron={{model.id}}" name="{{model.label|readable}} [{{model.id}}]">
+                                                    {{model.label|readable}} [{{model.id}}]
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        </div>
+                                        <div class="buttons">
+                                            <button class="reset" id="reload">Reload</button>
+                                        </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="buttons">
+                            <a class="document" href="{% url data result_obj.id %}">Download Results</a>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
     </div>
 
 
     <!-- POPUP DIALOG -->
     <div id="ui-dialog">
-	<div class="ui-dialog" title="result view" id="dialog-resultView">
-	    <iframe class="resultView" scrolling="no"></iframe>
-	</div>
+        <div class="ui-dialog" title="result view" id="dialog-resultView">
+            <iframe class="resultView" scrolling="no"></iframe>
+        </div>
 
-	<div class="ui-dialog" id="dialog-loading">
-	    <p>
-		<span class="ui-dialog-content"></span>
-	    </p>
-	</div>
+        <div class="ui-dialog" id="dialog-loading">
+            <p>
+                <span class="ui-dialog-content"></span>
+            </p>
+        </div>
 
-	<div class="ui-dialog" title="Confirm to simulate?" id="dialog-confirmSimulation">
-	    <p>
-		<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
-		The simulation lasts more than 5 seconds and it could have a speed effect on page loading time. Are you sure?
-	    </p>
-	</div>
-	
-	<div class="ui-dialog" id="dialog-simulating"></div>
-	
-	<div class="ui-dialog" id="step-helper">
-	    Ten steps to work with SPIC:
-	    <ol id="help-steps">
-		<li class="help-steps" id="device-add">Add <b>new devices</b> and set their status.</li>
-		<li class="help-steps" id="devices-save">Once done, save the <b>device table</b>.</li>
-		<li class="help-steps" id="layout-explore">Explore the <b>network layout</b>.</li>
-		<li class="help-steps" id="matrix-check">Explore the <b>connectivity matrix</b>.</li>
-		<li class="help-steps" id="device-change">Modify <b>the devices</b> if necessary save the table.</li>
-		<li class="help-steps" id="status-run">Run the <b>simulation</b>.</li>
-		<li class="help-steps" id="results-analye">View the <b>results</b>.</li>
-	    </ol>
-	    
-	    Each successful simulation appears in the history list. The same list can be used to retrieve past simulations together with the results.
-	    The recorded events (spikes, membrane potential etc.) are plotted online. They can also be downloaded as text files.
+        <div class="ui-dialog" title="Confirm to simulate?" id="dialog-confirmSimulation">
+            <p>
+                <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+                The simulation lasts more than 5 seconds and it could have a speed effect on page loading time.
+                <h4>Are you sure?</h4>
+            </p>
+        </div>
+        
+        <div class="ui-dialog" id="dialog-simulating"></div>
+        
+        <div class="ui-dialog" id="step-helper">
+            Ten steps to work with SPIC:
+            <ol id="help-steps">
+                <li class="help-steps" id="device-add">Add <b>new devices</b> and set their status.</li>
+                <li class="help-steps" id="devices-save">Once done, save the <b>device table</b>.</li>
+                <li class="help-steps" id="layout-explore">Explore the <b>network layout</b>.</li>
+                <li class="help-steps" id="matrix-check">Explore the <b>connectivity matrix</b>.</li>
+                <li class="help-steps" id="device-change">Modify <b>the devices</b> if necessary save the table.</li>
+                <li class="help-steps" id="status-run">Run the <b>simulation</b>.</li>
+                <li class="help-steps" id="results-analye">View the <b>results</b>.</li>
+            </ol>
+            
+            Each successful simulation appears in the history list. The same list can be used to retrieve past simulations together with the results.
+            The recorded events (spikes, membrane potential etc.) are plotted online. They can also be downloaded as text files.
 
-	    <h5>Optional:</h5>
-	    Add comments to each simulation describing what you did it, why you did it, what were the results etc. This will help also when retrieving old simulations.
-	    
-	    <p>Give some feedback in the forum.</p>
-	    
-	</div>
-	
-	<div class="ui-dialog" id="layout-legend">
-	    <ul id="help-steps">
-	    <li><b>blue</b>: excitatory connection</li>
-	    <li><b>red</b>: inhibitory connection</li>
-	    <li><b>left dot</b>: neuron receives externals</li>
-	    <li><b>right dot</b>: neuron activity is being recorded</li>
-	    </ul>
-	</div>
+            <h5>Optional:</h5>
+            Add comments to each simulation describing what you did it, why you did it, what were the results etc. This will help also when retrieving old simulations.
+            
+            <p>Give some feedback in the forum.</p>
+            
+        </div>
+        
+        <div class="ui-dialog" id="layout-legend">
+            <ul id="help-steps">
+            <li><b>blue</b>: excitatory connection</li>
+            <li><b>red</b>: inhibitory connection</li>
+            <li><b>left dot</b>: neuron receives externals</li>
+            <li><b>right dot</b>: neuron activity is being recorded</li>
+            </ul>
+        </div>
     </div>
 </div>
 {% endblock %}
