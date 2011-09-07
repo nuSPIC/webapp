@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.utils import simplejson
@@ -77,11 +78,17 @@ def spike_detector(request, result_id):
     Large View of Spike Detector data (its the same like small view of itself)
     """
     
+   
     result_obj = get_object_or_404(Result, pk=result_id)
     spike_detector = result_obj.spike_detector_data()
     assert len(spike_detector['senders']) == len(spike_detector['times'])
     spike_detector['neurons'] = [nn[0]['id'] for nn in result_obj.network.device_list(modeltype='neuron')]
     spike_detector['simTime'] = result_obj.revision.version_set.all()[0].object_version.object.duration
+    if 'nr_bins' in request.GET:
+        spike_detector['nr_bins'] = request.GET.get('nr_bins')
+    else:
+        spike_detector['nr_bins'] = 10
+    
     return spike_detector  
     
 @render_to('spike_detector_thumbnail.html')
@@ -95,4 +102,8 @@ def spike_detector_thumbnail(request, result_id):
     assert len(spike_detector['senders']) == len(spike_detector['times'])
     spike_detector['neurons'] = [nn[0]['id'] for nn in result_obj.network.device_list(modeltype='neuron')]
     spike_detector['simTime'] = result_obj.revision.version_set.all()[0].object_version.object.duration
+    if 'nr_bins' in request.GET:
+        spike_detector['nr_bins'] = request.GET.get('nr_bins')
+    else:
+        spike_detector['nr_bins'] = 10
     return spike_detector
