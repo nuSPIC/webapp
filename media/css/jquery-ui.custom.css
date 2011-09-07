@@ -1,0 +1,30 @@
+
+/* Component containers
+----------------------------------*/
+.ui-widget-header { padding: 5px; font-size: 1.25em; }
+.ui-widget-header a { font-weight: bold;}
+
+/* Button
+----------------------------------*/
+input.ui-button { padding: .2em .5em; }
+
+/* Dialog
+----------------------------------*/
+.ui-dialog { padding: 0; }
+.ui-dialog .ui-dialog-titlebar { padding: .2em .5em; }
+
+/* Tabs
+----------------------------------*/
+.ui-tabs .ui-tabs-nav { font-size: 1em; }
+.ui-tabs .ui-tabs-nav li a { padding: .1em 1em; }
+.ui-tabs .ui-tabs-panel { padding: .5em; }
+
+/* Shadow
+----------------------------------*/ 
+.ui-shadow {
+    margin: 0.3em;
+    box-shadow: 2px 2px 19px #aaa;
+    -o-box-shadow: 2px 2px 19px #aaa;
+    -webkit-box-shadow: 2px 2px 19px #aaa;
+    -moz-box-shadow: 2px 2px 19px #aaa;
+}

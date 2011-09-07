@@ -1,0 +1,203 @@
+div#content {
+    min-width: 1800px;
+    font: 11px sans-serif;
+}
+
+/* default settings
+*************************/
+
+table {
+    border-collapse: collapse;
+}
+
+td { 
+    font-weight: normal !important;
+    padding: 0.1em 0.2em;
+    border-top-width: 0px !important;
+}
+
+/* Container settings
+*************************/
+
+.portlet { margin: .3em .5em .2em .0; }
+.portlet-header { margin: 0; padding-bottom: 4px; padding-left: 0.2em; }
+.portlet-header .ui-icon { float: right; }
+.portlet-content { padding: 0.4em; }
+
+.column { min-width: 290px; float: left; padding-bottom: 100px; }
+
+.ui-sortable-placeholder { border: 3px dotted grey; visibility: visible !important; height: 50px !important; }
+    .ui-sortable-placeholder * { visibility: hidden; }
+
+div#ui-dialog {
+    display: none;
+}
+
+.collapse {
+    display:none;
+}
+
+.buttons {
+    margin-top: 5px;
+}
+
+/* Device Table
+************************/
+
+table#device-table tr.enabled {
+    cursor: pointer;
+}
+
+table#device-table td {
+    padding: .5em;
+}
+
+table#device-table input {
+    margin: 0;
+}
+
+table#device-table td.model {
+    width: 11em;
+}
+
+table#device-table td.disabled {
+    color: grey;
+}
+
+/* Message list
+*************************/
+
+ul.messagelist {
+    padding: 1px;
+    margin: 1px;
+}
+
+ul.messagelist li {
+    margin: 0;
+    font-size: 0.85em;
+    display: block;
+}
+
+/* Forms
+*************************/
+
+form.device-form {
+    display:none;
+}
+
+.field-wrapper input {
+     width: 97.5%;
+}
+
+.field-wrapper textarea {
+    width: 98%;
+}
+
+/* Connections Table
+*************************/
+
+.connections-table td {
+    min-width: 2.6em;
+    text-align: center;
+    padding: 1px 7px;
+}
+
+span.connections-tabs {
+    font-weight: bold;
+}
+
+span.verticaltext {
+    -webkit-transform: rotate(-90deg);
+    -moz-transform: rotate(-90deg);
+    -o-transform: rotate(-90deg);
+    -ms-transform:rotate(-90deg);
+}
+
+/* Step Helper
+*************************/
+
+#help-steps li {
+    cursor: pointer;
+    border: none;
+    font-size: .85em;
+    padding: .2em;
+}
+
+/* History list
+*************************/
+
+ul#history-list {
+    padding: 0;
+    margin: 0;
+}
+
+ul#history-list li {
+    cursor: pointer;    
+    font-size: .85em;
+    display: block;
+    padding: .7em .5em;
+    margin-top: 2px;
+}
+
+ul#history-list input {
+    margin: 0;
+    margin-right: .5em;
+}
+
+ul#history-list a {
+    text-decoration: none;
+}
+
+/* Page */
+
+ul.simplePagerNav li{
+    display: block;
+    float: left;
+    padding: 3px;
+}
+
+ul.simplePagerNav li a {
+    color: #333;
+    text-decoration: none;
+}
+
+li.currentPage {
+    background: #83bd63;	
+}
+
+ul.simplePagerNav li.currentPage a {
+    color: #fff;	
+}
+
+/* Result
+*************************/
+
+#resultView {
+   float:center;
+}
+
+iframe {
+    border: none;
+    margin: 3px;
+}
+
+#SpikeDetectorThumbnail {
+    height: 240px;
+    width: 250px;
+}
+
+#VoltmeterThumbnail {
+    height: 240px;
+    width: 250px;
+}
+
+iframe.resultView {
+    margin-top: 20px;
+    height: 420px;
+    width: 750px;
+}
+
+#fig {
+  position: relative;
+  margin: auto;
+}
