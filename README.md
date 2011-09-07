@@ -42,6 +42,7 @@ Installation instructions for django-bbmarkup:
 for Network/Simulation
 --------------
 primary
+
     # For Django
     $ pip install django-form-utils
     $ pip install django-reversion
@@ -54,6 +55,7 @@ primary
     $ pip install django-celery
 
 optional (useful for developer)
+
     $ pip install django-extensions #(0.6)
     $ pip install django-evolution #(0.6.5)
     $ pip install django-debug-toolbar # (0.8.5)
@@ -65,15 +67,18 @@ Synchronizing multiple databases
 insert DATABASE_ROUTERS in settings
  
 for default database
+
     $ ./manage.py sqlall reversion | ./manage.py dbshell
     $ ./manage.py syncdb
  
 for network database
+
     $ ./manage.py sqlall auth | ./manage.py dbshell --database=network
     $ ./manage.py sqlall django_evolution | ./manage.py dbshell --database=network
     $ ./manage.py syncdb --database=network
 
 for simulation database
+
     $ ./manage.py sqlall auth | ./manage.py dbshell --database=simulation
     $ ./manage.py sqlall django_evolution | ./manage.py dbshell --database=simulation
     $ ./manage.py sqlall network | ./manage.py dbshell --database=simulation
