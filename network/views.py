@@ -4,13 +4,13 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
-from django.utils import simplejson
 
 from celery.contrib.abortable import AbortableAsyncResult
 from reversion.models import Version
 from reversion import revision
 
 from lib.decorators import render_to
+from lib.delivery import networkx
 from lib.tasks import Simulation
 from lib.helpers import get_flatpage_or_none
 
@@ -26,20 +26,20 @@ import cjson
 
 # Define models with its modeltype, label and form.
 MODELS = [
-    {'model_type': 'neuron', 	'id_label': 'hh_psc_alpha', 	'form': HhPscAlphaForm,},
-    {'model_type': 'neuron', 	'id_label': 'iaf_cond_alpha', 	'form': IafCondAlphaForm,},
-    {'model_type': 'neuron', 	'id_label': 'iaf_neuron', 		'form': IafNeuronForm,},
-    {'model_type': 'neuron', 	'id_label': 'iaf_psc_alpha', 	'form': IafPscAlphaForm,},
+    {'model_type': 'neuron',         'id_label': 'hh_psc_alpha',         'form': HhPscAlphaForm,},
+    {'model_type': 'neuron',         'id_label': 'iaf_cond_alpha',         'form': IafCondAlphaForm,},
+    {'model_type': 'neuron',         'id_label': 'iaf_neuron',                 'form': IafNeuronForm,},
+    {'model_type': 'neuron',         'id_label': 'iaf_psc_alpha',         'form': IafPscAlphaForm,},
     
-    {'model_type': 'input', 	'id_label': 'ac_generator', 	'form': ACGeneratorForm,},
-    {'model_type': 'input', 	'id_label': 'dc_generator',		'form': DCGeneratorForm,},
-    {'model_type': 'input', 	'id_label': 'poisson_generator','form': PoissonGeneratorForm,},
-    {'model_type': 'input', 	'id_label': 'noise_generator', 	'form': NoiseGeneratorForm,},
-    {'model_type': 'input', 	'id_label': 'smp_generator', 	'form': SmpGeneratorForm,},
-   # {'model_type': 'input', 	'id_label': 'spike_generator', 	'form': SpikeGeneratorForm,},   
+    {'model_type': 'input',         'id_label': 'ac_generator',         'form': ACGeneratorForm,},
+    {'model_type': 'input',         'id_label': 'dc_generator',                'form': DCGeneratorForm,},
+    {'model_type': 'input',         'id_label': 'poisson_generator','form': PoissonGeneratorForm,},
+    {'model_type': 'input',         'id_label': 'noise_generator',         'form': NoiseGeneratorForm,},
+    {'model_type': 'input',         'id_label': 'smp_generator',         'form': SmpGeneratorForm,},
+   # {'model_type': 'input',         'id_label': 'spike_generator',         'form': SpikeGeneratorForm,},   
     
-    {'model_type': 'output', 	'id_label': 'spike_detector', 	'form': SpikeDetectorForm,},
-    {'model_type': 'output', 	'id_label': 'voltmeter', 		'form': VoltmeterForm,},
+    {'model_type': 'output',         'id_label': 'spike_detector',         'form': SpikeDetectorForm,},
+    {'model_type': 'output',         'id_label': 'voltmeter',                 'form': VoltmeterForm,},
 ]
 
 @revision.create_on_success
@@ -85,12 +85,19 @@ def network(request, SPIC_id, local_id):
         # Delete selected devices from database.
         if request.POST.get('version_ids'):
             version_ids = request.POST.getlist('version_ids')
-            try:
-                for version_id in version_ids:
-                    del_version = Version.objects.get(id=int(version_id))
-                    del_version.delete()
-            except:
-                pass
+            action = request.POST.get('action')
+            for vid in version_ids:
+                version_edit = Version.objects.get(pk=int(vid))
+                result = version_edit.revision.result
+                if action == 'delete':
+                    version_edit.delete()
+                    result.delete()
+                elif action == 'favorite':
+                    result.favorite = True
+                    result.save()
+                elif action == 'unfavorite':
+                    result.favorite = False
+                    result.save()
         
         # Delete selected versions of history.
         elif request.POST.get('device_ids'):
@@ -166,7 +173,7 @@ def network(request, SPIC_id, local_id):
     # If a version is selected , then it reverts selected version, otherwise it sets version id to 0.
     version_id = request.GET.get('version_id')
     if version_id:
-        version = Version.objects.get(id=version_id)
+        version = Version.objects.get(pk=version_id)
         version.revision.revert()
         network_obj = Network.objects.get(user_id=request.user.pk, SPIC_id=SPIC_id, local_id=local_id)
     else:
@@ -181,7 +188,19 @@ def network(request, SPIC_id, local_id):
             comment_form = None
     except:
         result_obj = None
+        
+    layout = request.GET.get('layout')
+    if layout == 'default':
+        device_list = network_obj.device_list()
+        edgelist = network_obj.connections(modeltype='neuron')
+        pos = networkx(edgelist, layout='circo')
 
+        for gid,value in pos.items():
+            if int(device_list[gid-1][0]['id']) == gid:
+                device_list[gid-1][0]['position'] = list(value)
+        
+        network_obj.devices_json = cjson.encode(device_list)
+        network_obj.save()
     
     response = {
         'network_obj': network_obj,
@@ -249,7 +268,7 @@ def device_preview(request, network_id):
         
             responseHTML = render_to_string('device_form.html', {'id_label':device['id_label'], 'form':form})
             response['responseHTML'] = responseHTML
-            return HttpResponse(simplejson.dumps(response), mimetype='application/json')
+            return HttpResponse(cjson.encode(response), mimetype='application/json')
                     
     return HttpResponse()
 
@@ -279,7 +298,7 @@ def device_commit(request, network_id):
             hidden_device_list = network_obj.device_list('hidden')
             network_obj.devices_json = cjson.encode(device_list + hidden_device_list)
             network_obj.save()
-            return HttpResponse(simplejson.dumps({'saved':1}), mimetype='application/json')
+            return HttpResponse(cjson.encode({'saved':1}), mimetype='application/json')
             
     return HttpResponse()
 
@@ -343,17 +362,17 @@ def simulate(request, network_id, version_id):
                     # check if it is already simulated, it prevents from simulating.
                     if version_obj.revision.result.is_recorded():
                         response = {'recorded':1}
-                        return HttpResponse(simplejson.dumps(response), mimetype='application/json')
+                        return HttpResponse(cjson.encode(response), mimetype='application/json')
                     else:
                         task = Simulation.delay(network_id=network_id, version_id=version_id)
                     
                 response = {'task_id':task.task_id}
-                return HttpResponse(simplejson.dumps(response), mimetype='application/json')
+                return HttpResponse(cjson.encode(response), mimetype='application/json')
                     
             else:
                 responseHTML = render_to_string('network_form.html', {'form': form})
                 response = {'responseHTML':responseHTML, 'valid': -1}
-                return HttpResponse(simplejson.dumps(response), mimetype='application/json')
+                return HttpResponse(cjson.encode(response), mimetype='application/json')
             
         else:
             # check if task_id exists, then a simulation will be aborted.
@@ -363,6 +382,6 @@ def simulate(request, network_id, version_id):
                 abortable_async_result.abort()
                                 
                 response = {'aborted':1}
-                return HttpResponse(simplejson.dumps(response), mimetype='application/json')
+                return HttpResponse(cjson.encode(response), mimetype='application/json')
                 
     return HttpResponse()
