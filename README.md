@@ -7,13 +7,23 @@ Requirements
  - recaptcha-client 1.0.5 or higher (http://pypi.python.org/pypi/recaptcha-client)
  - django-bbmarkup (http://bitbucket.org/offline/django-bbmarkup)
 
-
- - RabbitMQ, Broker for Celery (http://jazstudios.blogspot.com/2010/11/setup-django-rabbitmq-and-celery.html)
+ (- RabbitMQ, Broker for Celery (http://jazstudios.blogspot.com/2010/11/setup-django-rabbitmq-and-celery.html))
  - Celery integration for Django 2.3.3 (https://github.com/ask/django-celery)
  - Reversion integration for Django 1.5 (https://github.com/etianen/django-reversion)
- - Form utils integration for Django 0.2.0
- - Networkx 1.5
- - cjson for Python 1.0.5
+ - Form utils integration for Django 0.2.0 (http://pypi.python.org/pypi/django-form-utils)
+ - Networkx 1.5 (http://networkx.lanl.gov/)
+ - cjson for Python 1.0.5 (http://pypi.python.org/pypi/python-cjson)
+
+
+Optional
+------------
+
+ - Django Debug Toolbar 0.8.5 (http://pypi.python.org/pypi/django-debug-toolbar)
+ - Django Extensions 0.6 (http://code.google.com/p/django-command-extensions/)
+ - Django Evolution 0.6.5 (http://code.google.com/p/django-evolution/)
+ - Django South 0.7.3 (Data & Scheme Migration: http://south.aeracode.org/)
+
+South vs. Evolution: http://stackoverflow.com/questions/1590944/currently-using-django-evolution-is-south-better-and-worth-switching
 
 
 Installation
@@ -41,56 +51,70 @@ Installation instructions for django-bbmarkup:
 
 for Network/Simulation
 --------------
-primary
+requirement
 
-    # For Django
     $ pip install django-form-utils
     $ pip install django-reversion
 
     $ pip install python-cjson
     $ pip install networkx
 
-    # For Django-celery
-    $ sudo apt-get install rabbitmq-server
+    ($ sudo apt-get install rabbitmq-server)
     $ pip install django-celery
 
 optional (useful for developer)
 
-    $ pip install django-extensions #(0.6)
-    $ pip install django-evolution #(0.6.5)
-    $ pip install django-debug-toolbar # (0.8.5)
+    $ pip install django-extensions
+    $ pip install django-evolution
+    $ pip install django-debug-toolbar
+    $ pip install South
+
 
 
 Synchronizing multiple databases
 ------------
  
-insert DATABASE_ROUTERS in settings
+Insert DATABASE_ROUTERS in local_settings
  
-for default database
+Create an empty table reversion in default database
 
-    $ ./manage.py sqlall reversion | ./manage.py dbshell
-    $ ./manage.py syncdb
- 
-for network database
+    $ python manage.py sqlall reversion | python manage.py dbshell
 
-    $ ./manage.py sqlall auth | ./manage.py dbshell --database=network
-    $ ./manage.py sqlall django_evolution | ./manage.py dbshell --database=network
-    $ ./manage.py syncdb --database=network
+Synchronize default database to models
 
-for simulation database
+    $ python manage.py syncdb
 
-    $ ./manage.py sqlall auth | ./manage.py dbshell --database=simulation
-    $ ./manage.py sqlall django_evolution | ./manage.py dbshell --database=simulation
-    $ ./manage.py sqlall network | ./manage.py dbshell --database=simulation
-    $ ./manage.py syncdb --database=simulation
+Create empty tables in network database
+
+    $ python manage.py sqlall auth django_evolution | python manage.py dbshell --database=network
+
+Synchronize network database to models
+
+    $ python manage.py syncdb --database=network
+
+Create empty tables in simulation database
+
+    $ python manage.py sqlall auth django_evolution network | python manage.py dbshell --database=simulation
+
+Synchronize simulation database to models
+
+    $ python manage.py syncdb --database=simulation
 
 
 Starting Celery integration for Django
 ------------
- 
-    $./manage.py celeryd -E
-    $./manage.py celerycam
-    $./manage.py celeryev
+
+Start task with Events.
+
+    $ python manage.py celeryd -E
+
+Start camera to save tasks in django, see in django admin.
+
+    $ python manage.py celerycam
+
+Start live enviroment of task management.
+
+    $ python manage.py celeryev
 
 
 License
