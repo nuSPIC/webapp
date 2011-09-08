@@ -7,7 +7,7 @@ Requirements
  - recaptcha-client 1.0.5 or higher (http://pypi.python.org/pypi/recaptcha-client)
  - django-bbmarkup (http://bitbucket.org/offline/django-bbmarkup)
 
- (- RabbitMQ, Broker for Celery (http://jazstudios.blogspot.com/2010/11/setup-django-rabbitmq-and-celery.html))
+ - (RabbitMQ, Broker for Celery (http://jazstudios.blogspot.com/2010/11/setup-django-rabbitmq-and-celery.html))
  - Celery integration for Django 2.3.3 (https://github.com/ask/django-celery)
  - Reversion integration for Django 1.5 (https://github.com/etianen/django-reversion)
  - Form utils integration for Django 0.2.0 (http://pypi.python.org/pypi/django-form-utils)
