@@ -63,6 +63,11 @@ def network_list(request):
 @render_to('network.html')
 @login_required
 def network(request, SPIC_id, local_id):
+    return network_simulated(request, SPIC_id, local_id, -1)
+    
+@render_to('network.html')
+@login_required
+def network_simulated(request, SPIC_id, local_id, result_id):
     """ Main view for network workplace """
     
     # Check if prototype exists
@@ -75,9 +80,29 @@ def network(request, SPIC_id, local_id):
         network_obj.description = prototype.description
         network_obj.devices_json = prototype.devices_json
         revision_create(network_obj)
-
+    
+    result_obj = None
+    version_id = 0
+    
     # Get a list of network versions in reverse date is created.
-    versions = Version.objects.get_for_object(network_obj).reverse()
+    versions = Version.objects.get_for_object(network_obj)
+    
+    if int(result_id) == 0:
+        result_id = -1
+    elif int(result_id) > 0:
+        try:
+            results = [version.revision.result for version in versions[1:]]
+            result_ids = [result.local_id for result in results]
+            result_id = result_ids.index(int(result_id))
+            result_obj = results[result_id]
+            version_id = versions[result_id +1].pk
+        except:
+            pass
+        
+    if request.GET.get('version'):
+        version = versions[result_id +1].revision.revert()
+        network_obj = Network.objects.get(user_id=request.user.pk, SPIC_id=SPIC_id, local_id=local_id)   
+
     
     # If request is POST, then it executes any deletions
     if request.method == "POST":
@@ -92,6 +117,7 @@ def network(request, SPIC_id, local_id):
                 if action == 'delete':
                     version_edit.delete()
                     result.delete()
+                    result_obj = None
                 elif action == 'favorite':
                     result.favorite = True
                     result.save()
@@ -170,44 +196,19 @@ def network(request, SPIC_id, local_id):
         formsHTML = render_to_string('device_form.html', {'id_label':device['id_label'], 'form':device_form})
         device_formsets.append({'id_label':device['id_label'], 'formsHTML':formsHTML})
         
-    # If a version is selected , then it reverts selected version, otherwise it sets version id to 0.
-    version_id = request.GET.get('version_id')
-    if version_id:
-        version = Version.objects.get(pk=version_id)
-        version.revision.revert()
-        network_obj = Network.objects.get(user_id=request.user.pk, SPIC_id=SPIC_id, local_id=local_id)
-    else:
-        version_id = 0
 
     # If result exist, then get form for comment.
-    try:
-        result_obj = version.revision.result
-        if result_obj.network.user_id == request.user.id:
-            comment_form = CommentForm(instance=result_obj)
-        else:
-            comment_form = None
-    except:
-        result_obj = None
+    if result_obj:
+        comment_form = CommentForm(instance=result_obj)
+    else:
+        comment_Form = None
         
-    layout = request.GET.get('layout')
-    if layout == 'default':
-        device_list = network_obj.device_list()
-        edgelist = network_obj.connections(modeltype='neuron')
-        pos = networkx(edgelist, layout='circo')
-
-        for gid,value in pos.items():
-            if int(device_list[gid-1][0]['id']) == gid:
-                device_list[gid-1][0]['position'] = list(value)
-        
-        network_obj.devices_json = cjson.encode(device_list)
-        network_obj.save()
-    
     response = {
         'network_obj': network_obj,
         'network_form': NetworkForm(instance=network_obj),
         'device_choices': device_choices,
         'device_formsets': device_formsets,
-        'versions': versions,
+        'versions': versions.reverse(),
         'version_id': version_id,
     }
         
@@ -216,7 +217,6 @@ def network(request, SPIC_id, local_id):
         response['comment_form'] = comment_form
         
     return response
-
 
 def device_preview(request, network_id):
     """ AJAX: Check POST request for validation without saving it in database. """
@@ -353,7 +353,6 @@ def simulate(request, network_id, version_id):
                         revision_create(form, result=True, local_id=last_local_id+1)
                     except:
                         revision_create(form, result=True)
-                        
                     task = Simulation.delay(network_id=network_id)
                     
                 else:
@@ -384,4 +383,23 @@ def simulate(request, network_id, version_id):
                 response = {'aborted':1}
                 return HttpResponse(cjson.encode(response), mimetype='application/json')
                 
+    return HttpResponse()
+
+def default_layout(request, network_id):
+    network_obj = get_object_or_404(Network, pk=network_id)
+    if request.is_ajax():
+        device_list = network_obj.device_list()
+        edgelist = network_obj.connections(modeltype='neuron')
+        pos = networkx(edgelist, layout='circo')
+
+        for gid,value in pos.items():
+            if int(device_list[gid-1][0]['id']) == gid:
+                device_list[gid-1][0]['position'] = list(value)
+        
+        devices_json = cjson.encode(device_list)
+        network_obj.devices_json = devices_json
+        network_obj.save()
+        
+        return HttpResponse(devices_json, mimetype='application/json')
+
     return HttpResponse()
