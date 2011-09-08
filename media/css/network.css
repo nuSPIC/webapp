@@ -133,7 +133,7 @@ ul#history-list {
 
 ul#history-list li {
     cursor: pointer;    
-    font-size: .85em;
+    font-size: .8em;
     display: block;
     padding: .7em .5em;
     margin-top: 2px;
@@ -151,22 +151,22 @@ ul#history-list a {
 /* Page */
 
 ul.simplePagerNav li{
-    display: block;
+    cursor: pointer;
+    display: block; 
     float: left;
     padding: 3px;
 }
 
 ul.simplePagerNav li a {
-    color: #333;
     text-decoration: none;
 }
 
 li.currentPage {
-    background: #83bd63;	
+    background: #83bd63;
 }
 
 ul.simplePagerNav li.currentPage a {
-    color: #fff;	
+    color: #fff;
 }
 
 /* Result
