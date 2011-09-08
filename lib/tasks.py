@@ -129,5 +129,4 @@ class Simulation(AbortableTask):
         
         # Save result object
         result.save()
-        version_id = result.revision.version_set.latest('revision').pk
-        return {'version_id': version_id}
+        return {'result_local_id': result.local_id}
