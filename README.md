@@ -76,28 +76,16 @@ Synchronizing multiple databases
  
 Insert DATABASE_ROUTERS in local_settings
  
-Create an empty table reversion in default database
+Create empty tables in database
 
     $ python manage.py sqlall reversion | python manage.py dbshell
-
-Synchronize default database to models
-
-    $ python manage.py syncdb
-
-Create empty tables in network database
-
     $ python manage.py sqlall auth django_evolution | python manage.py dbshell --database=network
-
-Synchronize network database to models
-
-    $ python manage.py syncdb --database=network
-
-Create empty tables in simulation database
-
     $ python manage.py sqlall auth django_evolution network | python manage.py dbshell --database=simulation
 
-Synchronize simulation database to models
+Synchronize database to models
 
+    $ python manage.py syncdb
+    $ python manage.py syncdb --database=network
     $ python manage.py syncdb --database=simulation
 
 
