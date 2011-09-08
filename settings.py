@@ -72,6 +72,7 @@ INSTALLED_APPS = (
     'django_extensions',
     'debug_toolbar',
     'form_utils',
+    'south',
 
     'network',
     'reversion',
@@ -151,7 +152,7 @@ PAGINATION_TAIL = 2
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'test3_default',
+        'NAME': 'test_default',
         'USER': 'sysad',
         'PASSWORD': '',
         'HOST': '',
@@ -165,14 +166,14 @@ DATABASES = {
 
     'network': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'test3_network',
+        'NAME': 'test2_network',
         'USER': 'sysad',
         'PASSWORD': '',
     },
 
     'simulation': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'test3_simulation',
+        'NAME': 'test2_simulation',
         'USER': 'sysad',
         'PASSWORD': '',
     },
