@@ -4,12 +4,13 @@ from django.shortcuts import get_object_or_404
 from django.utils import simplejson
 
 from lib.decorators import render_to
+import lib.json as json
+
 from network.templatetags.network_filters import readable
 
 from models import Result
 from forms import CommentForm
 
-import cjson
 
 def result_comment(request, result_id):
     """
@@ -37,7 +38,7 @@ def data(request, result_id):
 	'spike_detector' : spike_detector,
 	}
 	
-    response = HttpResponse(cjson.encode(response), mimetype='application/force-download')
+    response = HttpResponse(json.encode(response), mimetype='application/force-download')
     response['Content-Disposition'] = 'attachment; filename=%s_%s.txt' %(result_obj.network, result_obj)
 
     return response
@@ -61,7 +62,7 @@ def voltmeter(request, result_id):
 	'times': voltmeter['times'],
 	'name': '%s [%s]' %(readable(status[0]['label']), status[0]['id']),
 	}
-    return {'voltmeter': cjson.encode(response)}
+    return {'voltmeter': json.encode(response)}
     
 @render_to('voltmeter_thumbnail.html')
 def voltmeter_thumbnail(request, result_id):
@@ -75,26 +76,7 @@ def voltmeter_thumbnail(request, result_id):
 @render_to('spike_detector.html')
 def spike_detector(request, result_id):
     """
-    Large View of Spike Detector data (its the same like small view of itself)
-    """
-    
-   
-    result_obj = get_object_or_404(Result, pk=result_id)
-    spike_detector = result_obj.spike_detector_data()
-    assert len(spike_detector['senders']) == len(spike_detector['times'])
-    spike_detector['neurons'] = [nn[0]['id'] for nn in result_obj.network.device_list(modeltype='neuron')]
-    spike_detector['simTime'] = result_obj.revision.version_set.all()[0].object_version.object.duration
-    if 'nr_bins' in request.GET:
-        spike_detector['nr_bins'] = request.GET.get('nr_bins')
-    else:
-        spike_detector['nr_bins'] = 10
-    
-    return spike_detector  
-    
-@render_to('spike_detector_thumbnail.html')
-def spike_detector_thumbnail(request, result_id):
-    """
-    Small View of Spike Detector data
+    View of Spike Detector data
     """
     
     result_obj = get_object_or_404(Result, pk=result_id)
@@ -102,8 +84,11 @@ def spike_detector_thumbnail(request, result_id):
     assert len(spike_detector['senders']) == len(spike_detector['times'])
     spike_detector['neurons'] = [nn[0]['id'] for nn in result_obj.network.device_list(modeltype='neuron')]
     spike_detector['simTime'] = result_obj.revision.version_set.all()[0].object_version.object.duration
-    if 'nr_bins' in request.GET:
-        spike_detector['nr_bins'] = request.GET.get('nr_bins')
+    
+    if request.GET.get('view') == 'small':
+        spike_detector['fig'] = {'width':250, 'height':300, 'w':230, 'h1':15, 'h2':50}
     else:
-        spike_detector['nr_bins'] = 10
+        spike_detector['fig'] = {'width':800, 'height':500, 'w':710, 'h1':30, 'h2':50}
+    
+    
     return spike_detector
