@@ -1,150 +1,180 @@
 <html>
-  <head>
-    <title>Scatterplot</title>
-    <link rel="stylesheet" href="/media/css/result.css"></link>
-    <script type="text/javascript" src="/media/js/jquery-1.6.2.min.js"></script>
-    <script type="text/javascript" src="/media/js/protovis.min.js"></script>
-<style type="text/css">
+    <head>
+        <title>Scatterplot</title>
+        <link rel="stylesheet" href="/media/css/default.css"></link>
+        <link rel="stylesheet" href="/media/css/result.css"></link>
 
-        #fig {
-          width: 800px;
-          height: 500px;
-        }
+        <script type="text/javascript" src="/media/js/jquery-1.6.2.min.js"></script>
+        <script type="text/javascript" src="/media/js/protovis.min.js"></script>
+        <script type="text/javascript" src="/media/js/jquery.spinedit.js"></script>
 
-    </style>
+    </head>
 
-  </head>
-  <body>
-  <div id="center">
-    <div id="fig">
+    <body>
+        <div id="center">
+            <div id="fig">
+                <script type="text/javascript+protovis">
+   
+                    /* Data of Spikes. */ 
+                    var senders = {{ senders|safe }},
+                    times = {{ times|safe }}
+                    simTime = {{ simTime|safe }},
+                    neurons = {{ neurons|safe }},
+                    fig = {{ fig|safe }};
 
-    <script type="text/javascript+protovis">
-    var senders = {{senders|safe}},
-	times = {{times|safe}}
-	simTime = {{simTime|safe}},
-	neurons = {{ neurons|safe }},
-	nr_bins = {{ nr_bins|safe }};
+                    /* Size of panels. */
+                    var w = fig.w,
+                    h1 = neurons.length * fig.h1,
+                    h2 = fig.h2,
+                    h = h1 + 30 + h2;
 
-	$(function() {
-		  $( "#"+ nr_bins +"_bins").attr('checked', true);
-	  });
+                    $( "#fig" ).css("width", fig.width).css("height", h);
 
-	  $( "form#nr_bins" ).live('change',function(e) {
-			$(this).submit();
-		});
-    
-    var data = pv.range(0, senders.length).map(function(i) {
-	return {x: times[i], y: senders[i]};
-    });
+                    /* Scales of Spikes panel */
+                    var xScale = pv.Scale.linear(0, simTime).range(0, w),
+                    yScale = pv.Scale.linear(1, neurons.length).range(0, h1);
 
-var draw = function(nr_bins) {
+                    /* Scales of PSTH panel */
+                    var bin_width = simTime/10,
+                    bin_xTicks = pv.range(0, simTime+1, bin_width);
 
-/* Sizing and scales. */
-var w = 710,
-    h1 = neurons.length * 40,
-    h2 = 50,
-    x = pv.Scale.linear(0, simTime).range(0, w),
-    y = pv.Scale.linear(1, pv.max(neurons)).range(0, h1),
-    bins = pv.histogram(times).bins(x.ticks(nr_bins)),
-    bin_height = pv.Scale.linear(0, pv.max(bins, function(d) d.y)).range(0, h2);
+                    var bins = pv.histogram(times).bins(bin_xTicks),
+                    bin_yScale = pv.Scale.linear(0, pv.max(bins, function(d) d.y)).range(0, h2);
 
-/* The root panel. */
-var vis = new pv.Panel()
-    .width(w)
-    .height(h1 + 50 + h2)
-    .bottom(20)
-    .left(20)
-    .right(10)
-    .top(5);
+                    /* The root panel. */
+                    var vis = new pv.Panel()
+                        .width(w)
+                        .height(h)
 
-/* The spike panel. */
-var spikes = vis.add(pv.Panel)
-    .top(0)
-    .height(h1);    
+                        .top(5)
+                        .right(5)
+                        .bottom(5)
+                        .left(15);
 
 
-          spikes.add(pv.Rule)
-                  .data(neurons)
-                  .top(y)
-                  .strokeStyle(function(d) d ? "#eee" : "#000")
-                .anchor("left").add(pv.Label)
-                  .text(y.tickFormat);
+                    /* The spike panel. */
+                    var spikes = vis.add(pv.Panel)
+                        .top(0)
+                        .height(h1);    
 
-          /* X-axis and ticks. */
-          spikes.add(pv.Rule)
-                  .data(x.ticks(nr_bins))
-                  .left(x)
-                  .strokeStyle(function(d) d ? "#eee" : "#000")
+                    /* Y-axis and ticks. */
+                    spikes.add(pv.Rule)
+                        .data(neurons)
+                        .top(yScale)
+                        .strokeStyle("#ddd")
+                      .anchor("left").add(pv.Label)
+                        .text(yScale.tickFormat);
 
-/* The dot plot! */
-spikes.add(pv.Dot)
-    .data(data)
-    .left(function(d) x(d.x))
-    .top(function(d) y(d.y))
-    .strokeStyle("#000")
-    .size(3)
-    .fillStyle("#000");
+                    /* X-axis and ticks. */
+                    var grid = spikes.add(pv.Rule)
+                        .data(bin_xTicks)
+                        .left(xScale)
+                        .strokeStyle("#ddd");
 
-/* X-axis label */
-          spikes.add(pv.Label)
-                  .bottom(-1)
-                  .textBaseline("top")
-                  .left(w/2)
-                  .textAlign("center")
-                  .text("Time (ms)")
-                .add(pv.Label)
-                  .bottom(-1)
-                  .textBaseline("top")
-                  .left(0)
-                  .textAlign("left")
-                  .text(senders.length +" spikes");
+                    /* The dot plot! */
+                    spikes.add(pv.Dot)
+                        .data(times)
+                        .left(function(d) xScale(d))
+                        .top(function() yScale(senders[this.index]))
+                        .strokeStyle("#000")
+                        .fillStyle("#000")
+                        .size(1);
 
-          /* The PSTH panel */
-          var psth = vis.add(pv.Panel)
-                  .bottom(10)
-                  .height(h2);
+                    /* X-axis label */
+                    spikes.add(pv.Label)
+                        .bottom(-1)
+                        .textBaseline("top")
+                        .left(w/2)
+                        .textAlign("center")
+                        .text("Time (ms)")
+                      .add(pv.Label)
+                        .bottom(-1)
+                        .textBaseline("top")
+                        .left(0)
+                        .textAlign("left")
+                        .textStyle("grey")
+                        .text(senders.length +" spikes");
 
-          /* the bar plot! */
-          psth.add(pv.Bar)
-                  .data(bins)
-                  .bottom(0)
-                  .left(function(d) x(d.x))
-                  .width(function(d) x(d.dx))
-                  .height(function(d) bin_height(d.y))
-                  .fillStyle("#000")
-                  .strokeStyle("rgba(255, 255, 255, .2)")
-                  .lineWidth(1)
-                .anchor("top").add(pv.Label)
-                  .textBaseline("bottom")
-                  .text(function(d) d.y);
 
-          psth.add(pv.Line)
-                  .data(bins)
-                  .left(function(d) x(d.x) + x(d.dx)/2)
-                  .bottom(function(d) bin_height(d.y));
+                    /* The PSTH panel */
+                    var psth = vis.add(pv.Panel)
+                        .bottom(10)
+                        .height(h2);
 
-          psth.add(pv.Label)
-                  .bottom(-1)
-                  .textBaseline("top")
-                  .left(w/2)
-                  .textAlign("center")
-                  .text("PSTH of " + senders.length + " spikes");
+                    psth.add(pv.Label)
+                        .bottom(-1)
+                        .textBaseline("top")
+                        .left(w/2)
+                        .textAlign("center")
+                        .textStyle("grey")
+                        .text("PSTH");
 
-vis.render();
+                    /* The bar plot! */
+                    var psth_bars = psth.add(pv.Bar)
+                        .data(bins)
+                        .bottom(0)
+                        .width(xScale(bin_width))
+                        .height(function(d) bin_yScale(d.y))
+                        .left(function(d) xScale(d.x))
+                        .fillStyle("#000")
+                        .strokeStyle("rgba(255, 255, 255, .2)");
 
-}
+//                     psth_bars.anchor("top").add(pv.Label)
+//                        .textBaseline("bottom")
+//                        .text(function(d) d.y);
 
-        draw(nr_bins);
+                    /* the line plot! */
+                    var psth_line = psth.add(pv.Line)
+                        .data(bins)
+                        .left(function(d) xScale(d.x) + xScale(d.dx)/2)
+                        .bottom(function(d) bin_yScale(d.y))
+                        .lineWidth(3);
 
-    </script>
+                    /* Number of spikes label */
+                    psth_line.anchor("top").add(pv.Label)
+                        .textBaseline("top")
+                        .text(function(d) d.y)
+                        .textStyle(function(d) (d.y > 0) ? "lightgrey": "black")
+                        .visible(function(d) d.dx >= simTime/20);
 
-<form method="GET" id="nr_bins">
-        <input type="radio" name="nr_bins" value="5" id="5_bins"> 5 
-        <input type="radio" name="nr_bins" value="10" id="10_bins"> 10
-        <input type="radio" name="nr_bins" value="20" id="20_bins"> 20
-        <input type="radio" name="nr_bins" value="50" id="50_bins"> 50
-        bins
-    </form>
+                    vis.render();
 
-  </div></div></body>
+                    $( "input.spinedit" ).bind("change mouseover mouseup mouseout keyup mousewheel DOMMouseScroll", function () {
+
+                        /* Update PSTH */
+                        var bin_width = $("input.spinedit").val();
+                        var bin_xTicks = pv.range(0, simTime+1, bin_width);
+                        if (simTime%bin_width != 0) {bin_xTicks[bin_xTicks.length] = simTime};
+
+                        var bins = pv.histogram(times).bins(bin_xTicks),
+                        bin_yScale = pv.Scale.linear(0, pv.max(bins, function(d) d.y)).range(0, h2);
+
+                        grid.data(bin_xTicks);
+
+                        psth_bars.data(bins)
+                            .width(xScale(bin_width))
+                            .left(function(d) xScale(d.x))
+                            .height(function(d) bin_yScale(d.y));
+
+                        psth_line.data(bins)
+                            .data(bins)
+                            .left(function(d) xScale(d.x) + xScale(d.dx)/2)
+                            .bottom(function(d) bin_yScale(d.y))
+                
+                        vis.render();
+                        });
+
+                    $(function() {
+                        $( "input.spinedit" ).SpinEdit({'step':20, 'min': 20, max: simTime}).val(bin_width);
+                        });
+
+                </script>
+
+                <p>
+                    <label for "bin_width"> Bin width: </label>
+                    <input type="text" class="spinedit" id="bin_width"/> ms
+                </p>
+            </div>
+        </div>
+    </body>
 </html>
