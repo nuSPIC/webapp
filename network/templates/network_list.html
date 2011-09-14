@@ -13,11 +13,11 @@
     <h3>SPIC {{ group.grouper }}</h3>
     <ul>
 	{% for network in group.list %}
-	    <li id="{{network.local_id}}">
+	    <li id="{{ network.local_id }}">
 		<a href="{% url network network.SPIC_id network.local_id %}">
-		    {{network.title|default_if_none:"Network"}}
+		    {{ network.title|default_if_none:"Network" }}
 		</a>
-		: {{network.description}}
+		: {{ network.description|default:"no description" }}
 	    </li>
 	{% endfor %}
     </ul>
