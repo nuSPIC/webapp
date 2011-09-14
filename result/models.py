@@ -2,10 +2,12 @@
 from django.db import models
 from reversion.models import Revision
 
-import numpy as np
-import cjson
+import lib.json as json
 
 from network.templatetags.network_filters import readable
+
+import numpy as np
+
 
 class Result(models.Model):
     revision = models.OneToOneField(Revision)
@@ -48,7 +50,7 @@ class Result(models.Model):
         """ Return a list of neurons are connected to voltmeter. """
         voltmeter = self.network.device_list(label='voltmeter')
         if voltmeter:
-            targets = cjson.decode('['+ voltmeter[0][2]['targets'] + ']')
+            targets = json.decode('['+ str(voltmeter[0][2]['targets']) + ']')
             if data:
                 return [neuron for neuron in self.network.device_list(modeltype='neuron') if int(neuron[0]['id']) in targets]
             return targets
@@ -57,7 +59,7 @@ class Result(models.Model):
     def voltmeter_points(self):
         """ Number of points in voltmeter data. Useful for quick loading of the page. """
         if self.has_voltmeter:
-            V_m = cjson.decode(self.voltmeter_json)['V_m']
+            V_m = json.decode(str(self.voltmeter_json))['V_m']
             return len(V_m)
         return 0
 
@@ -67,7 +69,7 @@ class Result(models.Model):
             def prep_to_vis(status, values):  
                 return {'status':status, 'values': values.tolist()}
                 
-            V_m = cjson.decode(self.voltmeter_json)['V_m']
+            V_m = json.decode(str(self.voltmeter_json))['V_m']
             times = np.arange(1.0, self.network.duration, self.voltmeter_interval())
             targets = self.voltmeter_targets(data=False)
             V_m = np.reshape(np.array(V_m), [self.network.duration-1, len(targets)]).T
@@ -82,11 +84,11 @@ class Result(models.Model):
     def spike_detector_points(self):
         """ Number of points in spike detector data. Useful for quick loading of the page. """
         if self.has_spike_detector:
-            return len(cjson.decode(self.spike_detector_json)['times'])
+            return len(json.decode(str(self.spike_detector_json))['times'])
         return 0
         
     def spike_detector_data(self):
         """ Decode spike detector data from json. """
         if self.has_spike_detector:
-            return cjson.decode(self.spike_detector_json)
+            return json.decode(str(self.spike_detector_json))
         return []
