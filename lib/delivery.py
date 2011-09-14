@@ -1,26 +1,23 @@
 # -*- coding: utf-8 -*-
+import lib.json as json
 from network.models import Network
 
 import networkx as nx
 import numpy as np
 import nest
 
-import cjson
 
 STATUS_FIELDS = {
-    'Neuron': (),
-        'aeif_cond_alpha': (),
-        'iaf_cond_alpha': (),
-        'iaf_psc_alpha': ('I_e','tau_m', 'V_th', 'E_L', 't_ref', 'V_reset', 'C_m', 'V_m'),
-        'iaf_neuron': (),
-    'Input': ('start', 'stop'),
-        'ac_generator': ('amplitude', 'frequency'),
-        'dc_generator': (),
-        'noise_generator': ('mean', 'std'),
-        'poisson_generator': ('rate', ),
-    'Output': (),
-        'spike_detector': (),
-        'voltmeter': (),
+    'hh_psc_alpha': ('V_m', 'E_L', 'g_L', 'C_m', 'tau_ex', 'tau_in', 'E_Na', 'g_Na', 'E_K', 'g_K', 'Act_m', 'Act_h', 'Inact_n', 'I_e'),
+    'iaf_cond_alpha': ('V_m', 'E_L', 'C_m', 't_ref', 'V_th', 'V_reset', 'E_ex', 'E_in', 'g_L', 'tau_syn_ex', 'tau_syn_in', 'I_e'),
+    'iaf_neuron': ('V_m', 'E_L', 'C_m', 'tau_m', 't_ref', 'V_th', 'V_reset', 'tau_syn', 'I_e'),
+    'iaf_psc_alpha': ('V_m', 'E_L', 'C_m', 't_ref', 'V_th', 'V_reset', 'E_ex', 'E_in', 'g_L', 'tau_syn_ex', 'tau_syn_in', 'I_e'),
+    'ac_generator': ('amplitude', 'offset', 'phase', 'frequency'),
+    'dc_generator': ('amplitude',),
+    'noise_generator': ('mean', 'std', 'dt', 'start', 'stop'),
+    'poisson_generator': ('origin', 'rate', 'start', 'stop'),
+    'smp_generator': ('dc', 'ac', 'freq', 'phi'),
+    'spike_generator': ('start', 'stop', 'spike_times', 'spike_weights'),
 }
 
 def networkx(edgelist, layout='neato'):
@@ -29,83 +26,131 @@ def networkx(edgelist, layout='neato'):
     G.add_edges_from(edgelist)
     return nx.graphviz_layout(G, layout)
 
-def NEST_to_nuSPIC(SPIC_id):
-    """transfer status informations
-    from nest models to django database """
+def exportToDatabase(SPIC_id, title, description=None, fields={}, hidden=[]):
+    """
+    Export informations of all devices from NEST memory to django database and returns network object.
+    
+    SPIC_id argument is required to classify the network for its challenge part.
+    It should be string, e.g.: '1', '2', or 'SPIC1', 'SPIC2'.
+    
+    fields argument is optional. In the case its empty, all non-default parameters from each device are exported
+    to the database. If you want fetch a part of field:
+    e.g. fields = {'iaf_neuron':('V_m', 'I_e'), 'poisson_generator':('start','stop','rate')}
+    
+    hidden argument is optional. To hide some devices write a list of its ids. e.g. hidden = [6,7,8]  
+    """
     
     root_status = nest.GetStatus([0])[0]
-    
     SPIC_id = SPIC_id.split('_')[-1]
     
-    if Network.objects.filter(SPIC_id=SPIC_id):
-        local_id = Network.objects.filter(SPIC_id=SPIC_id).latest('local_id').local_id + 1
+    network_list = Network.objects.filter(SPIC_id=SPIC_id)
+    if network_list:
+        local_id = int(network_list.latest('local_id').local_id) + 1
     else:
         local_id = 1
-    network_obj, created = Network.objects.get_or_create(user_id=0, SPIC_id=SPIC_id, local_id=local_id)
-    
-    if created:
-        network_obj.duration = root_status['time']
         
+    network_obj = Network(user_id=0, SPIC_id=SPIC_id, local_id=local_id, title=title, duration=root_status['time'])
+    if description:
+        network_obj.description = description
+
+    print "Network: SPIC_id='%s', local_id=%s, title='%s', description='%s', duration='%s'" %(network_obj.SPIC_id, network_obj.local_id, network_obj.title, network_obj.description, network_obj.duration)
+
+    # Check the existance of Spike Detector
+    for sd_gid in range(1,root_status['network_size']):
+        if nest.GetStatus([sd_gid])[0]['model'] == 'spike_detector':
+            break
+    else:
+        sd_gid = -1
+            
+    # Create a list of devices
+    device_list, sd_sources = [], []
+    for gid in range(1,root_status['network_size']):
+        device_status = nest.GetStatus([gid])[0]
+        label = device_status['model']
         
-        for sd_gid in range(1,root_status['network_size']):
-            if nest.GetStatus([sd_gid])[0]['model'] == 'spike_detector':
-                break
+        if 'generator' in label:
+            modeltype = 'input'
+        elif 'meter' in label or 'detector' in label:
+            modeltype = 'output'
         else:
-            sd_gid = -1
-                
-        device_list, sd_sources = [], []
-        for gid in range(1,root_status['network_size']):
-            device_status = nest.GetStatus([gid])[0]
+            modeltype = 'neuron'
+        
+        # model - essential information of device
+        if gid in hidden:
+            model = {'label':label, 'type':modeltype}
+        else:
+            model = {'label':label, 'type':modeltype, 'id':gid}
+        
+        # status - optional information of device
+        status = {}
+        if label in fields:
+            for field in fields[label]:
+                status[field] = str(device_status[field])
+        elif label in STATUS_FIELDS:
+            for field in STATUS_FIELDS[label]:
+                if nest.GetDefaults(label)[field] != device_status[field]:
+                    status[field] = str(device_status[field])
             
-            if 'generator' in device_status['model']:
-                modeltype = 'input'
-            elif 'meter' in device_status['model'] or 'detector' in device_status['model']:
-                modeltype = 'output'
-            else:
-                modeltype = 'neuron'
+        # essential information of connections
+        connections = {}
+        if nest.FindConnections([gid]):
+            connections_status = nest.GetStatus(nest.FindConnections([gid]))
+            targets, delay, weight = [],[],[]
+            for con in connections_status:
+                if con['target'] == sd_gid:
+                    sd_sources.append(str(gid))
+                else:
+                    targets.append(str(con['target']))
+                    weight.append(str(con['weight']))
+                    delay.append(str(con['delay']))
             
-            model = {'label':device_status['model'], 'type':modeltype, 'id':gid}
+            if targets:
+                if len(np.unique(np.array(weight))) == 1:
+                    weight = np.unique(np.array(weight)).tolist()
+                if len(np.unique(np.array(delay))) == 1:
+                    delay = np.unique(np.array(delay)).tolist()
+                
+                connections['targets'] = ','.join(targets)
+                connections['weight'] = ','.join(weight)
+                connections['delay'] = ','.join(delay)
+                
+        if device_status['model'] == 'spike_detector':
+            connections['sources'] = ','.join(sd_sources)
             
-            status = {}
-            for field in STATUS_FIELDS[device_status['model']]:
-                status[field] = device_status[field]
-                
-            connections = {}
-            if nest.FindConnections([gid]):
-                connections_status = nest.GetStatus(nest.FindConnections([gid]))
-                targets, delay, weight = [],[],[]
-                for con in connections_status:
-                    if con['target'] == sd_gid:
-                        sd_sources.append(str(gid))
-                    else:
-                        targets.append(str(con['target']))
-                        weight.append(str(con['weight']))
-                        delay.append(str(con['delay']))
-                
-                if targets:
-                    if len(np.unique(np.array(weight))) == 1:
-                        weight = np.unique(np.array(weight)).tolist()
-                    if len(np.unique(np.array(delay))) == 1:
-                        delay = np.unique(np.array(delay)).tolist()
-                    
-                    connections['targets'] = ','.join(targets)
-                    connections['weight'] = ','.join(weight)
-                    connections['delay'] = ','.join(delay)
-                    
-            if device_status['model'] == 'spike_detector':
-                connections['sources'] = ','.join(sd_sources)
-                
-            device_list.append([gid, model, status, connections])
-            
-        edgelist = network_obj.connections(modeltype='neuron')
-        pos = networkx(edgelist, layout='circo')
+        # merge all information of the device
+        if gid in hidden:
+            print " %s (hidden)" % gid
+        else:
+            print " %s" % gid
+        print " - Model: %s" % model
+        print " - Status: %s" % status
+        print " - Connection params: %s" % connections
+        device_list.append([model, status, connections])
 
-        for gid,value in pos.items():
-            if int(device_list[gid-1][0]['id']) == gid:
-                device_list[gid-1][0]['position'] = list(value)
-                
-        network_obj.devices_json = cjson.encode(device_list)
-        network_obj.save()
+    while True:
+        response = raw_input('Is it correct (y/[n])? ')
+        if response not in ['y', 'n', '']:
+            continue
+        elif response == 'y':
+            break
+        else:
+            print 'aborted'
+            return
+    
+    network_obj.devices_json = json.encode(device_list)
+    network_obj.save()            
+        
+    # Save position of neurons
+    edgelist = network_obj.connections(modeltype='neuron')
+    pos = networkx(edgelist, layout='circo')
 
-    return network_obj, created
+    for key, value in pos.iteritems():
+        device_list[key-1][0]['position'] = list(value)
+            
+    network_obj.devices_json = json.encode(device_list)
+    network_obj.save()
+    
+    print "Export is successful."
+
+    return network_obj
     
