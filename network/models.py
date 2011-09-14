@@ -2,7 +2,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 
-import cjson
+import lib.json as json
 
 __all__ = ["Network"]
 
@@ -39,7 +39,7 @@ class Network(models.Model):
     def root_status(self):
         """ Returns status data from the field status_json."""
         if self.status_json:
-            return cjson.decode(self.status_json)
+            return json.decode(str(self.status_json))
         return {}
 
     def device_list(self, term='visible', modeltype=None, label=None):
@@ -49,7 +49,7 @@ class Network(models.Model):
         its default is None, choices are 'neuron', 'input' or 'output'.
         """
         if self.devices_json:
-            devices = cjson.decode(self.devices_json)
+            devices = json.decode(str(self.devices_json))
             
             if term == 'visible':
                 devices = [dev for dev in devices if 'id' in dev[0]]
