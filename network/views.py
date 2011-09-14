@@ -13,6 +13,7 @@ from lib.decorators import render_to
 from lib.delivery import networkx
 from lib.tasks import Simulation
 from lib.helpers import get_flatpage_or_none
+import lib.json as json
 
 from network.models import Network
 from network.helpers import values_extend
@@ -22,24 +23,24 @@ from result.models import Result
 from result.forms import CommentForm
 
 import os
-import cjson
 
 # Define models with its modeltype, label and form.
 MODELS = [
-    {'model_type': 'neuron',         'id_label': 'hh_psc_alpha',         'form': HhPscAlphaForm,},
-    {'model_type': 'neuron',         'id_label': 'iaf_cond_alpha',         'form': IafCondAlphaForm,},
-    {'model_type': 'neuron',         'id_label': 'iaf_neuron',                 'form': IafNeuronForm,},
-    {'model_type': 'neuron',         'id_label': 'iaf_psc_alpha',         'form': IafPscAlphaForm,},
+    {'model_type': 'neuron',  'id_label': 'hh_psc_alpha',         'form': HhPscAlphaForm,},
+    {'model_type': 'neuron',  'id_label': 'iaf_cond_alpha',       'form': IafCondAlphaForm,},
+    {'model_type': 'neuron',  'id_label': 'iaf_neuron',           'form': IafNeuronForm,},
+    {'model_type': 'neuron',  'id_label': 'iaf_psc_alpha',        'form': IafPscAlphaForm,},
+    {'model_type': 'input',   'id_label': 'parrot',               'form': SourceForm,},
     
-    {'model_type': 'input',         'id_label': 'ac_generator',         'form': ACGeneratorForm,},
-    {'model_type': 'input',         'id_label': 'dc_generator',                'form': DCGeneratorForm,},
-    {'model_type': 'input',         'id_label': 'poisson_generator','form': PoissonGeneratorForm,},
-    {'model_type': 'input',         'id_label': 'noise_generator',         'form': NoiseGeneratorForm,},
-    {'model_type': 'input',         'id_label': 'smp_generator',         'form': SmpGeneratorForm,},
-   # {'model_type': 'input',         'id_label': 'spike_generator',         'form': SpikeGeneratorForm,},   
+    {'model_type': 'input',   'id_label': 'ac_generator',         'form': ACGeneratorForm,},
+    {'model_type': 'input',   'id_label': 'dc_generator',         'form': DCGeneratorForm,},
+    {'model_type': 'input',   'id_label': 'poisson_generator',    'form': PoissonGeneratorForm,},
+    {'model_type': 'input',   'id_label': 'noise_generator',      'form': NoiseGeneratorForm,},
+    {'model_type': 'input',   'id_label': 'smp_generator',        'form': SmpGeneratorForm,},
+   # {'model_type': 'input',     'id_label': 'spike_generator',         'form': SpikeGeneratorForm,},   
     
-    {'model_type': 'output',         'id_label': 'spike_detector',         'form': SpikeDetectorForm,},
-    {'model_type': 'output',         'id_label': 'voltmeter',                 'form': VoltmeterForm,},
+    {'model_type': 'output',  'id_label': 'spike_detector',       'form': TargetForm,},
+    {'model_type': 'output',  'id_label': 'voltmeter',            'form': SourceForm,},
 ]
 
 @revision.create_on_success
@@ -172,7 +173,7 @@ def network_simulated(request, SPIC_id, local_id, result_id):
                     device_list[idx] = device[0], device[1], params
             
             hidden_device_list = network_obj.device_list('hidden')
-            network_obj.devices_json = cjson.encode(device_list+hidden_device_list)
+            network_obj.devices_json = json.encode(device_list+hidden_device_list)
             network_obj.save()
             
     # Get a choice list for adding new device.
@@ -255,11 +256,12 @@ def device_preview(request, network_id):
                     params = {term: data.pop(term)[0], 'weight': data.pop('weight')[0], 'delay': data.pop('delay')[0]}
                 else:
                     params = {term: data.pop(term)[0]}
+                    
+                # after poping connection information save status of divices.
                 status = {}
-                
-                # save status of each divices.
-                for key, value in data.items():
-                    status[key] = value
+                for key, value in data.iteritems():
+                    if value:
+                        status[key] = value
                     
                 response = {'valid': 1, 'device':[model, status, params]}
                 
@@ -268,7 +270,7 @@ def device_preview(request, network_id):
         
             responseHTML = render_to_string('device_form.html', {'id_label':device['id_label'], 'form':form})
             response['responseHTML'] = responseHTML
-            return HttpResponse(cjson.encode(response), mimetype='application/json')
+            return HttpResponse(json.encode(response), mimetype='application/json')
                     
     return HttpResponse()
 
@@ -279,7 +281,7 @@ def device_commit(request, network_id):
     if request.is_ajax():
         if request.method == 'POST':
             post = request.POST
-            device_list = cjson.decode(post['devices_json'])
+            device_list = json.decode(str(post['devices_json']))
         
             for gid, device in enumerate(device_list):
                 model, status, params = device
@@ -296,9 +298,9 @@ def device_commit(request, network_id):
                     device_list[gid][2][term] = ','.join(extended_list)
                 
             hidden_device_list = network_obj.device_list('hidden')
-            network_obj.devices_json = cjson.encode(device_list + hidden_device_list)
+            network_obj.devices_json = json.encode(device_list + hidden_device_list)
             network_obj.save()
-            return HttpResponse(cjson.encode({'saved':1}), mimetype='application/json')
+            return HttpResponse(json.encode({'saved':1}), mimetype='application/json')
             
     return HttpResponse()
 
@@ -313,7 +315,7 @@ def simulate(request, network_id, version_id):
     if request.is_ajax():
         if request.method == 'POST':
             post = request.POST
-            device_list = cjson.decode(post['devices_json'])
+            device_list = json.decode(str(post['devices_json']))
             
             for gid, device in enumerate(device_list):
                 model, status, params = device
@@ -337,7 +339,7 @@ def simulate(request, network_id, version_id):
                     device_list[gid][2][term] = ','.join(extended_list)
             
             hidden_device_list = network_obj.device_list('hidden')
-            network_obj.devices_json = cjson.encode(device_list + hidden_device_list)
+            network_obj.devices_json = json.encode(device_list + hidden_device_list)
             form = NetworkForm(request.POST, instance=network_obj)
             
             versions = Version.objects.get_for_object(network_obj).reverse()
@@ -361,17 +363,17 @@ def simulate(request, network_id, version_id):
                     # check if it is already simulated, it prevents from simulating.
                     if version_obj.revision.result.is_recorded():
                         response = {'recorded':1}
-                        return HttpResponse(cjson.encode(response), mimetype='application/json')
+                        return HttpResponse(json.encode(response), mimetype='application/json')
                     else:
                         task = Simulation.delay(network_id=network_id, version_id=version_id)
                     
                 response = {'task_id':task.task_id}
-                return HttpResponse(cjson.encode(response), mimetype='application/json')
+                return HttpResponse(json.encode(response), mimetype='application/json')
                     
             else:
                 responseHTML = render_to_string('network_form.html', {'form': form})
                 response = {'responseHTML':responseHTML, 'valid': -1}
-                return HttpResponse(cjson.encode(response), mimetype='application/json')
+                return HttpResponse(json.encode(response), mimetype='application/json')
             
         else:
             # check if task_id exists, then a simulation will be aborted.
@@ -381,7 +383,7 @@ def simulate(request, network_id, version_id):
                 abortable_async_result.abort()
                                 
                 response = {'aborted':1}
-                return HttpResponse(cjson.encode(response), mimetype='application/json')
+                return HttpResponse(json.encode(response), mimetype='application/json')
                 
     return HttpResponse()
 
@@ -396,7 +398,7 @@ def default_layout(request, network_id):
             if int(device_list[gid-1][0]['id']) == gid:
                 device_list[gid-1][0]['position'] = list(value)
         
-        devices_json = cjson.encode(device_list)
+        devices_json = json.encode(device_list)
         network_obj.devices_json = devices_json
         network_obj.save()
         
