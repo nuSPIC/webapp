@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="/media/css/jquery-ui.custom.css"></link>
 <link rel="stylesheet" href="/media/css/network.css"></link>
 <link rel="stylesheet" href="/media/css/tipTip.css"></link>
-
+<link rel="stylesheet" href="/media/css/ui.selectmenu.css"></link>
 
 <script type="text/javascript" src="/media/js/jquery-1.6.2.min.js"></script>
 <script type="text/javascript" src="/media/js/jquery-ui-1.8.14.custom.min.js"></script>
@@ -20,7 +20,7 @@
 <script type="text/javascript" src="/media/js/quickpager.jquery.js"></script>
 <script type="text/javascript" src="/media/js/raphael-min.js"></script>
 <script type="text/javascript" src="/media/js/network-layout.js"></script>
-
+<script type="text/javascript" src="/media/js/ui.selectmenu.js"></script>
 
 <script type="text/javascript">
     var device_list = new Array(),
@@ -51,6 +51,8 @@
             $( "div#connections-tabs" ).tabs();
             $( "div#results-tabs" ).tabs();
             $( "ul#history-list" ).quickPager();
+            $( "select#versions-select" ).selectmenu();
+
             
             $( "button#toggle-device-form" ).click(function(e) {
                     e.preventDefault()
@@ -957,15 +959,18 @@
                         {% endfor %}
                     </ul>
                     
-<!--                    <div class="buttons">-->
-                        <select id="versions-select" name="action">
-                                            <option>--- Select an action ---</option>
-                                            <option value="delete">Delete</option>
-                                            <option value="favorite">Mark as favorite</option>
-                                            <option value="unfavorite">Unmark as favorite</option>
-                        </select>
-                        <button class="go" id="go-versions">Go</button>
-<!--                     </div> -->
+                   <div class="buttons field-wrapper" title="">
+                        <button class="go" id="go-versions" style="float:right">Go</button>
+                        <form action="#">
+                            <select style="display: none; float:left" name="action" id="versions-select">
+                                <option>Select an action</option>
+                                <option value="delete">Delete</option>
+                                <option value="favorite">Mark as favorite</option>
+                                <option value="unfavorite">Unmark as favorite</option>
+                            </select>
+
+                        </form>
+                    </div>
                 </form>
             </div>
         </div>
