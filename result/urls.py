@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.conf.urls.defaults import patterns, url
 
 urlpatterns = patterns('result.views',
@@ -8,5 +9,4 @@ urlpatterns = patterns('result.views',
     url(r'^(?P<result_id>\d+)/voltmeter_thumbnail/$', 'voltmeter_thumbnail', name='voltmeter_thumbnail'),
     
     url(r'^(?P<result_id>\d+)/spike_detector/$', 'spike_detector', name='spike_detector'),
-    url(r'^(?P<result_id>\d+)/spike_detector_thumbnail/$', 'spike_detector_thumbnail', name='spike_detector_thumbnail'),
     )
