@@ -19,7 +19,7 @@
 <script type="text/javascript" src="/media/js/jquery.tipTip.minified.js"></script>
 <script type="text/javascript" src="/media/js/quickpager.jquery.js"></script>
 <script type="text/javascript" src="/media/js/raphael-min.js"></script>
-<script type="text/javascript" src="/media/js/graffle.js"></script>
+<script type="text/javascript" src="/media/js/network-layout.js"></script>
 
 
 <script type="text/javascript">
@@ -46,6 +46,7 @@
             });
             
             load_theme( ".portlet" );
+            load_layout( device_list );
              
             $( "div#connections-tabs" ).tabs();
             $( "div#results-tabs" ).tabs();
@@ -67,7 +68,6 @@
             
             $( "span#device_id" ).html(selected_device_id);
             $( "span#last_device_id" ).html(last_device_id);
-            $( "span#version_id" ).html(version_id);
             
             $( "div#step-helper" ).dialog({
                                    title: 'How to use it?',
@@ -242,7 +242,7 @@
                 $( "#task_status" ).html(status);
                 if (status == 'PENDING') {
                     $( "#task_status" ).html('...simulating. Please wait.');
-                    window.setTimeout(function() {get_task_status()}, 5000);
+                    window.setTimeout(function() {get_task_status()}, 2000);
                 } else {
                     if (status == 'ABORTED') {
                         $( "#dialog-simulating" ).dialog({
@@ -284,7 +284,7 @@
                         var result = task['result'];
                         $( "#task_status" ).html('Simulation finished successfully.').effect("highlight", {}, 1000);
                         window.setTimeout(function() {
-                                window.location.href = '/network/'+ {{ network_obj.SPIC_id }} +'/'+ {{ network_obj.local_id }} +'/?version_id='+ result['version_id']
+                                window.location.href = '/network/'+ {{ network_obj.SPIC_id }} +'/'+ {{ network_obj.local_id }} +'/' + result['result_local_id']
                         }, 1000);
                     };
                 }
@@ -387,12 +387,11 @@
                     $(form).html(data.responseHTML).find( "#selected_device_id" ).html(selected_device_id);
                     load_theme( $(form).parent() );
                     if (data.valid != -1) {
-                        version_id = 0;
                         if ($( "select#id_label" ).val() == 'voltmeter' || $("select#id_label" ).val() == 'spike_detector') {
                             $( "select#id_label option:selected" ).hide()
                         };
                         $( "option:first" ).attr('selected', 'selected');
-                        data.device[0]["id"] = selected_device_id
+                        data.device[0]["id"] = parseInt(selected_device_id)
                         if (selected_device_id > device_list.length) {
                             device_list.push(data.device)
                         } else {
@@ -472,9 +471,14 @@
         });
     {% endif %}
 
-    $( "button#default-devices" ).live('click', function(e) {
+    $( "button#default-layout" ).live('click', function(e) {
             e.preventDefault();
-            window.location.href = '{% url network network_obj.SPIC_id network_obj.local_id %}?layout=default'
+            $.getJSON('/network/ajax/'+ {{ network_obj.id }} +'/default_layout/',
+                                        function(data) {
+                                            $( '#holder' ).html('');
+                                            load_layout(data);
+                                            device_list = data;
+                                    });
     });
     
     $( "button#layout-legend" ).live('click',function(e) {
@@ -488,7 +492,7 @@
                 e.preventDefault();
                 $.post('{% url result_comment result_obj.id %}',
                     $( this ).serialize(), function(data){
-                        $( "#history_{{version_id}} a" ).attr('title',data).tipTip({defaultPosition:'left'});
+                        $( "#history_{{result_obj.local_id}} a" ).attr('title',data).tipTip({defaultPosition:'left'});
                 }, 'html');                
         });
     {% endif %}
@@ -519,9 +523,10 @@
 
         $( "select#voltmeter-select" ).live('change',function(e) {
                 $( ".resultView" ).attr('src', $( this ).val());
+                $( ".resultView" ).css('height', 400);
                 $( "#dialog-resultView" ).dialog({
                         title: 'Voltmeter view of '+ $( this ).find( "option:selected" ).attr('name'),
-                        height: 550,
+                        height: 470,
                         width: 800,
                         modal: true,
                 });
@@ -541,10 +546,11 @@
         
     {% if result_obj.has_spike_detector %}
         $( "button#spike_detector-link" ).live('click',function(e) {
-                $( ".resultView" ).attr('src', "{% url spike_detector result_obj.id %}");
+                $( ".resultView" ).attr('src', "{% url spike_detector result_obj.id %}?view=large");
+                $( ".resultView" ).css('height', {{ network_obj.neuron_ids|length }} * 30 + 130);
                 $( "#dialog-resultView" ).dialog({
                         title: 'Spike Detector view of all sources',
-                        height: 550,
+                        height: {{ network_obj.neuron_ids|length }} * 30 + 200,
                         width: 800,
                         modal: true,
                 });
@@ -554,7 +560,7 @@
     $(document).ready(function() {
 //             $('#switcher').themeswitcher();
             
-            $( "table tr" ).each(function(){
+            $( "table#device-table tr" ).each(function(){
                     $( this ).addClass("tipTip-right");
             });
             $( "table th" ).each(function(){
@@ -616,7 +622,7 @@
 <div id="view">
     <div>
     network_id: {{network_obj.id}}
-    version_id: <span id="version_id"></span>
+    result_id: {{result_obj.id}}
     device_id: <span id="device_id"></span>
     last_device_id:<span id="last_device_id"></span>
     task_id: <span id="task_id"></span>
@@ -711,7 +717,7 @@
         <!-- DEVICE SELECT -->
         <div class="portlet" id="device-select">
             <div class="portlet-content">
-                <div class="field-wrapper">
+                <div class="field-wrapper" title="">
                     <label for="device-select">Add a device:</label>
                     <select id="id_label">
                         <option value="">--- select a device ---</option>
@@ -743,7 +749,7 @@
         <!--     CONNECTIVITY MATRIX  -->
             {% if network_obj.neuron_ids|length <= 10 %}
                 <div class="portlet" id="connectivity_matrix">
-                    <div class="portlet-header">
+                    <div class="portlet-header" title="">
                         Connectivity matrix
                     </div>
                     
@@ -762,19 +768,19 @@
                                         <tr><td colspan="{{network_obj.neuron_ids|length|add:2}}"><span class="connections-tabs" id="target_title">Target</span></td></tr>
                                         <tr>
                                             <th></th><th>Id</th>
-                                            <th>{{network_obj.neuron_ids|join:"</th><th>"}}</th>
+                                            <th class="connections-table">{{network_obj.neuron_ids|join:"</th><th class='connections-table'>"}}</th>
                                         </tr>
                                         </thead>
                                         
                                         <tbody>
                                             {% for id, weights in network_obj.weight_list %}
-                                                <tr>
+                                                <tr id="neuron_{{ id }}">
                                                     {% if forloop.first %}
                                                         <td class="first-col" rowspan="{{network_obj.weight_list|length}}">
                                                             <span class="connections-tabs {% if network_obj.weight_list|length > 3 %}verticaltext{% endif %}" id="source_title">Source</span>
                                                         </td>
                                                     {% endif %}
-                                                    <td class="connections-table"><b>{{id}}</b></td>
+                                                    <td class="connections-table"><b>{{ id }}</b></td>
                                                     <td class="connections-table">{{weights|join:'</td><td class="connections-table">'}}</td>
                                                 </tr>
                                             {% endfor %}
@@ -787,18 +793,18 @@
             <!--                 DELAY TAB -->
                             {% if network_obj.delay_list %}
                                 <div id="delays-tab">
-                                    <table class="connections-table" id="weight-table">
+                                    <table class="connections-table" id="delay-table">
                                         <thead>
                                         <tr><td colspan="{{network_obj.neuron_ids|length|add:2}}"><span class="connections-tabs" id="target_title">Target</span></td></tr>
                                         <tr>
                                             <th></th><th>Id</th>
-                                            <th>{{network_obj.neuron_ids|join:"</th><th>"}}</th>
+                                            <th class="connections-table">{{network_obj.neuron_ids|join:"</th><th class='connections-table'>"}}</th>
                                         </tr>
                                         </thead>
                                         
                                         <tbody>
                                             {% for id, delays in network_obj.delay_list %}
-                                                <tr>
+                                                <tr id="neuron_{{ id }}">
                                                     {% if forloop.first %}
                                                         <td class="first-col" rowspan="{{network_obj.delay_list|length}}">
                                                             <span class="connections-tabs {% if network_obj.delay_list|length > 3 %}verticaltext{% endif %}" id="source_title">Source</span>
@@ -867,7 +873,7 @@
     {% if network_obj.devices_json %}
         <div class="column" id="GUI">
             <div class="portlet" id="network_layout">
-                <div class="portlet-header" title="Click on popup icon to get a larger view.">
+                <div class="portlet-header" title="">
                     Network layout
                     <span class="ui-icon dialog ui-icon-newwin" style="float:right"></span>
                 </div>
@@ -877,7 +883,7 @@
                     
                     <div class="buttons">
                         <button class="check" id="save-devices">Save</button>
-                        <button class="reset" id="default-devices">Default</button>
+                        <button class="reset" id="default-layout">Default</button>
                         <button id="layout-legend">Legend</button>
                     </div>
 
@@ -886,14 +892,14 @@
             
             {% if comment_form %}
                 <form action="." method="POST" class="portlet" id="comment-form">
-                    <div class="portlet-header" title="Click on popup icon to get a larger view.">
+                    <div class="portlet-header" title="">
                         Comment
                     </div>
                     
                     <div class="portlet-content">
                         {% csrf_token %}
                         
-                        <div class="comment-form-content field-wrapper">
+                        <div class="comment-form-content field-wrapper" title="{{ comment_form.comment.help_text }}">
                             {{ comment_form.comment }}
                         </div>
 
@@ -922,21 +928,21 @@
                     <ul class="pager" id="history-list">
                         {% for version in versions %}
                             {% with version.revision.result as result %}
-                            <li class="{% if version_id == version.id %} selected {% endif %} tipTip-left" 
+                            <li class="{% ifequal result_obj.local_id version.revision.result.local_id %} ui-state-highlight {% endifequal %} tipTip-left" 
                                 title="{{version.revision.result.comment|default_if_none:'no comment'}}" id="history_{{version.id}}">
                                 <input style="float:right" type="checkbox" name="version_ids" value="{{version.id}}" {% if forloop.last %} disabled {% endif %}>
                                 {% if result.favorite %}<div class="ui-icon ui-icon-star" style="float:right"></div>{% endif %}
                                 <div class="version-link">
-                                    <a href="/network/{{network_obj.SPIC_id}}/{{network_obj.local_id}}/?version_id={{version.id}}" id="{{version.id}}">
+                                    <a href="{% url network-simulated network_obj.SPIC_id network_obj.local_id version.revision.result.local_id|default:0 %}?version=revert" id="{{version.revision.result.local_id}}">
                                         {% if forloop.last %}
                                             Initial version of network
                                         {% else %}  
                                             {% if result %}
-                                                <b>{{ result.local_id }}</b> - 
+                                                <b>{{ result.local_id }}</b> -
                                                 {% if result.date_simulated %}
                                                     {% if result.has_spike_detector %} [Sd] {% endif %}
-                                                    {% if result.has_voltmeter %} [Vm] {% endif %} -
-                                                    {{ result.date_simulated|timesince }} ago
+                                                    {% if result.has_voltmeter %} [Vm] {% endif %}
+                                                    - {{ result.date_simulated|timesince }} ago
                                                 {% else %}
                                                     no simulation
                                                 {% endif %}
@@ -951,7 +957,7 @@
                         {% endfor %}
                     </ul>
                     
-                    <div class="buttons">
+<!--                    <div class="buttons">-->
                         <select id="versions-select" name="action">
                                             <option>--- Select an action ---</option>
                                             <option value="delete">Delete</option>
@@ -959,7 +965,7 @@
                                             <option value="unfavorite">Unmark as favorite</option>
                         </select>
                         <button class="go" id="go-versions">Go</button>
-                    </div>
+<!--                     </div> -->
                 </form>
             </div>
         </div>
@@ -968,7 +974,7 @@
         {% if result_obj.has_spike_detector or result_obj.has_voltmeter %}
             <div class="portlet">
                 <div class="portlet-header" title="Simulation was succeed. So you can explore the view of results.">
-                    Results ({{result_obj.local_id}})
+                    Results
                 </div>
                 
                 <div class="portlet-content">
@@ -986,7 +992,7 @@
                         <div id="spike_detector-tab">
                             {% if result_obj.has_spike_detector %}
                                 <div>
-                                    <iframe scrolling="no" src="{% url spike_detector_thumbnail result_obj.id %}" id="SpikeDetectorThumbnail"></iframe>
+                                    <iframe scrolling="no" src="{% url spike_detector result_obj.id %}?view=small" id="SpikeDetectorThumbnail"></iframe>
                                 </div>
                                 
                                 <div class="buttons">
@@ -1005,7 +1011,7 @@
                                         The number of points is too big.
                                     {% endif %}
                                 </div>
-                                    <div class="field-wrapper">
+                                    <div class="field-wrapper" title="">
                                         <label for="field-wrapper">View larger screen</label>
                                         <select id="voltmeter-select">
                                             <option>--- Select a neuron ---</option>
