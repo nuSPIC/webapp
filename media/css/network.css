@@ -132,8 +132,9 @@ ul#history-list {
 }
 
 ul#history-list li {
+    font-weight: normal;
     cursor: pointer;    
-    font-size: .8em;
+    font-size: .85em;
     display: block;
     padding: .7em .5em;
     margin-top: 2px;
@@ -141,7 +142,6 @@ ul#history-list li {
 
 ul#history-list input {
     margin: 0;
-    margin-right: .5em;
 }
 
 ul#history-list a {
@@ -193,11 +193,5 @@ iframe {
 
 iframe.resultView {
     margin-top: 20px;
-    height: 420px;
     width: 750px;
-}
-
-#fig {
-  position: relative;
-  margin: auto;
 }
