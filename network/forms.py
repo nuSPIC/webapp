@@ -10,26 +10,17 @@ import numpy as np
 __all__ = ["NetworkForm", 
           "HhPscAlphaForm", "IafCondAlphaForm", "IafNeuronForm", "IafPscAlphaForm", 
           "ACGeneratorForm", "DCGeneratorForm", "NoiseGeneratorForm", "PoissonGeneratorForm", "SmpGeneratorForm", "SpikeGeneratorForm",
-          "SpikeDetectorForm", "VoltmeterForm"]
+          "SourceForm", "TargetForm"]
 
 class NetworkForm(BetterModelForm):
     """ Form for network object """
-    duration = forms.FloatField(help_text="Enter value, which is divisible by 50.")
+    duration = forms.FloatField(help_text="Enter positive value.")
     seed = forms.IntegerField(required=False, help_text="Enter only positive value.")  
     resolution = forms.FloatField(required=False,)
     
     def as_div(self):
         return self._html_output(u'<div class="field-wrapper" title="%(help_text)s">%(label)s %(errors)s %(field)s</div>', u'%s', '</div>', u'%s', False)
         
-    def clean_duration(self):
-        duration = self.cleaned_data.get('duration')
-        
-        # duration value should be divisible by 50, it's because of the visualization with protovis.
-        # TODO: find a better code for protovis.
-        if float(duration) % 50 != 0.0:
-            raise forms.ValidationError('This value isn`t divisible by 50.')
-        return duration
-
     class Meta:
         model = Network
         fieldsets = (('main', {'fields': ['duration']}),
@@ -291,39 +282,13 @@ class SpikeGeneratorForm(DeviceForm):
 
 
 """ 
-Outputs as entire forms 
+General Forms
 """
 
-class SpikeDetectorForm(BetterForm):
+class SourceForm(BetterForm):
     def __init__(self, network_obj=None, *args, **kwargs):
         self.instance = network_obj
-        super(SpikeDetectorForm, self).__init__(*args, **kwargs)
-        
-    model = forms.CharField(max_length=32, widget=forms.HiddenInput())
-    sources = forms.CharField(max_length=1000, help_text="Enter only ID of neurons, e.g. '1,2,4' or '1-3'")
-
-    def as_div(self):
-        return self._html_output(u'<div class="field-wrapper" title="%(help_text)s">%(label)s %(errors)s %(field)s</div>', u'%s', '</div>', u'%s', False)
-
-    def clean_sources(self):
-        sources = self.cleaned_data.get('sources').replace(' ','')
-        try:
-            extended_list = values_extend(sources, unique=True)
-        except:
-            raise forms.ValidationError('enter only number.')
-        
-        # check if all sources are neurons
-        neuron_ids = self.instance.neuron_ids()
-        for source in extended_list:
-            if not source in neuron_ids:
-                raise forms.ValidationError('sources should be neurons')
-            
-        return sources
-        
-class VoltmeterForm(BetterForm):
-    def __init__(self, network_obj=None, *args, **kwargs):
-        self.instance = network_obj
-        super(VoltmeterForm, self).__init__(*args, **kwargs)
+        super(SourceForm, self).__init__(*args, **kwargs)
         
     model = forms.CharField(max_length=32, widget=forms.HiddenInput())
     targets = forms.CharField(max_length=1000, help_text="Enter only ID of neurons, e.g. '1,2,4' or '1-3'")
@@ -346,4 +311,29 @@ class VoltmeterForm(BetterForm):
                 raise forms.ValidationError('targets should be neurons')
             
         return targets
-    
+
+class TargetForm(BetterForm):
+    def __init__(self, network_obj=None, *args, **kwargs):
+        self.instance = network_obj
+        super(TargetForm, self).__init__(*args, **kwargs)
+        
+    model = forms.CharField(max_length=32, widget=forms.HiddenInput())
+    sources = forms.CharField(max_length=1000, help_text="Enter only ID of neurons, e.g. '1,2,4' or '1-3'")
+
+    def as_div(self):
+        return self._html_output(u'<div class="field-wrapper" title="%(help_text)s">%(label)s %(errors)s %(field)s</div>', u'%s', '</div>', u'%s', False)
+
+    def clean_sources(self):
+        sources = self.cleaned_data.get('sources').replace(' ','')
+        try:
+            extended_list = values_extend(sources, unique=True)
+        except:
+            raise forms.ValidationError('enter only number.')
+        
+        # check if all sources are neurons
+        neuron_ids = self.instance.neuron_ids()
+        for source in extended_list:
+            if not source in neuron_ids:
+                raise forms.ValidationError('sources should be neurons')
+            
+        return sources
