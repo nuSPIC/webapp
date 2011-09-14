@@ -4,10 +4,11 @@ from celery.contrib.abortable import AbortableTask
 from reversion import revision
 from reversion.models import Version
 
+import lib.json as json
+
 from network.models import Network
 from result.models import Result
 
-import cjson
 import datetime
 
 class Simulation(AbortableTask):
@@ -56,27 +57,22 @@ class Simulation(AbortableTask):
         # Create models in NEST and set its status
         device_list = network_obj.device_list('all')
         for dev_model, dev_status, dev_params in device_list:
-            """ creating models """
+                
+            """ Create models """                
             if dev_status:
-                params = {}
-                for param_key, param_value in dev_status.items():
-                    if param_value:
-                        if ',' in param_value:
-                            param_list = param_value.split(',')
-                            params[str(param_key)] = param_list
-                        else:
-                            params[str(param_key)] = float(param_value)
-                gid = nest.Create(dev_model['label'], params=params)
+                status_params = {}
+                for status_key, status_value in dev_status.iteritems():
+                    if status_value:
+                        status_params[str(status_key)] = float(status_value)
+                gid = nest.Create(dev_model['label'], params=status_params)
             else:
                 gid = nest.Create(dev_model['label'])
-            if 'id' in dev_model:
-                assert gid == [int(dev_model['id'])]
     
         # Make connections in nest
         connections = network_obj.connections('all', data=True)
-        for source, target, params in connections:
-            if params:
-                nest.Connect([source],[target], params=params)
+        for source, target, conn_params in connections:
+            if conn_params:
+                nest.Connect([source],[target], params=conn_params)
             else:
                 nest.Connect([source],[target])
                     
@@ -92,6 +88,7 @@ class Simulation(AbortableTask):
                     logger.warning("Task aborted.")
                     return None
                 nest.Simulate(dt)
+                
             dt_last = duration % dt
             if dt_last:
                 nest.Simulate(dt_last)
@@ -101,13 +98,13 @@ class Simulation(AbortableTask):
         # Get data from output devices
         data = {}
         outputs = network_obj.device_list(modeltype='output')
-        for model, dev_status, connections in outputs:
-            gid = [int(model['id'])]
+        for out_model, out_status, out_params in outputs:
+            gid = [int(out_model['id'])]
             output_status = nest.GetStatus(gid)[0]['events']
             events = {}
             for key,value in output_status.items():
                 events[key] = value.tolist()
-            data[model['label']] = events
+            data[out_model['label']] = events
             
             
         # Get result object in latest version or in selected version
@@ -122,7 +119,7 @@ class Simulation(AbortableTask):
         # Write results and simulating date in database and reconfigure the existence of output devices
         result.has_spike_detector, result.has_voltmeter = False, False
         for label, value in data.items():
-            data_json = cjson.encode(value)
+            data_json = json.encode(value)
             result.__setattr__("%s_json" %label, data_json)
             result.__setattr__("has_%s" %label, True)
         result.date_simulated = datetime.datetime.now()
