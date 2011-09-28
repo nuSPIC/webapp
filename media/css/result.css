@@ -23,7 +23,7 @@ input.spinedit {
     height: 20px;
     background: url(/media/images/icons/bg-spinedit.png) 100% 0% no-repeat;
     text-align: right;
-    width: 75px;
+    width: 55px;
 }
 
 
@@ -45,4 +45,8 @@ input.spinedit.downp {
 
 input.spinedit.upp {
     background-position: right -72px;
+}
+
+.activated {
+    font-weight: bold;
 }
