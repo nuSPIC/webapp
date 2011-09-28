@@ -57,7 +57,7 @@ table#device-table input {
 }
 
 table#device-table td.model {
-    width: 11em;
+    width: 9em;
 }
 
 table#device-table td.disabled {
@@ -150,6 +150,10 @@ ul#history-list a {
 
 /* Page */
 
+ul.simplePagerNav {
+    padding-left: 2px; 
+}
+
 ul.simplePagerNav li{
     cursor: pointer;
     display: block; 
@@ -182,7 +186,7 @@ iframe {
 }
 
 #SpikeDetectorThumbnail {
-    height: 240px;
+    height: 250px;
     width: 250px;
 }
 
