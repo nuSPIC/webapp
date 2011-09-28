@@ -168,7 +168,7 @@ function load_layout (device_list) {
         };
 
     var x, y, id, edge, wcolors, 
-    paper = Raphael("holder", 363, 250),
+    paper = Raphael("holder", pos['x']+30, pos['y']+30),
 //     colors = [],
     texts = [], inputs = [], outputs = [], shapes = [],
     connections = [];
