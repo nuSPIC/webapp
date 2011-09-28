@@ -14,65 +14,115 @@
         <div id="center">
             <div id="fig">
                 <script type="text/javascript+protovis">
+
+function newFilledArray(len, val) {
+    var rv = new Array(len);
+    while (--len >= 0) {
+        rv[len] = val;
+    }
+    return rv;
+}
+
+
+                    Object.prototype.clone = function() {
+                        var newObj = (this instanceof Array) ? [] : {};
+                        for (i in this) {
+                            if (i == 'clone') continue;
+                            if (this[i] && typeof this[i] == "object") {
+                                newObj[i] = this[i].clone();
+                            } else newObj[i] = this[i]
+                            } return newObj;
+                        };
+
+                    Object.prototype.smooth = function () {
+                        var smooth = this.clone();
+                        for (idx in bins) {
+                            var nr_bins = 0;
+                            x = -kw;
+                            while (x <= kw) {
+                                if (parseInt(idx) + x > 0 && parseInt(idx)+x < this.length) {
+                                    nr_bins += (kw-Math.abs(x))/kw * bins[parseInt(idx)+x].y
+                                    };
+                                x++;
+                                };
+                            smooth[idx].y = nr_bins;
+                            } return smooth;
+                      };
    
                     /* Data of Spikes. */ 
                     var senders = {{ senders|safe }},
-                    times = {{ times|safe }}
+                    times = {{ times|safe }},
                     simTime = {{ simTime|safe }},
                     neurons = {{ neurons|safe }},
                     fig = {{ fig|safe }};
 
+                    var psth = newFilledArray(simTime, 0),
+                    nr_spikes = 1,
+                    kw = 100;
+
+                    function psth_calc() {
+
+                        /* Update PSTH */
+                        psth = newFilledArray(simTime, 0);
+
+                        for (var n = 0; n < times.length; n++) {
+                            psth[parseInt(times[n])] += 2/kw * 1000 / nr_spikes;
+                            for (var m = 1; m <= kw/2; m++) {
+                                if (parseInt(times[n] - m) >= 0) {
+                                    psth[parseInt(times[n] - m)] += 2/kw * ( 1 - (2/kw) * m) * 1000 / nr_spikes;
+                                }
+                                if (parseInt(times[n] + m) < psth.length) {
+                                    psth[parseInt(times[n] + m)] += 2/kw * ( 1 - (2/kw) * m) * 1000 / nr_spikes;
+                                }
+                            }
+                        };
+                    };
+
+                    psth_calc(); 
+
                     /* Size of panels. */
                     var w = fig.w,
-                    h1 = neurons.length * fig.h1,
+                    h1 = neurons.length * 10,
                     h2 = fig.h2,
                     h = h1 + 30 + h2;
 
                     $( "#fig" ).css("width", fig.width).css("height", h);
 
-                    /* Scales of Spikes panel */
+                    /* Scales of PSTH panel */
                     var xScale = pv.Scale.linear(0, simTime).range(0, w),
                     yScale = pv.Scale.linear(1, neurons.length).range(0, h1);
-
-                    /* Scales of PSTH panel */
-                    var bin_width = simTime/10,
-                    bin_xTicks = pv.range(0, simTime+1, bin_width);
-
-                    var bins = pv.histogram(times).bins(bin_xTicks),
-                    bin_yScale = pv.Scale.linear(0, pv.max(bins, function(d) d.y)).range(0, h2);
+                    psth_yScale = pv.Scale.linear(0, pv.max(psth, function(d) d+1)).range(0, h2);
 
                     /* The root panel. */
                     var vis = new pv.Panel()
                         .width(w)
                         .height(h)
-
-                        .top(5)
-                        .right(5)
-                        .bottom(5)
-                        .left(15);
-
+                        .top(20)
+                        .right(15) 
+                        .bottom(15)
+                        .left(25);
 
                     /* The spike panel. */
-                    var spikes = vis.add(pv.Panel)
+                    var spikes_panel = vis.add(pv.Panel)
                         .top(0)
                         .height(h1);    
 
                     /* Y-axis and ticks. */
-                    spikes.add(pv.Rule)
+                    spikes_panel.add(pv.Rule)
                         .data(neurons)
                         .top(yScale)
-                        .strokeStyle("#ddd")
+                        .strokeStyle("rgbs(0,0,0,0)")
                       .anchor("left").add(pv.Label)
                         .text(yScale.tickFormat);
 
                     /* X-axis and ticks. */
-                    var grid = spikes.add(pv.Rule)
-                        .data(bin_xTicks)
-                        .left(xScale)
-                        .strokeStyle("#ddd");
+//                     var grid = spikes.add(pv.Rule)
+//                         .data(bin_xTicks)
+//                         .left(xScale)
+//                         .strokeStyle("#ddd");
 
                     /* The dot plot! */
-                    spikes.add(pv.Dot)
+                    spikes_panel.add(pv.Dot)
                         .data(times)
                         .left(function(d) xScale(d))
                         .top(function() yScale(senders[this.index]))
@@ -80,100 +130,127 @@
                         .fillStyle("#000")
                         .size(1);
 
-                    /* X-axis label */
-                    spikes.add(pv.Label)
-                        .bottom(-1)
-                        .textBaseline("top")
-                        .left(w/2)
-                        .textAlign("center")
-                        .text("Time (ms)")
-                      .add(pv.Label)
-                        .bottom(-1)
-                        .textBaseline("top")
-                        .left(0)
+                    spikes_panel.add(pv.Label)
+                        .top(-5)
+                        .textBaseline("bottom")
+                        .left(-28)
                         .textAlign("left")
+                        .textStyle("grey")
+                        .text("neuron id");
+
+                    spikes_panel.add(pv.Label)
+                        .top(-5)
+                        .textBaseline("bottom")
+                        .right(0)
+                        .textAlign("right")
                         .textStyle("grey")
                         .text(senders.length +" spikes");
 
 
                     /* The PSTH panel */
-                    var psth = vis.add(pv.Panel)
+                    var psth_panel = vis.add(pv.Panel)
                         .bottom(10)
                         .height(h2);
 
-                    psth.add(pv.Label)
-                        .bottom(-1)
+                    var psth_y = psth_panel.add(pv.Rule)
+                        .data(psth_yScale.ticks(fig.yticks))
+                        .bottom(psth_yScale)
+                        .strokeStyle(function(d) d ? "#eee" : "#000");
+
+                      psth_y.anchor("left").add(pv.Label)
+                        .text(psth_yScale.tickFormat);
+
+                    psth_panel.add(pv.Rule)
+                        .data(xScale.ticks(5))
+                        .left(xScale)
+                        .strokeStyle(function(d) d ? "#eee" : "#000")
+                      .anchor("bottom").add(pv.Label)
+                        .text(xScale.tickFormat);
+
+                    psth_panel.add(pv.Label)
+                        .top(-1)
+                        .textBaseline("bottom")
+                        .left(w/2)
+                        .textAlign("center")
+                        .text("PSTH");
+
+                    /* X-axis label */
+                    psth_panel.add(pv.Label)
+                        .bottom(-10)
                         .textBaseline("top")
                         .left(w/2)
                         .textAlign("center")
                         .textStyle("grey")
-                        .text("PSTH");
+                        .text("Time (ms)");
 
-                    /* The bar plot! */
-                    var psth_bars = psth.add(pv.Bar)
-                        .data(bins)
-                        .bottom(0)
-                        .width(xScale(bin_width))
-                        .height(function(d) bin_yScale(d.y))
-                        .left(function(d) xScale(d.x))
-                        .fillStyle("#000")
-                        .strokeStyle("rgba(255, 255, 255, .2)");
+                    psth_panel.add(pv.Label)
+                        .top(-1)
+                        .textBaseline("bottom")
+                        .left(-25)
+                        .textAlign("left")
+                        .textStyle("grey")
+                        .text("Hz");
 
-//                     psth_bars.anchor("top").add(pv.Label)
-//                        .textBaseline("bottom")
-//                        .text(function(d) d.y);
 
-                    /* the line plot! */
-                    var psth_line = psth.add(pv.Line)
-                        .data(bins)
-                        .left(function(d) xScale(d.x) + xScale(d.dx)/2)
-                        .bottom(function(d) bin_yScale(d.y))
-                        .lineWidth(3);
+                    var psth_area = psth_panel.add(pv.Area)
+                        .data(psth)
+                        .left(function(d) xScale(this.index))
+                        .bottom(1)
+                        .height(function(d) psth_yScale(d))
+                        .fillStyle("rgba(0, 0, 0, 0) ")
+                        .interpolate("cardinal");
 
                     /* Number of spikes label */
-                    psth_line.anchor("top").add(pv.Label)
-                        .textBaseline("top")
-                        .text(function(d) d.y)
-                        .textStyle(function(d) (d.y > 0) ? "lightgrey": "black")
-                        .visible(function(d) d.dx >= simTime/20);
+                    psth_area.anchor("top").add(pv.Line)
+                        .strokeStyle("#000")
+                        .lineWidth(3);
 
                     vis.render();
 
-                    $( "input.spinedit" ).bind("change mouseover mouseup mouseout keyup mousewheel DOMMouseScroll", function () {
+                    function update() {
+                        psth_calc();
+                        psth_yScale = pv.Scale.linear(0, pv.max(psth, function(d) d)+1).range(0, h2);
 
-                        /* Update PSTH */
-                        var bin_width = $("input.spinedit").val();
-                        var bin_xTicks = pv.range(0, simTime+1, bin_width);
-                        if (simTime%bin_width != 0) {bin_xTicks[bin_xTicks.length] = simTime};
+                        psth_y.data(psth_yScale.ticks(fig.yticks))
+                            .bottom(psth_yScale);
 
-                        var bins = pv.histogram(times).bins(bin_xTicks),
-                        bin_yScale = pv.Scale.linear(0, pv.max(bins, function(d) d.y)).range(0, h2);
-
-                        grid.data(bin_xTicks);
-
-                        psth_bars.data(bins)
-                            .width(xScale(bin_width))
-                            .left(function(d) xScale(d.x))
-                            .height(function(d) bin_yScale(d.y));
-
-                        psth_line.data(bins)
-                            .data(bins)
-                            .left(function(d) xScale(d.x) + xScale(d.dx)/2)
-                            .bottom(function(d) bin_yScale(d.y))
-                
+                        psth_area.data(psth)
+                            .height(function(d) psth_yScale(d));
                         vis.render();
-                        });
+                    }; 
+
+                    $( "input#kernel_width" ).bind("change mouseover mouseup mouseout keyup mousewheel DOMMouseScroll", function () { 
+                            kw = parseFloat($(this).val());
+                            update();
+                    });
+
+                    $( ".term" ).bind("click", function(e) {
+                            e.preventDefault();
+                            $( ".term" ).removeClass('activated');
+                            $(this).addClass('activated');
+                            if (this.id == 'count') {
+                                nr_spikes = times.length;
+                            } else {
+                                nr_spikes = 1;
+                            };
+                            update();
+                    });                  
 
                     $(function() {
-                        $( "input.spinedit" ).SpinEdit({'step':20, 'min': 20, max: simTime}).val(bin_width);
-                        });
+                            $( "input#kernel_width" ).SpinEdit({'min': 1, 'step': 50}).val(kw);
+                    });
 
                 </script>
 
                 <p>
-                    <label for "bin_width"> Bin width: </label>
-                    <input type="text" class="spinedit" id="bin_width"/> ms
+                    <label for "kernel_width"> Kernel width: </label>
+                    <input type="text" class="spinedit" id="kernel_width"/> ms
+<!--                    <span style="float:right">
+                        <span style="cursor:pointer" class="term activated" id="rate">rate</span> /
+                        <span style="cursor:pointer" class="term" id="count">count</span>
+                    <span>-->
                 </p>
+
             </div>
         </div>
     </body>
