@@ -8,7 +8,7 @@ from network.helpers import values_extend
 import numpy as np
 
 __all__ = ["NetworkForm", 
-          "HhPscAlphaForm", "IafCondAlphaForm", "IafNeuronForm", "IafPscAlphaForm", 
+          "HhPscAlphaForm", "IafCondAlphaForm", "IafNeuronForm", "IafPscAlphaForm", 'ParrotForm',
           "ACGeneratorForm", "DCGeneratorForm", "NoiseGeneratorForm", "PoissonGeneratorForm", "SmpGeneratorForm", "SpikeGeneratorForm",
           "SourceForm", "TargetForm"]
 
@@ -36,6 +36,7 @@ class DeviceForm(BetterForm):
     targets = forms.CharField(max_length=1000, required=False, help_text="Enter only ID of neurons, e.g. '1,2,4' or '1-3'")
     weight = forms.CharField(max_length=1000, required=False, initial=1.0, label='Weight (pA)', help_text="Enter either positive or negative values.")
     delay = forms.CharField(max_length=1000, required=False, initial=1.0, label='Delay (ms)', help_text="Enter only positive values is lower than 10 seconds.")
+    #synapse_type = forms.ChoiceField(choices=(('static_synapse', 'static synapse'),('tsodyks_synapse', 'tsodyks synapse')), help_text='')
 
     def as_div(self):
         return self._html_output(u'<div class="field-wrapper" title="%(help_text)s">%(label)s %(errors)s %(field)s</div>', u'%s', '</div>', u'%s', False)
@@ -44,7 +45,6 @@ class DeviceForm(BetterForm):
         targets = self.cleaned_data.get('targets')
 
         if targets:
-            
             # Extend targets, e.g. from 1-3 to 1,2,3
             try:
                 extended_list = values_extend(targets, unique=True)
@@ -52,7 +52,6 @@ class DeviceForm(BetterForm):
                 raise forms.ValidationError('enter only number.')
             
             # Check if all targets are neurons
-    
             for target in extended_list:
                 neuron_ids = self.instance.neuron_ids()
                 if not target in neuron_ids:
@@ -186,28 +185,36 @@ class IafPscAlphaForm(DeviceForm):
                         'classes': ['advanced', 'collapse']}))
         row_attrs = {'model': {'is_hidden': True}}
 
+class ParrotForm(DeviceForm):
+  
+     class Meta:
+        fieldsets = (('main', {'fields': ['model', 'targets', 'weight', 'delay']}),
+                    ('Advanced', {
+                        'fields': [], 
+                        'classes': ['advanced', 'collapse']}))
+        row_attrs = {'model': {'is_hidden': True}}
 
 """ 
 Inputs as child forms of DeviceForm
 """
 
 class ACGeneratorForm(DeviceForm):
-    amplitude = forms.FloatField(required=False, label='Amplitude of sine current (pA)')
+    amplitude = forms.FloatField(required=False, label='Amplitude (pA)')
     offset = forms.FloatField(required=False, label='Constant amplitude offset (pA)')
     phase = forms.FloatField(required=False, label='Phase of sine current (0-360 deg)')
     frequency = forms.FloatField(required=False, label='Frequency (Hz)')
 
     class Meta:
-        fieldsets = (('main', {'fields': ['model', 'targets', 'weight', 'delay']}),
-                    ('Advanced', {'fields': ['amplitude', 'offset', 'phase', 'frequency'], 'classes': ['advanced', 'collapse']}))
+        fieldsets = (('main', {'fields': ['model', 'targets', 'weight', 'delay', 'amplitude', 'frequency']}),
+                    ('Advanced', {'fields': ['offset', 'phase'], 'classes': ['advanced', 'collapse']}))
         row_attrs = {'model': {'is_hidden': True}}
 
 class DCGeneratorForm(DeviceForm):
     amplitude = forms.FloatField(required=False, label='Amplitude of current (pA)')
 
     class Meta:
-        fieldsets = (('main', {'fields': ['model', 'targets', 'weight', 'delay']}),
-                    ('Advanced', {'fields': ['amplitude'], 'classes': ['advanced', 'collapse']}))
+        fieldsets = (('main', {'fields': ['model', 'targets', 'weight', 'delay', 'amplitude']}),
+                    ('Advanced', {'fields': [], 'classes': ['advanced', 'collapse']}))
         row_attrs = {'model': {'is_hidden': True}}
 
 class NoiseGeneratorForm(DeviceForm):
@@ -225,12 +232,12 @@ class NoiseGeneratorForm(DeviceForm):
 class PoissonGeneratorForm(DeviceForm):
     rate = forms.FloatField(required=False, label='Mean firing rate (Hz)')
     origin = forms.FloatField(required=False, label='Time origin for device timer (ms)')
-    start = forms.FloatField(required=False, label='Begin of device application with resp. to origin (ms)')
-    stop = forms.FloatField(required=False, label='End of device application with resp. to origin (ms)')
+    start = forms.FloatField(required=False, label='Start (ms)')
+    stop = forms.FloatField(required=False, label='Stop (ms)')
 
     class Meta:
         fieldsets = (('main', {'fields': ['model', 'targets', 'weight', 'delay', 'rate']}),
-                    ('Advanced', {'fields': ['origin', 'start', 'stop'], 'classes': ['advanced', 'collapse']}))
+                    ('Advanced', {'fields': ['start', 'stop', 'origin'], 'classes': ['advanced', 'collapse']}))
         row_attrs = {'model': {'is_hidden': True}}
 
 class SmpGeneratorForm(DeviceForm):
@@ -245,11 +252,11 @@ class SmpGeneratorForm(DeviceForm):
         row_attrs = {'model': {'is_hidden': True}}
 
 class SpikeGeneratorForm(DeviceForm):
-    origin = forms.FloatField(required=False, label='Time origin for device timer (ms)')
-    start = forms.FloatField(required=False, label='Earliest possible time stamp of a spike to be emitted (ms)')
-    stop = forms.FloatField(required=False, label='Earliest time stamp of a potential spike event that is not emitted (ms)')
-    spike_times = forms.CharField(max_length=1000, required=False, label='Spike-times (ms)')
-    spike_weights = forms.CharField(max_length=1000, required=False, label='Corrsponding spike-weights, the unit depends on the receiver.')
+    spike_times = forms.CharField(max_length=1000, required=False, label='Spike-times (ms)',
+        help_text="Enter spike times manually (comma separated) or select start, end, step values")   
+    start = forms.FloatField(required=False, initial=0, label='Start time (ms)')
+    stop = forms.FloatField(required=False, initial=np.inf, label='End time (ms)')
+    step = forms.FloatField(required=False, label='Step size (ms)')
 
     def clean_spike_times(self):
         spike_times = self.cleaned_data.get('spike_times')
@@ -263,21 +270,9 @@ class SpikeGeneratorForm(DeviceForm):
             
         return spike_times
         
-    def clean_spike_weights(self):
-        spike_weights = self.cleaned_data.get('spike_weights')
-        if spike_weights:
-            spike_weights_list = spike_weights.split(',')
-
-            try:
-                spike_weights_list = np.array([float(val) for val in spike_weights_list])
-            except:
-                raise forms.ValidationError('enter only numbers')
-            
-        return spike_weights    
-
     class Meta:
         fieldsets = (('main', {'fields': ['model', 'targets', 'weight', 'delay']}),
-                    ('Advanced', {'fields': ['start', 'stop', 'spike_times', 'spike_weights'], 'classes': ['advanced', 'collapse']}))
+                    ('Advanced', {'fields': ['spike_times', 'start', 'stop', 'step'], 'classes': ['advanced']}))
         row_attrs = {'model': {'is_hidden': True}}
 
 
