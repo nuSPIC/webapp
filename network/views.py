@@ -16,13 +16,14 @@ from lib.helpers import get_flatpage_or_none
 import lib.json as json
 
 from network.models import Network
-from network.helpers import values_extend
+from network.helpers import values_extend, id_convert
 from network.forms import *
 
 from result.models import Result
 from result.forms import CommentForm
 
 import os
+import numpy as np
 
 # Define models with its modeltype, label and form.
 MODELS = [
@@ -30,14 +31,14 @@ MODELS = [
     {'model_type': 'neuron',  'id_label': 'iaf_cond_alpha',       'form': IafCondAlphaForm,},
     {'model_type': 'neuron',  'id_label': 'iaf_neuron',           'form': IafNeuronForm,},
     {'model_type': 'neuron',  'id_label': 'iaf_psc_alpha',        'form': IafPscAlphaForm,},
-    {'model_type': 'input',   'id_label': 'parrot',               'form': SourceForm,},
+    {'model_type': 'input',   'id_label': 'parrot_neuron',        'form': ParrotForm,},
     
     {'model_type': 'input',   'id_label': 'ac_generator',         'form': ACGeneratorForm,},
     {'model_type': 'input',   'id_label': 'dc_generator',         'form': DCGeneratorForm,},
     {'model_type': 'input',   'id_label': 'poisson_generator',    'form': PoissonGeneratorForm,},
     {'model_type': 'input',   'id_label': 'noise_generator',      'form': NoiseGeneratorForm,},
-    {'model_type': 'input',   'id_label': 'smp_generator',        'form': SmpGeneratorForm,},
-   # {'model_type': 'input',     'id_label': 'spike_generator',         'form': SpikeGeneratorForm,},   
+    #{'model_type': 'input',   'id_label': 'smp_generator',        'form': SmpGeneratorForm,},
+    {'model_type': 'input',     'id_label': 'spike_generator',         'form': SpikeGeneratorForm,},   
     
     {'model_type': 'output',  'id_label': 'spike_detector',       'form': TargetForm,},
     {'model_type': 'output',  'id_label': 'voltmeter',            'form': SourceForm,},
@@ -114,66 +115,79 @@ def network_simulated(request, SPIC_id, local_id, result_id):
             action = request.POST.get('action')
             for vid in version_ids:
                 version_edit = Version.objects.get(pk=int(vid))
-                result = version_edit.revision.result
+                try:
+                    result = version_edit.revision.result
+                except:
+                    result = None
+                    
                 if action == 'delete':
                     version_edit.delete()
-                    result.delete()
-                    result_obj = None
-                elif action == 'favorite':
+                    if result:
+                        result.delete()
+                        result_obj = None
+                elif action == 'favorite' and result:
                     result.favorite = True
                     result.save()
-                elif action == 'unfavorite':
+                elif action == 'unfavorite' and result:
                     result.favorite = False
                     result.save()
         
-        # Delete selected versions of history.
+        # Delete selected device 
         elif request.POST.get('device_ids'):
+            device_dict = network_obj.device_dict()
+            ids = network_obj.id_converter()
             device_ids = [int(device_id) for device_id in request.POST.getlist('device_ids')]
-            device_list = [dev for dev in network_obj.device_list() if not int(dev[0]['id']) in device_ids]
             
-            # get new device IDs and update
-            new_device_ids = {}
-            for index, device in enumerate(device_list):
-                if not index == int(device[0]['id']):
-                    new_device_ids[device[0]['id']] = index + 1
-                    device[0]['id'] = index + 1
+            id_updater = np.zeros(len(network_obj.device_list()))
+            for device_id in device_ids:
+                id_updater[device_id-1:] += 1
+                
+            for tid, device in device_dict.iteritems():
+                if 'id' in device[0]:
+                    vid = id_convert(ids, tid=tid)                
+                    device_dict[tid][0]['id'] -= int(id_updater[vid-1])
             
-            # correct device IDs and targets/sources
-            for idx, device in enumerate(device_list):
+            # remove selected device from dict
+            [device_dict.pop(id_convert(ids, vid=vid)) for vid in device_ids]
 
-                if device[2] == {}:
-                    if 'targets' in device[2]:
-                        key = 'targets'
-                    elif 'sources' in device[2]:        
-                        key = 'sources'
+            # correct device IDs and targets/sources
+            for tid, device in device_dict.iteritems():
+                model, status, conns = device
+
+                if conns != {}:
+                    if 'targets' in conns:
+                        term = 'targets'
+                    elif 'sources' in conns:        
+                        term = 'sources'
                         
-                    value_list = device[2][key].split(',')
-                    values_index = [index for index, val in enumerate(value_list) if int(val) in device_ids]
-                    
+                    value_list = conns[term].split(',')
+
                     # delete old target/source
-                    value_list = [val for index, val in enumerate(value_list) if index not in values_index]
+                    values_index = [index for index, val in enumerate(value_list) if int(val) in device_ids]
+                    value_list = [int(val) for index, val in enumerate(value_list) if index not in values_index]
                     
                     # correct targets/sources
-                    value_list = [str(new_device_ids[val]) for val in value_list]
+                    for idx, val in enumerate(value_list):
+                        val -= int(id_updater[val-1])
+                        value_list[idx] = str(val)
                     values = ','.join(value_list)
-                    params = {key:values}
+                    new_conns = {term:values}
                     
                     # delete weight and delay
-                    if 'weight' in device[2]:
-                        weight_list = device[2]['weight'].split(',')
+                    if 'weight' in conns:
+                        weight_list = conns['weight'].split(',')
                         weight_list = [val for index, val in enumerate(weight_list) if index not in values_index]
-                        params['weight'] = ','.join(weight_list)
+                        new_conns['weight'] = ','.join(weight_list)
                         
-                    if 'delay' in device[2]:
-                        delay_list = device[2]['delay'].split(',')
+                    if 'delay' in conns:
+                        delay_list = conns['delay'].split(',')
                         delay_list = [val for index, val in enumerate(delay_list) if index not in values_index]
-                        params['delay'] = ','.join(delay_list)
+                        new_conns['delay'] = ','.join(delay_list)
                     
                     # merge all status
-                    device_list[idx] = device[0], device[1], params
-            
-            hidden_device_list = network_obj.device_list('hidden')
-            network_obj.devices_json = json.encode(device_list+hidden_device_list)
+                    device_dict[tid] = model, status, new_conns
+
+            network_obj.devices_json = json.encode(device_dict)
             network_obj.save()
             
     # Get a choice list for adding new device.
@@ -237,13 +251,13 @@ def device_preview(request, network_id):
                 label = data.pop('model')[0]
                 
                 # get modeltype of device.
+                model = {'id': None, 'label':label}
                 if 'generator' in label:
-                    modeltype = 'input'
+                    model['type'] = 'input'
                 elif 'meter' in label or 'detector' in label:
-                    modeltype = 'output'
+                    model['type'] = 'output'
                 else:
-                    modeltype = 'neuron'
-                model = {'id': None, 'label':label, 'type':modeltype}
+                    model['type'] = 'neuron'
                 
                 # get sources or targets.
                 if 'targets' in data:
@@ -251,19 +265,40 @@ def device_preview(request, network_id):
                 elif 'sources' in data:
                     term = 'sources'
                     
-                # it doesn't save weight and delay, if they don't exist.                    
-                if 'weight' in data and 'delay' in data:
-                    params = {term: data.pop(term)[0], 'weight': data.pop('weight')[0], 'delay': data.pop('delay')[0]}
-                else:
-                    params = {term: data.pop(term)[0]}
+                # it doesn't save weight, delay and synapse_type, if they don't exist.       
+                conns = {term: data.pop(term)[0]}
+                if 'weight' in data:
+                    conns['weight'] = data.pop('weight')[0]
+                if 'delay' in data:
+                    conns['delay'] = data.pop('delay')[0]
+                    
+                if 'synapse_type' in data:
+                    synapse_type = data.pop('synapse_type')[0]
+                    if synapse_type != 'static_synapse':
+                        conns['synapse_type'] = synapse_type
                     
                 # after poping connection information save status of divices.
                 status = {}
                 for key, value in data.iteritems():
                     if value:
                         status[key] = value
+                        
+                #if id_label == 'spike_generator' and 'step' in status:
+                    #if status['step']:
+                        #if float(status['step']) > 0.:
+                            #start = 0.
+                            #step = float(status['step'])
+                            
+                            #if status['start']:
+                                #start = float(status['start'])
+                                
+                            #if status['stop'] == 'inf':
+                                #stop = float(network_obj.duration) + step
+                                
+                            #status['spike_times'] = ','.join([str(ii) for ii in range(start,stop,step)])
+                        #status.pop('step')
                     
-                response = {'valid': 1, 'device':[model, status, params]}
+                response = {'valid': 1, 'device':[model, status, conns]}
                 
             else:
                 response = {'valid': -1, 'id_label':id_label}
@@ -280,25 +315,38 @@ def device_commit(request, network_id):
     network_obj = get_object_or_404(Network, pk=network_id)
     if request.is_ajax():
         if request.method == 'POST':
+
             post = request.POST
             device_list = json.decode(str(post['devices_json']))
-        
+            
+            ids = network_obj.id_converter()
             for gid, device in enumerate(device_list):
-                model, status, params = device
-                if 'targets' in params or 'sources' in params:
-                    if 'targets' in params:
+                model, status, conns = device
+                if 'targets' in conns or 'sources' in conns:
+                    if 'targets' in conns:
                         term = 'targets'
                     else:
                         term = 'sources'
+                        
                     try:
-                        extended_list = values_extend(params[term], unique=True, toString=True)
+                        extended_list = values_extend(conns[term], unique=True)
+                        extended_converted_list = [str(int(id_convert(ids, vid=vid))) for vid in extended_list]
                     except:
-                        extended_list = []
+                        extended_converted_list = []
+                        
+                    device_list[gid][2][term] = ','.join(extended_converted_list)
+                    
+            device_dict = network_obj.device_dict()
 
-                    device_list[gid][2][term] = ','.join(extended_list)
-                
-            hidden_device_list = network_obj.device_list('hidden')
-            network_obj.devices_json = json.encode(device_list + hidden_device_list)
+            for device in device_list:
+                if device[0]['type'] != 'neuron':
+                    tid = id_convert(ids,vid=device[0]['id'])
+                    if tid:
+                        device_dict[tid] = device
+                    else:
+                        device_dict[('%4d' %(len(device_dict)+1)).replace(' ', '0')] = device
+                        
+            network_obj.devices_json = json.encode(device_dict)
             network_obj.save()
             return HttpResponse(json.encode({'saved':1}), mimetype='application/json')
             
@@ -317,8 +365,9 @@ def simulate(request, network_id, version_id):
             post = request.POST
             device_list = json.decode(str(post['devices_json']))
             
+            ids = network_obj.id_converter()
             for gid, device in enumerate(device_list):
-                model, status, params = device
+                model, status, conns = device
                 
                 cleaned_status = {}
                 for status_key, status_value in status.iteritems():
@@ -326,20 +375,31 @@ def simulate(request, network_id, version_id):
                         cleaned_status[status_key] = status_value
                 device_list[gid][1] = cleaned_status
                 
-                if 'targets' in params or 'sources' in params:
-                    if 'targets' in params:
+                if 'targets' in conns or 'sources' in conns:
+                    if 'targets' in conns:
                         term = 'targets'
                     else:
                         term = 'sources'
+                        
                     try:
-                        extended_list = values_extend(params[term], unique=True, toString=True)
+                        extended_list = values_extend(conns[term], unique=True)
+                        extended_converted_list = [str(int(id_convert(ids, vid=vid))) for vid in extended_list]
                     except:
-                        extended_list = []
+                        extended_converted_list = []
+                        
+                    device_list[gid][2][term] = ','.join(extended_converted_list)
 
-                    device_list[gid][2][term] = ','.join(extended_list)
-            
-            hidden_device_list = network_obj.device_list('hidden')
-            network_obj.devices_json = json.encode(device_list + hidden_device_list)
+            device_dict = network_obj.device_dict()
+
+            for device in device_list:
+                if device[0]['type'] != 'neuron':
+                    tid = id_convert(ids,vid=device[0]['id'])
+                    if tid:
+                        device_dict[tid] = device
+                    else:
+                        device_dict[('%4d' %(len(device_dict)+1)).replace(' ', '0')] = device
+                        
+            network_obj.devices_json = json.encode(device_dict)
             form = NetworkForm(request.POST, instance=network_obj)
             
             versions = Version.objects.get_for_object(network_obj).reverse()
@@ -390,15 +450,14 @@ def simulate(request, network_id, version_id):
 def default_layout(request, network_id):
     network_obj = get_object_or_404(Network, pk=network_id)
     if request.is_ajax():
-        device_list = network_obj.device_list()
+        device_dict = network_obj.device_list('dict')
         edgelist = network_obj.connections(modeltype='neuron')
         pos = networkx(edgelist, layout='circo')
 
-        for gid,value in pos.items():
-            if int(device_list[gid-1][0]['id']) == gid:
-                device_list[gid-1][0]['position'] = list(value)
+        for key, value in pos.iteritems():
+            device_dict[id_convert(ids, vid=key)][0]['position'] = list(value)
         
-        devices_json = json.encode(device_list)
+        devices_json = json.encode(device_dict)
         network_obj.devices_json = devices_json
         network_obj.save()
         
