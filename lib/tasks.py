@@ -7,6 +7,7 @@ from reversion.models import Version
 import lib.json as json
 
 from network.models import Network
+from network.helpers import id_convert
 from result.models import Result
 
 import datetime
@@ -42,11 +43,10 @@ class Simulation(AbortableTask):
         # Set root status of network
         root_status = network_obj.root_status()
         
-        if 'seed' in root_status:
-            seed = int(root_status.pop('seed'))
-            nest.SetStatus([0], {'grng_seed': seed, 'rng_seeds':[seed]})
-        
         if root_status:
+            if 'seed' in root_status:
+                seed = int(root_status.pop('seed'))
+                nest.SetStatus([0], {'grng_seed': seed, 'rng_seeds':[seed]})
             try:
                 nest.SetStatus([0], root_status)
             except:
@@ -63,16 +63,31 @@ class Simulation(AbortableTask):
                 status_params = {}
                 for status_key, status_value in dev_status.iteritems():
                     if status_value:
-                        status_params[str(status_key)] = float(status_value)
+                        if ',' in status_value:
+                            status_values = status_value.split(',')
+                            status_values = [float(val) for val in status_values if val]
+                            status_params[str(status_key)] = status_values
+                        elif status_key == 'spike_times':
+                            status_params[str(status_key)] = [float(status_value)]
+                        else:
+                            status_params[str(status_key)] = float(status_value)
                 gid = nest.Create(dev_model['label'], params=status_params)
             else:
                 gid = nest.Create(dev_model['label'])
     
         # Make connections in nest
         connections = network_obj.connections('all', data=True)
-        for source, target, conn_params in connections:
+        for source, target, conn_params, conn_model in connections:
             if conn_params:
-                nest.Connect([source],[target], params=conn_params)
+                if conn_model:
+                    nest.Connect([source],[target], params=conn_params, model=conn_model['model'])
+                    
+                    syn_params = {}
+                    for syn_params_key, syn_params_value in conn_model['syn_params'].iteritems():
+                        syn_params[syn_params_key] = float(syn_params_value)
+                    nest.SetStatus(nest.FindConnections([source], [target]), syn_params)
+                else:
+                    nest.Connect([source],[target], params=conn_params)
             else:
                 nest.Connect([source],[target])
                     
@@ -94,13 +109,15 @@ class Simulation(AbortableTask):
                 nest.Simulate(dt_last)
         else:
             nest.Simulate(duration)
+            
 
         # Get data from output devices
         data = {}
+        ids = network_obj.id_converter()
         outputs = network_obj.device_list(modeltype='output')
         for out_model, out_status, out_params in outputs:
-            gid = [int(out_model['id'])]
-            output_status = nest.GetStatus(gid)[0]['events']
+            tid = id_convert(ids, vid= out_model['id'])
+            output_status = nest.GetStatus([int(tid)])[0]['events']
             events = {}
             for key,value in output_status.items():
                 events[key] = value.tolist()
