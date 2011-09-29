@@ -1,5 +1,6 @@
 html, body {
     font: 12px sans-serif;
+    font-family: Aller;
     color: #2B2924;
     background-color: #FAFAF9 ;
     height: 100%;
@@ -46,7 +47,7 @@ a {
     }
 
 #content {
-    font: 16px times;
+    font: 16px Aller;
     padding: 10px;
     overflow: hidden;
 }
@@ -75,7 +76,8 @@ a {
     }
 
 .share-in-social-media {
-    padding-top: 15px;
+    font-size: 0.8em;
+    padding-top: 25px;
     padding-bottom: 25px;
 }
 
@@ -250,4 +252,54 @@ div.rss-link {
     padding-right: 16px;
     padding-left: 40px;
     display: inline;
+}
+
+
+.logo {
+   margin-left: 300px;
+   background: url(/media/images/special/test_nuSPIC2.png) no-repeat;
+   width: 429px;
+   height: 186px;
+}
+
+.bcf_logo {
+   margin-left: 300px;
+   background: url(/media/images/special/bcf_logo.png) no-repeat;
+   width: 429px;
+   height: 186px;
+   background-size:50%;
+   float:left;
+}
+
+.nest_logo {
+   margin-left: 300px;
+   background: url(/media/images/special/nest_logo.png) no-repeat;
+   width: 429px;
+   height: 186px;
+   background-size:50%;
+   float:left;
+}
+
+.uni_freiburg_logo {
+   margin-left: 300px;
+   background: url(/media/images/special/uni_freiburg_logo.png) no-repeat;
+   width: 429px;
+   height: 186px;
+   background-size:50%;
+}
+
+.gnode_logo {
+   margin-left: 300px;
+   background: url(/media/images/special/gnode_logo.png) no-repeat;
+   width: 429px;
+   height: 186px;
+   background-size:50%;
+}
+
+.blockcontent {
+   margin-left: 300px;
+   vspace: -100;
+   font-family: Aller;
+   width : 800px;
+   line-height: 1.5em;
 }

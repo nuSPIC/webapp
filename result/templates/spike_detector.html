@@ -219,7 +219,7 @@ function newFilledArray(len, val) {
                         vis.render();
                     }; 
 
-                    $( "input#kernel_width" ).bind("change mouseover mouseup mouseout keyup mousewheel DOMMouseScroll", function () { 
+                    $( "input#kernel_width" ).bind("change mouseup mouseout keyup", function () { 
                             kw = parseFloat($(this).val());
                             update();
                     });

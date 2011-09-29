@@ -6,7 +6,11 @@
 {% block title %}Community{% endblock %}
 
 {% block content %}
-    <div style="overflow:hidden;">
+<div class="logo"></div>
+
+<div class="blockcontent">
+
+    <div style="overflow:hidden; margin-top:50px">
         <form action="." method="get" id="accounts-search-form" style="float:right;">
             {{ search_form.term }}
             <input type="submit" value="Search" />
@@ -31,6 +35,6 @@
             </div>
         {% endfor %}
     </div>
-    
+</div>    
     {% pagination page "user" search_term %}
 {% endblock %}

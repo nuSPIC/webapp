@@ -11,6 +11,8 @@ def values_extend(values, unique=False, toString=False):
     for value in value_list:
         if '-' in value:
             start, end = value.split('-')
+            
+            assert int(start) < int(end)
             value = [i for i in range(int(start), int(end)+1)]
             extended_list.extend(value)
         else:

@@ -12,9 +12,7 @@ class NetworkAdmin(VersionAdmin):
     
     list_display = (
         '__unicode__',
-        #'neurons',
-        #'inputs',
-        #'outputs'
+        'title',
         )
     list_filter = ['SPIC_id']
 

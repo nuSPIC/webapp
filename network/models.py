@@ -86,6 +86,9 @@ class Network(models.Model):
         if device_dict:
             device_items = device_dict.items()
             device_items.sort()
+            
+            #if self.user().pk == 1:
+                #term = 'all'
                                     
             if term == 'all':
                 device_list = [dev[1] for dev in device_items]

@@ -55,20 +55,6 @@
             $( "select#versions-select" ).selectmenu();
 
             
-            $( "button#toggle-device-form" ).click(function(e) {
-                    e.preventDefault()
-                    $( this ).toggleClass( "ui-state-highlight" )
-                    $( this ).parents( ".portlet-content" ).find( ".advanced" ).toggle();
-                    if ($(this).hasClass( "ui-state-highlight" )) {
-                        $(this).button("option", "icons", { primary: 'ui-icon-circle-arrow-n' })
-                        .button("option", "label", "Collapse");
-                        
-                    } else {
-                        $(this).button("option", "icons", { primary: 'ui-icon-circle-arrow-s' })
-                        .button("option", "label", "Expand");
-                    };        
-            });  
-            
             $( "span#device_id" ).html(selected_device_id);
             $( "span#last_device_id" ).html(last_device_id);
             
@@ -82,7 +68,7 @@
             $( "div#layout-legend" ).dialog({
                                    title: 'Legend for Layout',
                                    resizable: false,
-                                   height: 150,
+                                   height: 180,
                                    width: 380,
                             }).parent().hide();
     });
@@ -275,7 +261,7 @@
                                                 resizable: false,
                                                 modal: true,
                                         });
-                                        window.setTimeout(function() {  window.location.href = '/network/'+ {{ network_obj.SPIC_id }} +'/'+ {{ network_obj.local_id }} +'/' + result['result_local_id'] });
+                                        window.location.reload();
                                     }
                                 },
                         });
@@ -305,7 +291,7 @@
     $( "tr.enabled" ).find( "td.selectable" ).live('click',function(e) {
             e.preventDefault();
             $( "ul.errorlist" ).remove();
-            $( ".device-form" ).find( "input:text" ).val("");
+            $( ".device-form" ).find( "input:reset" ).click();
             $( "option:first" ).show().attr('selected', 'selected');
             selected_device_id = $(this).parent( ".enabled" ).attr('id')
             var device = device_list[selected_device_id-1];
@@ -394,6 +380,7 @@
                     $(form).html(data.responseHTML).find( "#selected_device_id" ).html(selected_device_id);
                     load_theme( $(form).parent() );
                     if (data.valid != -1) {
+                        $( "ul.errorlist" ).remove();
                         if ($( "select#id_label" ).val() == 'voltmeter' || $("select#id_label" ).val() == 'spike_detector') {
                             $( "select#id_label option:selected" ).hide()
                         };
@@ -423,20 +410,34 @@
     $( "#id_step" ).live('keyup', function(e) {
          e.preventDefault();
          var step = parseFloat($(this).val());
-         var start = parseFloat($(this).parents( ".advanced" ).find( "#id_start" ).val());
-         var stop = $(this).parents( ".advanced" ).find( "#id_stop" ).val();
-         if (stop == 'inf') {
-             stop = {{network_obj.duration|safe}}
-         }
-         var spike_times = [];
-         for (var tt = start; tt <= parseFloat(stop); tt = tt + step) {
-             spike_times.push(tt);
+         if (step > 0) {
+             var start = parseFloat($(this).parents( ".advanced" ).find( "#id_start" ).val());
+             var stop = $(this).parents( ".advanced" ).find( "#id_stop" ).val();
+             if (stop == 'inf') {
+                 stop = {{network_obj.duration|safe}}
+             }
+             var spike_times = [];
+             for (var tt = start; tt <= parseFloat(stop); tt = tt + step) {
+                 spike_times.push(tt);
+             };
          };
-         
-//          alert(spike_times.toString());
          $(this).parents( ".advanced" ).find( "#id_spike_times" ).val(spike_times.toString());
     });
-    
+
+    $( "button#toggle-device-form" ).live('click', function(e) {
+            e.preventDefault()
+            $( this ).toggleClass( "ui-state-highlight" )
+            $( this ).parents( ".portlet-content" ).find( ".advanced" ).toggle();
+            if ($(this).hasClass( "ui-state-highlight" )) {
+                $(this).button("option", "icons", { primary: 'ui-icon-circle-arrow-n' })
+                .button("option", "label", "Collapse");
+                
+            } else {
+                $(this).button("option", "icons", { primary: 'ui-icon-circle-arrow-s' })
+                .button("option", "label", "Expand");
+            };        
+    }); 
+
     $( "#help-steps #device-add" ).live('click', function() {
             $( "#device-select" ).find( ".ui-widget-content" ).effect("highlight", {}, 1000);
     });
@@ -978,7 +979,7 @@
                     <div class="portlet-content">
                         {% csrf_token %}
                         
-                        <div class="comment-form-content field-wrapper" title="{{ comment_form.comment.help_text }}">
+                        <div class="comment-form-content field-wrapper" title="Here you can enter a short description of what you did in order to relate to the simulation in the future.">
                             {{ comment_form.comment }}
                         </div>
 
@@ -1167,9 +1168,11 @@
             <ul id="help-steps">
             <li><b>blue</b>: excitatory connection</li>
             <li><b>red</b>: inhibitory connection</li>
-            <li><b>left dot</b>: neuron receives externals</li>
-            <li><b>right dot</b>: neuron activity is being recorded</li>
+            <li><b>left filled dot</b> then neuron receives external input.</li>
+            <li><b>right filled dot</b> then neurons are being recorded.</li>
             </ul>
+
+            <p style="font-size: 0.9em; margin-left:25px"><b>note</b>: neurons can be dragged around.</p>
         </div>
 
     </div>

@@ -31,7 +31,7 @@ MODELS = [
     {'model_type': 'neuron',  'id_label': 'iaf_cond_alpha',       'form': IafCondAlphaForm,},
     {'model_type': 'neuron',  'id_label': 'iaf_neuron',           'form': IafNeuronForm,},
     {'model_type': 'neuron',  'id_label': 'iaf_psc_alpha',        'form': IafPscAlphaForm,},
-    {'model_type': 'input',   'id_label': 'parrot_neuron',        'form': ParrotForm,},
+    #{'model_type': 'input',   'id_label': 'parrot_neuron',        'form': ParrotForm,},
     
     {'model_type': 'input',   'id_label': 'ac_generator',         'form': ACGeneratorForm,},
     {'model_type': 'input',   'id_label': 'dc_generator',         'form': DCGeneratorForm,},
@@ -243,7 +243,7 @@ def device_preview(request, network_id):
             id_labels = [device['id_label'] for device in MODELS]
             device = MODELS[id_labels.index(id_label)]
             form = device['form'](network_obj, request.POST)
-            
+
             # check if form is valid.
             if form.is_valid():
                 data = form.data.copy()
@@ -283,20 +283,9 @@ def device_preview(request, network_id):
                     if value:
                         status[key] = value
                         
-                #if id_label == 'spike_generator' and 'step' in status:
-                    #if status['step']:
-                        #if float(status['step']) > 0.:
-                            #start = 0.
-                            #step = float(status['step'])
-                            
-                            #if status['start']:
-                                #start = float(status['start'])
-                                
-                            #if status['stop'] == 'inf':
-                                #stop = float(network_obj.duration) + step
-                                
-                            #status['spike_times'] = ','.join([str(ii) for ii in range(start,stop,step)])
-                        #status.pop('step')
+                if id_label == 'spike_generator' and 'step' in status:
+                    if status['step']:
+                        status.pop('step')
                     
                 response = {'valid': 1, 'device':[model, status, conns]}
                 
