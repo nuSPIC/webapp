@@ -3,46 +3,64 @@
 {% block title %}{{ flatpage.title }}{% endblock %}
 
 {% block content %}
- 
-<!-- <IMG src="/media/images/webpage/nuspic_logo.png" style="margin: 0px 0px -150px 180px;" width="429" height="186" align="middle" border="0"> -->
-
-<!-- <DIV align="left" style="margin : 200px; vspace: -100; font-family : Aller; width : 800px;"> -->
-<div class="logo"></div>
 
 <div class="blockcontent">
 
 <h2 style="color : #3b3831;">The science behind nuSPIC</h2>
 
 Our approaches to understanding brain function can be divided in two broad categories:&nbsp; 
- <ul> <li>Observation and analysis of neural activity while animals are performing a sensory, motor or cognitive task.</li> <li>Building models of brain function based on this observed activity using methods from mathematics, physics, engineering and computer science.</li> </ul>
-The first approach assumes that recording activity, and other properties , of more and more neurons under a variety of conditions will suffice to reveal the brain's working principles. The second approach aims at integrating experimental findings in order to identify basic computational principles that the brain might be using.
-<IMG src="/media/images/webpage/neurofilament_egert.jpg" style="margin: 120px 0px 0px 20px;" width="251" height="191" vspace="120" align="right" border="2" hspace=20>
+    <ul>
+        <li>Observation and analysis of neural activity while animals are performing a sensory, motor or cognitive task.</li>
+        <li>Building models of brain function based on this observed activity using methods from mathematics, physics, engineering and computer science.</li>
+    </ul>
+The first approach assumes that recording activity, and other properties , of more and more neurons under a variety of conditions will suffice to reveal the brain's working principles.
+ The second approach aims at integrating experimental findings in order to identify basic computational principles that the brain might be using.
+
+<img src="/media/images/webpage/neurofilament_egert.jpg" style="margin: 120px 0px 0px 20px;" width="251" height="191" vspace="120" align="right" border="2" hspace=20>
 
 
 <h2 style="color : #3b3831;"> But can we really understand the brain with these approaches?</h2>
-Using the above strategies we have developed over the last decades a fairly good understanding of neuron, synapse, and network mechanisms. However, we haven't yet been able to transcend from mechanisms to network function, that is we still lack the ability to identify the function(s) performed by a particular brain structure on the network level. This makes one wonder if these approaches are indeed suitable to understand brain function. In 1986 Hopfield and Tank argued that it is not sufficient to know all details of neurons and their connectivity to extract the function of a neural network. With growing computer power and advancement of experimental methods that allow for increasing high-density sampling of neural activity, it seems that Hopfield's and Tank's message has been lost. 
+Using the above strategies we have developed over the last decades a fairly good understanding of neuron, synapse, and network mechanisms.
+ However, we haven't yet been able to transcend from mechanisms to network function, that is we still lack the ability to identify the function(s)
+ performed by a particular brain structure on the network level. This makes one wonder if these approaches are indeed suitable to understand brain function.
+ In 1986 Hopfield and Tank argued that it is not sufficient to know all details of neurons and their connectivity to extract the function of a neural network.
+ With growing computer power and advancement of experimental methods that allow for increasing high-density sampling of neural activity, it seems that Hopfield's and Tank's message has been lost. 
 
 <h2 style="color : #3b3831;"> A word of caution</h2>
+
 <p>
-We do not claim that the brain works like computer of any architecture to solve the kind of functions we have implemented here with spiking neural networks. Clearly, brains have evolved to solve problems related to the survival of the animal in a hostile environment. We assume that the solutions to these problems are incorporated in the various networks in the brain in the form of basic computing principles or functions (of unknown nature). As neuroscientists, using the approaches described above, we are trying to extract those hidden functions. But are our tools and methods suitable for the tasks at hand?
+    We do not claim that the brain works like computer of any architecture to solve the kind of functions we have implemented here with spiking neural networks.
+    Clearly, brains have evolved to solve problems related to the survival of the animal in a hostile environment. We assume that the solutions to these problems are incorporated
+    in the various networks in the brain in the form of basic computing principles or functions (of unknown nature). As neuroscientists, using the approaches described above,
+    we are trying to extract those hidden functions. But are our tools and methods suitable for the tasks at hand?
 </p>
+
 <p>
-The idea behind nuSPIC is to test if we can or cannot extract simple functions embedded in a neural network using information about the network and neural activity. If yes, then we hope to apply the insights gained in this endeavour on more realistic, biological networks. However, if we cannot extract the function out of these simple networks under optimal conditions, then there is only little hope that our current methods will help us understand more complex brain function investigated under much more difficult experimental conditions. One cannot solve differential equations if he does not understand simple arithmetic operations!
+    The idea behind nuSPIC is to test if we can or cannot extract simple functions embedded in a neural network using information about the network and neural activity.
+    If yes, then we hope to apply the insights gained in this endeavour on more realistic, biological networks. However, if we cannot extract the function out of these simple networks
+    under optimal conditions, then there is only little hope that our current methods will help us understand more complex brain function investigated under much more difficult experimental conditions.
+    One cannot solve differential equations if he does not understand simple arithmetic operations!
 </p>
 
 <h2 style="color : #3b3831;">Target group</h2>
+
 Neuroscientists, biologists, physicists, engineers, students, hackers and anyone else with genuine interest in understanding brain functions on a network level.
 
 <h2 style="color : #3b3831;">The Challenge</h2>
 To this end, we provide a web interface to our neural network simulator NEST, which can be used to perform a wide variety of experiments on small neural networks with spiking neurons, in which we have implemented a particular function. To help the user, we provide all relevant information about neural properties and the connectivity matrix. We also ask the user to implement a given function - biological, mathematical, etc. - using a finite number of neurons and synapses.
-<IMG src="/media/images/webpage/Nervennetz.jpg" style="margin: 50px 0px 0px 20px;" width="251" height="400" align="right" border="2">
+<img src="/media/images/webpage/Nervennetz.jpg" style="margin: 50px 0px 0px 20px;" width="251" height="400" align="right" border="2">
 
 <h2 style="color : #3b3831;">Goals</h2>
-<ol> <li>To determine if it is possible to extract a function from a small neural network given sufficient knowledge of neural activity and connectivity. Which classes of networks can be easily extracted and which are rather difficult or even impossible, in principle, to handle?</li> <li>To determine the specific strategies that users apply to extract the function of a network and to use the successful strategies for better experimental designs.</li> <li>To determine the technical and theoretical constraints in implementation of mathematical/logical etc. function(s) using a neural network of spiking neurons?</li> </ol>
+<ol>
+    <li>To determine if it is possible to extract a function from a small neural network given sufficient knowledge of neural activity and connectivity.
+        Which classes of networks can be easily extracted and which are rather difficult or even impossible, in principle, to handle?</li>
+    <li>To determine the specific strategies that users apply to extract the function of a network and to use the successful strategies for better experimental designs.</li>
+    <li>To determine the technical and theoretical constraints in implementation of mathematical/logical etc. function(s) using a neural network of spiking neurons?</li>
+</ol>
 
 <h2 style="color : #3b3831;">...and beyond</h2>
 Finally, nuSPIC is a powerful educational tool, which can be used for introducing young students from various disciplines to the basic workings of neural networks. <br />
-</div>
+
 </div>
 {% endblock %}
 

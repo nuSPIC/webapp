@@ -10,7 +10,7 @@ input.ui-button { padding: .2em .5em; }
 
 /* Dialog
 ----------------------------------*/
-.ui-dialog { padding: 0; }
+.ui-dialog { padding: 0; font-size: .85em; }
 .ui-dialog .ui-dialog-titlebar { padding: .2em .5em; }
 
 /* Tabs

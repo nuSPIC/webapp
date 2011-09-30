@@ -1,3 +1,12 @@
+#content {
+    margin: 0;
+    width : 98%;
+}
+
+.header_logo {
+    display : none;
+}
+
 
 /* Forums list
 **************************************/

@@ -687,7 +687,7 @@
 {% block content %}
 <div style="position:absolute; left:500px">
 <h2 style="margin: 0">{{network_obj.title}}</h2>
-{{network_obj.description}}
+<p>{{network_obj.description}}</p>
 
 <!-- ADMIN VIEW -->
 {% ifequal user.id 1 %}

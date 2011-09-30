@@ -7,9 +7,6 @@
 {% block title %}News archive{% endblock %}
 
 {% block content %}
-<div class="logo"></div>
-
-<div class="blockcontent">
 
     {% regroup news_list by pub_date.year as news_by_year %}
     
@@ -35,7 +32,6 @@
         {% endfor %}
     {% endfor %}
 
-</div>
 {% endblock %}
 
 

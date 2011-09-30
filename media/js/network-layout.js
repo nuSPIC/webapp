@@ -143,7 +143,6 @@ function load_layout (device_list) {
             inputs[(this.id+1)/4-1].animate({"fill-opacity": 0}, 500);
             outputs[(this.id+1)/4-1].animate({"fill-opacity": 0}, 500);
             
-            
         },
         
     move = function (dx, dy) {
@@ -152,7 +151,7 @@ function load_layout (device_list) {
         inputs[(this.id+1)/4-1].attr({cx: this.ox + dx - 10, cy: this.oy + dy});
         outputs[(this.id+1)/4-1].attr({cx: this.ox + dx + 10, cy: this.oy + dy});
 
-        device_list[(this.id+1)/4-1][0]['position'] = [this.ox + dx, this.oy + dy];
+        device_list[(this.id+1)/4][0]['position'] = [this.ox + dx, this.oy + dy];
         
         for (var i = connections.length; i--;) {
             paper.connection(connections[i]);

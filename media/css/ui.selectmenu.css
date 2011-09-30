@@ -8,7 +8,7 @@
 .ui-selectmenu-open { visibility: visible; }
 .ui-selectmenu-menu-popup { margin-top: -1px; }
 .ui-selectmenu-menu-dropdown { }
-.ui-selectmenu-menu li { padding:0; margin:0; display: block; border-top: 1px dotted transparent; border-bottom: 1px dotted transparent; border-right-width: 0 !important; border-left-width: 0 !important; font-weight: normal !important; }
+.ui-selectmenu-menu li { font-size:0.8em; padding:0; margin:0; display: block; border-top: 1px dotted transparent; border-bottom: 1px dotted transparent; border-right-width: 0 !important; border-left-width: 0 !important; font-weight: normal !important; }
 .ui-selectmenu-menu li a,.ui-selectmenu-status {line-height: 1.4em; display:block; padding:.3em 1em; outline:none; text-decoration:none; }
 .ui-selectmenu-menu li.ui-selectmenu-hasIcon a,
 .ui-selectmenu-hasIcon .ui-selectmenu-status { padding-left: 20px; position: relative; margin-left: 5px; }

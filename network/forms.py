@@ -14,11 +14,9 @@ __all__ = ["NetworkForm",
 
 class NetworkForm(BetterModelForm):
     """ Form for network object """
-    model = forms.CharField(max_length=32, widget=forms.HiddenInput())
     duration = forms.FloatField(help_text="Enter positive value.")
     rng_seeds = forms.CharField(max_length=32, required=False, help_text="Enter only positive value. (comma separated)")  
     grnd_seed = forms.IntegerField(required=False, help_text="Enter only positive value.")  
-    seed = forms.IntegerField(required=False, help_text="Enter only positive value.")  
     resolution = forms.FloatField(required=False, help_text='')
     
     class Meta:
