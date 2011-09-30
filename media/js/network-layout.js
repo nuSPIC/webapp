@@ -142,7 +142,8 @@ function load_layout (device_list) {
             this.oy = this.attr("cy");
             inputs[(this.id+1)/4-1].animate({"fill-opacity": 0}, 500);
             outputs[(this.id+1)/4-1].animate({"fill-opacity": 0}, 500);
-            
+
+            $('#position').fadeIn().html([this.ox, this.oy].toString());
         },
         
     move = function (dx, dy) {
@@ -150,8 +151,9 @@ function load_layout (device_list) {
         texts[(this.id+1)/4-1].attr({x: this.ox + dx, y: this.oy + dy});
         inputs[(this.id+1)/4-1].attr({cx: this.ox + dx - 10, cy: this.oy + dy});
         outputs[(this.id+1)/4-1].attr({cx: this.ox + dx + 10, cy: this.oy + dy});
-
-        device_list[(this.id+1)/4][0]['position'] = [this.ox + dx, this.oy + dy];
+        
+        $('#position').fadeIn().html([this.ox + dx, this.oy + dy].toString());
+        device_list[(this.id+1)/4-1][0]['position'] = [this.ox + dx, this.oy + dy];
         
         for (var i = connections.length; i--;) {
             paper.connection(connections[i]);
@@ -163,7 +165,7 @@ function load_layout (device_list) {
     up = function () {
         inputs[(this.id+1)/4-1].animate({"fill-opacity": 1}, 500);
         outputs[(this.id+1)/4-1].animate({"fill-opacity": 1}, 500);
-        
+        $('#position').fadeOut();
         };
 
     var x, y, id, edge, wcolors, 

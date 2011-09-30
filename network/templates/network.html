@@ -685,7 +685,7 @@
 {% endblock %}
 
 {% block content %}
-<div style="position:absolute; left:500px">
+<div style="position:absolute; left:900px">
 <h2 style="margin: 0">{{network_obj.title}}</h2>
 <p>{{network_obj.description}}</p>
 
@@ -708,7 +708,7 @@
 
 
 <div style="margin-top: -10px;">
-<img src="/media/images/special/test_nuSPIC2.png" width="468" height="80"/>
+    <img src="/media/images/special/nuSPIC_banner.png" width="880" height="85"/>
 </div>
 
 <div>
@@ -965,6 +965,7 @@
                         <button class="check" id="save-devices">Save</button>
                         <button class="reset" id="default-layout">Default</button>
                         <button id="layout-legend">Legend</button>
+                        <small style="float:right" id="position"></small>
                     </div>
 
                 </div>
@@ -1099,8 +1100,8 @@
                                         <select id="voltmeter-select">
                                             <option>--- Select a neuron ---</option>
                                             {% for model, status, params in result_obj.voltmeter_targets %}
-                                                <option value="/result/{{result_obj.id}}/voltmeter/?neuron={{model.id}}" name="{{model.label|readable}} [{{model.id}}]">
-                                                    {{model.label|readable}} [{{model.id}}]
+                                                <option value="/result/{{result_obj.id}}/voltmeter/?neuron={{model.id}}" name="Neuron [{{model.id}}]">
+                                                    Neuron [{{model.id}}]
                                                 </option>
                                             {% endfor %}
                                         </select>

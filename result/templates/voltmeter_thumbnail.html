@@ -63,7 +63,7 @@ panel.add(pv.Label)
     .right(function() panel.i() < 0 ? null : 0)
     .textAlign(function() panel.i() < 0 ? "left" : "right")
     .textStyle(function() panel.i() < 0 ? "#999" : "#000")
-    .text(function(d) panel.i() < 0 ? "neuron ["+ d.status[0]["id"] +"]"
+    .text(function(d) panel.i() < 0 ? "Neuron ["+ d.status[0]["id"] +"]"
         : times[panel.i()] + " ms: "+ numberFormat(d.values[panel.i()]) + " mV");
 
 vis.render();

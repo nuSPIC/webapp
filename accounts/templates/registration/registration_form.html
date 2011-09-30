@@ -3,23 +3,25 @@
 {% block title %}Registration{% endblock %}
 
 {% block content %}
-    <h2>Registration</h2>
-    
-    <form action="." method="post" id="registration-form">
-        {% csrf_token %}
+    <div class="blockcontent">
+        <h2>Registration</h2>
         
-        <fieldset>
-            <legend>Required fields</legend>
+        <form action="." method="post" id="registration-form">
+            {% csrf_token %}
             
-            {{ user_form.as_div }}
-        </fieldset>
-    
-        <fieldset>
-            <legend>Optional fields</legend>
-            
-            {{ profile_form.as_div }}
-        </fieldset>
+            <fieldset>
+                <legend>Required fields</legend>
+                
+                {{ user_form.as_div }}
+            </fieldset>
         
-        <input type="submit" value="Register" />
-    </form>
+            <fieldset>
+                <legend>Optional fields</legend>
+                
+                {{ profile_form.as_div }}
+            </fieldset>
+            
+            <input type="submit" value="Register" />
+        </form>
+    </div>
 {% endblock %}
