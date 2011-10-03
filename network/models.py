@@ -168,7 +168,7 @@ class Network(models.Model):
             return True
         return False
 
-    def neuron_ids(self):
+    def neuron_ids(self, connect_to=''):
         """
         Get a list of neuron ID for connectivity matrix and
         validation check of targets/sources.

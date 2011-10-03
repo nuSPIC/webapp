@@ -39,3 +39,24 @@ def id_convert(ids, tid=None, vid=None):
         return tids[vids.tolist().index(int(vid))]
         
     return 
+    
+def id_escape(ids, tid=None):
+    tids = ids[:,0]
+    vids = np.array(ids[:,1], dtype=int)
+    
+    if len(str(tid)) < 4:
+        tid = ('%4s' %tid).replace(' ', '0')
+
+    if tid in tids: 
+        return vids[tids.tolist().index(str(tid))]
+        
+    return 
+    
+def id_identify(ids, vid=None):
+    tids = ids[:,0]
+    vids = np.array(ids[:,1], dtype=int)
+    
+    if vid in vids: 
+        return tids[vids.tolist().index(int(vid))]
+        
+    return 

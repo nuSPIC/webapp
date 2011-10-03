@@ -36,7 +36,7 @@
         edgelist = {{ network_obj.edgelist|safe }},
         connect_to_input = {{ network_obj.connect_to_input }},
         connect_to_output = {{ network_obj.connect_to_output }},
-        pos = {{ network_obj.layout_size|safe }};
+        holder = {{ network_obj.layout_size|safe }};
     {% endif %}
     
     $(function() {
@@ -124,6 +124,11 @@
                 .find( ".toggle" ).button({
                         icons: {
                             primary: "ui-icon-circle-arrow-s"
+                        }})
+                    .end()
+                .find( ".ui-state-highlight" ).button({
+                        icons: {
+                            primary: "ui-icon-circle-arrow-n"
                         }})
                     .end()
                 .find( ".document" ).button({
@@ -356,6 +361,7 @@
 //     SELECT A DEVICE TO ADD
     $( "select#id_label" ).live('change', function(e) {
             e.preventDefault()
+            $( ".device-form" ).find( "input:reset" ).click();
             $( "ul.errorlist" ).remove();
             selected_device_id = last_device_id+1
             $( "span#device_id" ).html(selected_device_id);
@@ -533,8 +539,8 @@
                 .clone()
                 .dialog({
                     title: "Network layout",
-                    width: pos['x'] + 100,
-                    height: pos['y'] + 120,
+                    width: holder['x'] + 100,
+                    height: holder['y'] + 120,
                     close: function(ev, ui) { 
                         $( this ).remove();
                         $( popup ).show()
@@ -548,8 +554,8 @@
             $.getJSON('/network/ajax/'+ {{ network_obj.id }} +'/default_layout/',
                                         function(data) {
                                             $( '#holder' ).html('');
-                                            load_layout(data);
                                             device_list = data;
+                                            load_layout(data);
                                     });
     });
     
@@ -940,7 +946,15 @@
                     
                     <div class="buttons">
                         <button type="submit" class="play" id="submit-network-form">Save & simulate</button>
-                        <button class="toggle" id="toggle-device-form">Expand</button>
+                        {% with network_form.fieldsets.fieldsets|last|last as advanced %}
+                            {% if advanced.fields|length > 1 %}
+                                {% if 'collapse' in advanced.classes %}
+                                    <button class="toggle" id="toggle-device-form">Expand</button>
+                                {% else %}
+                                    <button class="toggle ui-state-highlight" id="toggle-device-form">Collapse</button>
+                                {% endif %}
+                            {% endif %}
+                        {% endwith%}
                         <span id="task_status"></span>
                     </div>
                 </div>

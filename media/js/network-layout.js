@@ -169,7 +169,7 @@ function load_layout (device_list) {
         };
 
     var x, y, id, edge, wcolors, 
-    paper = Raphael("holder", pos['x']+30, pos['y']+30),
+    paper = Raphael("holder", holder['x']+30, holder['y']+30),
 //     colors = [],
     texts = [], inputs = [], outputs = [], shapes = [],
     connections = [];
@@ -203,16 +203,18 @@ function load_layout (device_list) {
                 $( "table#weight-table" ).find( "tr#neuron_" + ((this.id+1)/4) ).find( "td.connections-table" ).addClass( "ui-state-highlight" );
                 $( "table#delay-table" ).find( "tr#neuron_" + ((this.id+1)/4) ).find( "td.connections-table" ).addClass( "ui-state-highlight" );
                 
-                var targets = device_list[(this.id+1)/4-1][2]["targets"].split(",");
-                for (idx in targets) {
-                    $( "table#weight-table" )
-                        .find( "th:nth-child(" + (Number(targets[idx])+2).toString() + ")" )
-                        .addClass( "ui-state-highlight" );
-                    
-                    $( "table#delay-table" )
-                        .find( "th:nth-child(" + (Number(targets[idx])+2).toString() + ")" )
-                        .addClass( "ui-state-highlight" );
-                    }
+                if ("targets" in device_list[(this.id+1)/4-1][2]) {
+                    var targets = device_list[(this.id+1)/4-1][2]["targets"].split(",");
+                        for (idx in targets) {
+                            $( "table#weight-table" )
+                                .find( "th:nth-child(" + (Number(targets[idx])+2).toString() + ")" )
+                                .addClass( "ui-state-highlight" );
+                            
+                            $( "table#delay-table" )
+                                .find( "th:nth-child(" + (Number(targets[idx])+2).toString() + ")" )
+                                .addClass( "ui-state-highlight" );
+                        }
+                    };
                 
                 },
             function () {

@@ -22,7 +22,7 @@ class NetworkForm(BetterModelForm):
     class Meta:
         model = Network
         fieldsets = (('main', {'fields': ['duration']}),
-                    ('Advanced', {'fields': ['rng_seeds', 'grnd_seed', 'resolution'], 'classes': ['advanced', 'collapse']}))
+                    ('Advanced', {'fields': [], 'classes': ['advanced', 'collapse']}))
 
 class DeviceForm(BetterForm):
     """ Parent form for input and neuron devices """    

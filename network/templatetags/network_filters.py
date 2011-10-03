@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # coding: utf-8
 
 from django.template import Library
@@ -41,10 +42,10 @@ def itemize(s):
     converts dictionary to string
     """
     if s:
-	l = s.items()
-	l.sort()
-	l = ["%s: %s" %(str(i[0]),str(i[1])) for i in l]
-	return ', '.join(l)
+        l = s.items()
+        l.sort()
+        l = ["%s: %s" %(str(i[0]),str(i[1])) for i in l]
+        return ', '.join(l)
     return None
 itemize.is_safe = True
 itemize = stringfilter(itemize)
