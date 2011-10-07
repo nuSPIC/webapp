@@ -16,3 +16,4 @@ local_settings.py
 *.sqlite
 .svn
 tmp
+.pid
