@@ -68,16 +68,13 @@ INSTALLED_APPS = (
     'lib',
     'news',
 
-    'django_evolution',
-    'django_extensions',
-    'debug_toolbar',
-    'form_utils',
-    'south',
-
     'network',
     'reversion',
-    'djcelery',
     'result',
+
+    'djcelery',
+    'djkombu',
+    'form_utils',
 )
 
 

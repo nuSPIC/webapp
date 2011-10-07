@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 import cjson
-import ujson
+#import ujson
 
 def decode(*args, **kwargs):
     try:
-        a
         return ujson.decode(*args, **kwargs)
     except:
         return cjson.decode(*args, **kwargs)
