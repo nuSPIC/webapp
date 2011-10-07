@@ -14,12 +14,12 @@
 
 <script type="text/javascript" src="/media/js/jquery-1.6.2.min.js"></script>
 <script type="text/javascript" src="/media/js/jquery-ui-1.8.14.custom.min.js"></script>
-<!-- <script type="text/javascript" src="http://jqueryui.com/themeroller/themeswitchertool/"></script> -->
-<script type="text/javascript" src="/media/js/json2.js"></script>
 <script type="text/javascript" src="/media/js/jquery.tipTip.minified.js"></script>
+<script type="text/javascript" src="/media/js/json2.js"></script>
+<script type="text/javascript" src="/media/js/network.js"></script>
 <script type="text/javascript" src="/media/js/quickpager.jquery.js"></script>
 <script type="text/javascript" src="/media/js/raphael-min.js"></script>
-<script type="text/javascript" src="/media/js/network-layout.js"></script>
+<script type="text/javascript" src="/media/js/raphael-networkLayout.js"></script>
 <script type="text/javascript" src="/media/js/ui.selectmenu.js"></script>
 
 <script type="text/javascript">
@@ -46,13 +46,14 @@
                     opacity: 0.7,
             });
             
-            load_theme( ".portlet" );
-            load_layout( device_list );
+//             load_theme( ".portlet" );
+            $( ".portlet" ).loadTheme();
+            $( "#holder" ).loadLayout( device_list );
              
             $( "div#connections-tabs" ).tabs();
             $( "div#results-tabs" ).tabs();
             $( "ul#history-list" ).quickPager();
-            $( "select#versions-select" ).selectmenu();
+//             $( "select#versions-select" ).selectmenu();
 
             
             $( "span#device_id" ).html(selected_device_id);
@@ -73,80 +74,7 @@
                             }).parent().hide();
     });
 
-    var load_theme = function (portlet) {
-            $( portlet ).addClass( "ui-widget ui-helper-clearfix ui-corner-top ui-shadow" )
-                .find( ".portlet-header" )
-                        .addClass( "ui-widget-header ui-corner-top tipTip-top" )
-                        .prepend( "<span class='ui-icon toggle ui-icon-minusthick'></span>")
-//                         .prepend( "<span class='ui-icon dialog ui-icon-newwin'></span>")
-                        .end()
-                .find( ".portlet-content" )
-                        .addClass( "ui-widget-content" );
-                        
-                        
-            $( portlet ).find( ".portlet-header .toggle" ).click(function() {
-                    $( this ).toggleClass( "ui-icon-minusthick" ).toggleClass( "ui-icon-plusthick" );
-                    $( this ).parents( ".portlet:first" ).find( ".portlet-content" ).slideToggle();
-            });
-            
-            $( portlet ).find( ".buttons")
-                .find( "button" ).button().end()
-                .find( ".delete" ).button({
-                        icons: {
-                            primary: "ui-icon-trash"
-                        },})
-                    .end()
-                .find( ".check" ).button({
-                        icons: {
-                            primary: "ui-icon-check"
-                        },})
-                    .end()
-                .find( ".reset" ).button({
-                        icons: {
-                            primary: "ui-icon-arrowreturnthick-1-w"
-                        },})
-                    .end()
-                .find( ".play" ).button({
-                        icons: {
-                            primary: "ui-icon-play"
-                        },})
-                    .end()
-                .find( ".zoomin" ).button({
-                        icons: {
-                            primary: "ui-icon-zoomin"
-                        }})
-                    .end()
-                .find( ".help" ).button({
-                        icons: {
-                            primary: "ui-icon-help"
-                        }})
-                    .end()        
-                .find( ".toggle" ).button({
-                        icons: {
-                            primary: "ui-icon-circle-arrow-s"
-                        }})
-                    .end()
-                .find( ".ui-state-highlight" ).button({
-                        icons: {
-                            primary: "ui-icon-circle-arrow-n"
-                        }})
-                    .end()
-                .find( ".document" ).button({
-                        icons: {
-                            primary: "ui-icon-document"
-                        }})
-                    .end()
-                .find( ".favorite" ).button({
-                        icons: {
-                            primary: "ui-icon-star"
-                        }})
-                    .end();
-                    
-            $( portlet ).find( "div.field-wrapper" ).tipTip({
-                    defaultPosition: 'right',
-                    delay: 500,
-            });
-    };
+
 
     var device_list_preview = function (data) {
         var label = data[0]['label'].replace("_", " "),
@@ -384,7 +312,7 @@
                 $(this).serialize(), function(data){
                     var form = $( "#"+ data.id_label +"-form-content" )
                     $(form).html(data.responseHTML).find( "#selected_device_id" ).html(selected_device_id);
-                    load_theme( $(form).parent() );
+                    $(form).parent().loadTheme();
                     if (data.valid != -1) {
                         $( "ul.errorlist" ).remove();
                         if ($( "select#id_label" ).val() == 'voltmeter' || $("select#id_label" ).val() == 'spike_detector') {
@@ -553,9 +481,9 @@
             e.preventDefault();
             $.getJSON('/network/ajax/'+ {{ network_obj.id }} +'/default_layout/',
                                         function(data) {
-                                            $( '#holder' ).html('');
+                                            $( "#holder" ).html('');
                                             device_list = data;
-                                            load_layout(data);
+                                            $( "#holder" ).loadLayout(device_list);
                                     });
     });
     

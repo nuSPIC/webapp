@@ -136,7 +136,7 @@ Array.prototype.inArray = function (value,caseSensitive)
 };
 
 
-function load_layout (device_list) {
+$.fn.loadLayout = function (device_list) {
     var dragger = function () {
             this.ox = this.attr("cx");
             this.oy = this.attr("cy");
