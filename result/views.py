@@ -89,10 +89,15 @@ def spike_detector(request, result_id):
     spike_detector = result_obj.spike_detector_data()
     assert len(spike_detector['senders']) == len(spike_detector['times'])
 
-    ids = network_obj.id_converter()
-    spike_detector['senders'] = [id_escape(ids, sender) for sender in spike_detector['senders']]
+    neurons = network_obj.neuron_ids()
+    spike_detector['neurons'] = network_obj._connect_to(label='spike_detector')
+    spike_detector['neuronScale'] = [ii+1 for ii,v in enumerate(spike_detector['neurons'])]
+
+    id_filterbank = network_obj.id_filterbank()
+    neuron_id_filterbank = network_obj.neuron_id_filterbank(label="spike_detector")
+    spike_detector['senders'] = [id_escape(id_filterbank, sender) for sender in spike_detector['senders']]
+    spike_detector['senders'] = [id_escape(neuron_id_filterbank, sender) for sender in spike_detector['senders']]
     
-    spike_detector['neurons'] = network_obj.neuron_ids(connect_to='spike_detector')
     spike_detector['simTime'] = result_obj.revision.version_set.all()[0].object_version.object.duration
     
     if request.GET.get('view') == 'small':

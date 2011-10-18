@@ -2,9 +2,7 @@
 import numpy as np
 
 def values_extend(values, unique=False, toString=False):
-    """
-    Extend targets/sources e.g. if target is '1-3, 5', it converts into '1,2,3,5'.
-    """
+    """ Extend targets/sources e.g. if target is '1-3, 5', it converts into '1,2,3,5'. """
     
     value_list = values.split(',')
     extended_list = []
@@ -28,35 +26,22 @@ def values_extend(values, unique=False, toString=False):
         
     return extended_list
 
+def id_escape(id_filterbank, tid=None):
+    """ Return user visible id from true id. """
+    tids = np.array(id_filterbank[:,0], dtype=float)
+    vids = np.array(id_filterbank[:,1], dtype=int)
 
-def id_convert(ids, tid=None, vid=None):
-    tids = ids[:,0]
-    vids = np.array(ids[:,1], dtype=int)
-    
-    if tid in tids: 
-        return vids[tids.tolist().index(str(tid))]
-    if vid in vids: 
-        return tids[vids.tolist().index(int(vid))]
+    if float(tid) in tids: 
+        return vids[tids.tolist().index(float(tid))]
         
-    return 
+    return np.array([], dtype=int)
     
-def id_escape(ids, tid=None):
-    tids = ids[:,0]
-    vids = np.array(ids[:,1], dtype=int)
+def id_identify(id_filterbank, vid=None):
+    """ Return true id from user visible id. """
+    tids = np.array(id_filterbank[:,0], dtype=int)
+    vids = np.array(id_filterbank[:,1], dtype=float)
     
-    if len(str(tid)) < 4:
-        tid = ('%4s' %tid).replace(' ', '0')
-
-    if tid in tids: 
-        return vids[tids.tolist().index(str(tid))]
+    if float(vid) in vids: 
+        return tids[vids.tolist().index(float(vid))]
         
-    return 
-    
-def id_identify(ids, vid=None):
-    tids = ids[:,0]
-    vids = np.array(ids[:,1], dtype=int)
-    
-    if vid in vids: 
-        return tids[vids.tolist().index(int(vid))]
-        
-    return 
+    return np.array([], dtype=int)

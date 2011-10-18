@@ -1,7 +1,15 @@
-
-.header_logo {
-    display : none;
+#content {
+    font-size: .8em;
+    padding: 10px;
+    overflow: hidden;
+    width : 98%;
+    margin: auto;
+    line-height: 1.2em;
 }
+
+    #content .header_logo {
+        display : none;
+    }
 
 
 /* Forums list

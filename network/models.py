@@ -4,11 +4,12 @@ from django.db import models
 import numpy as np
 
 import lib.json as json
-from network.helpers import id_convert
+from network.helpers import id_escape
 
 __all__ = ["Network"]
 
-SPIC_CHOICES = (('1','SPIC1'),
+SPIC_CHOICES = (('0','Sandbox'),
+                ('1','SPIC1'),
                 ('2','SPIC2'),
                 ('3','SPIC3'),
                 ('4','SPIC4'))
@@ -45,16 +46,17 @@ class Network(models.Model):
         return {}
 
     def layout_size(self):
-        x, y = 333, 0
+        x, y = 260, 12
         for dev in self.device_list(modeltype='neuron'):
-            pos = dev[0]['position']
-            if pos[0] > x:
-                x = pos[0]
-            if pos[1] > y:
-                y = pos[1]
+            if 'position' in dev[0]:
+                pos = dev[0]['position']
+                if pos[0] > x:
+                    x = pos[0]
+                if pos[1] > y:
+                    y = pos[1]
         return {'x':x, 'y':y}
 
-    def id_converter(self):
+    def id_filterbank(self):
         device_dict = self.device_dict()
         device_items = device_dict.items()
         device_items.sort()
@@ -66,7 +68,7 @@ class Network(models.Model):
             else:
                 ids.append((tid, -1))
                 
-        return np.array(ids)
+        return np.array(ids, dtype=int)
 
     def device_dict(self):
         """
@@ -76,7 +78,7 @@ class Network(models.Model):
             return json.decode(str(self.devices_json))
         return []
 
-    def device_list(self, term='visible', modeltype=None, label=None):
+    def device_list(self, term='visible', modeltype=None, label=None, key=None):
         """
         Return a list of devices.
         Argument modeltype is for filtering devices by its type,
@@ -86,16 +88,14 @@ class Network(models.Model):
         if device_dict:
             device_items = device_dict.items()
             device_items.sort()
-            
-            #if self.user().pk == 1:
-                #term = 'all'
                                     
             if term == 'all':
                 device_list = [dev[1] for dev in device_items]
                 
             elif term == 'visible':
+                id_filterbank = self.id_filterbank()
                 device_list = [dev[1] for dev in device_items if 'id' in dev[1][0]]
-                ids = self.id_converter()
+                
                 for idx, dev in enumerate(device_list):
                     if 'targets' in dev[2]:
                         targets = dev[2]['targets'].split(',')
@@ -109,7 +109,8 @@ class Network(models.Model):
                         new_weights, new_delays = [], []
                         for idx_tgt, tgt in enumerate(targets):
                             if tgt:
-                                new_tgt = id_convert(ids, tid=('%4d' %int(tgt)).replace(' ', '0'))
+                                tid = ('%4d' %int(tgt)).replace(' ', '0')
+                                new_tgt = id_escape(id_filterbank, tid)
                             
                                 if new_tgt > 0:
                                     new_targets.append(str(new_tgt))
@@ -134,8 +135,9 @@ class Network(models.Model):
                         new_sources = []
                         for idx_src, src in enumerate(sources):
                             if src:
-                                new_src = id_convert(ids, tid=('%4d' %int(src)).replace(' ', '0'))
-                            
+                                tid = ('%4d' %int(src)).replace(' ', '0')
+                                new_src = id_escape(id_filterbank, tid)
+
                                 if new_src > 0:
                                     new_sources.append(str(new_src))
                                 
@@ -148,6 +150,14 @@ class Network(models.Model):
                 device_list = [dev for dev in device_list if dev[0]['type'] == modeltype]
             if label:
                 device_list = [dev for dev in device_list if dev[0]['label'] == label]
+            if key:
+                if key in ['id','label','type','position']:
+                    device_list = [dev[0][key] for dev in device_list if key in dev[0]]
+                elif key in ['targets','sources','weight','delay']:
+                    device_list = [dev[2][key] for dev in device_list if key in dev[2]]
+                else:
+                    device_list = [dev[1][key] for dev in device_list if key in dev[1]]
+                
             return device_list
         return device_dict
 
@@ -168,7 +178,7 @@ class Network(models.Model):
             return True
         return False
 
-    def neuron_ids(self, connect_to=''):
+    def neuron_ids(self):
         """
         Get a list of neuron ID for connectivity matrix and
         validation check of targets/sources.
@@ -178,6 +188,17 @@ class Network(models.Model):
             return [int(dev[0]['id']) for dev in neuron_list]
         return neuron_list
         
+    def neuron_ids_to_spike_detector(self):
+        return self.neuron_ids(connect_to='spike_detector')
+
+    def neuron_id_filterbank(self, modeltype=None, label=None):
+        neuron_list = self.device_list(modeltype='neuron')
+        
+        if modeltype or label:
+             neuron_ids = self._connect_to(modeltype=modeltype, label=label)
+             neuron_list = [neuron for neuron in neuron_list if neuron[0]['id'] in neuron_ids]
+        return np.array([[neuron[0]['id'], gid+1] for gid, neuron in enumerate(neuron_list)])
+            
     def _get_param_list(self, term):
         """
         Get a listed tuple of device ID and list of values 
@@ -223,6 +244,7 @@ class Network(models.Model):
         -> see the method device_list.
         """        
         device_list = self.device_list(term, modeltype=modeltype)
+        neuron_id_filterbank = self.neuron_id_filterbank()
 
         connections = []
         if device_list:
@@ -241,8 +263,9 @@ class Network(models.Model):
                             if len(conns['sources']) > 0:
                                 sources = conns['sources'].split(',')
                                 for index, source in enumerate(sources):
+                                  
                                     if data:
-                                        connections.append([int(source), gid,  None, None])
+                                        connections.append([int(source), gid,  {}, ''])
                                     else:
                                         connections.append([int(source), gid])
                             
@@ -252,6 +275,9 @@ class Network(models.Model):
                                 for index, target in enumerate(targets):
                                         
                                     if target:
+                                        if modeltype == 'neuron':
+                                            target = id_escape(neuron_id_filterbank, target)
+                                            
                                         if data:
                                             connection_params, connection_model = {}, ''
                                             if 'weight' in conns:
@@ -278,9 +304,9 @@ class Network(models.Model):
         """ Get a list of neoron edges for graph. """
         return self.connections(data=True, modeltype='neuron')
 
-    def _connect_to(self, modeltype):
+    def _connect_to(self, modeltype=None, label=None):
         """ Get a list of devices of one type, which the neurons are connected to. """
-        device_list = self.device_list(modeltype=modeltype)
+        device_list = self.device_list(modeltype=modeltype, label=label)
         neurons = []
         for model, status, conns in device_list:
             if 'targets' in conns:
@@ -293,11 +319,15 @@ class Network(models.Model):
         
     def connect_to_input(self):
         """ List of connections of neurons are connected to input. """
-        return self._connect_to('input')
+        return self._connect_to(modeltype='input')
         
     def connect_to_output(self):
         """ List of connections of neurons are connected to output. """
-        return self._connect_to('output')        
+        return self._connect_to(modeltype='output')    
+        
+    def connect_to_spike_detector(self):
+        """ List of connections of neurons are connected to output. """
+        return self._connect_to(label='spike_detector')            
         
     def neurons(self):
         """ Return a readable string of all meurons. """        

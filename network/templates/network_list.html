@@ -4,9 +4,6 @@
 {% block title %}{{ flatpage.title }}{% endblock %}
 
 {% block content %}
-
-    <div class="blockcontent">
-
         <div>
             {{ flatpage.content }}
         </div>
@@ -31,7 +28,7 @@
                     <ul>
                 {% for network in group.list %}
                     <li id="{{ network.local_id }}">
-                    <a style="color : #914E0C; text-decoration: none" href="{% url network network.SPIC_id network.local_id %}">
+                    <a href="{% url network network.SPIC_id network.local_id %}">
                         {{ network.title|default_if_none:"Network" }}
                     </a>
                     : {{ network.description|default:"no description" }}
@@ -60,7 +57,5 @@
             The nuSPIC is aiming to test if we can extract a function from the network or can implement a function in a neural network.
             Testing these ideas does not depend on the exact set of parameters used in the network. 
         </p>
-
-    </div>
 
 {% endblock %}

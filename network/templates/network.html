@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 
+{% load lib_filters %}
 {% load network_filters %}
 {% load network_tags %}
 
@@ -10,7 +11,6 @@
 <link rel="stylesheet" href="/media/css/jquery-ui.custom.css"></link>
 <link rel="stylesheet" href="/media/css/network.css"></link>
 <link rel="stylesheet" href="/media/css/tipTip.css"></link>
-<link rel="stylesheet" href="/media/css/ui.selectmenu.css"></link>
 
 <script type="text/javascript" src="/media/js/jquery-1.6.2.min.js"></script>
 <script type="text/javascript" src="/media/js/jquery-ui-1.8.14.custom.min.js"></script>
@@ -20,24 +20,27 @@
 <script type="text/javascript" src="/media/js/quickpager.jquery.js"></script>
 <script type="text/javascript" src="/media/js/raphael-min.js"></script>
 <script type="text/javascript" src="/media/js/raphael-networkLayout.js"></script>
-<script type="text/javascript" src="/media/js/ui.selectmenu.js"></script>
+
 
 <script type="text/javascript">
-    var device_list = new Array(),
-    edgelist = [];
+    var device_list = [],
+    edgelist = [],
+    neuron_ids = [];
 
     var last_device_id = {{ network_obj.last_device_id|safe }},
     version_id = {{ version_id|safe }},
     selected_device_id,
     task_id;
     
-    {% if network_obj.devices_json %}
+    {% if network_obj.device_list %}
         var device_list = {{ network_obj.device_list|safe }},
+        neuron_ids = {{ network_obj.neuron_ids|safe }},
         edgelist = {{ network_obj.edgelist|safe }},
         connect_to_input = {{ network_obj.connect_to_input }},
         connect_to_output = {{ network_obj.connect_to_output }},
-        holder = {{ network_obj.layout_size|safe }};
+        layoutSize = {{ network_obj.layout_size|safe }};
     {% endif %}
+
     
     $(function() {
             $( ".column" ).sortable({
@@ -48,12 +51,17 @@
             
 //             load_theme( ".portlet" );
             $( ".portlet" ).loadTheme();
-            $( "#holder" ).loadLayout( device_list );
+
+            if (neuron_ids.length > 0) {
+                $( "#holder" ).loadLayout( device_list );
+            } else {
+                $( "#holder" ).parents( ".portlet" ).hide();
+                $( "div#connectivity_matrix" ).hide();
+            }
              
             $( "div#connections-tabs" ).tabs();
             $( "div#results-tabs" ).tabs();
             $( "ul#history-list" ).quickPager();
-//             $( "select#versions-select" ).selectmenu();
 
             
             $( "span#device_id" ).html(selected_device_id);
@@ -105,17 +113,21 @@
         if ('weight' in data[2]) {$(device).find( "td.weight" ).html(data[2]['weight'])}
         if ('delay' in data[2]) {$(device).find( "td.delay" ).html(data[2]['delay'])};
         
-        $(device).attr('title', title).tipTip({defaultPosition: 'right',}).show();
+        if (title) {
+        $(device).attr('title', 'no status').fadeIn().tipTip({defaultPosition: 'right',});
+        } else {
+        $(device).attr('title', title.join(",")).fadeIn().tipTip({defaultPosition: 'right',});            
+        }
 
         version_id = 0;
         $( "#device-message" ).html("<li>"+ label +" ["+ selected_device_id +"] was "+ term +" successfully.</li>");
+        $( "#device-list" ).find( ".portlet-content" ).show();
     };
     
     var save_and_simulate = function () { 
         var form = $( "#network-form" ).serialize();
         var devices_json = JSON.stringify(device_list);
         var post_data = form.concat('&devices_json='+ devices_json);
-        
         $.post('/network/ajax/'+ {{ network_obj.id }} +'/'+ version_id +'/simulate/',
             post_data, function(data){
                 if (data.valid == -1) {
@@ -217,20 +229,21 @@
         });
     };
     
-    
+   
 // DEVICE ACTIVITY
 
 //     SELECT DEVICE TO CHANGE STATUS AND PARAMETERS
-    $( "tr.enabled" ).find( "td.selectable" ).live('click',function(e) {
+    $( "tr.enabled" ).find( "td.selectable" ).live('click', function(e) {
             e.preventDefault();
             $( "ul.errorlist" ).remove();
-            $( ".device-form" ).find( "input:reset" ).click();
-            $( "option:first" ).show().attr('selected', 'selected');
+            $( "option:first" ).attr('selected', 'selected');
             selected_device_id = $(this).parent( ".enabled" ).attr('id')
             var device = device_list[selected_device_id-1];
-            if ($( "#"+device[0].label ).is(":visible") && $( "#device_id" ).html() == selected_device_id) {
+            var form = $( "#"+device[0].label );
+            
+            if ($( form ).is(":visible") && $( "#device_id" ).html() == selected_device_id) {
                 $( "#device_id" ).html("")
-                $( "#"+device[0].label ).toggle()
+                $( form ).toggle()
             } else {
                 $( "#device_id" ).html(selected_device_id)
                 $( "tr.enabled" ).each(function() {
@@ -239,16 +252,21 @@
                         }
                 });
                 $( ".device-form:visible" ).toggle();
-                var form = $( "#"+device[0].label ).children();
-                $(form).find( "#selected_device_id" ).html(selected_device_id).end()
+                $( form ).reset();
+                var form_content = $( form ).children();
+                $(form_content)
                     .find( "#id_model" ).val(device[0]['label']);
                 for (var key in device[1]) {
-                    $(form).find( "#id_"+ key ).val(device[1][key]);
+                    $(form_content).find( "#id_"+ key ).val(device[1][key]).removeClass('ui-state-hover');
                 };
                 for (var key in device[2]) {
-                    $(form).find( "#id_"+ key ).val(device[2][key]);
+                    $(form_content).find( "#id_"+ key ).val(device[2][key]).removeClass('ui-state-hover');
                 };
-                $( "#"+device[0].label).toggle();
+                $( form ).toggle();
+                $( "#device-form" )
+                      .find( "#selected_device_id" ).html(selected_device_id).end()
+                      .find( "#selected_device_label" ).html(device[0]['label'].replace(/_/g, ' ')).end()
+                      .show();
             }
     });
 
@@ -289,7 +307,7 @@
 //     SELECT A DEVICE TO ADD
     $( "select#id_label" ).live('change', function(e) {
             e.preventDefault()
-            $( ".device-form" ).find( "input:reset" ).click();
+            $( ".device-form:visible" ).hide();
             $( "ul.errorlist" ).remove();
             selected_device_id = last_device_id+1
             $( "span#device_id" ).html(selected_device_id);
@@ -298,104 +316,103 @@
                             $(this).children("td").toggleClass("ui-state-highlight");
                         }
                 });
-            $( ".device-form:visible" ).toggle();
-            $( "#"+ $(this).val() )
-                .find( "#selected_device_id" ).html(selected_device_id).end()
+
+            var form = $( "#"+ $(this).val() );
+            $( form ).reset().find( "#selected_device_id" ).html(selected_device_id).end()
                 .find( "#id_model" ).attr('value', $(this).val()).end()
-                .show()
+                .show();
+
+            $( "#device-form" )
+                .find( "#selected_device_id" ).html(selected_device_id).end()
+                .find( "#selected_device_label" ).html($(this).val().toString().replace(/_/g, ' ')).end()
+                .show();
     });
     
     
     $( "form.device-form" ).live('submit',  function(e) {
             e.preventDefault();
+            var form_data = $( this ).serialize();
+            var post_data = form_data.concat('&neuron_ids='+ JSON.stringify(neuron_ids));
             $.post('{% url device_preview network_obj.id %}',
-                $(this).serialize(), function(data){
-                    var form = $( "#"+ data.id_label +"-form-content" )
-                    $(form).html(data.responseHTML).find( "#selected_device_id" ).html(selected_device_id);
-                    $(form).parent().loadTheme();
+                post_data, function(data){
+                    var form = $( "#"+ data.id_label +"-form" )
+                    $(form).html(data.responseHTML);
                     if (data.valid != -1) {
                         $( "ul.errorlist" ).remove();
                         if ($( "select#id_label" ).val() == 'voltmeter' || $("select#id_label" ).val() == 'spike_detector') {
                             $( "select#id_label option:selected" ).hide()
                         };
                         $( "option:first" ).attr('selected', 'selected');
-                        data.device[0]["id"] = parseInt(selected_device_id);
 
-                        if (data.device[0]["type"] == 'output') {
-                            if ("targets" in data.device[2]) {
-                                connect_to_output.push(data.device[2]["targets"]);
+                        device = data.device;
+                        device[0]["id"] = parseInt(selected_device_id);
+
+                        if (device[0]["type"] == 'output') {
+                            if ("targets" in device[2]) {
+                                connect_to_output.push(device[2]["targets"]);
                             } else {
-                                connect_to_output.push(data.device[2]["sources"]);
+                                connect_to_output.push(device[2]["sources"]);
                             };
-                        } else if (data.device[0]["type"] == 'input') {
-                            connect_to_input.push(data.device[2]["targets"]);
-                        };
+                        } else if (device[0]["type"] == 'input') {
+                            connect_to_input.push(device[2]["targets"]);
+                        } else if (device[0]["type"] == 'neuron') {
+                            neuron_ids.push(device[0]["id"])
+                        }
 
-                        if (selected_device_id > device_list.length) {
-                            device_list.push(data.device);
+                        if (selected_device_id > device_list.length || selected_device_id > last_device_id) {
+                            device_list.push(device);
                         } else {
-                            device_list[selected_device_id-1] = data.device;
+                            position = device_list[selected_device_id-1][0]["position"];
+                            device[0]["position"] = position;
+                            device_list[selected_device_id-1] = device;
                         };
-                        device_list_preview(data.device);
+                        device_list_preview(device);
                     };
             }, 'json');
     });
 
-    $( "#id_step" ).live('keyup', function(e) {
-         e.preventDefault();
-         var step = parseFloat($(this).val());
+    $( ".required input" ).live('keyup',  function() {
+        if (this.value == '') {
+            $(this).addClass('ui-state-hover');
+        } else {
+            $(this).removeClass('ui-state-hover');
+        }
+    });
+
+    $( "#id_step" ).live('keyup', function() {
+         var step = parseFloat(this.value);
+         var spike_times = [];
          if (step > 0) {
-             var start = parseFloat($(this).parents( ".advanced" ).find( "#id_start" ).val());
+             var start = $(this).parents( ".advanced" ).find( "#id_start" ).val();
              var stop = $(this).parents( ".advanced" ).find( "#id_stop" ).val();
              if (stop == 'inf') {
                  stop = {{network_obj.duration|safe}}
              }
              var spike_times = [];
-             for (var tt = start; tt <= parseFloat(stop); tt = tt + step) {
+             for (var tt = parseFloat(start); tt <= parseFloat(stop); tt += step) {
                  spike_times.push(tt);
              };
          };
-         $(this).parents( ".advanced" ).find( "#id_spike_times" ).val(spike_times.toString());
+         $(this).parents( ".device-form" ).find( "#id_spike_times" ).val(spike_times.toString());
     });
 
-    $( "button#toggle-device-form" ).live('click', function(e) {
-            e.preventDefault()
-            $( this ).toggleClass( "ui-state-highlight" )
-            $( this ).parents( ".portlet-content" ).find( ".advanced" ).toggle();
-            if ($(this).hasClass( "ui-state-highlight" )) {
-                $(this).button("option", "icons", { primary: 'ui-icon-circle-arrow-n' })
-                .button("option", "label", "Collapse");
-                
-            } else {
-                $(this).button("option", "icons", { primary: 'ui-icon-circle-arrow-s' })
-                .button("option", "label", "Expand");
-            };        
-    }); 
+//     $( "button#toggle-device-form" ).live('click', function(e) {
+//             e.preventDefault()
+//             $( this ).toggleClass( "ui-state-highlight" )
+//             $( this ).parents( ".portlet-content" ).find( ".advanced" ).toggle();
+//             if ($(this).hasClass( "ui-state-highlight" )) {
+//                 $(this).button("option", "icons", { primary: 'ui-icon-circle-arrow-n' })
+//                 .button("option", "label", "Collapse");
+//                 
+//             } else {
+//                 $(this).button("option", "icons", { primary: 'ui-icon-circle-arrow-s' })
+//                 .button("option", "label", "Expand");
+//             };        
+//     }); 
 
-    $( "#help-steps #device-add" ).live('click', function() {
-            $( "#device-select" ).find( ".ui-widget-content" ).effect("highlight", {}, 1000);
+    $( "input#id_same_seed" ).live('change',  function() {
+        version_id = 0;
     });
-            
-    $( "#help-steps #devices-save" ).live('click', function() {
-            $( "#device-list" ).find( ".buttons" ).effect("highlight", {}, 1000);
-    });
-            
-    $( "#help-steps #layout-explore" ).live('click', function() {
-            $( "#network_layout" ).find( ".ui-widget-header" ).effect("highlight", {}, 1000);
-    });
-            
-    $( "#help-steps #matrix-check" ).live('click', function() {
-            $( "#connectivity_matrix" ).find( "tr" ).effect("highlight", {}, 1000);
-    });
-            
-    $( "#help-steps #device-change" ).live('click', function() {
-            $( "#device-list" ).find( "tr.enabled" ).effect("highlight", {}, 1000);
-    });            
-
-    $( "#help-steps #status-run" ).live('click', function() {
-            $( "#network-form" ).find( ".ui-widget-header" ).effect("highlight", {}, 1000);
-    });
-    
   
     $( "form#network-form" ).live('submit',  function(e) {
             e.preventDefault();
@@ -460,30 +477,45 @@
 
 
 // NETWORK LAYOUT
-    $( ".portlet-header" ).find( ".dialog" ).live('click', function(e) {
+    $( ".portlet-header" ).find( ".ui-icon-newwin" ).live('click', function(e) {
             e.preventDefault();
-            var popup = $( this ).parents( ".portlet" )
-            $( popup ).find( ".portlet-content" )
-                .clone()
-                .dialog({
-                    title: "Network layout",
-                    width: holder['x'] + 100,
-                    height: holder['y'] + 120,
-                    close: function(ev, ui) { 
-                        $( this ).remove();
-                        $( popup ).show()
-                    }
-            });          
-            $( popup ).hide();
+            var popup = $( this ).parents( ".portlet" );
+            width = ($(popup).find( ".portlet-content" ).width()+30).toString();
+            height = ($(popup).find( ".portlet-content" ).height()+50).toString();
+            newPopup = window.open('{% url network_layout network_obj.SPIC_id network_obj.local_id %}',
+                        'network_layout',
+                        'left=50,width='+ width +',height='+ height +',toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,copyhistory=no');
+            newPopup.moveTo(screen.availWidth/2 - width/2, screen.availHeight/2 - height /2);
+            newPopup.focus();
+//             $( popup ).find( ".toggle" ).toggleClass( "ui-icon-minusthick" ).toggleClass( "ui-icon-plusthick" );
+//             $( popup ).find( ".portlet-content" ).slideToggle();
+    });
+
+    $( "button#save-layout" ).live('click', function(e) {
+            e.preventDefault();
+            var devices_json = JSON.stringify(device_list);
+            $.post('{% url save_layout network_obj.id %}',
+                    {'csrfmiddlewaretoken':"{{ csrf_token }}", 'devices_json':devices_json},
+                    function(data) {
+                        layoutSize = data["layoutSize"];
+                        $( "#holder" ).height(layoutSize["y"]+30)
+                                      .width(layoutSize["x"]+30)
+                                      .html('')
+                                      .loadLayout(device_list);
+                        $( "#position" ).html("saved").show();
+            }, 'json');
     });
 
     $( "button#default-layout" ).live('click', function(e) {
             e.preventDefault();
-            $.getJSON('/network/ajax/'+ {{ network_obj.id }} +'/default_layout/',
+            $.getJSON('{% url default_layout network_obj.id %}', //'/network/ajax/'+ {{ network_obj.id }} +'/default_layout/',
                                         function(data) {
-                                            $( "#holder" ).html('');
-                                            device_list = data;
-                                            $( "#holder" ).loadLayout(device_list);
+                                            device_list = data["device_list"];
+                                            layoutSize = data["layoutSize"];
+                                            $( "#holder" ).height(layoutSize["y"]+30)
+                                                          .width(layoutSize["x"]+30)
+                                                          .html('')
+                                                          .loadLayout(device_list);
                                     });
     });
     
@@ -540,16 +572,6 @@
         });
     {% endif %}
     
-//     $("#VoltmeterThumbnail").contents().find(".voltmeter").live('click', function() {
-//                 $( ".resultView" ).attr('src', $( this ).val());
-//                 $( "#dialog-resultView" ).dialog({
-//                         title: 'Voltmeter view of '+ $( this ).find( "option:selected" ).attr('name'),
-//                         height: 550,
-//                         width: 800,
-//                         modal: true,
-//                 });
-//         });
-        
     {% if result_obj.has_spike_detector %}
         $( "button#spike_detector-link" ).live('click',function(e) {
                 $( ".resultView" ).attr('src', "{% url spike_detector result_obj.id %}?view=large");
@@ -610,7 +632,13 @@
             $( ".tipTip-left" ).tipTip({
                     defaultPosition: 'left',
             });
-            
+
+            $( ".required input" ).each(function() {
+                if ($(this).val() == '') {$(this).addClass('ui-state-hover')};
+                });
+            if (neuron_ids.length == 0) {
+               $( "#device-list" ).find( ".portlet-content" ).hide();
+            }
     });
     
     
@@ -682,13 +710,7 @@
                                         <td class="delete collapse"><input type="checkbox" name="device_ids" value="{{model.id}}" {% if network_obj.SPIC_id == "1" and model.type == "neuron" %} disabled {% endif %}></td>
                                         <td class="selectable id"><b>{{ model.id }}</b></td>
                                         <td class="selectable model {% if network_obj.SPIC_id == "1" and model.type == "neuron" %} disabled {% endif %}">
-                                            {% if network_obj.SPIC_id == "1" %}
-                                                {% if model.type == "neuron" %}
-                                                    Neuron 
-                                                {% else %}
-                                                   {{ model.label|readable }}
-                                                {% endif %}
-                                            {% endif %}
+                                            {{ model.label|label_escape:model.type }}
                                         </td>
                                         <td class="selectable targets">
                                         {% if connections.targets %}
@@ -726,17 +748,17 @@
                     
                 </form>
             </div>
-        </div>
+<!--        </div>-->
 
         <!-- DEVICE SELECT -->
-        <div class="portlet" id="device-select">
+<!--        <div class="portlet" id="device-select">-->
             <div class="portlet-content">
                 <div class="field-wrapper" title="">
                     <label for="device-select">Add a device:</label>
                     <select id="id_label">
                         <option value="">--- select a device ---</option>
                         {% for device in device_choices %}
-                            <option value="{{device.id_label}}" style="color:{% ifequal device.model_type 'input'%}#467ab3{% else %}#6B4226{% endifequal %}">{{device.id_label|readable}}</option>
+                            <option value="{{device.id_label}}" style="color:{% ifequal device.model_type 'input'%}#467ab3{% else %}#6B4226{% endifequal %}">{{device.id_label|label_escape}}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -744,22 +766,34 @@
         </div>
 
         <!-- DEVICE FORMS -->
+        <div class="portlet" id="device-form">
+            <div class="portlet-header" title="">
+              <span id="selected_device_id"></span> - <span id="selected_device_label"></span>
+            </div>
+
         {% for forms in device_formsets %}
-            <form action="." method="POST" class="portlet device-form" id="{{forms.id_label}}">
+
+            <form action="." method="POST" class="portlet-content device-form" id="{{forms.id_label}}">
                 {% csrf_token %}
-                <div id="{{forms.id_label}}-form-content">
+                <div id="{{forms.id_label}}-form">
                     {{forms.formsHTML}}
+                </div>
+
+                <div class="buttons">
+                    <button type="submit" class="check" id="submit-device-form">Apply</button>
+                    <button type="reset" class="reset" id="reset-device-form">Reset</button>
                 </div>
                 
             </form>
         {% endfor %}
+            </div>
         
         </div>
     </div>
     
     <!-- NETWORK -->
     <div class="column" id="network">
-        {% if network_obj.devices_json %} 
+        {% if network_obj.connections %} 
         <!--     CONNECTIVITY MATRIX  -->
             {% if network_obj.neuron_ids|length <= 10 %}
                 <div class="portlet" id="connectivity_matrix">
@@ -782,7 +816,9 @@
                                         <tr><td colspan="{{network_obj.neuron_ids|length|add:2}}"><span class="connections-tabs" id="target_title">Target</span></td></tr>
                                         <tr>
                                             <th></th><th>Id</th>
-                                            <th class="connections-table">{{network_obj.neuron_ids|join:"</th><th class='connections-table'>"}}</th>
+                                            {% for neuron_id in network_obj.neuron_ids %}
+                                                <th class="connections-table" id="weight_{{neuron_id}}">{{ neuron_id }}</th>
+                                            {% endfor %}
                                         </tr>
                                         </thead>
                                         
@@ -794,8 +830,11 @@
                                                             <span class="connections-tabs {% if network_obj.weight_list|length > 3 %}verticaltext{% endif %}" id="source_title">Source</span>
                                                         </td>
                                                     {% endif %}
+
                                                     <td class="connections-table"><b>{{ id }}</b></td>
-                                                    <td class="connections-table">{{weights|join:'</td><td class="connections-table">'}}</td>
+                                                    {% for weight in weights %}
+                                                        <td class="connections-table">{{ weight }}</td>
+                                                    {% endfor %}
                                                 </tr>
                                             {% endfor %}
                                         <tbody>
@@ -812,7 +851,9 @@
                                         <tr><td colspan="{{network_obj.neuron_ids|length|add:2}}"><span class="connections-tabs" id="target_title">Target</span></td></tr>
                                         <tr>
                                             <th></th><th>Id</th>
-                                            <th class="connections-table">{{network_obj.neuron_ids|join:"</th><th class='connections-table'>"}}</th>
+                                            {% for neuron_id in network_obj.neuron_ids %}
+                                                <th class="connections-table" id="delay_{{neuron_id}}">{{ neuron_id }}</th>
+                                            {% endfor %}
                                         </tr>
                                         </thead>
                                         
@@ -824,8 +865,11 @@
                                                             <span class="connections-tabs {% if network_obj.delay_list|length > 3 %}verticaltext{% endif %}" id="source_title">Source</span>
                                                         </td>
                                                     {% endif %}
-                                                    <td class="connections-table"><b>{{id}}</b></td>
-                                                    <td class="connections-table">{{delays|join:'</td><td class="connections-table">'}}</td>
+
+                                                    <td class="connections-table"><b>{{ id }}</b></td>
+                                                    {% for delay in delays %}
+                                                        <td class="connections-table">{{ delay }}</td>
+                                                    {% endfor %}
                                                 </tr>
                                             {% endfor %}
                                         <tbody>
@@ -874,7 +918,7 @@
                     
                     <div class="buttons">
                         <button type="submit" class="play" id="submit-network-form">Save & simulate</button>
-                        {% with network_form.fieldsets.fieldsets|last|last as advanced %}
+                        <!--{% with network_form.fieldsets.fieldsets|last|last as advanced %}
                             {% if advanced.fields|length > 1 %}
                                 {% if 'collapse' in advanced.classes %}
                                     <button class="toggle" id="toggle-device-form">Expand</button>
@@ -882,7 +926,7 @@
                                     <button class="toggle ui-state-highlight" id="toggle-device-form">Collapse</button>
                                 {% endif %}
                             {% endif %}
-                        {% endwith%}
+                        {% endwith%}-->
                         <span id="task_status"></span>
                     </div>
                 </div>
@@ -904,7 +948,7 @@
                     <div id=holder></div>
                     
                     <div class="buttons">
-                        <button class="check" id="save-devices">Save</button>
+                        <button class="check" id="save-layout">Save</button>
                         <button class="reset" id="default-layout">Default</button>
                         <button id="layout-legend">Legend</button>
                         <small style="float:right" id="position"></small>
@@ -956,7 +1000,7 @@
                                 <input style="float:right" type="checkbox" name="version_ids" value="{{version.id}}" {% if forloop.last %} disabled {% endif %}>
                                 {% if result.favorite %}<div class="ui-icon ui-icon-star" style="float:right"></div>{% endif %}
                                 <div class="version-link">
-                                    <a href="{% url network-simulated network_obj.SPIC_id network_obj.local_id version.revision.result.local_id|default:0 %}?version=revert" id="{{version.revision.result.local_id}}">
+                                    <a href="{% url network_simulated network_obj.SPIC_id network_obj.local_id version.revision.result.local_id|default:0 %}?version=revert" id="{{version.revision.result.local_id}}">
                                         {% if forloop.last %}
                                             Initial version of network
                                         {% else %}  

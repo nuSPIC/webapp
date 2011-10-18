@@ -7,7 +7,6 @@ from reversion.models import Version
 import lib.json as json
 
 from network.models import Network
-from network.helpers import id_convert
 from result.models import Result
 
 import datetime
@@ -44,18 +43,12 @@ class Simulation(AbortableTask):
         root_status = network_obj.root_status()
         
         if root_status:
-            if 'seed' in root_status:
-                seed = int(root_status.pop('seed'))
-                nest.SetStatus([0], {'grng_seed': seed, 'rng_seeds':[seed]})
-            try:
-                nest.SetStatus([0], root_status)
-            except:
-                logger.warning("Task failed due to setting root status.")
-                return
+            nest.SetStatus([0], root_status)
         
         
         # Create models in NEST and set its status
         device_list = network_obj.device_list('all')
+        outputs = []
         for dev_model, dev_status, dev_params in device_list:
                 
             """ Create models """                
@@ -74,6 +67,9 @@ class Simulation(AbortableTask):
                 gid = nest.Create(dev_model['label'], params=status_params)
             else:
                 gid = nest.Create(dev_model['label'])
+                
+            if dev_model['type'] == 'output':
+                outputs.extend(gid)
     
         # Make connections in nest
         connections = network_obj.connections('all', data=True)
@@ -113,15 +109,14 @@ class Simulation(AbortableTask):
 
         # Get data from output devices
         data = {}
-        ids = network_obj.id_converter()
-        outputs = network_obj.device_list(modeltype='output')
-        for out_model, out_status, out_params in outputs:
-            tid = id_convert(ids, vid= out_model['id'])
-            output_status = nest.GetStatus([int(tid)])[0]['events']
-            events = {}
-            for key,value in output_status.items():
-                events[key] = value.tolist()
-            data[out_model['label']] = events
+        for output_gid in outputs:
+            output_status = nest.GetStatus([output_gid])[0]
+            if 'events' in output_status:
+                output_events = output_status['events']
+                events = {}
+                for key,value in output_events.items():
+                    events[key] = value.tolist()
+                data[output_status['model']] = events
             
             
         # Get result object in latest version or in selected version

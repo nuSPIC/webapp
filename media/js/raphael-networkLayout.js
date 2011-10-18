@@ -94,15 +94,15 @@ Raphael.fn.connection = function (obj1, obj2, line, bg, syn) {
                                                            opacity: 0.7,
                                                            fill: "none",
                                                            stroke: bg.split("|")[0],
-                                                           "stroke-width": bg.split("|")[1] || 3}),
-                line: this.path(path).attr({opacity:1, fill: "none", stroke: color}),
+                                                           "stroke-width": bg.split("|")[1] || 3}).toBack(),
+                line: this.path(path).attr({opacity:1, fill: "none", stroke: color}).toBack(),
                 syn: syn && syn.split && this.path(syn_path).attr({        
                                                                   fill: syn.split("|")[0],
                                                                   "fill-opacity": 0.7,
                                                                   stroke: syn.split("|")[0],
                                                                   "stroke-opacity": 0.5,
                                                                   "stroke-width": syn.split("|")[1] || 3, 
-                                                                  "stroke-linejoin": "round",}),
+                                                                  "stroke-linejoin": "round",}).toBack(),
                 from: obj1,
                 to: obj2
             };
@@ -137,92 +137,161 @@ Array.prototype.inArray = function (value,caseSensitive)
 
 
 $.fn.loadLayout = function (device_list) {
-    var dragger = function () {
-            this.ox = this.attr("cx");
-            this.oy = this.attr("cy");
-            inputs[(this.id+1)/4-1].animate({"fill-opacity": 0}, 500);
-            outputs[(this.id+1)/4-1].animate({"fill-opacity": 0}, 500);
+  
+    var start = function () {
+        this.ox = this.attr("cx");
+        this.oy = this.attr("cy");
+        this.neuron_id = this.data("id");
+        this.neuron_label = this.data("label");
+        
+        this.draggableset = draggablesets[this.neuron_id];
+        this.draggableset.oBB = this.draggableset.getBBox();
+        this.bb = this.draggableset.getBBox();
 
-            $('#position').fadeIn().html([this.ox, this.oy].toString());
+//         inputs[this.neuron_id-1].animate({"fill-opacity": 0}, 500);
+//         outputs[this.neuron_id-1].animate({"fill-opacity": 0}, 500);
+//         this.trial = this.glow();
+
+//         $('#position').fadeIn().html([this.ox, this.oy].toString());
         },
         
     move = function (dx, dy) {
-        this.attr({cx: this.ox + dx, cy: this.oy + dy});
-        texts[(this.id+1)/4-1].attr({x: this.ox + dx, y: this.oy + dy});
-        inputs[(this.id+1)/4-1].attr({cx: this.ox + dx - 10, cy: this.oy + dy});
-        outputs[(this.id+1)/4-1].attr({cx: this.ox + dx + 10, cy: this.oy + dy});
+        this.bb = this.draggableset.getBBox();
+        this.cx = parseInt(this.bb.x)+17;
+        this.cy = parseInt(this.bb.y)+12;        
+        this.draggableset.translate(this.draggableset.oBB.x - this.bb.x + dx, this.draggableset.oBB.y - this.bb.y + dy);
         
-        $('#position').fadeIn().html([this.ox + dx, this.oy + dy].toString());
-        device_list[(this.id+1)/4-1][0]['position'] = [this.ox + dx, this.oy + dy];
+//        this.attr({cx: this.ox + dx, cy: this.oy + dy});
+//         labels[this.neuron_id-1].attr({x: this.cx, y: this.cy});
+//         inputs[this.neuron_id-1].attr({cx: this.cx - 10, cy: this.cy});
+//         outputs[this.neuron_id-1].attr({cx: this.cx + 10, cy: this.cy});
         
         for (var i = connections.length; i--;) {
             paper.connection(connections[i]);
             }
         paper.safari();
-
+        
+        $('#position').fadeIn().html([this.cx, this.cy].toString());
         },
     
     up = function () {
-        inputs[(this.id+1)/4-1].animate({"fill-opacity": 1}, 500);
-        outputs[(this.id+1)/4-1].animate({"fill-opacity": 1}, 500);
+//         this.trial.animate({"opacity": 0}, 1000);
+//         inputs[this.neuron_id-1].animate({"fill-opacity": 1}, 500);
+//         outputs[this.neuron_id-1].animate({"fill-opacity": 1}, 500);
+
+        device_list[this.neuron_label-1][0]["position"] = [this.bb.x > 0 ? this.cx : 18, this.bb.y > 0 ? this.cy : 13];
         $('#position').fadeOut();
         };
 
     var x, y, id, edge, wcolors, 
-    paper = Raphael("holder", holder['x']+30, holder['y']+30),
-//     colors = [],
-    texts = [], inputs = [], outputs = [], shapes = [],
-    connections = [];
+    paper = Raphael("holder", layoutSize["x"]+30, layoutSize["y"]+30),
+    shapes = [], connections = [];
     
     paper.clear();
-        
-    for (var i = 0; i < device_list.length; i++) {
-        if ('position' in device_list[i][0]) {
-            x = device_list[i][0]['position'][0];
-            y = device_list[i][0]['position'][1];
-            id = device_list[i][0]['id'];
-//             colors.push(Raphael.getColor());
-//             Raphael.getColor();
-            texts.push(paper.text(x, y, id.toString()).attr({"font-weight": "bold"}));
-            inputs.push(paper.ellipse(x-10, y, 2, 2).attr({"stroke-width": 0, "fill-opacity": 1}));
-            outputs.push(paper.ellipse(x+10, y, 2, 2).attr({"stroke-width": 0, "fill-opacity": 1}));
-            shapes.push(paper.ellipse(x, y, 17, 12).attr({"fill-opacity": 0, stroke:"#000", "stroke-width": 2, "stroke-opacity": .8, cursor: "move"}));
+    id = 0;
+    for (var ii = 0; ii < device_list.length; ii++) {
+        device = device_list[ii];
+        if ("position" in device[0]) {
+            x = device[0]["position"][0];
+            y = device[0]["position"][1];
+            label = device[0]["id"];
+
+            shapes.push(
+                paper.ellipse(x, y, 17, 12)
+                     .data("id", id++)
+                     .data("label", label)
+                     .data("input", connect_to_input.inArray(label))
+                     .data("output", connect_to_output.inArray(label))
+                     .data("targets", device[2]["targets"])
+                     .attr({cursor: "move",
+                           fill: "#fff",
+                           "fill-opacity": 0.1,
+                           stroke: $( ".ui-widget-content" ).css("color"),
+                           "stroke-width": 2,
+                           "stroke-opacity": .8,
+                           })
+                     );
+              
             }
         }
-    
-    for (var i = 0; i < shapes.length; i++) {
-        texts[i].attr({"font-weight": "bold", fill: $( ".ui-widget-content" ).css("color")});
-        connect_to_input.inArray(i+1) ? inputs[i].attr({fill: $( ".ui-widget-content" ).css("color")}) : inputs[i].attr({fill: "none"});
-        connect_to_output.inArray(i+1) ? outputs[i].attr({fill: $( ".ui-widget-content" ).css("color")}): outputs[i].attr({fill: "none"});
-//         shapes[i].attr({fill: colors[i], stroke: colors[i]})
-        shapes[i].attr({fill: "#fff", stroke: $( ".ui-widget-content" ).css("color")})
-        .drag(move, dragger, up)
-        .hover(function() {
-                this.animate({"stroke-width": 3}, 500);
-                $( "table#device-table" ).find( "tr#" + ((this.id+1)/4) ).find( "td" ).addClass( "ui-state-highlight" );
-                $( "table#weight-table" ).find( "tr#neuron_" + ((this.id+1)/4) ).find( "td.connections-table" ).addClass( "ui-state-highlight" );
-                $( "table#delay-table" ).find( "tr#neuron_" + ((this.id+1)/4) ).find( "td.connections-table" ).addClass( "ui-state-highlight" );
-                
-                if ("targets" in device_list[(this.id+1)/4-1][2]) {
-                    var targets = device_list[(this.id+1)/4-1][2]["targets"].split(",");
-                        for (idx in targets) {
-                            $( "table#weight-table" )
-                                .find( "th:nth-child(" + (Number(targets[idx])+2).toString() + ")" )
-                                .addClass( "ui-state-highlight" );
-                            
-                            $( "table#delay-table" )
-                                .find( "th:nth-child(" + (Number(targets[idx])+2).toString() + ")" )
-                                .addClass( "ui-state-highlight" );
-                        }
-                    };
-                
-                },
-            function () {
-                this.animate({"stroke-width": 2}, 500);
-                $( "table#device-table" ).find( "td" ).removeClass( "ui-state-highlight" );
-                $( "table#weight-table" ).find( ".connections-table" ).removeClass( "ui-state-highlight" );
-                $( "table#delay-table" ).find( ".connections-table" ).removeClass( "ui-state-highlight" );
-                });
+        
+    var draggablesets = [];
+    var labels = [], inputs = [], outputs = [];
+    for (var ii = 0; ii < shapes.length; ii++) {
+        draggableset = paper.set();
+        
+        shape = shapes[ii];
+        draggableset.push(shape);
+        
+        x = shape.attr("cx");
+        y = shape.attr("cy");
+        
+        draggableset.push(
+            paper.text(x, y, shape.data("label").toString())
+                 .attr({fill: $( ".ui-widget-content" ).css("color"), 
+                       "font-weight": "bold"}
+                       )
+                 .toBack()
+                 );
+                 
+        if ( shape.data("input") ) {
+            draggableset.push(
+                paper.ellipse(x-10, y, 2, 2)
+                     .attr({
+                           fill: $( ".ui-widget-content" ).css("color"),
+                           "fill-opacity": 1,
+                           "stroke-width": 0}
+                           )
+                     .toBack()
+                );
+            }
+            
+        if ( shape.data("output") ) {
+            draggableset.push(
+                paper.ellipse(x+10, y, 2, 2)
+                     .attr({
+                           fill: $( ".ui-widget-content" ).css("color"),
+                           "fill-opacity": 1,
+                           "stroke-width": 0}
+                           )
+                     .toBack()
+                );
+            }
+
+        draggableset.drag(move, start, up)
+             .hover(
+                function() {
+                    this.animate({"stroke-width": 3}, 500);
+                   
+                    var neuron_label = this.data("label");
+                    $( "table#device-table" ).find( "tr#"+ neuron_label).find( "td" ).addClass( "ui-state-highlight" );
+                    $( "table#weight-table" ).find( "tr#neuron_"+ neuron_label ).find( "td.connections-table" ).addClass( "ui-state-highlight" );
+                    $( "table#delay-table" ).find( "tr#neuron_"+ neuron_label ).find( "td.connections-table" ).addClass( "ui-state-highlight" );
+                    
+                    device = device_list[neuron_label-1];
+                    if ("targets" in device[2]) {
+                        var targets = device[2]["targets"].split(",");
+                            for (idx in targets) {
+                                var tgt = (targets[idx]);
+                                $( "table#weight-table" )
+                                    .find( "th#weight_" + tgt )
+                                    .addClass( "ui-state-highlight" );
+                                
+                                $( "table#delay-table" )
+                                    .find( "th#delay_" + tgt )
+                                    .addClass( "ui-state-highlight" );
+                            }
+                        };
+                    
+                    },
+                function () {
+                    this.animate({"stroke-width": 2}, 500);
+                    $( "table#device-table" ).find( "td" ).removeClass( "ui-state-highlight" );
+                    $( "table#weight-table" ).find( ".connections-table" ).removeClass( "ui-state-highlight" );
+                    $( "table#delay-table" ).find( ".connections-table" ).removeClass( "ui-state-highlight" );
+                    });
+                    
+        draggablesets.push(draggableset)
     
         }
 
@@ -231,7 +300,6 @@ $.fn.loadLayout = function (device_list) {
         if ("weight" in edge[2]) { var weight = edge[2]["weight"] } else { var weight = 1. };
         
         wcolor =  weight < 0 ? "#B34846" : "#467AB3";
-//         connections.push(paper.connection(shapes[edge[0]-1], shapes[edge[1]-1], "#000", colors[edge[1]-1] +"|3", wcolor +"|2"));
         connections.push(paper.connection(shapes[edge[0]-1], shapes[edge[1]-1], wcolor, wcolor +"|3", wcolor +"|2"));
     }
 };

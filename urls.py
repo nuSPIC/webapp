@@ -19,7 +19,7 @@ urlpatterns = patterns('',
     (r'^network/', include('network.urls')),
     (r'^result/',  include('result.urls')),
 
-    url(r'^status/(?P<task_id>[\w\d\-]+)/?$', celery_views.task_status, name="celery-task_status"),
+    url(r'^status/(?P<task_id>[\w\d\-]+)/?$', celery_views.task_status, name="celery_task_status"),
 )
 
 # Serve static files in Django development server mode

@@ -1,17 +1,22 @@
+$.fn.reset = function () {
+    $(this).each (function() { this.reset(); });
+    return this
+};
+
 $.fn.loadTheme = function (options) {
-        $( this ).addClass( "ui-widget ui-helper-clearfix ui-corner-top ui-shadow" )
+        $( this ).addClass( "ui-widget ui-helper-clearfix" )
             .find( ".portlet-header" )
-                    .addClass( "ui-widget-header ui-corner-top tipTip-top" )
+                    .addClass( "ui-widget-header ui-corner-tl tipTip-top" )
                     .prepend( "<span class='ui-icon toggle ui-icon-minusthick'></span>")
 //                  .prepend( "<span class='ui-icon dialog ui-icon-newwin'></span>")
                     .end()
             .find( ".portlet-content" )
-                    .addClass( "ui-widget-content" );
+                    .addClass( "ui-widget-content ui-shadow" );
                     
                     
         $( this ).find( ".portlet-header .toggle" ).click(function() {
                 $( this ).toggleClass( "ui-icon-minusthick" ).toggleClass( "ui-icon-plusthick" );
-                $( this ).parents( ".portlet:first" ).find( ".portlet-content" ).slideToggle();
+                $( this ).parents( ".portlet:first" ).find( "div.portlet-content" ).slideToggle();
         });
         
         $( this ).find( ".buttons")

@@ -18,7 +18,8 @@ div.centered-404 {
 }
 
 a {
-    color: #000;
+    color: #914E0C;
+    text-decoration: none;
 }
 
 /* Layout
@@ -32,29 +33,38 @@ a {
 }
 
     #header .top_links {
-	float: right;
+        float: right;
         text-align: right;
     }
 
     #header .navigation {
-	overflow: hidden;
+        overflow: hidden;
         font-size: 100%;
     }
     
     #header a {
-	color:  #FAFAF9;
-	text-decoration: none;
+        color:  #FAFAF9;
+        text-decoration: none;
     }
 
 #content {
     padding: 10px;
     overflow: hidden;
-
+    width : 800px;
+    margin: auto;
+    line-height: 1.5em;
 }
+
+    #content .header_logo {
+      background: url(/media/images/special/nuspic_logo.png) no-repeat;
+      width: 429px;
+      height: 186px;
+    }
 
 #footer {
     margin-top: 25px;
     text-align: center;
+    font-size:0.8em;
 }
 
 /* News
@@ -63,6 +73,7 @@ a {
 .news-list {
     width: 30%;
     font-size:0.8em;
+    line-height: 1.2em;
     float:right;
 }
 
@@ -145,7 +156,7 @@ a {
 }
 
 #registration-form, #profile-edit-form {
-    width: 850px;
+    width: 800px;
 }
 
 ul.errorlist {
@@ -210,7 +221,7 @@ ul.errorlist {
         }
 
     .field-wrapper textarea {
-        width			: 99%;
+        width            : 99%;
         background-color: #EEEEEE;
         border          : 1px solid #BBBBBB;
         padding         : 4px;
@@ -260,18 +271,6 @@ div.rss-link {
     display: inline;
 }
 
-
-.header_logo {
-   background: url(/media/images/special/nuspic_logo.png) no-repeat;
-   width: 429px;
-   height: 186px;
-}
-
-.blockcontent {
-    width : 800px;
-    margin-left: 10%;
-    line-height: 1.5em;
-}
 
 .logo {
     margin-top: 100px;

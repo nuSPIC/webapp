@@ -23,12 +23,12 @@ td {
 /* Container settings
 *************************/
 
-.portlet { margin: .3em .5em .2em .0; }
-.portlet-header { margin: 0; padding-bottom: 4px; padding-left: 0.2em; }
+.portlet { margin-top: .3em; }
+.portlet-header { width: 180px; margin-left: 7px; padding: 3px 5px 1px 10px; font-size: 1em;}
 .portlet-header .ui-icon { float: right; }
-.portlet-content { padding: 0.4em; }
+.portlet-content { min-width: 260px; margin: .2em .2em; margin-top: 0; padding: 0.4em;}
 
-.column { min-width: 290px; float: left; padding-bottom: 100px; }
+.column { margin-top: .5em; min-width: 180px; float: left; padding-bottom: 100px; }
 
 .ui-sortable-placeholder { border: 3px dotted grey; visibility: visible !important; height: 50px !important; }
     .ui-sortable-placeholder * { visibility: hidden; }
@@ -49,25 +49,25 @@ div#ui-dialog {
 /* Device Table
 ************************/
 
-table#device-table tr.enabled {
-    cursor: pointer;
-}
+    table#device-table tr.enabled {
+        cursor: pointer;
+    }
 
-table#device-table td {
-    padding: .5em;
-}
+    table#device-table td {
+        padding: .5em;
+    }
 
-table#device-table input {
-    margin: 0;
-}
+    table#device-table input {
+        margin: 0;
+    }
 
-table#device-table td.model {
-    width: 9em;
-}
+    table#device-table td.model {
+        width: 9em;
+    }
 
-table#device-table td.disabled {
-    color: grey;
-}
+    table#device-table td.disabled {
+        color: grey;
+    }
 
 /* Message list
 *************************/
@@ -77,56 +77,64 @@ ul.messagelist {
     margin: 1px;
 }
 
-ul.messagelist li {
-    margin: 0;
-    font-size: 0.85em;
-    display: block;
-}
+    ul.messagelist li {
+        margin: 0;
+        font-size: 0.85em;
+        display: block;
+    }
 
 /* Forms
 *************************/
 
-form.device-form {
+#device-form {
     display:none;
 }
 
-.field-wrapper input {
-     width: 97.5%;
+.device-form {
+    display:none;
 }
 
-.field-wrapper textarea {
-    width: 98%;
-}
+    .field-wrapper input {
+        width: 97%;
+    }
+
+    .field-wrapper textarea {
+        width: 98%;
+    }
+
+/*    .required input {
+        border: 1px solid red;
+    }*/
 
 /* Connections Table
 *************************/
 
-.connections-table td {
-    min-width: 2.6em;
-    text-align: center;
-    padding: 1px 7px;
-}
+    .connections-table td {
+        min-width: 2.6em;
+        text-align: center;
+        padding: 1px 7px;
+    }
 
-span.connections-tabs {
-    font-weight: bold;
-}
+    .connections-table span.connections-tabs {
+        font-weight: bold;
+    }
 
-span.verticaltext {
-    -webkit-transform: rotate(-90deg);
-    -moz-transform: rotate(-90deg);
-    -o-transform: rotate(-90deg);
-    -ms-transform:rotate(-90deg);
-}
+    .connections-table span.verticaltext {
+        -webkit-transform: rotate(-90deg);
+        -moz-transform: rotate(-90deg);
+        -o-transform: rotate(-90deg);
+        -ms-transform:rotate(-90deg);
+    }
 
 /* Step Helper
 *************************/
 
-#help-steps li {
-    cursor: pointer;
-    border: none;
-    font-size: .85em;
-    padding: .2em;
-}
+    #help-steps li {
+        cursor: pointer;
+        border: none;
+        font-size: .85em;
+        padding: .2em;
+    }
 
 /* History list
 *************************/
@@ -136,22 +144,22 @@ ul#history-list {
     margin: 0;
 }
 
-ul#history-list li {
-    font-weight: normal;
-    cursor: pointer;    
-    font-size: .85em;
-    display: block;
-    padding: .7em .5em;
-    margin-top: 2px;
-}
+    ul#history-list li {
+        font-weight: normal;
+        cursor: pointer;    
+        font-size: .85em;
+        display: block;
+        padding: .7em .5em;
+        margin-top: 2px;
+    }
 
-ul#history-list input {
-    margin: 0;
-}
+    ul#history-list input {
+        margin: 0;
+    }
 
-ul#history-list a {
-    text-decoration: none;
-}
+    ul#history-list a {
+        text-decoration: none;
+    }
 
 /* Page */
 
@@ -159,24 +167,24 @@ ul.simplePagerNav {
     padding-left: 2px; 
 }
 
-ul.simplePagerNav li{
-    cursor: pointer;
-    display: block; 
-    float: left;
-    padding: 3px;
-}
+    ul.simplePagerNav li {
+        cursor: pointer;
+        display: block; 
+        float: left;
+        padding: 3px;
+    }
 
-ul.simplePagerNav li a {
-    text-decoration: none;
-}
+        ul.simplePagerNav li a {
+            text-decoration: none;
+        }
 
-li.currentPage {
-    background: #83bd63;
-}
+    ul.simplePagerNav li.currentPage {
+        background: #83bd63;
+    }
 
-ul.simplePagerNav li.currentPage a {
-    color: #fff;
-}
+        ul.simplePagerNav li.currentPage a {
+            color: #fff;
+        }
 
 /* Result
 *************************/

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # coding: utf-8
 
 from django.conf import settings
@@ -86,21 +87,3 @@ def post_editor(context, post_form):
         'MEDIA_URL': context['MEDIA_URL'],
         'post_form': post_form,
     }
-
-@register.filter()
-def truncate(s, max_len):
-    """
-    Truncates a string after a certain number of letters
-    """
-    
-    try:
-        length = int(max_len)
-    except ValueError:
-        return s
-    
-    if len(s) > length:
-        return s[:length] + '...'
-    else:
-        return s[:length] 
-truncate.is_safe = True
-truncate = stringfilter(truncate)

@@ -3,7 +3,7 @@ from __future__ import print_function
 
 import lib.json as json
 from network.models import Network
-from network.helpers import id_convert
+from network.helpers import id_identify
 
 import networkx as nx
 import numpy as np
@@ -152,7 +152,7 @@ def exportToDatabase(SPIC_id, title, description=None, gids=[], hidden=[], field
     network_obj.devices_json = json.encode(device_list)
     network_obj.save() 
 
-    ids = network_obj.id_converter()
+    id_filterbank = network_obj.id_filterbank()
     
     # Save position of neurons
     edgelist = network_obj.connections(modeltype='neuron')
@@ -161,7 +161,7 @@ def exportToDatabase(SPIC_id, title, description=None, gids=[], hidden=[], field
     
     if pos:
         for key, value in pos.iteritems():
-            device_list[id_convert(ids, vid=key)][0]['position'] = list(value)
+            device_list[id_identify(id_filterbank, key)][0]['position'] = list(value)
             
         network_obj.devices_json = json.encode(device_list)
         network_obj.save()

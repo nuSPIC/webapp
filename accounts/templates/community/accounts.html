@@ -6,6 +6,7 @@
 {% block title %}Community{% endblock %}
 
 {% block content %}
+<div class="logo"></div>
 
 <div class="blockcontent">
 
@@ -34,7 +35,6 @@
             </div>
         {% endfor %}
     </div>
-    {% pagination page "user" search_term %}
-
 </div>    
+    {% pagination page "user" search_term %}
 {% endblock %}

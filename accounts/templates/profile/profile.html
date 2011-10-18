@@ -3,52 +3,50 @@
 {% block title %}{{ profile.user.get_full_name }} &raquo; User profile{% endblock %}
 
 {% block content %}
-    <div class="blockcontent">
-        <div id="profile">
-            <h2>{{ profile.user.get_full_name }}</h2>
-                
-            {% if user == profile.user %}
-                <div class="row">
-                    <div class="title">Username</div>
-                    <div class="value">{{ profile.user.username }}</div>
-                </div>
-                
-                <div class="row">
-                    <div class="title">E-mail address</div>
-                    <div class="value">{{ profile.user.email|urlize }}</div>
-                </div>
-            {% endif %}
+    <div id="profile">
+        <h2>{{ profile.user.get_full_name }}</h2>
             
+        {% if user == profile.user %}
             <div class="row">
-                <div class="title">Present occupation</div>
-                <div class="value">{{ profile.get_present_occupation_display|default:"&mdash;" }}</div>
+                <div class="title">Username</div>
+                <div class="value">{{ profile.user.username }}</div>
             </div>
             
             <div class="row">
-                <div class="title">Present academic affiliation</div>
-                <div class="value">{{ profile.academic_affiliation|default:"&mdash;" }}</div>
+                <div class="title">E-mail address</div>
+                <div class="value">{{ profile.user.email|urlize }}</div>
             </div>
+        {% endif %}
         
-            <div class="row">
-                <div class="title">Public e-mail address</div>
-                <div class="value">{{ profile.public_email|urlize|default:"&mdash;" }}</div>
-            </div>
-        
-            <div class="row">
-                <div class="title">Publicly visible web page address</div>
-                <div class="value">{{ profile.web_page|urlize|default:"&mdash;" }}</div>
-            </div>
-        
-            <div class="row">
-                <div class="title">Miscellaneous notes (bio)</div>
-                <div class="value">{{ profile.notes|default:"&mdash;" }}</div>
-            </div>
-            
-            {% if user == profile.user %}
-                <a href="{% url profile_edit profile.id %}">Edit profile</a> |
-                <a href="{% url password_change %}">Change password</a> |
-                <a href="{% url forum_subscription %}">Forum subscriptions</a>
-            {% endif %}
+        <div class="row">
+            <div class="title">Present occupation</div>
+            <div class="value">{{ profile.get_present_occupation_display|default:"&mdash;" }}</div>
         </div>
+        
+        <div class="row">
+            <div class="title">Present academic affiliation</div>
+            <div class="value">{{ profile.academic_affiliation|default:"&mdash;" }}</div>
+        </div>
+    
+        <div class="row">
+            <div class="title">Public e-mail address</div>
+            <div class="value">{{ profile.public_email|urlize|default:"&mdash;" }}</div>
+        </div>
+    
+        <div class="row">
+            <div class="title">Publicly visible web page address</div>
+            <div class="value">{{ profile.web_page|urlize|default:"&mdash;" }}</div>
+        </div>
+    
+        <div class="row">
+            <div class="title">Miscellaneous notes (bio)</div>
+            <div class="value">{{ profile.notes|default:"&mdash;" }}</div>
+        </div>
+        
+        {% if user == profile.user %}
+            <a href="{% url profile_edit profile.id %}">Edit profile</a> |
+            <a href="{% url password_change %}">Change password</a> |
+            <a href="{% url forum_subscription %}">Forum subscriptions</a>
+        {% endif %}
     </div>
 {% endblock %}
