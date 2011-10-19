@@ -46,7 +46,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
-    #'debug_toolbar.middleware.DebugToolbarMiddleware',    
 )
 
 ROOT_URLCONF = 'urls'
@@ -142,67 +141,6 @@ NEWS_FEED_ITEMS_COUNT = 15
 # tail     ^padding^        tail
 PAGINATION_PADDING = 3
 PAGINATION_TAIL = 2
-
-
-# Database connection settings
-# found out that DATABASES should be in settings.py, i'dont know why
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'test_default',
-        'USER': 'sysad',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
-        'OPTIONS': {
-            'ssl': {
-                'ca': '/path/to/cacert.pem',
-                },
-            },
-    },
-
-    'network': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'test2_network',
-        'USER': 'sysad',
-        'PASSWORD': '',
-    },
-
-    'simulation': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'test2_simulation',
-        'USER': 'sysad',
-        'PASSWORD': '',
-    },
-}
-
-
-#  Debug Toolbar
-# ===================
-
-DEBUG_TOOLBAR_PANELS = (
-    'debug_toolbar.panels.version.VersionDebugPanel',
-    'debug_toolbar.panels.timer.TimerDebugPanel',
-    'debug_toolbar.panels.settings_vars.SettingsVarsDebugPanel',
-    'debug_toolbar.panels.headers.HeaderDebugPanel',
-    'debug_toolbar.panels.request_vars.RequestVarsDebugPanel',
-    'debug_toolbar.panels.template.TemplateDebugPanel',
-    'debug_toolbar.panels.sql.SQLDebugPanel',
-    'debug_toolbar.panels.signals.SignalDebugPanel',
-    'debug_toolbar.panels.logger.LoggingPanel',
-    #'lib.debug_toolbar.panels.profiling.ProfilingPanel',
-)
-
-def custom_show_toolbar(request):
-    return True # Always show toolbar, for example purposes only.
-
-DEBUG_TOOLBAR_CONFIG = {
-    'INTERCEPT_REDIRECTS': False,
-    'SHOW_TOOLBAR_CALLBACK': custom_show_toolbar,
-    #'EXTRA_SIGNALS': ['lib.decorators.signals'],
-    'HIDE_DJANGO_SQL': False,
-    'TAG': 'div',
-}
 
 
 # Import local settings depending on running environment
