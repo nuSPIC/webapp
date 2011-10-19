@@ -178,6 +178,7 @@ def network_simulated(request, SPIC_id, local_id, result_id):
 
             for model, status, conns in device_list:
                
+               
                 if not model['id'] in del_vids:
                     # correct device IDs
                     old_id = model['id']
@@ -221,7 +222,11 @@ def network_simulated(request, SPIC_id, local_id, result_id):
             for old_vid, new_vid in id_updatebank:
                 if new_vid > 0 and old_vid not in del_vids:
                     new_device_dict[('%4d' %id_identify(id_filterbank, new_vid)).replace(' ','0')] = device_dict[('%4d' %id_identify(id_filterbank, old_vid)).replace(' ','0')]
-            
+                    
+            hidden_device_tids = id_identify(id_filterbank, -1)
+            for hidden_device_tid in hidden_device_tids:
+                new_device_dict[('%4d' %hidden_device_tid).replace(' ','0')] = device_dict[('%4d' %hidden_device_tid).replace(' ','0')]
+                
             network_obj.devices_json = json.encode(new_device_dict)
             network_obj.save()
 
@@ -332,7 +337,10 @@ def device_preview(request, network_id):
                 # after poping connection information save status of divices.
                 status = {}
                 for key, value in data.iteritems():
-                    if value and float(value) != float(form.fields[key].initial):
+                    if form.fields[key].initial:
+                        if value and float(value) != float(form.fields[key].initial):
+                            status[key] = value
+                    else:
                         status[key] = value
                         
                 if id_label == 'spike_generator' and 'step' in status:
