@@ -7,6 +7,8 @@ $.fn.loadTheme = function (options) {
         $( this ).addClass( "ui-widget ui-helper-clearfix" )
             .find( ".portlet-header" )
                     .addClass( "ui-widget-header ui-corner-tl tipTip-top" )
+                    .end()
+            .find( ".portlet-header:not(#device-form-header)" )
                     .prepend( "<span class='ui-icon toggle ui-icon-minusthick'></span>")
 //                  .prepend( "<span class='ui-icon dialog ui-icon-newwin'></span>")
                     .end()
@@ -16,7 +18,7 @@ $.fn.loadTheme = function (options) {
                     
         $( this ).find( ".portlet-header .toggle" ).click(function() {
                 $( this ).toggleClass( "ui-icon-minusthick" ).toggleClass( "ui-icon-plusthick" );
-                $( this ).parents( ".portlet:first" ).find( "div.portlet-content" ).slideToggle();
+                $( this ).parents( ".portlet:first" ).find( "div.portlet-content" ).fadeToggle("slow");
         });
         
         $( this ).find( ".buttons")
