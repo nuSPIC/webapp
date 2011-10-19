@@ -41,6 +41,9 @@ def id_identify(id_filterbank, vid=None):
     tids = np.array(id_filterbank[:,0], dtype=int)
     vids = np.array(id_filterbank[:,1], dtype=float)
     
+    if vid == -1:
+        return tids[vids == -1]
+    
     if float(vid) in vids: 
         return tids[vids.tolist().index(float(vid))]
         
