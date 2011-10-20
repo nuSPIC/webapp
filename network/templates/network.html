@@ -49,7 +49,6 @@
                     opacity: 0.7,
             });
             
-//             load_theme( ".portlet" );
             $( ".portlet" ).loadTheme();
 
             if (neuron_ids.length > 0) {
@@ -70,16 +69,10 @@
             $( "div#step-helper" ).dialog({
                                    title: 'How to use it?',
                                    resizable: false,
-                                   height: 450,
+                                   height: 400,
                                    width: 420,
                             }).parent().hide();
-                            
-            $( "div#layout-legend" ).dialog({
-                                   title: 'Legend for Layout',
-                                   resizable: false,
-                                   height: 180,
-                                   width: 380,
-                            }).parent().hide();
+
     });
 
 
@@ -214,15 +207,11 @@
                     } else if (status == 'SUCCESS') {
                         $( "#dialog-simulating" ).dialog( {
                                 title:"Simulation was finished successfully.",
-                                buttons: {
-                                    ok: function() {
-                                        $( this ).dialog( "close" );
-                                    }
-                                },
+                                buttons: {},
                         });
                         var result = task['result'];
                         window.setTimeout(function() {
-                                window.location.href = '/network/'+ {{ network_obj.SPIC_id }} +'/'+ {{ network_obj.local_id }} +'/' + result['result_local_id']
+                                window.location.href = '{% url network network_obj.SPIC_id network_obj.local_id %}' + result['result_local_id'] + '/'
                         }, 1000);
                     };
                 }
@@ -519,9 +508,9 @@
                                     });
     });
     
-    $( "button#layout-legend" ).live('click',function(e) {
-            e.preventDefault();
-            $( "div#layout-legend" ).parent().slideToggle();            
+    $( "button#layout-legend" ).live('click',function() {
+            $(this).toggleClass("ui-state-highlight");
+            $( "div#layout-legend" ).slideToggle();
     });
 
 // COMMENT 
@@ -955,8 +944,17 @@
                     </div>
 
                 </div>
+
+                <div class="portlet-content collapse" style="font-size: 0.9em; padding-left:15px; line-height: .5em;" id="layout-legend">
+                    <p><b>blue line</b> - excitatory connection</p>
+                    <p><b>red line</b> - inhibitory connection</p>
+                    <p><b>left dot</b> - then neuron receives external input.</p>
+                    <p><b>right dot</b> - then neurons are being recorded.</p>
+                    <br>
+                    <p><b>NOTE</b>: neurons can be dragged around.</p>
+                </div>
             </div>
-            
+
             {% if comment_form %}
                 <form action="." method="POST" class="portlet" id="comment-form">
                     <div class="portlet-header" title="">
@@ -1151,17 +1149,6 @@
             
         </div>
         
-        <div class="ui-dialog" id="layout-legend">
-            <ul id="help-steps">
-            <li><b>blue</b>: excitatory connection</li>
-            <li><b>red</b>: inhibitory connection</li>
-            <li><b>left filled dot</b> then neuron receives external input.</li>
-            <li><b>right filled dot</b> then neurons are being recorded.</li>
-            </ul>
-
-            <p style="font-size: 0.9em; margin-left:25px"><b>note</b>: neurons can be dragged around.</p>
-        </div>
-
     </div>
 </div>
 {% endblock %}

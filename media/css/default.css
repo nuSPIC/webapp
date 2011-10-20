@@ -22,14 +22,20 @@ a {
     text-decoration: none;
 }
 
+a:hover {
+    color: orange;
+}
+
 /* Layout
 ***********************/
 
 #header {
-    color: #FAFAF9;
+    color: #ccc;
     background-color: #2B2924;
-    padding: 10px;
+    padding: 8px 10px 6px 10px;
+    font-family: arial,sans-serif;
     font-size: .8em;
+    border-bottom: 1px solid #000;
 }
 
     #header .top_links {
@@ -43,8 +49,11 @@ a {
     }
     
     #header a {
+        color:  #ccc;
+    }
+
+    #header a:hover {
         color:  #FAFAF9;
-        text-decoration: none;
     }
 
 #content {
