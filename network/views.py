@@ -7,23 +7,22 @@ from django.template.loader import render_to_string
 
 from celery.contrib.abortable import AbortableAsyncResult
 from reversion.models import Version
-from reversion import revision
 
 from lib.decorators import render_to
 from lib.delivery import networkx
-from lib.tasks import Simulation
 from lib.helpers import get_flatpage_or_none
+from lib.tasks import Simulation
 import lib.json as json
 
-from network.models import Network
-from network.helpers import values_extend, id_escape, id_identify
+from network.helpers import revision_create, values_extend, id_escape, id_identify
 from network.forms import *
+from network.models import Network
 
-from result.models import Result
 from result.forms import CommentForm
+from result.models import Result
 
-import os
 import numpy as np
+import os
 
 # Define models with its modeltype, label and form.
 MODELS = [
@@ -43,13 +42,6 @@ MODELS = [
     {'model_type': 'output',  'id_label': 'spike_detector',       'form': TargetForm,},
     {'model_type': 'output',  'id_label': 'voltmeter',            'form': SourceForm,},
 ]
-
-@revision.create_on_success
-def revision_create(obj, result=False, **kwargs):
-    """ Create a revision for network object. """
-    obj.save()
-    if result:
-        revision.add_meta(Result, **kwargs)
 
 @render_to('network_list.html')
 def network_list(request):
@@ -472,40 +464,39 @@ def simulate(request, network_id, version_id):
             
             form = NetworkForm(request.POST, instance=network_obj)
             versions = Version.objects.get_for_object(network_obj).reverse()
-
+            
             # check if network form is valid.
             if form.is_valid():
-
+              
                 # if network form is changed or version_id is 0, a new version will be created. 
                 # Otherwise it simulates without creating new version.
-                if form.has_changed() or int(version_id) == 0:
-                  
-                    if form.cleaned_data['same_seed']:
-                        root_status = network_obj.root_status()
-                        root_status = {'rng_seeds': [1], 'grng_seed': 1}
-                    else:
-                        rng_seeds, grng_seed = np.random.random_integers(0,1000,2)
-                        root_status = {'rng_seeds': [int(rng_seeds)], 'grng_seed': int(grng_seed)}
-                        
-                    network_obj.status_json = json.encode(root_status)
-                    network_obj.save()        
-                        
-                    try:
-                        last_local_id = versions[0].revision.result.local_id
-                        revision_create(form, result=True, local_id=last_local_id+1)
-                    except:
-                        revision_create(form, result=True)
-                    task = Simulation.delay(network_id=network_id)
+                if form.has_changed():
+                    version_id = 0
                     
+                if form.cleaned_data['same_seed']:
+                    root_status = {'rng_seeds': [1], 'grng_seed': 1}
                 else:
+                    rng_seeds, grng_seed = np.random.random_integers(0,1000,2)
+                    root_status = {'rng_seeds': [int(rng_seeds)], 'grng_seed': int(grng_seed)}
+                    
+                network_obj.status_json = json.encode(root_status)
+                network_obj.save()        
+                        
+                if int(version_id) != 0:
                     version_obj = Version.objects.get(pk=version_id)
                     
                     # check if it is already simulated, it prevents from simulating.
                     if version_obj.revision.result.is_recorded():
                         response = {'recorded':1}
                         return HttpResponse(json.encode(response), mimetype='application/json')
-                    else:
-                        task = Simulation.delay(network_id=network_id, version_id=version_id)
+                        
+                try:
+                    last_local_id = versions[0].revision.result.local_id
+                    revision_create(form, result=True, local_id=last_local_id+1)
+                except:
+                    revision_create(form, result=True)
+
+                task = Simulation.delay(network_id=network_id, form=form, version_id=version_id)
                     
                 response = {'task_id':task.task_id}
                 return HttpResponse(json.encode(response), mimetype='application/json')

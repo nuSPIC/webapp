@@ -6,7 +6,10 @@ from reversion.models import Version
 
 import lib.json as json
 
+from network.helpers import revision_create
+from network.forms import NetworkForm
 from network.models import Network
+
 from result.models import Result
 
 import datetime
@@ -71,6 +74,7 @@ class Simulation(AbortableTask):
             if dev_model['type'] == 'output':
                 outputs.extend(gid)
     
+    
         # Make connections in nest
         connections = network_obj.connections('all', data=True)
         for source, target, conn_params, conn_model in connections:
@@ -86,7 +90,8 @@ class Simulation(AbortableTask):
                     nest.Connect([source],[target], params=conn_params)
             else:
                 nest.Connect([source],[target])
-                    
+                
+                
         # In case duration is more than 5s, Start simulation for a partial time
         # and checks, if producer is aborted, else simulation goes on.
         duration = network_obj.duration
@@ -117,16 +122,29 @@ class Simulation(AbortableTask):
                 for key,value in output_events.items():
                     events[key] = value.tolist()
                 data[output_status['model']] = events
-            
-            
+                
+                
+                
+        # Create a version of network
+        versions = Version.objects.get_for_object(network_obj).reverse()
+        form = kwargs['form']
+#        form = NetworkForm(request.POST, instance=network_obj)
+
+#        try:
+#            last_local_id = versions[0].revision.result.local_id
+#            revision_create(form, result=True, local_id=last_local_id+1)
+#        except:
+#            revision_create(form, result=True)
+
+
         # Get result object in latest version or in selected version
-        if 'version_id' in kwargs:
-            version_id = kwargs['version_id']
-            version = Version.objects.get(pk=version_id)
-            result = version.revision.result
-        else:
+        version_id = kwargs['version_id']
+        if int(version_id) == 0:
             version = Version.objects.get_for_object(network_obj).reverse()[0]
-            result = version.revision.result
+        else:
+            version = Version.objects.get(pk=version_id)
+        result = version.revision.result
+        print result.local_id
         
         # Write results and simulating date in database and reconfigure the existence of output devices
         result.has_spike_detector, result.has_voltmeter = False, False

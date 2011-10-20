@@ -1,6 +1,15 @@
 # -*- coding: utf-8 -*-
+from reversion import revision
+from result.models import Result
 import numpy as np
 
+@revision.create_on_success
+def revision_create(obj, result=False, **kwargs):
+    """ Create a revision for network object. """
+    obj.save()
+    if result:
+        revision.add_meta(Result, **kwargs)
+        
 def values_extend(values, unique=False, toString=False):
     """ Extend targets/sources e.g. if target is '1-3, 5', it converts into '1,2,3,5'. """
     
