@@ -44,3 +44,10 @@ def itemize(s):
     return None
 itemize.is_safe = True
 itemize = stringfilter(itemize)
+
+@register.filter()
+def split(s, index):
+    l = s.split('<!--cut-->')
+    return str(l[int(index)])
+split.is_safe = True
+split = stringfilter(split)

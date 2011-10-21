@@ -1,61 +1,35 @@
 {% extends "base.html" %}
 {% load humanize %}
+{% load network_filters %}
 
 {% block title %}{{ flatpage.title }}{% endblock %}
 
 {% block content %}
-        <div>
-            {{ flatpage.content }}
-        </div>
+        <div class="flatpage">
 
-        <h2>The challenges</h2>
+            <div>
+                {% regroup network_list|dictsort:"SPIC_id" by SPIC_id as network_by_SPIC %}
 
-        <h3> nuSPIC-I </h3>
+                {% for group in network_by_SPIC %}
+                    {{ flatpage.content|split:forloop.counter0 }}
 
-            In this class of nuSPIC  the specific implemented function (mathematical, logical, biological...) has to be extracted from the neural activity.
-            We provide you with all necessary information about connectivity and neural activity (subthreshold membrane potential and spikes)*.
-            In addition, different input devices are available which can be connected to one or more neurons in the network. 
-            Two output devices - spike detector and voltmeter - are provided to read the output of the network.
-
-        <p>
-            Choose one of the following nuSPICs:
-        </p>
-
-        <div>
-            {% regroup network_list|dictsort:"SPIC_id" by SPIC_id as network_by_SPIC %}
-
-            {% for group in network_by_SPIC %}
                     <ul>
-                {% for network in group.list %}
-                    <li id="{{ network.local_id }}">
-                    <a href="{% url network network.SPIC_id network.local_id %}">
-                        {{ network.title|default_if_none:"Network" }}
-                    </a>
-                    : {{ network.description|default:"no description" }}
-                    </li>
+                        {% for network in group.list %}
+                            <li id="{{ network.local_id }}">
+                            <a href="{% url network network.SPIC_id network.local_id %}">
+                                {{ network.title|default_if_none:"Network" }}
+                            </a>
+                            : {{ network.description|default:"no description" }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+
                 {% endfor %}
-                </ul>
-            {% endfor %}
+            
+                {{ flatpage.content|split:-2 }}
+                {{ flatpage.content|split:-1 }}
+            </div>
         </div>
 
-        <h3> nuSPIC-II </h3>
-
-        In this class of nuSPIC the user is asked to implement a specific function.
-        A finite number of neurons are available, which can be connected in any desired manner.
-        Input and output devices can be used to stimulate and probe the network.
-
-        <p>
-            ...coming soon...
-        </p>
-
-
-        <p style="font-size:0.7em; margin-top:100px">
-            *<b>Disclaimer</b>
-
-            While solving the nuSPIC you will notice that the input required to stimulate a neurons is too big or that synaptic strengths are too large.
-            This is primarily because we have such small networks. Real biological networks are larger. Here, the aim of nuSPIC is not to exactly use the parameter ranges found in the brain.
-            The nuSPIC is aiming to test if we can extract a function from the network or can implement a function in a neural network.
-            Testing these ideas does not depend on the exact set of parameters used in the network. 
-        </p>
 
 {% endblock %}
