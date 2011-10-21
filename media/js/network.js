@@ -8,7 +8,7 @@ $.fn.loadTheme = function (options) {
             .find( ".portlet-header" )
                     .addClass( "ui-widget-header ui-corner-tl tipTip-top" )
                     .end()
-            .find( ".portlet-header:not(#device-form-header)" )
+            .find( ".portlet-toggle" )
                     .prepend( "<span class='ui-icon toggle ui-icon-minusthick'></span>")
 //                  .prepend( "<span class='ui-icon dialog ui-icon-newwin'></span>")
                     .end()
