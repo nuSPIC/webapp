@@ -17,7 +17,7 @@
     </head>
     
     <body>
-        <div id="header">
+        <div class="ui-shadow-light" id="header">
             <div class="top_links">
                 {% if user.is_authenticated %}
                     Welcome, <a href="{% url profile user.profile.id %}">{{ user.get_full_name }}</a> | <a href="{% url logout %}">Logout</a>
@@ -38,12 +38,14 @@
                 
             </div>
         </div>
-        
-        <div id="content" style="min-height: 680px">
-            <div class="header_logo"></div>
+
+        <div id="banner"></div>
+
+        <div class="" id="content">
             {% block content %}{% endblock %}
         </div>
-        
+
+
         <div id="footer">
             <div class="navigation">
                 <a href="{% url mainpage %}">Home</a> |
