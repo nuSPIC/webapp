@@ -45,7 +45,6 @@ a:hover {
 
     #header .navigation {
         overflow: hidden;
-        font-size: 100%;
     }
     
     #header a {
@@ -56,19 +55,34 @@ a:hover {
         color:  #FAFAF9;
     }
 
-#content {
-    padding: 10px;
-    overflow: hidden;
+#web_logo, #content{
     width : 800px;
     margin: auto;
-    line-height: 1.5em;
 }
 
-    #content .header_logo {
-      background: url(/media/images/special/nuspic_logo.png) no-repeat;
-      width: 429px;
-      height: 186px;
-    }
+#web_logo {
+  background: url(/media/images/special/nuspic_logo.png) no-repeat;
+  height: 186px;
+}
+
+#news {
+    background-color: #FAFAF9 ;
+    width: 20%;
+    float: right;
+    margin-left:40px;
+    padding-left:10px;
+    font-size:0.8em;
+    line-height: 1.2em;
+    border-left: 1px solid #2B2924;
+}
+
+#content {
+    margin-top: 15px !important;
+    padding: 10px;
+    line-height: 1.5em;
+    /*min-height: 60%;*/
+    overflow: hidden;
+}
 
 #footer {
     margin-top: 25px;
@@ -78,13 +92,6 @@ a:hover {
 
 /* News
 *********************/
-
-.news-list {
-    width: 30%;
-    font-size:0.8em;
-    line-height: 1.2em;
-    float:right;
-}
 
 .news-block {
 
@@ -282,7 +289,9 @@ div.rss-link {
 
 
 .logo {
+    width: 800px;
     margin-top: 100px;
+    overflow: hidden;
 }
 
     .logo img {
@@ -290,3 +299,9 @@ div.rss-link {
         height: 75px;
         vertical-align: middle;
     }
+
+.ui-shadow {
+    box-shadow: 2px 2px 7px #444;
+    -o-box-shadow: 1px 1px 7px #444;
+    -webkit-box-shadow: 1px 1px 7px #444;
+    -moz-box-shadow: 2px 2px 7px #444;

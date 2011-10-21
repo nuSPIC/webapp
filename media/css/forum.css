@@ -1,15 +1,15 @@
 #content {
-    font-size: .8em;
+    font-family: arial;
+    font-size: 11px;
     padding: 10px;
-    overflow: hidden;
-    width : 98%;
+    /*width : 98%;*/
     margin: auto;
     line-height: 1.2em;
 }
 
-    #content .header_logo {
-        display : none;
-    }
+/*#web_logo {*/
+    /*display: none;*/
+/*}*/
 
 
 /* Forums list
@@ -52,7 +52,6 @@
 
     #forum_list .forum_name {
         float: left;
-        width: 480px;
     }
     
         #forum_list .forum_name .description {
@@ -61,7 +60,7 @@
 
     #forum_list .topics_count {
         float: right;
-        width: 75px;
+        width: 100px;
         text-align: center;
     }
     
@@ -72,7 +71,7 @@
 
     #forum_list .posts_count {
         float: right;
-        width: 125px;
+        width: 100px;
         text-align: center;
     }
 
@@ -82,7 +81,7 @@
         }
 
     #forum_list .last_post {
-        width: 200px;
+        width: 320px;
         float: right;
     }
     
@@ -210,7 +209,7 @@
     
     #topic_list .topic_name {
         float: left;
-        width: 580px;
+        width: 430px;
     }
     
         #topic_list .topic_name .name {

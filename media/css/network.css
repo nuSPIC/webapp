@@ -3,7 +3,7 @@
     font: 11px sans-serif;
 }
 
-.header_logo {
+#web_logo {
     display : none;
 }
 
@@ -44,6 +44,10 @@ div#ui-dialog {
 
 .buttons {
     margin-top: 5px;
+}
+
+.buttons button {
+    margin: 0px;
 }
 
 /* Device Table
