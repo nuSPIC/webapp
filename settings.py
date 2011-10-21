@@ -95,7 +95,7 @@ EMAIL_CHANGE_TIMEOUT_DAYS = 3
 EMAIL_REQUEST_DELAY = timedelta(minutes=30)
 
 # Community page
-ACCOUNTS_PER_PAGE = 15
+ACCOUNTS_PER_PAGE = 21
 
 
 #  Forum

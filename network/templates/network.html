@@ -469,11 +469,11 @@
     $( ".portlet-header" ).find( ".ui-icon-newwin" ).live('click', function(e) {
             e.preventDefault();
             var popup = $( this ).parents( ".portlet" );
-            width = ($(popup).find( ".portlet-content" ).width()+30).toString();
-            height = ($(popup).find( ".portlet-content" ).height()+50).toString();
+            width = ($(popup).find( ".portlet-content" ).width()+80);
+            height = ($(popup).find( ".portlet-content" ).height()+110);
             newPopup = window.open('{% url network_layout network_obj.SPIC_id network_obj.local_id %}',
                         'network_layout',
-                        'left=50,width='+ width +',height='+ height +',toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,copyhistory=no');
+                        'left=50,width='+ width.toString() +',height='+ height.toString() +',toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,copyhistory=no');
             newPopup.moveTo(screen.availWidth/2 - width/2, screen.availHeight/2 - height /2);
             newPopup.focus();
 //             $( popup ).find( ".toggle" ).toggleClass( "ui-icon-minusthick" ).toggleClass( "ui-icon-plusthick" );
@@ -575,7 +575,7 @@
     {% endif %}
     
     $(document).ready(function() {
-//             $('#switcher').themeswitcher();
+            $( "#content" ).removeClass("ui-shadow")
             
             $( "table#device-table tr" ).each(function(){
                     $( this ).addClass("tipTip-right");
@@ -625,8 +625,10 @@
             $( ".required input" ).each(function() {
                 if ($(this).val() == '') {$(this).addClass('ui-state-hover')};
                 });
+
             if (neuron_ids.length == 0) {
-               $( "#device-list" ).find( ".portlet-content" ).hide();
+                $( "#device-list" ).find( "#device-list-content" ).hide();
+                $( "#device-list" ).find( ".ui-icon-minusthick" ).hide();
             }
     });
     
@@ -673,7 +675,7 @@
                 Devices
             </div>
             
-            <div class="portlet-content">
+            <div class="portlet-content" id="device-list-content">
                 
                 <form action="." method="POST" class="devices-form">
                     {% csrf_token %}
@@ -741,7 +743,7 @@
 
         <!-- DEVICE SELECT -->
 <!--        <div class="portlet" id="device-select">-->
-            <div class="portlet-content">
+            <div class="portlet-content" id="device-form-content">
                 <div class="field-wrapper" title="">
                     <label for="device-select">Add a device:</label>
                     <select id="id_label">
@@ -782,11 +784,11 @@
     
     <!-- NETWORK -->
     <div class="column" id="network">
-        {% if network_obj.connections %} 
+        {% if network_obj.connections %}
         <!--     CONNECTIVITY MATRIX  -->
-            {% if network_obj.neuron_ids|length <= 10 %}
+            {% if network_obj.neuron_ids|length <= 10 and network_obj.connect_to_input %}
                 <div class="portlet" id="connectivity_matrix">
-                    <div class="portlet-header" title="">
+                    <div class="portlet-header portlet-toggle" title="">
                         Connectivity matrix
                     </div>
                     
@@ -957,7 +959,7 @@
 
             {% if comment_form %}
                 <form action="." method="POST" class="portlet" id="comment-form">
-                    <div class="portlet-header" title="">
+                    <div class="portlet-header portlet-toggle" title="">
                         Comment
                     </div>
                     
@@ -982,7 +984,7 @@
 
     <!--     SIMULATION HISTORY -->
         <div class="portlet" id="history">
-            <div class="portlet-header" title="Click a simulated network version to load it.">
+            <div class="portlet-header portlet-toggle" title="Click a simulated network version to load it.">
                 History
             </div>
             
@@ -1041,7 +1043,7 @@
     <!--     RESULT_DATA -->
         {% if result_obj.has_spike_detector or result_obj.has_voltmeter %}
             <div class="portlet">
-                <div class="portlet-header" title="Simulation was succeed. So you can explore the view of results.">
+                <div class="portlet-header portlet-toggle" title="Simulation was succeed. So you can explore the view of results.">
                     Results
                 </div>
                 

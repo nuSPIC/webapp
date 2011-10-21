@@ -364,36 +364,53 @@ def device_commit(request, network_id):
             device_dict = network_obj.device_dict()
             edgelist = network_obj.connections(modeltype='neuron')
             id_filterbank = network_obj.id_filterbank()
+            layoutSize = network_obj.layout_size()
+            import pdb
+            for gid, device in enumerate(device_list):
+                model, status, conns = device
+
+                if model['type'] == 'neuron':
+                    if 'targets' in conns:
+                        extended_list = values_extend(conns['targets'], unique=True)
+                        extended_converted_list = [str(id_identify(id_filterbank, vid)) for vid in extended_list if vid in id_filterbank[:,1]]
+                        if extended_converted_list:
+                            device[2]['targets'] = ','.join(extended_converted_list)
+
+                    if not 'position' in model:
+                        device[0]['position'] = [np.random.random_integers(17, layoutSize['x']), np.random.random_integers(14, layoutSize['y']+30)]
+                 
+                    if id_filterbank.any():
+                        tid = id_identify(id_filterbank, device[0]['id'])
+                        if not tid:
+                            tid = id_filterbank[-1][0]+1
+                            id_filterbank = np.append(id_filterbank, np.array([[tid, device[0]['id']]], dtype=int), axis=0)
+                    else:
+                        tid = 1
+                        id_filterbank = np.array([[tid, device[0]['id']]], dtype=int)
+                    device_dict[('%4d' %tid).replace(' ', '0')] = device
+                    pdb.set_trace()
 
             for gid, device in enumerate(device_list):
                 model, status, conns = device
-                if 'targets' in conns or 'sources' in conns:
-                    if 'targets' in conns:
-                        term = 'targets'
-                    else:
-                        term = 'sources'
+                
+                if model['type'] != 'neuron':
+                    if 'targets' in conns or 'sources' in conns:
+                        if 'targets' in conns:
+                            term = 'targets'
+                        else:
+                            term = 'sources'
 
-                    try:
                         extended_list = values_extend(conns[term], unique=True)
-                        extended_converted_list = [str(id_identify(id_filterbank, vid)) for vid in extended_list]
-                    except:
-                        extended_converted_list = []
-                        
-                    device[2][term] = ','.join(extended_converted_list)
-                    
-                layoutSize = network_obj.layout_size()
-                if model['type'] == 'neuron' and not 'position' in model:
-                    device[0]['position'] = [np.random.random_integers(17, layoutSize['x']), np.random.random_integers(14, layoutSize['y']+30)]
-                 
-                if id_filterbank.any():
+                        extended_converted_list = [str(id_identify(id_filterbank, vid)) for vid in extended_list if vid in id_filterbank[:,1]]
+                        if extended_converted_list:
+                            device[2][term] = ','.join(extended_converted_list)
+
                     tid = id_identify(id_filterbank, device[0]['id'])
                     if not tid:
                         tid = id_filterbank[-1][0]+1
                         id_filterbank = np.append(id_filterbank, np.array([[tid, device[0]['id']]], dtype=int), axis=0)
-                else:
-                    tid = 1
-                    id_filterbank = np.array([[tid, device[0]['id']]], dtype=int)
-                device_dict[('%4d' %tid).replace(' ', '0')] = device
+                    device_dict[('%4d' %tid).replace(' ', '0')] = device
+                    pdb.set_trace()
 
             network_obj.devices_json = json.encode(device_dict)
             network_obj.save()
