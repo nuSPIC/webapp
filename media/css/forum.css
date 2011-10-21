@@ -1,15 +1,14 @@
 #content {
-    font-family: arial;
-    font-size: 11px;
+    font-family: sans-serif;
+    font-size: 14px;
     padding: 10px;
-    /*width : 98%;*/
     margin: auto;
-    line-height: 1.2em;
+    line-height: 1em;
 }
 
-/*#web_logo {*/
-    /*display: none;*/
-/*}*/
+h2 {
+    padding: 10px;
+}
 
 
 /* Forums list
@@ -60,7 +59,7 @@
 
     #forum_list .topics_count {
         float: right;
-        width: 100px;
+        width: 75px;
         text-align: center;
     }
     
@@ -71,7 +70,7 @@
 
     #forum_list .posts_count {
         float: right;
-        width: 100px;
+        width: 125px;
         text-align: center;
     }
 
@@ -81,7 +80,7 @@
         }
 
     #forum_list .last_post {
-        width: 320px;
+        width: 200px;
         float: right;
     }
     
@@ -117,10 +116,18 @@
             text-align: center;
         }
 
+    #forum_list .footer .wrapper {
+        padding: 10px 0px;
+        overflow: hidden;
+    }
+
     #forum_list .footer .new_topics {
+        width: 48%;
+        float: right;
     }
 
     #forum_list .footer .popular_topics {
+        width: 48%;
     }
 
                 #forum_list .footer .popular_topics .list .row .count {
@@ -128,6 +135,8 @@
                 }
     
     #forum_list .footer .statistics {
+        width: 48%;
+        float: right;
     }
 
 
@@ -209,7 +218,7 @@
     
     #topic_list .topic_name {
         float: left;
-        width: 430px;
+        width: 530px;
     }
     
         #topic_list .topic_name .name {

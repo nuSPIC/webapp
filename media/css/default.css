@@ -1,5 +1,6 @@
 html, body {
-    font-family: 16px Aller;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
     color: #2B2924;
     background-color: #FAFAF9 ;
     height: 100%;
@@ -33,9 +34,7 @@ a:hover {
     color: #ccc;
     background-color: #2B2924;
     padding: 8px 10px 6px 10px;
-    font-family: arial,sans-serif;
-    font-size: .8em;
-    border-bottom: 1px solid #000;
+    font-family: Arial,sans-serif;
 }
 
     #header .top_links {
@@ -48,50 +47,62 @@ a:hover {
     }
     
     #header a {
-        color:  #ccc;
+        color:  #CCCCCC;
     }
 
     #header a:hover {
         color:  #FAFAF9;
     }
 
-#web_logo, #content{
-    width : 800px;
+#banner, #content, #logo{
+    width : 900px;
     margin: auto;
 }
 
-#web_logo {
+#banner {
   background: url(/media/images/special/nuspic_logo.png) no-repeat;
   height: 186px;
-}
-
-#news {
-    background-color: #FAFAF9 ;
-    width: 20%;
-    float: right;
-    margin-left:40px;
-    padding-left:10px;
-    font-size:0.8em;
-    line-height: 1.2em;
-    border-left: 1px solid #2B2924;
 }
 
 #content {
     margin-top: 15px !important;
     padding: 10px;
-    line-height: 1.5em;
-    /*min-height: 60%;*/
+    min-height: 65%;
     overflow: hidden;
+    /*border-left: 1px solid #CCCCCC;*/
+    /*border-right: 1px solid #CCCCCC;*/
 }
 
 #footer {
     margin-top: 25px;
     text-align: center;
-    font-size:0.8em;
+}
+
+/* Flatpages
+*********************/
+
+.flatpage {
+    font-size: 16px;
+    line-height: 1.5em;
 }
 
 /* News
 *********************/
+
+#news {
+    background-color: #FAFAF9 ;
+    width: 25%;
+    float: right;
+    margin-left: 40px;
+    padding-left: 10px;
+    border-left: 1px solid #CCCCCC;
+}
+
+#news hr {
+    border: 0;
+    background-color: #CCCCCC;
+    height: 1px;
+}
 
 .news-block {
 
@@ -139,7 +150,6 @@ a:hover {
 *******************/
 
 #profile {
-    
 }
 
     #profile .row {
@@ -288,13 +298,12 @@ div.rss-link {
 }
 
 
-.logo {
-    width: 800px;
+#logo {
     margin-top: 100px;
-    overflow: hidden;
+    overflow:  hidden;
 }
 
-    .logo img {
+    #logo img {
         padding: 15px;
         height: 75px;
         vertical-align: middle;
@@ -302,6 +311,14 @@ div.rss-link {
 
 .ui-shadow {
     box-shadow: 2px 2px 7px #444;
-    -o-box-shadow: 1px 1px 7px #444;
-    -webkit-box-shadow: 1px 1px 7px #444;
+    -o-box-shadow: 2px 2px 7px #444;
+    -webkit-box-shadow: 2px 2px 7px #444;
     -moz-box-shadow: 2px 2px 7px #444;
+}
+
+.ui-shadow-light {
+    box-shadow: 0px 0px 10px #444;
+    -o-box-shadow: 0px 0px 10px #444;
+    -webkit-box-shadow: 0px 0px 10px #444;
+    -moz-box-shadow: 0px 0px 10px #444;
+}

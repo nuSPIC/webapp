@@ -18,12 +18,3 @@ input.ui-button { padding: .2em .5em; }
 .ui-tabs .ui-tabs-nav { font-size: 1em; }
 .ui-tabs .ui-tabs-nav li a { padding: .1em 1em; }
 .ui-tabs .ui-tabs-panel { padding: .5em; }
-
-/* Shadow
-----------------------------------*/ 
-.ui-shadow {
-    box-shadow: 2px 2px 7px #444;
-    -o-box-shadow: 1px 1px 7px #444;
-    -webkit-box-shadow: 1px 1px 7px #444;
-    -moz-box-shadow: 2px 2px 7px #444;
-}
