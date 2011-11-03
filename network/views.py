@@ -85,28 +85,34 @@ def network_simulated(request, SPIC_id, local_id, result_id):
         network_obj.description = prototype.description
         network_obj.devices_json = prototype.devices_json
         revision_create(network_obj)
-    
+
+    version_obj = None
     result_obj = None
-    version_id = 0
+    version_id = -1
     
     # Get a list of network versions in reverse date is created.
     versions = Version.objects.get_for_object(network_obj)
-    
-    if int(result_id) == 0:
-        result_id = -1
-    elif int(result_id) > 0:
-        try:
-            results = [version.revision.result for version in versions[1:]]
-            result_ids = [result.local_id for result in results]
-            result_id = result_ids.index(int(result_id))
-            result_obj = results[result_id]
-            version_id = versions[result_id +1].pk
-        except:
-            pass
+
+    version_term = request.GET.get('version')
+    if version_term == 'first' or int(result_id) == 0:
+        version_obj = versions[0].revision.revert()
+        network_obj = Network.objects.get(user_id=request.user.pk, SPIC_id=SPIC_id, local_id=local_id)
+        version_id = 0
         
-    if request.GET.get('version'):
-        version = versions[result_id +1].revision.revert()
-        network_obj = Network.objects.get(user_id=request.user.pk, SPIC_id=SPIC_id, local_id=local_id)   
+    else:
+        results = [version.revision.result for version in versions[1:]]
+        result_ids = [result.local_id for result in results]
+
+        if version_term == 'last':
+            result_id = result_ids[-1]
+
+        if int(result_id) in result_ids:
+            result_id = result_ids.index(int(result_id))
+
+            version_obj = versions[result_id +1].revision.revert()
+            result_obj = results[result_id]
+            version_id = versions[result_id +1].revision.result.local_id
+            network_obj = Network.objects.get(user_id=request.user.pk, SPIC_id=SPIC_id, local_id=local_id)
 
     
     # If request is POST, then it executes any deletions
@@ -365,7 +371,7 @@ def device_commit(request, network_id):
             edgelist = network_obj.connections(modeltype='neuron')
             id_filterbank = network_obj.id_filterbank()
             layoutSize = network_obj.layout_size()
-            import pdb
+            
             for gid, device in enumerate(device_list):
                 model, status, conns = device
 
@@ -388,7 +394,6 @@ def device_commit(request, network_id):
                         tid = 1
                         id_filterbank = np.array([[tid, device[0]['id']]], dtype=int)
                     device_dict[('%4d' %tid).replace(' ', '0')] = device
-                    pdb.set_trace()
 
             for gid, device in enumerate(device_list):
                 model, status, conns = device
@@ -410,7 +415,6 @@ def device_commit(request, network_id):
                         tid = id_filterbank[-1][0]+1
                         id_filterbank = np.append(id_filterbank, np.array([[tid, device[0]['id']]], dtype=int), axis=0)
                     device_dict[('%4d' %tid).replace(' ', '0')] = device
-                    pdb.set_trace()
 
             network_obj.devices_json = json.encode(device_dict)
             network_obj.save()
@@ -484,7 +488,7 @@ def simulate(request, network_id, version_id):
             
             # check if network form is valid.
             if form.is_valid():
-              
+
                 # if network form is changed or version_id is 0, a new version will be created. 
                 # Otherwise it simulates without creating new version.
                 if form.has_changed():
@@ -499,10 +503,9 @@ def simulate(request, network_id, version_id):
                 network_obj.status_json = json.encode(root_status)
                 network_obj.save()        
                         
-                if int(version_id) != 0:
-                    version_obj = Version.objects.get(pk=version_id)
-                    
+                if int(version_id) > 0:
                     # check if it is already simulated, it prevents from simulating.
+                    version_obj = Version.objects.get(pk=version_id)
                     if version_obj.revision.result.is_recorded():
                         response = {'recorded':1}
                         return HttpResponse(json.encode(response), mimetype='application/json')
