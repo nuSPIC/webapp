@@ -1,17 +1,23 @@
 
 /* Component containers
 ----------------------------------*/
-.ui-widget-header { padding: 5px; font-size: 1.25em; }
+.ui-widget { font-family: Aller, sans serif; }
+.ui-widget .ui-widget { font-size: .9em; }
+.ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button { font-family: Aller, sans serif; }
+
+.ui-widget-header { padding: 5px; }
 .ui-widget-header a { font-weight: bold;}
 
 /* Button
 ----------------------------------*/
 input.ui-button { padding: .2em .5em; }
 
+
 /* Dialog
 ----------------------------------*/
-.ui-dialog { padding: 0; font-size: .85em; }
+.ui-dialog { padding: 0; }
 .ui-dialog .ui-dialog-titlebar { padding: .2em .5em; }
+.ui-dialog .ui-dialog-content { font-size: .9em;}
 
 /* Tabs
 ----------------------------------*/
