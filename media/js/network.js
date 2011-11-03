@@ -6,11 +6,10 @@ $.fn.reset = function () {
 $.fn.loadTheme = function (options) {
         $( this ).addClass( "ui-widget ui-helper-clearfix" )
             .find( ".portlet-header" )
-                    .addClass( "ui-widget-header ui-corner-tl tipTip-top" )
+                    .addClass( "ui-widget-header ui-corner-top tipTip-top" )
                     .end()
             .find( ".portlet-toggle" )
                     .prepend( "<span class='ui-icon toggle ui-icon-minusthick'></span>")
-//                  .prepend( "<span class='ui-icon dialog ui-icon-newwin'></span>")
                     .end()
             .find( ".portlet-content" )
                     .addClass( "ui-widget-content ui-shadow" );
@@ -73,9 +72,13 @@ $.fn.loadTheme = function (options) {
                         primary: "ui-icon-star"
                     }})
                 .end();
-                
-        $( this ).find( "div.field-wrapper" ).tipTip({
+
+        if ('tipTip' in options && options['tipTip']) {
+            $( this ).find( "div.field-wrapper" ).tipTip({
                 defaultPosition: 'right',
-                delay: 500,
-        });
+                delay: 500
+            });
+        }
+                
+
 };
