@@ -10,7 +10,7 @@
     <div id="news">
         {% for news in news_list %}
             <div>
-                <strong>{{ news.pub_date|date:"DATE_FORMAT" }} &raquo; {{ news.title }}</strong>
+                <strong><span style="color:#AAAAAA">{{ news.pub_date|date:"DATE_FORMAT" }}</span> <br> &raquo; {{ news.title }}</strong>
                 <div>
                     {{ news.summary|safe }}
                 </div>
