@@ -1,40 +1,44 @@
+html {
+    overflow-y:scroll;
+}
+
+
 html, body {
-    font-family: Arial, sans-serif;
-    font-size: 12px;
+    font-family: Aller, Arial, sans-serif;
+    font-size: 14px;
     color: #2B2924;
     background-color: #FAFAF9 ;
-    height: 100%;
-    padding: 0;
-    margin: 0;
+    padding: 0px;
+    margin: 0px;
 }
 
 div.centered-404 {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 760px;
+    /*position: absolute;*/
+    /*left: 50%;*/
+    /*top: 50%;*/
+    /*width: 760px;*/
     height: 500px;
-    margin-left: -380px;
-    margin-top: -250px;
+    /*margin-left: -380px;*/
+    /*margin-top: -250px;*/
 }
 
 a {
-    color: #914E0C;
+    color: #865e34; /*#b37e46;*//* #914E0C;*/
     text-decoration: none;
 }
 
 a:hover {
-    color: orange;
+    color: #432f1a; /*#593f23;*/ /*#6c3a09;*/
 }
 
 /* Layout
 ***********************/
 
 #header {
-    color: #ccc;
+    font-size: 12px;
+    color: #CCCCCC;
     background-color: #2B2924;
     padding: 8px 10px 6px 10px;
-    font-family: Arial,sans-serif;
 }
 
     #header .top_links {
@@ -45,7 +49,7 @@ a:hover {
     #header .navigation {
         overflow: hidden;
     }
-    
+
     #header a {
         color:  #CCCCCC;
     }
@@ -54,29 +58,42 @@ a:hover {
         color:  #FAFAF9;
     }
 
-#banner, #content, #logo{
+    #header #competition {
+           color: #FFCE2E;
+           font-weight: bold;
+        }
+
+    #header #competition:hover {
+           color: #ff652e;
+        }
+
+#content-inner, #logo{
     width : 900px;
     margin: auto;
 }
 
-#banner {
-  background: url(/media/images/special/nuspic_logo.png) no-repeat;
-  height: 186px;
-}
+    #content #content-inner {
+        padding: 10px;
+    }
 
-#content {
-    margin-top: 15px !important;
-    padding: 10px;
-    min-height: 65%;
-    overflow: hidden;
-    /*border-left: 1px solid #CCCCCC;*/
-    /*border-right: 1px solid #CCCCCC;*/
-}
+    #content #banner {
+        height: 171px;
+    }
+
 
 #footer {
-    margin-top: 25px;
+    /*background-color: #2B2924;*//*#d0e5f5; #a6c9e2*/
     text-align: center;
+    padding: 8px 10px 6px 10px;
 }
+
+    /*#footer a {*/
+        /*color:  #CCCCCC;*/
+    /*}*/
+
+    /*#footer a:hover {*/
+        /*color:  #FAFAF9;*/
+    /*}*/
 
 /* Flatpages
 *********************/
@@ -90,8 +107,9 @@ a:hover {
 *********************/
 
 #news {
+    font-size: 12px;
     background-color: #FAFAF9 ;
-    width: 25%;
+    width: 27%;
     float: right;
     margin-left: 40px;
     padding-left: 10px;
@@ -134,7 +152,7 @@ a:hover {
 
     #accounts .column {
         float: left;
-        width: 33%;
+        width: 25%;
     }
 
         #accounts .column .profile {
@@ -297,6 +315,22 @@ div.rss-link {
     display: inline;
 }
 
+/* Misc styles
+************************/
+
+h2 {
+    color: #3b3831;
+    padding-left: 10px;
+}
+
+h2.delimiter {
+    padding-bottom: 10px;
+}
+
+.delimiter {
+	border-bottom: 1px solid #CCCCCC;
+	overflow	 : hidden;
+}
 
 #logo {
     margin-top: 100px;
@@ -306,7 +340,7 @@ div.rss-link {
     #logo img {
         padding: 15px;
         height: 75px;
-        vertical-align: middle;
+        vertical-align: bottom;
     }
 
 .ui-shadow {
@@ -316,9 +350,9 @@ div.rss-link {
     -moz-box-shadow: 2px 2px 7px #444;
 }
 
-.ui-shadow-light {
-    box-shadow: 0px 0px 10px #444;
-    -o-box-shadow: 0px 0px 10px #444;
-    -webkit-box-shadow: 0px 0px 10px #444;
-    -moz-box-shadow: 0px 0px 10px #444;
+.ui-inner-shadow {
+    box-shadow: inset 0 0 10px #000;
+    -o-box-shadow: inset 0 0 10px #000;
+    -webkit-box-shadow: inset 0 0 10px #000;
+    -moz-box-shadow: inset 0 0 10px #000;
 }
