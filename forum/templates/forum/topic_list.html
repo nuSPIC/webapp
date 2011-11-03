@@ -19,6 +19,10 @@
     <div id="topic_list">
         <h2 class="delimiter">{{ forum.name }}</h2>
         
+        <div class="breadcrumbs">
+            &raquo; <a href="{% url forum %}">Discussions</a>
+        </div>
+
         {% if user.is_authenticated %}
             <div class="forum_menu">
                 <a href="{% url subscribe_forum forum.id %}">
@@ -31,10 +35,6 @@
                 &middot; <a href="{% url forum_mark_read forum.id %}" class="mark_read">Mark forum as read</a>
             </div>
         {% endif %}
-        
-        <div class="breadcrumbs">
-            &raquo; <a href="{% url forum %}">Discussions</a>
-        </div>
         
         {% if forum_perms.can_add_topic %}
             <div class="headline">

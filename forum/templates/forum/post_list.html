@@ -148,10 +148,6 @@
         <div class="breadcrumbs">&raquo; <a href="{% url forum %}">Discussions</a> &raquo; <a href="{{ forum.get_absolute_url }}">{{ forum.name }}</a></div>
 
         {% if user.is_authenticated %}
-            <div class="topic_actions">
-                {% topic_actions topic forum_perms user %}
-            </div>
-            
             <div class="topic_menu">
                 <a href="{% url subscribe_topic topic.id %}">
                     {% if subscribed %}
@@ -162,8 +158,13 @@
                 </a>
                 &middot; <a href="{% url topic_mark_read topic.id %}" class="mark_read">Mark topic as read</a>
             </div>
+
+            <div class="topic_actions">
+                {% topic_actions topic forum_perms user %}
+            </div>
+
         {% endif %}
-        
+
         <div class="posts">
             {% for post in post_list.object_list %}
                 <div class="post{% if not forloop.last or not user.is_anonymous %} delimiter{% endif %}">
