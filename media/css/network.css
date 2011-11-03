@@ -1,9 +1,19 @@
-#content {
-    min-width: 1800px;
-    font: 11px sans-serif;
+#content-head {
+    overflow:  hidden;
+    cursor: pointer;
 }
 
-#banner, #footer {
+#content-body {
+    margin: auto;
+    width: 1600px;
+    min-width: 1600px;
+    padding:  10px;
+    font-family: Aller, arial;
+    font-size: 12px;
+    overflow: auto;
+}
+
+#footer .navigation {
     display : none;
 }
 
@@ -17,25 +27,25 @@ table {
 td { 
     font-weight: normal !important;
     padding: 0.1em 0.2em;
-    border-top-width: 0px !important;
+    border-top-width: 0 !important;
 }
 
 /* Container settings
 *************************/
 
-.portlet { margin-top: .3em; }
-.portlet-header { width: 180px; margin-left: 7px; padding: 3px 5px 1px 10px; font-size: 1em;}
+.portlet { margin-top: .3em;}
+.portlet-header { width: 180px; margin-left: 7px; padding: 3px 5px 1px 10px;}
 .portlet-header .ui-icon { float: right; }
 .portlet-content { min-width: 260px; margin: .2em .2em; margin-top: 0; padding: 0.4em;}
 
-.column { margin-top: .5em; min-width: 180px; float: left; padding-bottom: 100px; }
+.column { min-width: 180px; float: left; padding-bottom: 100px; }
 
 .ui-sortable-placeholder { border: 3px dotted grey; visibility: visible !important; height: 50px !important; }
     .ui-sortable-placeholder * { visibility: hidden; }
 
 div#ui-dialog {
-    font: 12px sans-serif;
     display: none;
+    font-size : .9em;
 }
 
 .collapse {
@@ -49,6 +59,16 @@ div#ui-dialog {
 .buttons button {
     margin: 0px;
 }
+
+/* Step Helper
+*************************/
+
+    #help-steps li {
+        cursor: pointer;
+        border: none;
+        font-size: .85em;
+        padding: .2em;
+    }
 
 /* Device Table
 ************************/
@@ -66,7 +86,7 @@ div#ui-dialog {
     }
 
     table#device-table td.model {
-        width: 9em;
+        width: 8.5em;
     }
 
     table#device-table td.disabled {
@@ -130,15 +150,12 @@ ul.messagelist {
         -ms-transform:rotate(-90deg);
     }
 
-/* Step Helper
-*************************/
 
-    #help-steps li {
-        cursor: pointer;
-        border: none;
-        font-size: .85em;
-        padding: .2em;
-    }
+#layout-legend-content {
+    font-size: 0.9em;
+    padding-left:15px;
+    line-height: .5em;
+}
 
 /* History list
 *************************/
