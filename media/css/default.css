@@ -1,3 +1,12 @@
+@font-face {
+    font-family: 'Aller';
+    src: url('/media/files/fonts/AllerRegular/aller_rg-webfont.eot');
+    src: url('/media/files/fonts/AllerRegular/aller_rg-webFont.eot?#iefix') format('embedded-opentype'),
+        url('/media/files/fonts/AllerRegular/aller_rg-webFont.woff') format('woff'),
+        url('/media/files/fonts/AllerRegular/aller_rg-webFont.ttf') format('truetype'),
+        url('/media/files/fonts/AllerRegular/aller_rg-webFont.svg#webfont') format('svg');
+}
+
 html {
     overflow-y:scroll;
 }
