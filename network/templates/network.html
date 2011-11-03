@@ -22,7 +22,6 @@
 <script type="text/javascript" src="{{ MEDIA_URL }}js/raphael-min.js"></script>
 <script type="text/javascript" src="{{ MEDIA_URL }}js/raphael-networkLayout.js"></script>
 
-
 <script type="text/javascript">
     var device_list = [],
     edgelist = [],
@@ -53,17 +52,18 @@
             $( ".portlet" ).loadTheme({"tipTip":true});
 
             if (neuron_ids.length > 0) {
-                $( "#holder" ).loadLayout( device_list );
-            } else {
-                $( "#holder" ).parents( ".portlet" ).hide();
-                $( "div#connectivity_matrix" ).hide();
-            }
+                    $( "#holder" ).loadLayout( device_list );
+                } else {
+                    $( "#device-list" ).find( "#device-list-content" ).hide();
+                    $( "#holder" ).parents( ".portlet" ).hide();
+                    $( "div#connectivity_matrix" ).hide();
+                }
 
             $( "div#connections-tabs" ).tabs();
             $( "div#results-tabs" ).tabs();
             $( "ul#history-list" ).quickPager();
 
-
+            // ADMIN
             $( "span#device_id" ).html(selected_device_id);
             $( "span#last_device_id" ).html(last_device_id);
 
@@ -79,7 +79,7 @@
             title.push(' '+ i.toString() +': '+ status[i].toString());
             }
 
-//         Add new device to the list
+        // Add new device to the list
         if (selected_device_id == last_device_id + 1) {
             var device = $( "#device-table > tbody tr:last" );
             $(device).after( $(device).clone() );
@@ -158,7 +158,7 @@
         }, 'json');
     };
 
-//     LOOPING REQUEST FOR SIMULATION PROGRESS
+    // LOOPING REQUEST FOR SIMULATION PROGRESS
     var get_task_status = function() {
         $.getJSON('/status/'+task_id+'/?', function(data) {
                 var task = data['task'];
@@ -216,58 +216,7 @@
     };
 
 
-// DEVICE ACTIVITY
-
-//     SELECT DEVICE TO CHANGE STATUS AND PARAMETERS
-    $( "tr.enabled" ).find( "td.selectable" ).live('click', function(e) {
-            e.preventDefault();
-            $( "ul.errorlist" ).remove();
-            $( "option:first" ).attr('selected', 'selected');
-            selected_device_id = $(this).parent( ".enabled" ).attr('id')
-            var device = device_list[selected_device_id-1];
-            var form = $( "#"+device[0].label );
-
-            if ($( form ).is(":visible")) {
-                $( "#device_id" ).html("");
-                $( form ).toggle();
-                $( "#device-form" ).hide();
-            } else {
-                $( "#device_id" ).html(selected_device_id)
-                $( "tr.enabled" ).each(function() {
-                        if ($(this).attr('id') != selected_device_id && $(this).children("td").hasClass("ui-state-highlight")) {
-                            $(this).children("td").toggleClass("ui-state-highlight");
-                        }
-                });
-                $( ".device-form:visible" ).toggle();
-                $( form ).reset();
-                var form_content = $( form ).children();
-                $(form_content)
-                    .find( "#id_model" ).val(device[0]['label']);
-                for (var key in device[1]) {
-                    $(form_content).find( "#id_"+ key ).val(device[1][key]).removeClass('ui-state-hover');
-                };
-                for (var key in device[2]) {
-                    $(form_content).find( "#id_"+ key ).val(device[2][key]).removeClass('ui-state-hover');
-                };
-                $( form ).toggle();
-                $( "#device-form" )
-                      .find( "#selected_device_id" ).html(selected_device_id).end()
-                      .find( "#selected_device_label" ).html(device[0]['label'].replace(/_/g, ' ')).end()
-                      .show();
-            }
-    });
-
-//     COMMIT TO WRITE DEVICES INTO DATABASE
-    $( "button#delete-devices" ).live('click', function(e) {
-            e.preventDefault();
-            $( this ).toggleClass( "ui-state-highlight" )
-                if ($( "table#device-table .delete" ).is(":visible") && $( "table#device-table .delete" ).find( "input" ).is(":checked")) {
-                $(".devices-form").submit();
-            } else {
-                $( "table#device-table .delete" ).toggle();
-            };
-    });
-
+    // DEVICE ACTIVITY
     $( "button#save-devices" ).live('click', function(e) {
             e.preventDefault();
             $( ".device-form" ).hide();
@@ -284,35 +233,6 @@
                                     window.location.href = '{% url network network_obj.SPIC_id network_obj.local_id %}'
                             }, 1000);
             }, 'json');
-    });
-
-
-
-//     SELECT A DEVICE TO ADD
-    $( "select#id_label" ).live('change', function(e) {
-            e.preventDefault()
-            $( ".device-form:visible" ).hide();
-            $( "#device-form" ).hide();
-            $( "ul.errorlist" ).remove();
-            selected_device_id = last_device_id+1
-            $( "span#device_id" ).html(selected_device_id);
-            $( "tr.enabled" ).each(function() {
-                        if ($(this).attr('id') != selected_device_id && $(this).children("td").hasClass("ui-state-highlight")) {
-                            $(this).children("td").toggleClass("ui-state-highlight");
-                        }
-                });
-
-            var form = $( "#"+ $(this).val() );
-            if ($(this).val() != "") {
-                $( form ).reset().find( "#selected_device_id" ).html(selected_device_id).end()
-                    .find( "#id_model" ).attr('value', $(this).val()).end()
-                    .show();
-
-                $( "#device-form" )
-                    .find( "#selected_device_id" ).html(selected_device_id).end()
-                    .find( "#selected_device_label" ).html($(this).val().toString().replace(/_/g, ' ')).end()
-                    .show();
-            }
     });
 
 
@@ -358,13 +278,6 @@
             }, 'json');
     });
 
-    $( ".required input" ).live('keyup',  function() {
-        if (this.value == '') {
-            $(this).addClass('ui-state-hover');
-        } else {
-            $(this).removeClass('ui-state-hover');
-        }
-    });
 
     $( "#id_step" ).live('keyup', function() {
          var step = parseFloat(this.value);
@@ -383,19 +296,6 @@
          $(this).parents( ".device-form" ).find( "#id_spike_times" ).val(spike_times.toString());
     });
 
-//     $( "button#toggle-device-form" ).live('click', function(e) {
-//             e.preventDefault()
-//             $( this ).toggleClass( "ui-state-highlight" )
-//             $( this ).parents( ".portlet-content" ).find( ".advanced" ).toggle();
-//             if ($(this).hasClass( "ui-state-highlight" )) {
-//                 $(this).button("option", "icons", { primary: 'ui-icon-circle-arrow-n' })
-//                 .button("option", "label", "Collapse");
-//
-//             } else {
-//                 $(this).button("option", "icons", { primary: 'ui-icon-circle-arrow-s' })
-//                 .button("option", "label", "Expand");
-//             };
-//     });
 
 
     $( "form#network-form" ).live('submit',  function(e) {
@@ -503,10 +403,6 @@
                                     });
     });
 
-    $( "button#layout-legend" ).live('click',function() {
-            $(this).toggleClass("ui-state-highlight");
-            $( "div#layout-legend-content" ).slideToggle();
-    });
 
 // COMMENT
     {% if comment_form %}
@@ -518,24 +414,6 @@
                 }, 'html');
         });
     {% endif %}
-
-// HISTORY LIST
-    $( "ul#history-list div.version-link" ).live('click', function (e) {
-            $(".ui-dialog-content" ).html($( this ).attr('title'));
-            $( "#dialog-loading" ).dialog({
-                    title: 'Loading... please wait.',
-                    resizable: false,
-                    modal: true,
-            });
-            window.location.href = $( this ).find( "a" ).attr('href')
-    });
-
-    $( "button#go-versions" ).live('click', function(e) {
-            e.preventDefault();
-            if ($( "ul#history-list input" ).is(":checked")) {
-                $( ".versions-form" ).submit();
-            };
-    });
 
 // RESULTS
     {% if result_obj.has_voltmeter %}
@@ -569,77 +447,7 @@
         })
     {% endif %}
 
-    $(document).ready(function() {
-        $( "#banner" ).css("background", "url({{ MEDIA_URL }}images/special/nuspic_banner_small.png) no-repeat")
-                .css('height','85px')
-                .css('width', '880px');
 
-        $( "#content-head" ).click(function(){
-            $( "#network_header_toggle" ).slideToggle('fast', function () {
-                $( "#youtube" ).html('<object style="height: 210px; width: 320px; margin:auto"><param name="movie" value="http://www.youtube.com/v/LE-JN7_rxtE?version=3&feature=player_detailpage"><param name="allowFullScreen" value="true"><param name="allowScriptAccess" value="always"><embed src="http://www.youtube.com/v/LE-JN7_rxtE?version=3&feature=player_detailpage" type="application/x-shockwave-flash" allowfullscreen="true" allowScriptAccess="always" width="320" height="180"></object>');
-            });
-        });
-
-        $( "button#help-network" ).click(function(e) {
-            e.preventDefault()
-            $( "#network_header_toggle" ).slideToggle('fast');
-        });
-
-        $( "table#device-table tr" ).each(function(){
-                $( this ).addClass("tipTip-right");
-        });
-        $( "table th" ).each(function(){
-                $( this ).addClass("ui-state-default");
-        });
-        $( "table td" ).each(function(){
-                $( this ).addClass("ui-widget-content");
-        });
-        $( "table tr.enabled" ).hover(
-                function(){
-                    $( this ).children("td").addClass("ui-state-hover");
-                },function(){
-                    $( this ).children("td").removeClass("ui-state-hover");
-        });
-        $( "table tr.enabled" ).click(function(){
-                $( this ).children( "td" ).toggleClass("ui-state-highlight");
-        });
-
-        $( "ul#history-list li" ).each(function(){
-                $( this ).addClass("ui-widget-content");
-        });
-
-        $( "#history-list li" ).hover(
-                function(){
-                    $( this ).addClass("ui-state-hover");
-                },function(){
-                    $( this ).removeClass("ui-state-hover");
-        });
-
-        $( ".ui-tabs .ui-tabs-nav" ).removeClass("ui-widget-header");
-
-        $( ".tipTip-top" ).tipTip({
-                delay: 1000,
-                defaultPosition: 'top',
-        });
-
-        $( ".tipTip-right" ).tipTip({
-                defaultPosition: 'right',
-        });
-
-        $( ".tipTip-left" ).tipTip({
-                defaultPosition: 'left',
-        });
-
-        $( ".required input" ).each(function() {
-            if ($(this).val() == '') {$(this).addClass('ui-state-hover')};
-            });
-
-        if (neuron_ids.length == 0) {
-            $( "#device-list" ).find( "#device-list-content" ).hide();
-        }
-
-        $( "#history_"+ version_id).addClass( "ui-state-highlight" );
-    })
 </script>
 
 {% endblock %}
