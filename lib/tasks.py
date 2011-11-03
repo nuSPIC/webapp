@@ -44,17 +44,17 @@ class Simulation(AbortableTask):
         
         # Set root status of network
         root_status = network_obj.root_status()
-        
+
         if root_status:
             nest.SetStatus([0], root_status)
-        
-        
+
+
         # Create models in NEST and set its status
         device_list = network_obj.device_list('all')
         outputs = []
         for dev_model, dev_status, dev_params in device_list:
-                
-            """ Create models """                
+
+            """ Create models """
             if dev_status:
                 status_params = {}
                 for status_key, status_value in dev_status.iteritems():
@@ -70,18 +70,18 @@ class Simulation(AbortableTask):
                 gid = nest.Create(dev_model['label'], params=status_params)
             else:
                 gid = nest.Create(dev_model['label'])
-                
+
             if dev_model['type'] == 'output':
                 outputs.extend(gid)
-    
-    
+
+
         # Make connections in nest
         connections = network_obj.connections('all', data=True)
         for source, target, conn_params, conn_model in connections:
             if conn_params:
                 if conn_model:
                     nest.Connect([source],[target], params=conn_params, model=conn_model['model'])
-                    
+
                     syn_params = {}
                     for syn_params_key, syn_params_value in conn_model['syn_params'].iteritems():
                         syn_params[syn_params_key] = float(syn_params_value)
@@ -90,8 +90,8 @@ class Simulation(AbortableTask):
                     nest.Connect([source],[target], params=conn_params)
             else:
                 nest.Connect([source],[target])
-                
-                
+
+
         # In case duration is more than 5s, Start simulation for a partial time
         # and checks, if producer is aborted, else simulation goes on.
         duration = network_obj.duration
@@ -104,13 +104,12 @@ class Simulation(AbortableTask):
                     logger.warning("Task aborted.")
                     return None
                 nest.Simulate(dt)
-                
+
             dt_last = duration % dt
             if dt_last:
                 nest.Simulate(dt_last)
         else:
             nest.Simulate(duration)
-            
 
         # Get data from output devices
         data = {}
@@ -122,8 +121,7 @@ class Simulation(AbortableTask):
                 for key,value in output_events.items():
                     events[key] = value.tolist()
                 data[output_status['model']] = events
-                
-                
+
                 
         # Create a version of network
         versions = Version.objects.get_for_object(network_obj).reverse()
@@ -139,13 +137,12 @@ class Simulation(AbortableTask):
 
         # Get result object in latest version or in selected version
         version_id = kwargs['version_id']
-        if int(version_id) == 0:
-            version = Version.objects.get_for_object(network_obj).reverse()[0]
-        else:
+        if int(version_id) > 0:
             version = Version.objects.get(pk=version_id)
+        else:
+            version = Version.objects.get_for_object(network_obj).reverse()[0]
         result = version.revision.result
-        print result.local_id
-        
+
         # Write results and simulating date in database and reconfigure the existence of output devices
         result.has_spike_detector, result.has_voltmeter = False, False
         for label, value in data.items():
