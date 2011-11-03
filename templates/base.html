@@ -8,8 +8,8 @@
         <meta name="keywords" content="nuSPIC, NEST, g-node, BCF" />
         <meta name="description" content="Neural System Prediction and Identification Challenge" />
 
-        <link rel="icon" href="{{ MEDIA_URL }}favicon.ico" type="image/x-icon" />
-        <link rel="shortcut icon" href="{{ MEDIA_URL }}favicon.ico" type="image/x-icon" />
+        <link rel="icon" href="{{ MEDIA_URL }}nuSPIC_blue.ico" type="image/x-icon" />
+        <link rel="shortcut icon" href="{{ MEDIA_URL }}nuSPIC_blue.ico" type="image/x-icon" />
         <link href="{{ MEDIA_URL }}css/default.css" type="text/css" rel="stylesheet" />
         
         {% block feeds %}{% endblock %}
@@ -17,7 +17,7 @@
     </head>
     
     <body>
-        <div class="ui-shadow-light" id="header">
+        <div id="header">
             <div class="top_links">
                 {% if user.is_authenticated %}
                     Welcome, <a href="{% url profile user.profile.id %}">{{ user.get_full_name }}</a> | <a href="{% url logout %}">Logout</a>
@@ -29,7 +29,7 @@
             <div class="navigation">
                 <a href="{% url mainpage %}">Home</a> |
                 <a href="{% url news_archive %}">News</a> |
-                <a href="{% url network_list %}"><b style="color:orange">Competition</b></a> |
+                <a href="{% url network_list %}" id="competition">Competition</a> |
                 <a href="/about/">About</a> |
                 <a href="/faq/">FAQ</a> |
                 <a href="{% url accounts %}">Community</a> |
@@ -39,12 +39,20 @@
             </div>
         </div>
 
-        <div id="banner"></div>
+        
+        <div id="content">
+            <div class="ui-inner-shadow" id="content-head">
+                <div id="content-inner">
+                    <div id="banner" style="background: url({{ MEDIA_URL }}images/special/nuspic_logo.png) no-repeat;"></div>
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
 
-        <div class="" id="content">
-            {% block content %}{% endblock %}
+            <div id="content-body">
+                {% block footer %}{% endblock %}
+            </div>
+
         </div>
-
 
         <div id="footer">
             <div class="navigation">
