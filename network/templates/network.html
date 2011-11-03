@@ -7,19 +7,20 @@
 {% load humanize %}
 
 {% block extrahead %}
-<link rel="stylesheet" href="/media/css/nuspic/jquery-ui-1.8.14.custom.css"></link>
-<link rel="stylesheet" href="/media/css/jquery-ui.custom.css"></link>
-<link rel="stylesheet" href="/media/css/network.css"></link>
-<link rel="stylesheet" href="/media/css/tipTip.css"></link>
 
-<script type="text/javascript" src="/media/js/jquery-1.6.2.min.js"></script>
-<script type="text/javascript" src="/media/js/jquery-ui-1.8.14.custom.min.js"></script>
-<script type="text/javascript" src="/media/js/jquery.tipTip.minified.js"></script>
-<script type="text/javascript" src="/media/js/json2.js"></script>
-<script type="text/javascript" src="/media/js/network.js"></script>
-<script type="text/javascript" src="/media/js/quickpager.jquery.js"></script>
-<script type="text/javascript" src="/media/js/raphael-min.js"></script>
-<script type="text/javascript" src="/media/js/raphael-networkLayout.js"></script>
+<link href="{{ MEDIA_URL }}css/nuspic/jquery-ui-1.8.14.custom.css" type="text/css" rel="stylesheet" />
+<link href="{{ MEDIA_URL }}css/jquery-ui.custom.css" type="text/css" rel="stylesheet" />
+<link href="{{ MEDIA_URL }}css/network.css" type="text/css" rel="stylesheet" />
+<link href="{{ MEDIA_URL }}css/tipTip.css" type="text/css" rel="stylesheet" />
+
+<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.8.14.custom.min.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.tipTip.minified.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/json2.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/network.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/quickpager.jquery.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/raphael-min.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/raphael-networkLayout.js"></script>
 
 
 <script type="text/javascript">
@@ -31,7 +32,7 @@
     version_id = {{ version_id|safe }},
     selected_device_id,
     task_id;
-    
+
     {% if network_obj.device_list %}
         var device_list = {{ network_obj.device_list|safe }},
         neuron_ids = {{ network_obj.neuron_ids|safe }},
@@ -41,15 +42,15 @@
         layoutSize = {{ network_obj.layout_size|safe }};
     {% endif %}
 
-    
+
     $(function() {
             $( ".column" ).sortable({
                     cancel: ".portlet-content",
                     connectWith: ".column",
-                    opacity: 0.7,
+                    opacity: 0.7
             });
-            
-            $( ".portlet" ).loadTheme();
+
+            $( ".portlet" ).loadTheme({"tipTip":true});
 
             if (neuron_ids.length > 0) {
                 $( "#holder" ).loadLayout( device_list );
@@ -57,21 +58,15 @@
                 $( "#holder" ).parents( ".portlet" ).hide();
                 $( "div#connectivity_matrix" ).hide();
             }
-             
+
             $( "div#connections-tabs" ).tabs();
             $( "div#results-tabs" ).tabs();
             $( "ul#history-list" ).quickPager();
 
-            
+
             $( "span#device_id" ).html(selected_device_id);
             $( "span#last_device_id" ).html(last_device_id);
-            
-            $( "div#step-helper" ).dialog({
-                                   title: 'How to use it?',
-                                   resizable: false,
-                                   height: 400,
-                                   width: 420,
-                            }).parent().hide();
+
 
     });
 
@@ -89,38 +84,39 @@
             var device = $( "#device-table > tbody tr:last" );
             $(device).after( $(device).clone() );
             $(device).attr('id', selected_device_id).addClass('enabled');
-            
+
             $(device).find( "td.id" ).html(selected_device_id).end()
                 .find(" td.model" ).html(label);
-            
+
             var term = 'added';
             last_device_id++;
         } else {
             var device = $( "#"+ selected_device_id );
             var term = 'changed';
         }
-        
+
         if ('targets' in data[2]) { $(device).find( "td.targets" ).html(data[2]['targets'])}
         else if ('sources' in data[2]) { $(device).find( "td.targets" ).html(data[2]['sources'])};
-        
+
         if ('weight' in data[2]) {$(device).find( "td.weight" ).html(data[2]['weight'])}
         if ('delay' in data[2]) {$(device).find( "td.delay" ).html(data[2]['delay'])};
-        
+
         if (title) {
         $(device).attr('title', 'no status').fadeIn().tipTip({defaultPosition: 'right',});
         } else {
-        $(device).attr('title', title.join(",")).fadeIn().tipTip({defaultPosition: 'right',});            
+        $(device).attr('title', title.join(",")).fadeIn().tipTip({defaultPosition: 'right',});
         }
 
         version_id = 0;
         $( "#device-message" ).html("<li>"+ label +" ["+ selected_device_id +"] was "+ term +" successfully.</li>");
         $( "#device-list" ).find( ".portlet-content" ).show();
     };
-    
-    var save_and_simulate = function () { 
+
+    var save_and_simulate = function () {
         var form = $( "#network-form" ).serialize();
         var devices_json = JSON.stringify(device_list);
         var post_data = form.concat('&devices_json='+ devices_json);
+        version_id = version_id > 0 ? version_id : 0
         $.post('/network/ajax/'+ {{ network_obj.id }} +'/'+ version_id +'/simulate/',
             post_data, function(data){
                 if (data.valid == -1) {
@@ -161,7 +157,7 @@
                 };
         }, 'json');
     };
-    
+
 //     LOOPING REQUEST FOR SIMULATION PROGRESS
     var get_task_status = function() {
         $.getJSON('/status/'+task_id+'/?', function(data) {
@@ -189,6 +185,7 @@
                         });
                         $( "#task_status" ).html('Simulation aborted.').effect("highlight", {}, 1000);
                     } else if (status == 'FAILURE') {
+                        var result = task['result'];
                         $( "#dialog-simulating" ).dialog({
                                 title:"Simulation failed.",
                                 buttons: {
@@ -217,8 +214,8 @@
                 }
         });
     };
-    
-   
+
+
 // DEVICE ACTIVITY
 
 //     SELECT DEVICE TO CHANGE STATUS AND PARAMETERS
@@ -229,10 +226,11 @@
             selected_device_id = $(this).parent( ".enabled" ).attr('id')
             var device = device_list[selected_device_id-1];
             var form = $( "#"+device[0].label );
-            
-            if ($( form ).is(":visible") && $( "#device_id" ).html() == selected_device_id) {
-                $( "#device_id" ).html("")
-                $( form ).toggle()
+
+            if ($( form ).is(":visible")) {
+                $( "#device_id" ).html("");
+                $( form ).toggle();
+                $( "#device-form" ).hide();
             } else {
                 $( "#device_id" ).html(selected_device_id)
                 $( "tr.enabled" ).each(function() {
@@ -282,21 +280,19 @@
                                     resizable: false,
                                     modal: true,
                             });
-                            window.setTimeout(function() { 
-                                    window.location.href = '{% url network network_obj.SPIC_id network_obj.local_id %}' 
+                            window.setTimeout(function() {
+                                    window.location.href = '{% url network network_obj.SPIC_id network_obj.local_id %}'
                             }, 1000);
             }, 'json');
     });
 
-    $( "button#help-network" ).live('click',function(e) {
-            e.preventDefault();
-            $( "#step-helper" ).parent().slideToggle();            
-    });     
-    
+
+
 //     SELECT A DEVICE TO ADD
     $( "select#id_label" ).live('change', function(e) {
             e.preventDefault()
             $( ".device-form:visible" ).hide();
+            $( "#device-form" ).hide();
             $( "ul.errorlist" ).remove();
             selected_device_id = last_device_id+1
             $( "span#device_id" ).html(selected_device_id);
@@ -307,17 +303,19 @@
                 });
 
             var form = $( "#"+ $(this).val() );
-            $( form ).reset().find( "#selected_device_id" ).html(selected_device_id).end()
-                .find( "#id_model" ).attr('value', $(this).val()).end()
-                .show();
+            if ($(this).val() != "") {
+                $( form ).reset().find( "#selected_device_id" ).html(selected_device_id).end()
+                    .find( "#id_model" ).attr('value', $(this).val()).end()
+                    .show();
 
-            $( "#device-form" )
-                .find( "#selected_device_id" ).html(selected_device_id).end()
-                .find( "#selected_device_label" ).html($(this).val().toString().replace(/_/g, ' ')).end()
-                .show();
+                $( "#device-form" )
+                    .find( "#selected_device_id" ).html(selected_device_id).end()
+                    .find( "#selected_device_label" ).html($(this).val().toString().replace(/_/g, ' ')).end()
+                    .show();
+            }
     });
-    
-    
+
+
     $( "form.device-form" ).live('submit',  function(e) {
             e.preventDefault();
             var form_data = $( this ).serialize();
@@ -392,17 +390,14 @@
 //             if ($(this).hasClass( "ui-state-highlight" )) {
 //                 $(this).button("option", "icons", { primary: 'ui-icon-circle-arrow-n' })
 //                 .button("option", "label", "Collapse");
-//                 
+//
 //             } else {
 //                 $(this).button("option", "icons", { primary: 'ui-icon-circle-arrow-s' })
 //                 .button("option", "label", "Expand");
-//             };        
-//     }); 
+//             };
+//     });
 
-    $( "input#id_same_seed" ).live('change',  function() {
-        version_id = 0;
-    });
-  
+
     $( "form#network-form" ).live('submit',  function(e) {
             e.preventDefault();
             if (connect_to_output.length <1) {
@@ -473,7 +468,7 @@
             height = ($(popup).find( ".portlet-content" ).height()+110);
             newPopup = window.open('{% url network_layout network_obj.SPIC_id network_obj.local_id %}',
                         'network_layout',
-                        'left=50,width='+ width.toString() +',height='+ height.toString() +',toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,copyhistory=no');
+                        'left=50,width='+ width.toString() +',height='+ height.toString() +',toolbar=no,location=yes,directories=no,status=no,menubar=no,scrollbars=no,copyhistory=no');
             newPopup.moveTo(screen.availWidth/2 - width/2, screen.availHeight/2 - height /2);
             newPopup.focus();
 //             $( popup ).find( ".toggle" ).toggleClass( "ui-icon-minusthick" ).toggleClass( "ui-icon-plusthick" );
@@ -507,20 +502,20 @@
                                                           .loadLayout(device_list);
                                     });
     });
-    
+
     $( "button#layout-legend" ).live('click',function() {
             $(this).toggleClass("ui-state-highlight");
-            $( "div#layout-legend" ).slideToggle();
+            $( "div#layout-legend-content" ).slideToggle();
     });
 
-// COMMENT 
+// COMMENT
     {% if comment_form %}
         $( "form#comment-form" ).live('submit',  function(e) {
                 e.preventDefault();
                 $.post('{% url result_comment result_obj.id %}',
                     $( this ).serialize(), function(data){
                         $( "#history_{{result_obj.local_id}} a" ).attr('title',data).tipTip({defaultPosition:'left'});
-                }, 'html');                
+                }, 'html');
         });
     {% endif %}
 
@@ -534,14 +529,14 @@
             });
             window.location.href = $( this ).find( "a" ).attr('href')
     });
-    
+
     $( "button#go-versions" ).live('click', function(e) {
             e.preventDefault();
             if ($( "ul#history-list input" ).is(":checked")) {
                 $( ".versions-form" ).submit();
             };
     });
-    
+
 // RESULTS
     {% if result_obj.has_voltmeter %}
         $( "button#reload" ).live('click', function(e) {
@@ -560,128 +555,176 @@
                 $( "#voltmeter-select option:first" ).attr('selected', 'selected');
         });
     {% endif %}
-    
+
     {% if result_obj.has_spike_detector %}
         $( "button#spike_detector-link" ).live('click',function(e) {
                 $( ".resultView" ).attr('src', "{% url spike_detector result_obj.id %}?view=large");
                 $( ".resultView" ).css('height', {{ network_obj.neuron_ids|length }} * 15 + 230);
                 $( "#dialog-resultView" ).dialog({
-                        title: 'Spike Detector view of all sources',
-                        height: {{ network_obj.neuron_ids|length }} * 15 + 300,
-                        width: 780,
+                        title: 'Spike Detector view of all connected neurons',
+                        height: {{ network_obj.neuron_ids|length }} * 15 + 320,
+                        width: 800,
                         modal: true,
                 });
-        });
+        })
     {% endif %}
-    
+
     $(document).ready(function() {
-            $( "#content" ).removeClass("ui-shadow")
-            
-            $( "table#device-table tr" ).each(function(){
-                    $( this ).addClass("tipTip-right");
+        $( "#banner" ).css("background", "url({{ MEDIA_URL }}images/special/nuspic_banner_small.png) no-repeat")
+                .css('height','85px')
+                .css('width', '880px');
+
+        $( "#content-head" ).click(function(){
+            $( "#network_header_toggle" ).slideToggle('fast', function () {
+                $( "#youtube" ).html('<object style="height: 210px; width: 320px; margin:auto"><param name="movie" value="http://www.youtube.com/v/LE-JN7_rxtE?version=3&feature=player_detailpage"><param name="allowFullScreen" value="true"><param name="allowScriptAccess" value="always"><embed src="http://www.youtube.com/v/LE-JN7_rxtE?version=3&feature=player_detailpage" type="application/x-shockwave-flash" allowfullscreen="true" allowScriptAccess="always" width="320" height="180"></object>');
             });
-            $( "table th" ).each(function(){
-                    $( this ).addClass("ui-state-default");
-            });
-            $( "table td" ).each(function(){
-                    $( this ).addClass("ui-widget-content");
-            });
-            $( "table tr.enabled" ).hover(
-                    function(){
-                        $( this ).children("td").addClass("ui-state-hover");
-                    },function(){
-                        $( this ).children("td").removeClass("ui-state-hover");
-            });
-            $( "table tr.enabled" ).click(function(){
-                    $( this ).children( "td" ).toggleClass("ui-state-highlight");
-            });
-            
-            $( "ul#history-list li" ).each(function(){
-                    $( this ).addClass("ui-widget-content");
-            });
-            
-            $( "li" ).hover(
-                    function(){
-                        $( this ).addClass("ui-state-hover");
-                    },function(){
-                        $( this ).removeClass("ui-state-hover");
-            });
-            
-            $( ".ui-tabs .ui-tabs-nav" ).removeClass("ui-widget-header");
-            
-            $( ".tipTip-top" ).tipTip({
-                    delay: 1000,
-                    defaultPosition: 'top',
-            });
-            
-            $( ".tipTip-right" ).tipTip({
-                    defaultPosition: 'right',
-            });
-            
-            $( ".tipTip-left" ).tipTip({
-                    defaultPosition: 'left',
+        });
+
+        $( "button#help-network" ).click(function(e) {
+            e.preventDefault()
+            $( "#network_header_toggle" ).slideToggle('fast');
+        });
+
+        $( "table#device-table tr" ).each(function(){
+                $( this ).addClass("tipTip-right");
+        });
+        $( "table th" ).each(function(){
+                $( this ).addClass("ui-state-default");
+        });
+        $( "table td" ).each(function(){
+                $( this ).addClass("ui-widget-content");
+        });
+        $( "table tr.enabled" ).hover(
+                function(){
+                    $( this ).children("td").addClass("ui-state-hover");
+                },function(){
+                    $( this ).children("td").removeClass("ui-state-hover");
+        });
+        $( "table tr.enabled" ).click(function(){
+                $( this ).children( "td" ).toggleClass("ui-state-highlight");
+        });
+
+        $( "ul#history-list li" ).each(function(){
+                $( this ).addClass("ui-widget-content");
+        });
+
+        $( "#history-list li" ).hover(
+                function(){
+                    $( this ).addClass("ui-state-hover");
+                },function(){
+                    $( this ).removeClass("ui-state-hover");
+        });
+
+        $( ".ui-tabs .ui-tabs-nav" ).removeClass("ui-widget-header");
+
+        $( ".tipTip-top" ).tipTip({
+                delay: 1000,
+                defaultPosition: 'top',
+        });
+
+        $( ".tipTip-right" ).tipTip({
+                defaultPosition: 'right',
+        });
+
+        $( ".tipTip-left" ).tipTip({
+                defaultPosition: 'left',
+        });
+
+        $( ".required input" ).each(function() {
+            if ($(this).val() == '') {$(this).addClass('ui-state-hover')};
             });
 
-            $( ".required input" ).each(function() {
-                if ($(this).val() == '') {$(this).addClass('ui-state-hover')};
-                });
+        if (neuron_ids.length == 0) {
+            $( "#device-list" ).find( "#device-list-content" ).hide();
+        }
 
-            if (neuron_ids.length == 0) {
-                $( "#device-list" ).find( "#device-list-content" ).hide();
-                $( "#device-list" ).find( ".ui-icon-minusthick" ).hide();
-            }
-    });
-    
-    
-    
+        $( "#history_"+ version_id).addClass( "ui-state-highlight" );
+    })
 </script>
+
 {% endblock %}
 
+{% block title %}{{ network_obj.title }}{% endblock %}
+
 {% block content %}
-<div style="position:absolute; left:900px">
-<h2 style="margin: 0">{{network_obj.title}}</h2>
-<p>{{network_obj.description}}</p>
+<div >
 
-<!-- ADMIN VIEW -->
-{% ifequal user.id 1 %}
-<div id="view">
-    <div>
-    network_id: {{network_obj.id}}
-    result_id: {{result_obj.id}}
-    device_id: <span id="device_id"></span>
-    last_device_id:<span id="last_device_id"></span>
-    task_id: <span id="task_id"></span>
+    <div style="width: 880px">
+        <h2 class="delimiter" id="network_title" style="margin: 0">{{network_obj.title}}</h2>
+
+        <div class="collapse" id="network_header_toggle">
+
+            <div id="network_description">{{network_obj.description|default:"no description"}}</div>
+
+            <div style="float:right; width: 48%">
+                <h2 class="delimiter">Youtube</h2>
+
+                <div id="youtube"><object></object></div>
+
+            </div>
+
+            <div style="width: 48%">
+                <h2 class="delimiter">Ten steps to work with SPIC</h2>
+                <ol>
+                    <li>Add <b>new devices</b> and set their status.</li>
+                    <li>Once done, save the <b>device table</b>.</li>
+                    <li>Explore the <b>network layout</b>.</li>
+                    <li>Explore the <b>connectivity matrix</b>.</li>
+                    <li>Modify <b>the devices</b> if necessary save the table.</li>
+                    <li>Run the <b>simulation</b>.</li>
+                    <li>View the <b>results</b>.</li>
+                </ol>
+
+                Each successful simulation appears in the history list. The same list can be used to retrieve past simulations together with the results.
+                The recorded events (spikes, membrane potential etc.) are plotted online. They can also be downloaded as text files.
+
+                <h4>Optional:</h4>
+                Add comments to each simulation describing what you did it, why you did it, what were the results etc. This will help also when retrieving old simulations.
+
+                <p>Give some feedback in the forum.</p>
+
+            </div>
+
+                        <!-- ADMIN VIEW -->
+            {% ifequal user.id 1 %}
+            <div id="view">
+                <div>
+                network_id: {{network_obj.id}}
+                result_id: {{result_obj.id}}
+                device_id: <span id="device_id"></span>
+                last_device_id:<span id="last_device_id"></span>
+                task_id: <span id="task_id"></span>
+                </div>
+
+                <div id="switcher"></div>
+            </div>
+            {% endifequal %}
+
+        </div>
     </div>
-    
-    <div id="switcher"></div>
-</div>
-{% endifequal %}
 </div>
 
+{% endblock %}
 
-
-<div style="margin-top: -10px;">
-    <img src="/media/images/special/nuspic_banner.png" width="880" height="85"/>
-</div>
+{% block footer %}
 
 <div>
-
     <!-- DEVICES -->
     <div class="column" id="devices">
-        
+
         <!-- DEVICE LIST -->
         <div class="portlet" id="device-list">
             <div class="portlet-header" title="Hover a device to get more parameters or click a enabled device to modify it.">
                 Devices
             </div>
-            
+
             <div class="portlet-content" id="device-list-content">
-                
+
                 <form action="." method="POST" class="devices-form">
                     {% csrf_token %}
                     <table id="device-table">
                         <thead>
-                            <tr>
+                            <tr title="">
                                 <th class="delete collapse"></th>
                                 <th>Id</th>
                                 <th>Device</th>
@@ -690,7 +733,7 @@
                                 <th>Delay (ms)</th>
                             </tr>
                         </thead>
-                        
+
                         <tbody>
                             {% if network_obj.device_list|length > 0 %}
                                 {% for model, status, connections in network_obj.device_list %}
@@ -715,7 +758,7 @@
                                     </tr>
                                  {% endfor %}
                             {% endif %}
-                            
+
                             <tr class="collapse">
                                 <td class="delete collapse"></td>
                                 <td class="selectable id"></td>
@@ -724,9 +767,9 @@
                                 <td class="selectable weight"></td>
                                 <td class="selectable delay"></td>
                             </tr>
-                            
+
                         </tbody>
-                        
+
                     </table>
 
                     <div class="buttons">
@@ -734,18 +777,15 @@
                         <button class="check" id="save-devices">Save</button>
                         <button class="help" id="help-network">Help</button>
                     </div>
-                    
+
                     <ul class="messagelist" id="device-message"></ul>
-                    
+
                 </form>
             </div>
-<!--        </div>-->
 
-        <!-- DEVICE SELECT -->
-<!--        <div class="portlet" id="device-select">-->
             <div class="portlet-content" id="device-form-content">
                 <div class="field-wrapper" title="">
-                    <label for="device-select">Add a device:</label>
+                    <label for="id_label">Add a device:</label>
                     <select id="id_label">
                         <option value="">--- select a device ---</option>
                         {% for device in device_choices %}
@@ -762,43 +802,42 @@
               <span id="selected_device_id"></span> - <span id="selected_device_label"></span>
             </div>
 
-        {% for forms in device_formsets %}
+            {% for forms in device_formsets %}
 
-            <form action="." method="POST" class="portlet-content device-form" id="{{forms.id_label}}">
-                {% csrf_token %}
-                <div id="{{forms.id_label}}-form">
-                    {{forms.formsHTML}}
-                </div>
+                <form action="." method="POST" class="portlet-content device-form" id="{{forms.id_label}}">
+                    {% csrf_token %}
+                    <div id="{{forms.id_label}}-form">
+                        {{forms.formsHTML}}
+                    </div>
 
-                <div class="buttons">
-                    <button type="submit" class="check" id="submit-device-form">Apply</button>
-                    <button type="reset" class="reset" id="reset-device-form">Reset</button>
-                </div>
-                
-            </form>
-        {% endfor %}
-            </div>
-        
+                    <div class="buttons">
+                        <button type="submit" class="check" id="submit-device-form">Apply</button>
+                        <button type="reset" class="reset" id="reset-device-form">Reset</button>
+                    </div>
+
+                </form>
+            {% endfor %}
         </div>
+
     </div>
-    
+
     <!-- NETWORK -->
     <div class="column" id="network">
         {% if network_obj.connections %}
         <!--     CONNECTIVITY MATRIX  -->
-            {% if network_obj.neuron_ids|length <= 10 and network_obj.connect_to_input %}
+            {% if network_obj.neuron_ids|length <= 10 and network_obj.weight_list %}
                 <div class="portlet" id="connectivity_matrix">
                     <div class="portlet-header portlet-toggle" title="">
                         Connectivity matrix
                     </div>
-                    
+
                     <div class="portlet-content">
                         <div id="connections-tabs">
                             <ul>
                                 {% if network_obj.weight_list %}<li><a href="#weights-tab">Weights (pA)</a></li>{% endif %}
                                 {% if network_obj.delay_list %}<li><a href="#delays-tab">Delays (ms)</a></li>{% endif %}
                             </ul>
-                            
+
             <!--                 WEIGHT TAB -->
                             {% if network_obj.weight_list %}
                                 <div id="weights-tab">
@@ -812,7 +851,7 @@
                                             {% endfor %}
                                         </tr>
                                         </thead>
-                                        
+
                                         <tbody>
                                             {% for id, weights in network_obj.weight_list %}
                                                 <tr id="neuron_{{ id }}">
@@ -832,8 +871,8 @@
                                     </table>
                                 </div>
                             {% endif %}
-                            
-                            
+
+
             <!--                 DELAY TAB -->
                             {% if network_obj.delay_list %}
                                 <div id="delays-tab">
@@ -847,7 +886,7 @@
                                             {% endfor %}
                                         </tr>
                                         </thead>
-                                        
+
                                         <tbody>
                                             {% for id, delays in network_obj.delay_list %}
                                                 <tr id="neuron_{{ id }}">
@@ -871,17 +910,17 @@
                     </div>
                 </div>
             {% endif %}
-            
+
 
         <!--     SIMULATION -->
             <form action="." method="POST" class="portlet" id="network-form">
                 <div class="portlet-header" title="Before you start it, be sure that you have saved devices.">
                     Simulation
                 </div>
-                
+
                 <div class="portlet-content">
                     {% csrf_token %}
-                    
+
                     <div class="network-form-content">
                         {% if network_form.fieldsets %}
                             {% for fieldset in network_form.fieldsets %}
@@ -906,7 +945,7 @@
                             {{ network_form.as_div }}
                         {% endif %}
                     </div>
-                    
+
                     <div class="buttons">
                         <button type="submit" class="play" id="submit-network-form">Save & simulate</button>
                         <!--{% with network_form.fieldsets.fieldsets|last|last as advanced %}
@@ -918,12 +957,12 @@
                                 {% endif %}
                             {% endif %}
                         {% endwith%}-->
-                        <span id="task_status"></span>
+                        <div style="float:right" id="task_status"></div>
                     </div>
                 </div>
             </form>
         {% endif %}
-        
+
     </div>
 
     <!-- GUI -->
@@ -934,10 +973,10 @@
                     Network layout
                     <span class="ui-icon dialog ui-icon-newwin" style="float:right"></span>
                 </div>
-                
+
                 <div class="portlet-content">
                     <div id=holder></div>
-                    
+
                     <div class="buttons">
                         <button class="check" id="save-layout">Save</button>
                         <button class="reset" id="default-layout">Default</button>
@@ -947,7 +986,7 @@
 
                 </div>
 
-                <div class="portlet-content collapse" style="font-size: 0.9em; padding-left:15px; line-height: .5em;" id="layout-legend">
+                <div class="portlet-content collapse" id="layout-legend-content">
                     <p><b>blue line</b> - excitatory connection</p>
                     <p><b>red line</b> - inhibitory connection</p>
                     <p><b>left dot</b> - then neuron receives external input.</p>
@@ -962,10 +1001,10 @@
                     <div class="portlet-header portlet-toggle" title="">
                         Comment
                     </div>
-                    
+
                     <div class="portlet-content">
                         {% csrf_token %}
-                        
+
                         <div class="comment-form-content field-wrapper" title="Here you can enter a short description of what you did in order to relate to the simulation in the future.">
                             {{ comment_form.comment }}
                         </div>
@@ -978,7 +1017,7 @@
             {% endif %}
         </div>
     {% endif %}
-    
+
     <!-- RESULTS -->
     <div class="column" >
 
@@ -987,23 +1026,23 @@
             <div class="portlet-header portlet-toggle" title="Click a simulated network version to load it.">
                 History
             </div>
-            
+
             <div class="portlet-content">
-                
+
                 <form action="." method="POST" class="versions-form">
                     {% csrf_token %}
                     <ul class="pager" id="history-list">
                         {% for version in versions %}
                             {% with version.revision.result as result %}
-                            <li class="{% ifequal result_obj.local_id version.revision.result.local_id %} ui-state-highlight {% endifequal %} tipTip-left" 
-                                title="{{version.revision.result.comment|default_if_none:'no comment'}}" id="history_{{version.id}}">
+                            <li class="tipTip-left"
+                                title="{{version.revision.result.comment|default_if_none:'no comment'}}" id="history_{{version.revision.result.local_id|default:0}}">
                                 <input style="float:right" type="checkbox" name="version_ids" value="{{version.id}}" {% if forloop.last %} disabled {% endif %}>
                                 {% if result.favorite %}<div class="ui-icon ui-icon-star" style="float:right"></div>{% endif %}
                                 <div class="version-link">
                                     <a href="{% url network_simulated network_obj.SPIC_id network_obj.local_id version.revision.result.local_id|default:0 %}?version=revert" id="{{version.revision.result.local_id}}">
                                         {% if forloop.last %}
                                             Initial version of network
-                                        {% else %}  
+                                        {% else %}
                                             {% if result %}
                                                 <b>{{ result.local_id }}</b> -
                                                 {% if result.date_simulated %}
@@ -1023,7 +1062,7 @@
                             {% endwith %}
                         {% endfor %}
                     </ul>
-                    
+
                    <div class="buttons field-wrapper" title="" >
                         <button class="go" id="go-versions" style="float:right">Go</button>
                         <form action="#">
@@ -1039,14 +1078,14 @@
                 </form>
             </div>
         </div>
-        
+
     <!--     RESULT_DATA -->
         {% if result_obj.has_spike_detector or result_obj.has_voltmeter %}
             <div class="portlet">
                 <div class="portlet-header portlet-toggle" title="Simulation was succeed. So you can explore the view of results.">
                     Results
                 </div>
-                
+
                 <div class="portlet-content">
                     <div id="results-tabs">
                         <ul>
@@ -1064,7 +1103,7 @@
                                 <div>
                                     <iframe scrolling="no" src="{% url spike_detector result_obj.id %}?view=small" id="SpikeDetectorThumbnail"></iframe>
                                 </div>
-                                
+
                                 <div class="buttons">
                                     <button class="zoomin" id="spike_detector-link">Larger view</button>
                                 </div>
@@ -1081,27 +1120,27 @@
                                         The number of points is too big.
                                     {% endif %}
                                 </div>
-                                    <div class="field-wrapper" title="">
-                                        <label for="field-wrapper">View larger screen</label>
-                                        <select id="voltmeter-select">
-                                            <option>--- Select a neuron ---</option>
-                                            {% for model, status, params in result_obj.voltmeter_targets %}
-                                                <option value="/result/{{result_obj.id}}/voltmeter/?neuron={{model.id}}" name="Neuron [{{model.id}}]">
-                                                    Neuron [{{model.id}}]
-                                                </option>
-                                            {% endfor %}
-                                        </select>
-                                        </div>
-                                        <div class="buttons">
-                                            <button class="reset" id="reload">Reload</button>
-                                        </div>
+
+                                <div class="field-wrapper" title="">
+                                    <label for="voltmeter-select">View larger screen</label>
+                                    <select id="voltmeter-select">
+                                        <option>--- Select a neuron ---</option>
+                                        {% for model, status, params in result_obj.voltmeter_targets %}
+                                            <option value="/result/{{result_obj.id}}/voltmeter/?neuron={{model.id}}" name="Neuron [{{model.id}}]">
+                                                Neuron [{{model.id}}]
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+
+                                    <div class="buttons">
+                                        <button class="reset" id="reload">Reload</button>
+                                    </div>
                                 </div>
                             {% endif %}
                         </div>
-                        
+
                         <div class="buttons">
                             <a class="document" href="{% url data result_obj.id %}">Download Results</a>
-                            
                         </div>
                     </div>
                 </div>
@@ -1125,33 +1164,11 @@
         <div class="ui-dialog" title="Confirm to simulate?" id="dialog-confirmSimulation">
             <p></p>
         </div>
-        
-        <div class="ui-dialog" id="dialog-simulating"> 
-        </div>
-        
-        <div class="ui-dialog" id="step-helper">
-            Ten steps to work with SPIC:
-            <ol id="help-steps">
-                <li class="help-steps" id="device-add">Add <b>new devices</b> and set their status.</li>
-                <li class="help-steps" id="devices-save">Once done, save the <b>device table</b>.</li>
-                <li class="help-steps" id="layout-explore">Explore the <b>network layout</b>.</li>
-                <li class="help-steps" id="matrix-check">Explore the <b>connectivity matrix</b>.</li>
-                <li class="help-steps" id="device-change">Modify <b>the devices</b> if necessary save the table.</li>
-                <li class="help-steps" id="status-run">Run the <b>simulation</b>.</li>
-                <li class="help-steps" id="results-analye">View the <b>results</b>.</li>
-            </ol>
-            
-            Each successful simulation appears in the history list. The same list can be used to retrieve past simulations together with the results.
-            The recorded events (spikes, membrane potential etc.) are plotted online. They can also be downloaded as text files.
 
-            <h5>Optional:</h5>
-            Add comments to each simulation describing what you did it, why you did it, what were the results etc. This will help also when retrieving old simulations.
-            
-            <p>Give some feedback in the forum.</p>
-            
+        <div class="ui-dialog" id="dialog-simulating">
         </div>
-        
+
     </div>
 </div>
-{% endblock %}
 
+{% endblock %}
