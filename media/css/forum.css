@@ -1,14 +1,9 @@
 #content {
-    font-family: sans-serif;
     font-size: 14px;
-    padding: 10px;
     margin: auto;
-    line-height: 1em;
+    line-height: 1.2em;
 }
 
-h2 {
-    padding: 10px;
-}
 
 
 /* Forums list
@@ -21,7 +16,6 @@ h2 {
         overflow: hidden;
     }
         .forum_list_menu {
-            padding-top: 10px;
             float: left;
         }
 
@@ -188,12 +182,9 @@ h2 {
 
     #topic_list .forum_menu {
         float: right;
-        font-size: 0.9em;
-        padding-top: 3px;
     }
 
     #topic_list .headline {
-        padding-top: 10px;
         overflow: hidden;
     }
 
@@ -818,9 +809,4 @@ h2 {
 
 #add_topic_form, #edit_topic_form, #move_topic_form, #split_topic_form {
     padding-top: 10px;
-}
-
-.delimiter {
-	border-bottom: 1px solid #CCCCCC;
-	overflow	 : hidden;
 }
