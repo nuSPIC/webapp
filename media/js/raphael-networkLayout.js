@@ -228,11 +228,12 @@ $.fn.loadLayout = function (device_list) {
         
         draggableset.push(
             paper.text(x, y, shape.data("label").toString())
-                 .attr({fill: $( ".ui-widget-content" ).css("color"), 
-                       "font-weight": "bold"}
-                       )
-                 .toBack()
-                 );
+                .attr({fill: $( ".ui-widget-content" ).css("color"),
+                    "font-family": "Aller",
+                    "font-weight": "bold"}
+                    )
+                .toBack()
+                );
                  
         if ( shape.data("input") ) {
             draggableset.push(
