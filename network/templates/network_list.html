@@ -6,29 +6,38 @@
 
 {% block content %}
         <div class="flatpage">
+            <span style="float:right; font-size:0.8em; font-weight:bold; margin-right:5px">Version</span>
+        
+            {% regroup network_list|dictsort:"SPIC_id" by SPIC_id as network_by_SPIC %}
 
-            <div>
-                {% regroup network_list|dictsort:"SPIC_id" by SPIC_id as network_by_SPIC %}
+            {% for group in network_by_SPIC %}
+                {{ flatpage.content|split:forloop.counter0 }}
 
-                {% for group in network_by_SPIC %}
-                    {{ flatpage.content|split:forloop.counter0 }}
-
-                    <ul>
-                        {% for network in group.list %}
-                            <li id="{{ network.local_id }}">
+                <ul>
+                    {% for network in group.list %}
+                        <li id="{{ network.local_id }}">
                             <a href="{% url network network.SPIC_id network.local_id %}">
                                 {{ network.title|default_if_none:"Network" }}
                             </a>
-                            : {{ network.description|default:"no description" }}
-                            </li>
-                        {% endfor %}
-                    </ul>
+                            : <span style="font-size:0.8em">{{ network.description|default:"no description" }}</span>
 
-                {% endfor %}
-            
-                {{ flatpage.content|split:-2 }}
-                {{ flatpage.content|split:-1 }}
-            </div>
+                            <div style="float:right; font-size:0.8em">
+                                <a href="{% url network network.SPIC_id network.local_id %}?version=first">
+                                    first
+                                </a>
+                                 |
+                                <a href="{% url network network.SPIC_id network.local_id %}?version=last">
+                                    last
+                                </a>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+
+            {% endfor %}
+
+            {{ flatpage.content|split:-2 }}
+            {{ flatpage.content|split:-1 }}
         </div>
 
 
