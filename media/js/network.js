@@ -119,7 +119,7 @@ $.fn.loadTheme = function (options) {
 
 
         // SELECT DEVICE TO CHANGE PARAMETERS
-        $( "tr.enabled" ).find( "td.selectable" ).live('click', function(e) {
+        $( "tr.enabled" ).find( "td.selectable" ).click(function(e) {
                 e.preventDefault();
                 $( "ul.errorlist" ).remove();
                 $( "option:first" ).attr('selected', 'selected');
