@@ -132,6 +132,9 @@ ul.messagelist {
 
 /* Connections Table
 *************************/
+#weights-tab, #delays-tab{
+    padding: .5em 0 0 0;
+}
 
     .connections-table td {
         min-width: 2.6em;
