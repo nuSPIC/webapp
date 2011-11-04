@@ -124,8 +124,8 @@ class Simulation(AbortableTask):
 
                 
         # Create a version of network
-        versions = Version.objects.get_for_object(network_obj).reverse()
-        form = kwargs['form']
+#        versions = Version.objects.get_for_object(network_obj).reverse()
+#        form = kwargs['form']
 #        form = NetworkForm(request.POST, instance=network_obj)
 
 #        try:
