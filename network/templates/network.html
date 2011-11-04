@@ -51,13 +51,12 @@
 
             $( ".portlet" ).loadTheme({"tipTip":true});
 
-            if (neuron_ids.length > 0) {
-                    $( "#holder" ).loadLayout( device_list );
-                } else {
-                    $( "#device-list" ).find( "#device-list-content" ).hide();
-                    $( "#holder" ).parents( ".portlet" ).hide();
-                    $( "div#connectivity_matrix" ).hide();
-                }
+            $( "div#step-helper" ).dialog({
+                                   title: 'How to use it?',
+                                   resizable: false,
+                                   height: 450,
+                                   width: 550,
+                 }).parent().hide();
 
             $( "div#connections-tabs" ).tabs();
             $( "div#results-tabs" ).tabs();
@@ -165,10 +164,10 @@
                 var status = task['status'];
                 $( "#task_status" ).html(status);
                 if (status == 'PENDING') {
-                    $( "#task_status" ).html('...simulating. Please wait.');
                     window.setTimeout(function() {get_task_status()}, 2000);
                 } else {
                     if (status == 'ABORTED') {
+                        $( "#task_status" ).html('ABORT');
                         $( "#dialog-simulating" ).dialog({
                                 title:"Simulation was aborted.",
                                 buttons: {
@@ -183,8 +182,8 @@
                                     }
                                 },
                         });
-                        $( "#task_status" ).html('Simulation aborted.').effect("highlight", {}, 1000);
                     } else if (status == 'FAILURE') {
+                        $( "#task_status" ).html('Simulation failure.').effect("highlight", {}, 1000);
                         var result = task['result'];
                         $( "#dialog-simulating" ).dialog({
                                 title:"Simulation failed.",
@@ -200,7 +199,6 @@
                                     }
                                 },
                         });
-                        $( "#task_status" ).html('Simulation failure.').effect("highlight", {}, 1000);
                     } else if (status == 'SUCCESS') {
                         $( "#dialog-simulating" ).dialog( {
                                 title:"Simulation was finished successfully.",
@@ -447,6 +445,198 @@
         })
     {% endif %}
 
+    $(document).ready(function() {
+
+        // CONTENT HEADER
+        $( "#banner" ).css("background", "url(/media/images/special/nuspic_banner_small.png) no-repeat")
+                .css('height','85px')
+                .css('width', '880px');
+
+
+        // DEVICE TABLE
+        $( "table#device-table tr" ).each(function(){
+                $( this ).addClass("tipTip-right");
+        });
+        $( "table th" ).each(function(){
+                $( this ).addClass("ui-state-default");
+        });
+        $( "table td" ).each(function(){
+                $( this ).addClass("ui-widget-content");
+        });
+        $( "table tr.enabled" ).hover(
+                function(){
+                    $( this ).children("td").addClass("ui-state-hover");
+                },function(){
+                    $( this ).children("td").removeClass("ui-state-hover");
+        });
+        $( "table tr.enabled" ).click(function(){
+                $( this ).children( "td" ).toggleClass("ui-state-highlight");
+        });
+
+
+        // SELECT DEVICE TO CHANGE PARAMETERS
+        $( "tr.enabled" ).find( "td.selectable" ).click(function(e) {
+                e.preventDefault();
+                $( "ul.errorlist" ).remove();
+                $( "option:first" ).attr('selected', 'selected');
+                selected_device_id = $(this).parent( ".enabled" ).attr('id')
+                var device = device_list[selected_device_id-1];
+                var form = $( "#"+device[0].label );
+
+                if ($( form ).is(":visible")) {
+                    $( "#device_id" ).html("");
+                    $( form ).toggle();
+                    $( "#device-form" ).hide();
+                } else {
+                    $( "#device_id" ).html(selected_device_id)
+                    $( "tr.enabled" ).each(function() {
+                            if ($(this).attr('id') != selected_device_id && $(this).children("td").hasClass("ui-state-highlight")) {
+                                $(this).children("td").toggleClass("ui-state-highlight");
+                            }
+                    });
+                    $( ".device-form:visible" ).toggle();
+                    $( form ).reset();
+                    var form_content = $( form ).children();
+                    $(form_content)
+                        .find( "#id_model" ).val(device[0]['label']);
+                    for (var key in device[1]) {
+                        $(form_content).find( "#id_"+ key ).val(device[1][key]).removeClass('ui-state-hover');
+                    };
+                    for (var key in device[2]) {
+                        $(form_content).find( "#id_"+ key ).val(device[2][key]).removeClass('ui-state-hover');
+                    };
+                    $( form ).toggle();
+                    $( "#device-form" )
+                          .find( "#selected_device_id" ).html(selected_device_id).end()
+                          .find( "#selected_device_label" ).html(device[0]['label'].replace(/_/g, ' ')).end()
+                          .show();
+                }
+        });
+
+
+        // DELETE DEVICE
+        $( "button#delete-devices" ).click(function(e) {
+                e.preventDefault();
+                $( this ).toggleClass( "ui-state-highlight" )
+                    if ($( "table#device-table .delete" ).is(":visible") && $( "table#device-table .delete" ).find( "input" ).is(":checked")) {
+                    $(".devices-form").submit();
+                } else {
+                    $( "table#device-table .delete" ).toggle();
+                };
+        });
+
+
+        // GET HELP
+        $( "button#help-network" ).live('click',function(e) {
+            e.preventDefault();
+            $( "#step-helper" ).parent().slideToggle();
+        });
+
+
+        // SELECT A DEVICE TO ADD
+        $( "select#id_label" ).change(function(e) {
+                e.preventDefault()
+                $( ".device-form:visible" ).hide();
+                $( "#device-form" ).hide();
+                $( "ul.errorlist" ).remove();
+                selected_device_id = last_device_id+1
+                $( "span#device_id" ).html(selected_device_id);
+                $( "tr.enabled" ).each(function() {
+                            if ($(this).attr('id') != selected_device_id && $(this).children("td").hasClass("ui-state-highlight")) {
+                                $(this).children("td").toggleClass("ui-state-highlight");
+                            }
+                    });
+
+                var form = $( "#"+ $(this).val() );
+                if ($(this).val() != "") {
+                    $( form ).reset().find( "#selected_device_id" ).html(selected_device_id).end()
+                        .find( "#id_model" ).attr('value', $(this).val()).end()
+                        .show();
+
+                    $( "#device-form" )
+                        .find( "#selected_device_id" ).html(selected_device_id).end()
+                        .find( "#selected_device_label" ).html($(this).val().toString().replace(/_/g, ' ')).end()
+                        .show();
+                }
+        });
+
+
+        // DEVICE FORMS
+        $( ".required input" ).each(function() {
+            if ($(this).val() == '') {$(this).addClass('ui-state-hover')};
+            });
+
+        $( ".required input" ).keyup(function() {
+            if (this.value == '') {
+                $(this).addClass('ui-state-hover');
+            } else {
+                $(this).removeClass('ui-state-hover');
+            }
+        });
+
+
+        // NETWORK LAYOUT
+        $( "button#layout-legend" ).click(function() {
+            $(this).toggleClass("ui-state-highlight");
+            $( "div#layout-legend-content" ).slideToggle();
+        });
+
+
+        // HISTORY LIST
+        $( "#history_"+ version_id).addClass( "ui-state-highlight" );
+
+        $( "ul#history-list li" ).each(function(){
+            $( this ).addClass("ui-widget-content");
+        });
+
+        $( "#history-list li" ).hover(
+            function(){
+                $( this ).addClass("ui-state-hover");
+            },function(){
+                $( this ).removeClass("ui-state-hover");
+        });
+
+        $( "ul#history-list div.version-link" ).click(function (e) {
+                $(".ui-dialog-content" ).html($( this ).attr('title'));
+                $( "#dialog-loading" ).dialog({
+                        title: 'Loading... please wait.',
+                        resizable: false,
+                        modal: true,
+                });
+                window.location.href = $( this ).find( "a" ).attr('href')
+        });
+
+        $( "button#go-versions" ).click(function(e) {
+                e.preventDefault();
+                if ($( "ul#history-list input" ).is(":checked")) {
+                    $( ".versions-form" ).submit();
+                };
+        });
+
+        // tipTip
+        $( ".tipTip-top" ).tipTip({
+                delay: 1000,
+                defaultPosition: 'top',
+        });
+
+        $( ".tipTip-right" ).tipTip({
+                defaultPosition: 'right',
+        });
+
+        $( ".tipTip-left" ).tipTip({
+                defaultPosition: 'left',
+        });
+
+        if (neuron_ids.length > 0) {
+                    $( "#holder" ).loadLayout( device_list );
+                } else {
+                    $( "#device-list" ).find( "#device-list-content" ).hide();
+                    $( "#holder" ).parents( ".portlet" ).hide();
+                    $( "div#connectivity_matrix" ).hide();
+                }
+
+    })
+
 
 </script>
 
@@ -458,55 +648,23 @@
 <div >
 
     <div style="width: 880px">
-        <h2 class="delimiter" id="network_title" style="margin: 0">{{network_obj.title}}</h2>
 
-        <div class="collapse" id="network_header_toggle">
+        <span id="network_title" style="font-size:1.2em; padding:5px"><strong>{{network_obj.title}}</strong></span>
+        &raquo;<span id="network_description" >{{network_obj.description|default:"no description"}}</span>
 
-            <div id="network_description">{{network_obj.description|default:"no description"}}</div>
-
-            <div style="float:right; width: 48%">
-                <h2 class="delimiter">Youtube</h2>
-
-                <div id="youtube"><object></object></div>
-
+        <!-- ADMIN VIEW -->
+        {% ifequal user.id 1 %}
+        <div id="view">
+            <div>
+            network_id: {{network_obj.id}}
+            result_id: {{result_obj.id}}
+            device_id: <span id="device_id"></span>
+            last_device_id:<span id="last_device_id"></span>
+            task_id: <span id="task_id"></span>
             </div>
 
-            <div style="width: 48%">
-                <h2 class="delimiter">Ten steps to work with SPIC</h2>
-                <ol>
-                    <li>Add <b>new devices</b> and set their status.</li>
-                    <li>Once done, save the <b>device table</b>.</li>
-                    <li>Explore the <b>network layout</b>.</li>
-                    <li>Explore the <b>connectivity matrix</b>.</li>
-                    <li>Modify <b>the devices</b> if necessary save the table.</li>
-                    <li>Run the <b>simulation</b>.</li>
-                    <li>View the <b>results</b>.</li>
-                </ol>
-
-                Each successful simulation appears in the history list. The same list can be used to retrieve past simulations together with the results.
-                The recorded events (spikes, membrane potential etc.) are plotted online. They can also be downloaded as text files.
-
-                <h4>Optional:</h4>
-                Add comments to each simulation describing what you did it, why you did it, what were the results etc. This will help also when retrieving old simulations.
-
-                <p>Give some feedback in the forum.</p>
-
-            </div>
-
-                        <!-- ADMIN VIEW -->
-            {% ifequal user.id 1 %}
-            <div id="view">
-                <div>
-                network_id: {{network_obj.id}}
-                result_id: {{result_obj.id}}
-                device_id: <span id="device_id"></span>
-                last_device_id:<span id="last_device_id"></span>
-                task_id: <span id="task_id"></span>
-                </div>
-
-                <div id="switcher"></div>
-            </div>
-            {% endifequal %}
+            <div id="switcher"></div>
+        {% endifequal %}
 
         </div>
     </div>
@@ -642,8 +800,8 @@
                     <div class="portlet-content">
                         <div id="connections-tabs">
                             <ul>
-                                {% if network_obj.weight_list %}<li><a href="#weights-tab">Weights (pA)</a></li>{% endif %}
-                                {% if network_obj.delay_list %}<li><a href="#delays-tab">Delays (ms)</a></li>{% endif %}
+                                {% if network_obj.weight_list %}<li><a href="#weights-tab"><strong>Weights (pA)</strong></a></li>{% endif %}
+                                {% if network_obj.delay_list %}<li><a href="#delays-tab"><strong>Delays (ms)</strong></a></li>{% endif %}
                             </ul>
 
             <!--                 WEIGHT TAB -->
@@ -777,7 +935,7 @@
     {% if network_obj.devices_json %}
         <div class="column" id="GUI">
             <div class="portlet" id="network_layout">
-                <div class="portlet-header" title="">
+                <div class="portlet-header portlet-toggle" title="">
                     Network layout
                     <span class="ui-icon dialog ui-icon-newwin" style="float:right"></span>
                 </div>
@@ -975,6 +1133,30 @@
 
         <div class="ui-dialog" id="dialog-simulating">
         </div>
+
+
+        <div class="ui-dialog" id="step-helper">
+            <h2 class="delimiter">Ten steps to work with SPIC</h2>
+            <ol>
+                <li>Add <b>new devices</b> and set their status.</li>
+                <li>Once done, save the <b>device table</b>.</li>
+                <li>Explore the <b>network layout</b>.</li>
+                <li>Explore the <b>connectivity matrix</b>.</li>
+                <li>Modify <b>the devices</b> if necessary save the table.</li>
+                <li>Run the <b>simulation</b>.</li>
+                <li>View the <b>results</b>.</li>
+            </ol>
+
+            Each successful simulation appears in the history list. The same list can be used to retrieve past simulations together with the results.
+            The recorded events (spikes, membrane potential etc.) are plotted online. They can also be downloaded as text files.
+
+            <h4>Optional:</h4>
+            Add comments to each simulation describing what you did it, why you did it, what were the results etc. This will help also when retrieving old simulations.
+
+            <p>Give some feedback in the forum.</p>
+
+        </div>
+
 
     </div>
 </div>
