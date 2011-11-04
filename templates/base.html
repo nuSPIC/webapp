@@ -29,7 +29,7 @@
             <div class="navigation">
                 <a href="{% url mainpage %}">Home</a> |
                 <a href="{% url news_archive %}">News</a> |
-                <a href="{% url network_list %}" id="competition">Competition</a> |
+                <a href="{% url network_list %}" id="competition"><strong>Competition</strong></a> |
                 <a href="/about/">About</a> |
                 <a href="/faq/">FAQ</a> |
                 <a href="{% url accounts %}">Community</a> |
@@ -42,13 +42,15 @@
         
         <div id="content">
             <div class="ui-inner-shadow" id="content-head">
+
                 <div id="content-inner">
-                    <div id="banner" style="background: url({{ MEDIA_URL }}images/special/nuspic_logo.png) no-repeat;"></div>
+                    <div id="banner" style="background: url(/media/images/special/nuspic_logo.png) no-repeat;"></div>
                     {% block content %}{% endblock %}
                 </div>
+
             </div>
 
-            <div id="content-body">
+            <div id="content-footer">
                 {% block footer %}{% endblock %}
             </div>
 
@@ -58,7 +60,7 @@
             <div class="navigation">
                 <a href="{% url mainpage %}">Home</a> |
                 <a href="{% url news_archive %}">News</a> |
-                <a href="{% url network_list %}"> Competition</a> |
+                <a href="{% url network_list %}">Competition</a> |
                 <a href="/about/">About</a> |
                 <a href="/faq/">FAQ</a> |
                 <a href="{% url accounts %}">Community</a> |
