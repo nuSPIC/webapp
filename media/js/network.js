@@ -17,7 +17,7 @@ $.fn.loadTheme = function (options) {
                     
         $( this ).find( ".portlet-header .toggle" ).click(function() {
                 $( this ).toggleClass( "ui-icon-minusthick" ).toggleClass( "ui-icon-plusthick" );
-                $( this ).parents( ".portlet:first" ).find( "div.portlet-content" ).fadeToggle("slow");
+                $( this ).parents( ".portlet:first" ).find( "div.portlet-content" ).slideToggle("slow");
         });
         
         $( this ).find( ".buttons" )
