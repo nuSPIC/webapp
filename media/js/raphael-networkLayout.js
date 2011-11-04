@@ -229,7 +229,7 @@ $.fn.loadLayout = function (device_list) {
         draggableset.push(
             paper.text(x, y, shape.data("label").toString())
                 .attr({fill: $( ".ui-widget-content" ).css("color"),
-                    "font-family": "Aller",
+                    "font-family": "Helvetica, Arial",
                     "font-weight": "bold"}
                     )
                 .toBack()
