@@ -1,16 +1,16 @@
 
 /* Component containers
 ----------------------------------*/
-.ui-widget { font-family: Aller, sans serif; }
+.ui-widget { font-family: Helvetica, sans-serif; }
 .ui-widget .ui-widget { font-size: .9em; }
-.ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button { font-family: Aller, sans serif; }
+.ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button { font-size: .85em; }
 
 .ui-widget-header { padding: 5px; }
 .ui-widget-header a { font-weight: bold;}
 
 /* Button
 ----------------------------------*/
-input.ui-button { padding: .2em .5em; }
+input.ui-button { padding: .2em .5em; font-size: .85em; }
 
 
 /* Dialog
