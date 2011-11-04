@@ -133,12 +133,13 @@
                             },
                     });
                 } else {
-
+                    $( "#submit-network-form" ).attr("disabled", true);
                     $( "#dialog-simulating" ).dialog({
                             title: "Simulation has started.",
                             resizable: false,
-                            height: 0,
+                            height: 150,
                             width: 400,
+                            modal: true,
                             buttons: {
                                 'Abort': function() {
                                     $.getJSON('/network/ajax/'+ {{ network_obj.id }} +'/'+ version_id +'/simulate/',
@@ -166,6 +167,8 @@
                 if (status == 'PENDING') {
                     window.setTimeout(function() {get_task_status()}, 2000);
                 } else {
+                    $( "#loading_icon" ).fadeOut();
+                    $( "#submit-network-form" ).attr("disabled", false);
                     if (status == 'ABORTED') {
                         $( "#task_status" ).html('ABORT');
                         $( "#dialog-simulating" ).dialog({
@@ -1122,9 +1125,6 @@
         </div>
 
         <div class="ui-dialog" id="dialog-loading">
-            <p>
-                <span class="ui-dialog-content"></span>
-            </p>
         </div>
 
         <div class="ui-dialog" title="Confirm to simulate?" id="dialog-confirmSimulation">
@@ -1132,6 +1132,9 @@
         </div>
 
         <div class="ui-dialog" id="dialog-simulating">
+            <div style="width:220px; margin:auto; padding:12px" id="loading_icon">
+                <img src="/media/images/icons/ajax-loader_bar.gif">
+            </div>
         </div>
 
 
