@@ -288,12 +288,10 @@ def device_preview(request, network_id):
         if request.method == 'POST':
           
             post = request.POST
-            neuron_ids = json.decode(str(post['neuron_ids']))
-            
             id_label = post.get('model')
             id_labels = [device['id_label'] for device in MODELS]
             device = MODELS[id_labels.index(id_label)]
-            form = device['form'](network_obj, neuron_ids, post)
+            form = device['form'](network_obj, post)
 
             # check if form is valid.
             if form.is_valid():
