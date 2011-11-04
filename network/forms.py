@@ -2,6 +2,7 @@
 from django import forms
 from form_utils.forms import BetterForm, BetterModelForm # They are able to group fields in fieldsets.
 
+import lib.json as json
 from network.models import Network
 from network.helpers import values_extend
 
@@ -25,9 +26,10 @@ class NetworkForm(BetterModelForm):
 
 class NeuronForm(BetterForm):
     """ Parent form for input and neuron devices """    
-    def __init__(self, network_obj=None, neuron_ids=None, *args, **kwargs):
+    def __init__(self, network_obj=None, *args, **kwargs):
         self.instance = network_obj
-        self.neuron_ids = neuron_ids
+        if args:
+            self.neuron_ids = json.decode(str(args[0]['neuron_ids']))
         super(NeuronForm, self).__init__(*args, **kwargs)
     
     model = forms.CharField(max_length=32, widget=forms.HiddenInput())
@@ -187,9 +189,10 @@ Inputs as child forms of DeviceForm
 
 class DeviceForm(BetterForm):
     """ Parent form for input and neuron devices """    
-    def __init__(self, network_obj=None, neuron_ids=None, *args, **kwargs):
+    def __init__(self, network_obj=None, *args, **kwargs):
         self.instance = network_obj
-        self.neuron_ids = neuron_ids
+        if args:
+            self.neuron_ids = json.decode(str(args[0]['neuron_ids']))
         super(DeviceForm, self).__init__(*args, **kwargs)
     
     model = forms.CharField(max_length=32, widget=forms.HiddenInput())
@@ -512,9 +515,10 @@ General Forms
 """
 
 class SourceForm(BetterForm):
-    def __init__(self, network_obj=None, neuron_ids=None, *args, **kwargs):
+    def __init__(self, network_obj=None, *args, **kwargs):
         self.instance = network_obj
-        self.neuron_ids = neuron_ids
+        if args:
+            self.neuron_ids = json.decode(str(args[0]['neuron_ids']))
         super(SourceForm, self).__init__(*args, **kwargs)
         
     model = forms.CharField(max_length=32, widget=forms.HiddenInput())
@@ -532,10 +536,14 @@ class SourceForm(BetterForm):
             raise forms.ValidationError("Enter neuron id(s), e.g. '1,2,3' or '1-4'")
         
         # check if all targets are neurons
-        neuron_ids = self.instance.neuron_ids()        
+        neuron_ids = self.instance.neuron_ids()
+        parrot_ids = self.instance.neuron_ids(label='parrot_neuron')
+        
         for target in extended_list:
             if not (target in neuron_ids or target in self.neuron_ids):
                 raise forms.ValidationError("Targets should be neurons.")
+            if target in parrot_ids:
+                raise forms.ValidationError("Some of the targets are not recordable.")
             
         return targets
 
@@ -544,9 +552,10 @@ class SourceForm(BetterForm):
                     ('Advanced', {'fields': [], 'classes': ['advanced']}))
 
 class TargetForm(BetterForm):
-    def __init__(self, network_obj=None, neuron_ids=None, *args, **kwargs):
+    def __init__(self, network_obj=None, *args, **kwargs):
         self.instance = network_obj
-        self.neuron_ids = neuron_ids
+        if args:
+            self.neuron_ids = json.decode(str(args[0]['neuron_ids']))
         super(TargetForm, self).__init__(*args, **kwargs)
         
     model = forms.CharField(max_length=32, widget=forms.HiddenInput())
@@ -564,10 +573,14 @@ class TargetForm(BetterForm):
         
         # check if all sources are neurons
         neuron_ids = self.instance.neuron_ids()
+        parrot_ids = self.instance.neuron_ids(label='parrot_neuron')
+
         for source in extended_list:
             if not (source in neuron_ids or source in self.neuron_ids):
-                raise forms.ValidationError("Targets should be neurons.")
-            
+                raise forms.ValidationError("Sources should be neurons.")
+            if source in parrot_ids:
+                raise forms.ValidationError("Some of the sources are not recordable.")
+
         return sources
 
     class Meta:
