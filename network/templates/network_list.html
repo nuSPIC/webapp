@@ -4,16 +4,44 @@
 
 {% block title %}{{ flatpage.title }}{% endblock %}
 
+{% block extrahead %}
+    <link href="{{ MEDIA_URL }}css/nuspic/jquery-ui-1.8.14.custom.css" type="text/css" rel="stylesheet" />
+    <link href="{{ MEDIA_URL }}css/jquery-ui.custom.css" type="text/css" rel="stylesheet" />
+    
+    <script type="text/javascript" src="/media/js/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="/media/js/jquery-ui-1.8.14.custom.min.js"></script>
+
+    <script type="text/javascript" >
+        $(document).ready(function() {
+            $( "#tutorial_vid" ).dialog({
+                                   title: 'Tutorial',
+                                   resizable: false,
+                                   height: 395,
+                                   width: 600,
+                 }).parent().hide();
+
+            $( "#tutorial" ).click(function(e) {
+                e.preventDefault();
+                $( "#tutorial_vid" ).parents( ".ui-widget" ).toggle();
+            })
+
+
+        });
+    </script>
+
+{% endblock %}
+
 {% block content %}
         <div class="flatpage">
-            <span style="float:right; font-size:0.8em; font-weight:bold; margin-right:5px">Version</span>
-        
+
             {% regroup network_list|dictsort:"SPIC_id" by SPIC_id as network_by_SPIC %}
 
             {% for group in network_by_SPIC %}
                 {{ flatpage.content|split:forloop.counter0 }}
 
-                <ul>
+                {% if group.grouper != '0' %}
+{#                <div style="text-align:right; font-size:0.8em; font-weight:bold; margin-right:5px">Version</div>#}
+                <ul style="margin-top:0;">
                     {% for network in group.list %}
                         <li id="{{ network.local_id }}">
                             <a href="{% url network network.SPIC_id network.local_id %}">
@@ -21,24 +49,24 @@
                             </a>
                             : <span style="font-size:0.8em">{{ network.description|default:"no description" }}</span>
 
-                            <div style="float:right; font-size:0.8em">
-                                <a href="{% url network network.SPIC_id network.local_id %}?version=first">
-                                    first
-                                </a>
-                                 |
-                                <a href="{% url network network.SPIC_id network.local_id %}?version=last">
-                                    last
-                                </a>
-                            </div>
+{#                            <div style="float:right; font-size:0.8em">#}
+{#                                <a href="{% url network network.SPIC_id network.local_id %}?version=first">#}
+{#                                    first#}
+{#                                </a>#}
+{#                                 |#}
+{#                                <a href="{% url network network.SPIC_id network.local_id %}?version=last">#}
+{#                                    last#}
+{#                                </a>#}
+{#                            </div>#}
                         </li>
                     {% endfor %}
                 </ul>
+                {% endif %}
 
             {% endfor %}
 
             {{ flatpage.content|split:-2 }}
             {{ flatpage.content|split:-1 }}
         </div>
-
 
 {% endblock %}
