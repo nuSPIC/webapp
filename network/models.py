@@ -178,12 +178,12 @@ class Network(models.Model):
             return True
         return False
 
-    def neuron_ids(self):
+    def neuron_ids(self, label=None):
         """
         Get a list of neuron ID for connectivity matrix and
         validation check of targets/sources.
         """
-        neuron_list = self.device_list(modeltype='neuron')
+        neuron_list = self.device_list(modeltype='neuron', label=label)
         if neuron_list:
             return [int(dev[0]['id']) for dev in neuron_list]
         return neuron_list
