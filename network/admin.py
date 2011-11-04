@@ -11,10 +11,12 @@ class NetworkAdmin(VersionAdmin):
     """
     
     list_display = (
-        '__unicode__',
+        'user',
+        'SPIC_id',
+        'local_id',
         'title',
         )
-    list_filter = ['SPIC_id']
+    list_filter = ['SPIC_id', 'title']
 
 try:
     admin.site.register(Network, NetworkAdmin)
