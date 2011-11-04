@@ -7,7 +7,7 @@
 {% block title %}{{ flatpage.title }}{% endblock %}
 
 {% block content %}
-    <div id="news">
+    <div style="width: 27%;" id="news">
         {% for news in news_list %}
             <div>
                 <strong><span style="color:#AAAAAA">{{ news.pub_date|date:"DATE_FORMAT" }}</span> <br> &raquo; {{ news.title }}</strong>
@@ -22,7 +22,7 @@
         <a href="{% url news_archive %}">News archive</a>
     </div>
     
-    <div class="flatpage">
+    <div style="width: 70%;" class="flatpage">
         {{ flatpage.content }}
     </div>
 {% endblock %}
