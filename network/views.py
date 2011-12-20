@@ -75,69 +75,39 @@ def network_layout(request, SPIC_id, local_id):
 def network_simulated(request, SPIC_id, local_id, result_id):
     """ Main view for network workplace """
     
-    # Check if prototype exists
-    prototype = get_object_or_404(Network, user_id=0, SPIC_id=SPIC_id, local_id=local_id)
-
     # If network is created, then it create a copy from prototype and an initial version of network.
     network_obj, created = Network.objects.get_or_create(user_id=request.user.pk, SPIC_id=SPIC_id, local_id=local_id)
     if created:
+        # Check if prototype exists
+        prototype = get_object_or_404(Network, user_id=0, SPIC_id=SPIC_id, local_id=local_id)
+      
         network_obj.title = prototype.title
         network_obj.description = prototype.description
         network_obj.devices_json = prototype.devices_json
         revision_create(network_obj)
 
-    version_obj = None
-    result_obj = None
-    version_id = -1
-    
-    # Get a list of network versions in reverse date is created.
-    versions = Version.objects.get_for_object(network_obj)
-
-    version_term = request.GET.get('version')
-    if version_term == 'first' or int(result_id) == 0:
-        version_obj = versions[0].revision.revert()
-        network_obj = Network.objects.get(user_id=request.user.pk, SPIC_id=SPIC_id, local_id=local_id)
-        version_id = 0
-        
-    else:
-        results = [version.revision.result for version in versions[1:]]
-        result_ids = [result.local_id for result in results]
-
-        if version_term == 'last':
-            result_id = result_ids[-1]
-
-        if int(result_id) in result_ids:
-            result_id = result_ids.index(int(result_id))
-
-            version_obj = versions[result_id +1].revision.revert()
-            result_obj = results[result_id]
-            version_id = versions[result_id +1].revision.result.local_id
-            network_obj = Network.objects.get(user_id=request.user.pk, SPIC_id=SPIC_id, local_id=local_id)
-
-    
+   
     # If request is POST, then it executes any deletions
     if request.method == "POST":
         
         # Delete selected devices from database.
-        if request.POST.get('version_ids'):
-            version_ids = request.POST.getlist('version_ids')
+        if request.POST.get('result_ids'):
+            result_ids = request.POST.getlist('result_ids')
             action = request.POST.get('action')
-            for vid in version_ids:
-                version_edit = Version.objects.get(pk=int(vid))
-                try:
-                    result = version_edit.revision.result
-                except:
-                    result = None
+            for result_id in result_ids:
+                result = Result.objects.get(pk=int(result_id))
                     
                 if action == 'delete':
+                    result.delete()
+                    result_obj = None
+                    
+                    version_edit = result.revision.version_set.latest('id')
                     version_edit.delete()
-                    if result:
-                        result.delete()
-                        result_obj = None
-                elif action == 'favorite' and result:
+                        
+                elif action == 'favorite':
                     result.favorite = True
                     result.save()
-                elif action == 'unfavorite' and result:
+                elif action == 'unfavorite':
                     result.favorite = False
                     result.save()
         
@@ -227,7 +197,50 @@ def network_simulated(request, SPIC_id, local_id, result_id):
                 
             network_obj.devices_json = json.encode(new_device_dict)
             network_obj.save()
-
+            
+            
+    ## Get a list of results in reversed date is simulated.
+    results = Result.objects.filter(revision__version__object_id=str(network_obj.pk)).order_by('-date_simulated')
+    result_ids = [result.local_id for result in results]
+    
+    
+    # Revert selected version
+    version_term = request.GET.get('version')
+    if version_term:
+        if version_term == 'revert' and int(result_id) in result_ids:
+            result_obj = results.get(local_id=int(result_id))
+            result_obj.revision.revert()
+        
+        elif version_term == 'last':
+            result_obj = results.latest('local_id')
+            result_obj.revision.revert()
+            result_id = result_obj.local_id
+            
+        elif version_term == 'last_simulated':
+            result_obj = results.latest('date_simulated')
+            result_obj.revision.revert()
+            result_id = result_obj.local_id
+            
+        elif version_term == 'first':
+            versions = Version.objects.get_for_object(network_obj)
+            versions[0].revision.revert()
+            result_id = 0
+            
+        elif version_term == 'first_simulated':
+            result_obj = results.order_by('date_simulated')[0]
+            result_obj.revision.revert()
+            result_id = result_obj.local_id
+            
+        network_obj = Network.objects.get(user_id=request.user.pk, SPIC_id=SPIC_id, local_id=local_id)
+        
+        
+    # Get result object for plotting.
+    if int(result_id) in result_ids:
+        result_obj = results.get(local_id=result_id)
+    else:
+        result_obj = None
+        
+        
     # Get a choice list for adding new device.
     if network_obj.devices_json:
         device_choices = []
@@ -237,10 +250,12 @@ def network_simulated(request, SPIC_id, local_id, result_id):
                 device_choices.append(device)
     else:
         device_choices = MODELS
+        
             
     # If SPIC1, then pop out neurons from choice list
     if network_obj.SPIC_id == "1":
         device_choices = [device for device in device_choices if device['model_type'] != 'neuron']
+        
     
     # Get a list of forms for all devices.
     device_formsets = []
@@ -256,6 +271,8 @@ def network_simulated(request, SPIC_id, local_id, result_id):
     else:
         comment_Form = None
         
+        
+    # Get root status
     root_status = network_obj.root_status()
     if 'rng_seeds' in root_status or 'grng_seed' in root_status:
         if root_status['rng_seeds'] == [1] or root_status['grng_seed'] == 1:
@@ -265,13 +282,15 @@ def network_simulated(request, SPIC_id, local_id, result_id):
     else:
         network_form = NetworkForm(instance=network_obj, initial={'same_seed': True})
         
+        
+    # Prepare for template
     response = {
         'network_obj': network_obj,
         'network_form': network_form,
         'device_choices': device_choices,
         'device_formsets': device_formsets,
-        'versions': versions.reverse(),
-        'version_id': version_id,
+        'results': results,
+        'result_id': result_id,
     }
         
     if result_obj:
@@ -280,10 +299,11 @@ def network_simulated(request, SPIC_id, local_id, result_id):
         
     return response
 
+
 def device_preview(request, network_id):
     """ AJAX: Check POST request for validation without saving it in database. """
-
     network_obj = get_object_or_404(Network, pk=network_id)
+    
     if request.is_ajax():
         if request.method == 'POST':
           
@@ -292,6 +312,7 @@ def device_preview(request, network_id):
             id_labels = [device['id_label'] for device in MODELS]
             device = MODELS[id_labels.index(id_label)]
             form = device['form'](network_obj, post)
+            
 
             # check if form is valid.
             if form.is_valid():
@@ -299,6 +320,7 @@ def device_preview(request, network_id):
                 data.pop('csrfmiddlewaretoken')
                 data.pop('neuron_ids')
                 label = data.pop('model')[0]
+                
                 
                 # get modeltype of device.
                 model = {'id': None, 'label':label}
@@ -308,12 +330,14 @@ def device_preview(request, network_id):
                     model['type'] = 'output'
                 else:
                     model['type'] = 'neuron'
+                    
                 
                 # get sources or targets.
                 if 'targets' in data:
                     term = 'targets'
                 elif 'sources' in data:
                     term = 'sources'
+                    
                     
                 # it doesn't save weight, delay and synapse_type, if they don't exist.
                 conns = {term: data.pop(term)[0]}
@@ -330,7 +354,8 @@ def device_preview(request, network_id):
                 if not conns[term]:
                     conns = {}
                     
-                # after poping connection information save status of divices.
+                    
+                # after poping connection information save status of devices.
                 status = {}
                 for key, value in data.iteritems():
                     if form.fields[key].initial:
@@ -354,9 +379,9 @@ def device_preview(request, network_id):
                     
     return HttpResponse()
 
+
 def device_commit(request, network_id):
     """ AJAX: Extend targets/sources and write devices in database. """
-    
     network_obj = get_object_or_404(Network, pk=network_id)
 
     if request.is_ajax():
@@ -423,14 +448,15 @@ def device_commit(request, network_id):
             
     return HttpResponse()
 
+
 def simulate(request, network_id, version_id):
     """
     AJAX: If version_id is 0, it creates a new version of network and then simulates.
     If already simulated, it won't resimulate.
     If task_id is in request.GET, then it aborts the simulation task.
     """
-    
     network_obj = get_object_or_404(Network, pk=network_id)
+    
     if request.is_ajax():
         if request.method == 'POST':
           
@@ -536,7 +562,9 @@ def simulate(request, network_id, version_id):
                 
     return HttpResponse()
 
-def save_layout(request, network_id):
+
+def layout_save(request, network_id):
+    """ AJAX: Save network layout."""
     network_obj = get_object_or_404(Network, pk=network_id)
     
     if request.is_ajax():
@@ -563,7 +591,9 @@ def save_layout(request, network_id):
 
     return HttpResponse()
 
+
 def default_layout(request, network_id):
+    """ AJAX: Set network layout to default."""
     network_obj = get_object_or_404(Network, pk=network_id)
     
     if request.is_ajax():
