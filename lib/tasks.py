@@ -94,21 +94,19 @@ class Simulation(AbortableTask):
 
         # In case duration is more than 5s, Start simulation for a partial time
         # and checks, if producer is aborted, else simulation goes on.
-        duration = network_obj.duration
-        if duration > 5000.0:
-            dt = 5000.0
-            for t in xrange(0, duration, dt):
-                if self.is_aborted(**kwargs):
-                    # Respect the aborted status and terminate gracefully
-                    # TODO it should return failed instead of success
-                    logger.warning("Task aborted.")
-                    return None
-                nest.Simulate(dt)
+        duration = float(network_obj.duration)
+        timestep = 5000.
+        
+        while duration > timestep:
+            if self.is_aborted(**kwargs):
+                # Respect the aborted status and terminate gracefully
+                # TODO it should return failed instead of success
+                logger.warning("Task aborted.")
+                return None
+            nest.Simulate(timestep)
+            duration -= timestep
 
-            dt_last = duration % dt
-            if dt_last:
-                nest.Simulate(dt_last)
-        else:
+        if duration > 0.:
             nest.Simulate(duration)
 
         # Get data from output devices
