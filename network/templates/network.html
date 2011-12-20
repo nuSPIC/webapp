@@ -23,24 +23,17 @@
 <script type="text/javascript" src="{{ MEDIA_URL }}js/raphael-networkLayout.js"></script>
 
 <script type="text/javascript">
-    var device_list = [],
-    edgelist = [],
-    neuron_ids = [];
+    var device_list = {{ network_obj.device_list|safe }},
+    neuron_ids = {{ network_obj.neuron_ids|safe }},
+    edgelist = {{ network_obj.edgelist|safe }},
+    connect_to_input = {{ network_obj.connect_to_input|safe }},
+    connect_to_output = {{ network_obj.connect_to_output|safe }},
+    layoutSize = {{ network_obj.layout_size|safe }},
+    last_device_id = {{ network_obj.last_device_id|safe }};
 
-    var last_device_id = {{ network_obj.last_device_id|safe }},
-    version_id = {{ version_id|safe }},
+    var result_id = {{ result_id|safe }},
     selected_device_id,
     task_id;
-
-    {% if network_obj.device_list %}
-        var device_list = {{ network_obj.device_list|safe }},
-        neuron_ids = {{ network_obj.neuron_ids|safe }},
-        edgelist = {{ network_obj.edgelist|safe }},
-        connect_to_input = {{ network_obj.connect_to_input }},
-        connect_to_output = {{ network_obj.connect_to_output }},
-        layoutSize = {{ network_obj.layout_size|safe }};
-    {% endif %}
-
 
     $(function() {
             $( ".column" ).sortable({
@@ -106,7 +99,7 @@
         $(device).attr('title', title.join(",")).fadeIn().tipTip({defaultPosition: 'right',});
         }
 
-        version_id = 0;
+        result_id = 0;
         $( "#device-message" ).html("<li>"+ label +" ["+ selected_device_id +"] was "+ term +" successfully.</li>");
         $( "#device-list" ).find( ".portlet-content" ).show();
     };
@@ -115,8 +108,8 @@
         var form = $( "#network-form" ).serialize();
         var devices_json = JSON.stringify(device_list);
         var post_data = form.concat('&devices_json='+ devices_json);
-        version_id = version_id > 0 ? version_id : 0
-        $.post('/network/ajax/'+ {{ network_obj.id }} +'/'+ version_id +'/simulate/',
+        result_id = result_id > 0 ? result_id : 0
+        $.post('/network/ajax/'+ {{ network_obj.id }} +'/'+ result_id +'/simulate/',
             post_data, function(data){
                 if (data.valid == -1) {
                     $( ".network-form-content" ).html(data.responseHTML);
@@ -142,7 +135,7 @@
                             modal: true,
                             buttons: {
                                 'Abort': function() {
-                                    $.getJSON('/network/ajax/'+ {{ network_obj.id }} +'/'+ version_id +'/simulate/',
+                                    $.getJSON('/network/ajax/'+ {{ network_obj.id }} +'/'+ result_id +'/simulate/',
                                         {'task_id': task_id},
                                         function() {
                                             $( this ).dialog( "close" );
@@ -586,7 +579,7 @@
 
 
         // HISTORY LIST
-        $( "#history_"+ version_id).addClass( "ui-state-highlight" );
+        $( "#history_"+ result_id).addClass( "ui-state-highlight" );
 
         $( "ul#history-list li" ).each(function(){
             $( this ).addClass("ui-widget-content");
@@ -637,7 +630,8 @@
                     $( "#holder" ).parents( ".portlet" ).hide();
                     $( "div#connectivity_matrix" ).hide();
                 }
-
+        setTimeout('$( "#VoltmeterThumbnail" ).contents().find("span").each(function() { $(this).click(function() {alert(this.id)}); })', 2000.)
+        
     })
 
 
@@ -1001,35 +995,38 @@
                 <form action="." method="POST" class="versions-form">
                     {% csrf_token %}
                     <ul class="pager" id="history-list">
-                        {% for version in versions %}
-                            {% with version.revision.result as result %}
-                            <li class="tipTip-left"
-                                title="{{version.revision.result.comment|default_if_none:'no comment'}}" id="history_{{version.revision.result.local_id|default:0}}">
-                                <input style="float:right" type="checkbox" name="version_ids" value="{{version.id}}" {% if forloop.last %} disabled {% endif %}>
+                        {% for result in results %}
+                             <li class="tipTip-left"
+                                title="{{result.comment|default_if_none:'no comment'}}" id="history_{{result.local_id|default:0}}">
+                                <input style="float:right" type="checkbox" name="result_ids" value="{{result.id}}">
                                 {% if result.favorite %}<div class="ui-icon ui-icon-star" style="float:right"></div>{% endif %}
                                 <div class="version-link">
-                                    <a href="{% url network_simulated network_obj.SPIC_id network_obj.local_id version.revision.result.local_id|default:0 %}?version=revert" id="{{version.revision.result.local_id}}">
-                                        {% if forloop.last %}
-                                            Initial version of network
-                                        {% else %}
-                                            {% if result %}
-                                                <b>{{ result.local_id }}</b> -
-                                                {% if result.date_simulated %}
-                                                    {% if result.has_spike_detector %} [Sd] {% endif %}
-                                                    {% if result.has_voltmeter %} [Vm] {% endif %}
-                                                    - {{ result.date_simulated|timesince }} ago
-                                                {% else %}
-                                                    no simulation
-                                                {% endif %}
+                                    <a href="{% url network_simulated network_obj.SPIC_id network_obj.local_id result.local_id|default:0 %}?version=revert" id="{{result.local_id}}">
+                                        {% if result %}
+                                            <b>{{ result.local_id }}</b> -
+                                            {% if result.date_simulated %}
+                                                {% if result.has_spike_detector %} [Sd] {% endif %}
+                                                {% if result.has_voltmeter %} [Vm] {% endif %}
+                                                - {{ result.date_simulated|timesince }} ago
                                             {% else %}
-                                                NaN - no result found
+                                                no simulation
                                             {% endif %}
+                                        {% else %}
+                                            NaN - no result found
                                         {% endif %}
                                     </a>
                                 </div>
                             </li>
-                            {% endwith %}
                         {% endfor %}
+
+                        <li class="tipTip-left"
+                            title="" id="history_0">
+                           <div class="version-link">
+                                <a href="{% url network network_obj.SPIC_id network_obj.local_id %}?version=first">
+                                    Initial version of network
+                                </a>
+                            </div>
+                        </li>
                     </ul>
 
                    <div class="buttons field-wrapper" title="" >
