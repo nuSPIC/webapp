@@ -56,9 +56,9 @@ def voltmeter(request, result_id):
     
     voltmeter = result_obj.voltmeter_data(neuron)
     V_m = voltmeter['V_m'][0]
-    status = V_m['status']
     assert (len(voltmeter['times']) == len(V_m['values']))
-    
+    status = V_m['status']
+
     response = {
         'values': V_m['values'],
         'times': voltmeter['times'],
