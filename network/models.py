@@ -76,7 +76,7 @@ class Network(models.Model):
         """
         if self.devices_json:
             return json.decode(str(self.devices_json))
-        return []
+        return {}
 
     def device_list(self, term='visible', modeltype=None, label=None, key=None):
         """
@@ -159,7 +159,7 @@ class Network(models.Model):
                     device_list = [dev[1][key] for dev in device_list if key in dev[1]]
                 
             return device_list
-        return device_dict
+        return []
 
     def last_device_id(self):
         """
@@ -307,15 +307,20 @@ class Network(models.Model):
     def _connect_to(self, modeltype=None, label=None):
         """ Get a list of devices of one type, which the neurons are connected to. """
         device_list = self.device_list(modeltype=modeltype, label=label)
+        
         neurons = []
-        for model, status, conns in device_list:
-            if 'targets' in conns:
-                neurons.extend(conns['targets'].split(','))
-            else:
-                neurons.extend(conns['sources'].split(','))
+        if device_list:
+            for model, status, conns in device_list:
+                if 'targets' in conns:
+                    neurons.extend(conns['targets'].split(','))
+                else:
+                    neurons.extend(conns['sources'].split(','))
+                
         if neurons:
             neurons = [int(nn) for nn in neurons if nn != '']
-        return list(set(neurons))
+            neurons = list(set(neurons))
+            
+        return neurons
         
     def connect_to_input(self):
         """ List of connections of neurons are connected to input. """
