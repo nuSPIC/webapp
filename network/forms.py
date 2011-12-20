@@ -258,10 +258,10 @@ class DeviceForm(BetterForm):
         return delay
 
 class ACGeneratorForm(DeviceForm):
-    amplitude = forms.FloatField(required=False, label='Amplitude (pA)', help_text='Enter only values > 0.')
+    amplitude = forms.FloatField(required=False, initial=0., label='Amplitude (pA)', help_text='Enter only values > 0.')
     offset = forms.FloatField(required=False, label='Constant amplitude offset (pA)', help_text='')
     phase = forms.FloatField(required=False, label='Phase of sine current (0-360 deg)', help_text='Enter only values between 0 and 360.')
-    frequency = forms.FloatField(required=False, label='Frequency (Hz)', help_text='Enter only positive values.')
+    frequency = forms.FloatField(required=False, initial=0., label='Frequency (Hz)', help_text='Enter only positive values.')
 
     def clean_amplitude(self):
         amplitude = self.cleaned_data.get('amplitude')
