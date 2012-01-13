@@ -6,7 +6,6 @@ from django.utils import simplejson
 from lib.decorators import render_to
 import lib.json as json
 
-from network.templatetags.network_filters import readable
 from network.helpers import id_escape
 
 from models import Result
@@ -62,7 +61,6 @@ def voltmeter(request, result_id):
     response = {
         'values': V_m['values'],
         'times': voltmeter['times'],
-        'name': '%s [%s]' %(readable(status[0]['label']), status[0]['id']),
     }
     
     return {'voltmeter': json.encode(response)}

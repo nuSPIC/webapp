@@ -17,6 +17,7 @@ import lib.json as json
 from network.helpers import revision_create, values_extend, id_escape, id_identify
 from network.forms import *
 from network.models import Network
+from network.network_settings import PARAMS_ORDER
 
 from result.forms import CommentForm
 from result.models import Result
@@ -54,12 +55,12 @@ def network_list(request):
         'network_list': network_list,
     }        
 
-@render_to('network.html')
+@render_to('network_main.html')
 @login_required
 def network(request, SPIC_id, local_id):
     return network_simulated(request, SPIC_id, local_id, -1)
     
-@render_to('network_layout.html')
+@render_to('network_layout_popup.html')
 @login_required
 def network_layout(request, SPIC_id, local_id):
     network_obj = get_object_or_404(Network, user_id=request.user.pk, SPIC_id=SPIC_id, local_id=local_id)
@@ -70,7 +71,7 @@ def network_layout(request, SPIC_id, local_id):
     
     return response
     
-@render_to('network.html')
+@render_to('network_main.html')
 @login_required
 def network_simulated(request, SPIC_id, local_id, result_id):
     """ Main view for network workplace """
@@ -199,7 +200,7 @@ def network_simulated(request, SPIC_id, local_id, result_id):
             network_obj.save()
             
             
-    ## Get a list of results in reversed date is simulated.
+    # Get a list of results in reversed date is simulated.
     results = Result.objects.filter(revision__version__object_id=str(network_obj.pk)).order_by('-date_simulated')
     result_ids = [result.local_id for result in results]
     
@@ -240,6 +241,9 @@ def network_simulated(request, SPIC_id, local_id, result_id):
     else:
         result_obj = None
         
+        
+    # Get CSV for expert.
+    device_csv_form = DeviceCSVForm({'data':network_obj.csv()})    
         
     # Get a choice list for adding new device.
     if network_obj.devices_json:
@@ -286,6 +290,7 @@ def network_simulated(request, SPIC_id, local_id, result_id):
     # Prepare for template
     response = {
         'network_obj': network_obj,
+        'device_csv_form': device_csv_form,
         'network_form': network_form,
         'device_choices': device_choices,
         'device_formsets': device_formsets,
@@ -299,6 +304,93 @@ def network_simulated(request, SPIC_id, local_id, result_id):
         
     return response
 
+def device_csv(request, network_id):
+    """ AJAX: Check POST request for validation without saving it in database. """
+    network_obj = get_object_or_404(Network, pk=network_id)
+    layoutSize = network_obj.layout_size()
+    
+    if request.is_ajax():
+        if request.method == 'POST':
+            post = request.POST
+            device_csv_form = DeviceCSVForm(post)
+            data = post['data'].split('\r\n')
+            
+            neuron_ids = []
+            for dev in data:
+                params = dev.split(';')
+                if 'neuron' in params[0] and params[1].isdigit():
+                    neuron_ids.append(int(params[1]))
+
+            invalid = []
+            device_dict = {}
+            for dev in data:
+                params = dev.split(';')
+                params_dict = {'neuron_ids': neuron_ids}
+                
+                if params[1].isdigit():
+                    if 'generator' in params[0]:
+                        modeltype = 'input'
+                    elif 'detector' in params[0] or 'meter' in params[0]:
+                        modeltype = 'output'
+                    else:
+                        modeltype = 'neuron'
+                  
+                    model = {'id': int(params[1]), 'label': str(params[0]), 'type':modeltype}
+                    params_dict['model'] = params[0]
+                    
+                    # Set or get position for network layout
+                    if modeltype == 'neuron':
+                        device_dict_db = network_obj.device_dict()
+                        try:
+                            model['position'] = device_dict_db[('%4d' %model['id']).replace(' ', '0')][0]['position']
+                        except:
+                            model['position'] = [np.random.random_integers(17, layoutSize['x']), np.random.random_integers(14, layoutSize['y']+30)]
+                
+                conns = {}
+                if len(params) > 2:
+                    if params[0] == 'spike_detector':
+                        conns['sources'] = str(params[2])
+                    else:
+                        conns['targets'] = str(params[2])
+                if len(params) > 3:
+                    conns['weight'] = str(params[3])
+                    conns['delay'] = str(params[4])
+                params_dict.update(conns)
+                    
+                status = {}
+                if len(params) > 5:
+                    paranames = PARAMS_ORDER[params[0]]
+                    paranames = paranames[0] + paranames[1]
+                    for idx, p_val in enumerate(params[5:]):
+                        status[paranames[idx]] = str(p_val)
+                params_dict.update(status)
+                
+                id_labels = [device['id_label'] for device in MODELS]
+                device = MODELS[id_labels.index(params[0])]
+                form = device['form'](network_obj, params_dict)
+                
+                if form.is_valid():
+                    device_dict[('%4d' %int(params[1])).replace(' ', '0')] = ([model,status,conns])
+                else:
+                    invalid.append('%s[%s]' %(params[0], params[1]))
+                    
+            valid = -1           
+            if len(invalid) > 1:
+                device_csv_form.errors['data'] = [', '.join(invalid[:-1]) + ' and %s are wrong.' % invalid[-1]]
+            elif len(invalid) == 1:
+                device_csv_form.errors['data'] = ['%s is wrong.' % invalid[0]]
+            else:
+                network_obj.devices_json = json.encode(device_dict)
+                network_obj.save()
+                valid = 1
+                
+            response = {'responseHTML': device_csv_form.as_div(), 'valid':valid}
+            return HttpResponse(json.encode(response), mimetype='application/json')
+            
+        else:
+            
+            device_csv_form = DeviceCSVForm({'data': network_obj.csv()})
+            return HttpResponse(device_csv_form.as_div())
 
 def device_preview(request, network_id):
     """ AJAX: Check POST request for validation without saving it in database. """
@@ -529,9 +621,10 @@ def simulate(request, network_id, version_id):
                         
                 if int(version_id) > 0:
                     # check if it is already simulated, it prevents from simulating.
-                    version_obj = Version.objects.get(pk=version_id)
-                    if version_obj.revision.result.is_recorded():
-                        response = {'recorded':1}
+                    results = network_obj.filter_results()
+                    result_obj = results.get(local_id=version_id)
+                    if result_obj.is_recorded():
+                        response = {'recorded':1, 'valid': 1}
                         return HttpResponse(json.encode(response), mimetype='application/json')
                         
                 try:

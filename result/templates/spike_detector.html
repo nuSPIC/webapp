@@ -7,47 +7,16 @@
         <script type="text/javascript" src="/media/js/jquery-1.6.2.min.js"></script>
         <script type="text/javascript" src="/media/js/protovis.min.js"></script>
         <script type="text/javascript" src="/media/js/jquery.spinedit.js"></script>
+        <script type="text/javascript" src="/media/js/protovis.spike_detector.js"></script>
 
     </head>
 
     <body>
         <div id="center">
             <div id="fig">
+                <span id="chart"></span>
+
                 <script type="text/javascript+protovis">
-
-                    function newFilledArray(len, val) {
-                        var rv = new Array(len);
-                        while (--len >= 0) {
-                            rv[len] = val;
-                        }
-                        return rv;
-                    }
-
-
-                    Object.prototype.clone = function() {
-                        var newObj = (this instanceof Array) ? [] : {};
-                        for (i in this) {
-                            if (i == 'clone') continue;
-                            if (this[i] && typeof this[i] == "object") {
-                                newObj[i] = this[i].clone();
-                            } else newObj[i] = this[i]
-                            } return newObj;
-                        };
-
-                    Object.prototype.smooth = function () {
-                        var smooth = this.clone();
-                        for (idx in bins) {
-                            var nr_bins = 0;
-                            x = -kw;
-                            while (x <= kw) {
-                                if (parseInt(idx) + x > 0 && parseInt(idx)+x < this.length) {
-                                    nr_bins += (kw-Math.abs(x))/kw * bins[parseInt(idx)+x].y
-                                    };
-                                x++;
-                                };
-                            smooth[idx].y = nr_bins;
-                            } return smooth;
-                      };
    
                     /* Data of Spikes. */ 
                     var senders = {{ senders|safe }},
@@ -55,32 +24,10 @@
                     simTime = {{ simTime|safe }},
                     neuronScale = {{ neuronScale|safe }},
                     neurons = {{ neurons|safe }},
-
                     fig = {{ fig|safe }};
 
-                    var psth = newFilledArray(simTime, 0),
-                    nr_spikes = 1,
+                    var nr_spikes = 1,
                     kw = 100;
-
-                    function psth_calc() {
-
-                        /* Update PSTH */
-                        psth = newFilledArray(simTime, 0);
-
-                        for (var n = 0; n < times.length; n++) {
-                            psth[parseInt(times[n])] += 2/kw * 1000 / nr_spikes;
-                            for (var m = 1; m <= kw/2; m++) {
-                                if (parseInt(times[n] - m) >= 0) {
-                                    psth[parseInt(times[n] - m)] += 2/kw * ( 1 - (2/kw) * m) * 1000 / nr_spikes;
-                                }
-                                if (parseInt(times[n] + m) < psth.length) {
-                                    psth[parseInt(times[n] + m)] += 2/kw * ( 1 - (2/kw) * m) * 1000 / nr_spikes;
-                                }
-                            }
-                        };
-                    };
-
-                    psth_calc(); 
 
                     /* Size of panels. */
                     var w = fig.w,
@@ -93,153 +40,21 @@
                     /* Scales of PSTH panel */
                     var xScale = pv.Scale.linear(0, simTime).range(0, w),
                     yScale = pv.Scale.linear(1,neuronScale.length).range(0, h1);
-                    psth_yScale = pv.Scale.linear(0, pv.max(psth, function(d) d+1)).range(0, h2);
 
-                    /* The root panel. */
-                    var vis = new pv.Panel()
-                        .width(w)
-                        .height(h)
-                        .top(20)
-                        .right(15) 
-                        .bottom(15)
-                        .left(25);
+                    var psth = psth_calc();                    
+                    var psth_yScale = pv.Scale.linear(0, pv.max(psth, function(d) d+1)).range(0, h2);
 
-                    /* The spike panel. */
-                    var spikes_panel = vis.add(pv.Panel)
-                        .top(0)
-                        .height(h1);    
-
-                    /* Y-axis and ticks. */
-                    spikes_panel.add(pv.Rule)
-                        .data(neuronScale)
-                        .top(yScale)
-                        .strokeStyle("rgbs(0,0,0,0)")
-                      .anchor("left").add(pv.Label)
-                        .text(function () neurons[this.index]);
-
-                    /* X-axis and ticks. */
-//                     var grid = spikes.add(pv.Rule)
-//                         .data(bin_xTicks)
-//                         .left(xScale)
-//                         .strokeStyle("#ddd");
-
-                    /* The dot plot! */
-                    spikes_panel.add(pv.Dot)
-                        .data(times)
-                        .left(function(d) xScale(d))
-                        .top(function() yScale(senders[this.index]))
-                        .strokeStyle("#000")
-                        .fillStyle("#000")
-                        .size(1);
-
-                    spikes_panel.add(pv.Label)
-                        .top(-5)
-                        .textBaseline("bottom")
-                        .left(-28)
-                        .textAlign("left")
-                        .textStyle("grey")
-                        .text("neuron id");
-
-                    spikes_panel.add(pv.Label)
-                        .top(-5)
-                        .textBaseline("bottom")
-                        .right(0)
-                        .textAlign("right")
-                        .textStyle("grey")
-                        .text(senders.length +" spikes");
-
-
-                    /* The PSTH panel */
-                    var psth_panel = vis.add(pv.Panel)
-                        .bottom(10)
-                        .height(h2);
-
-                    var psth_y = psth_panel.add(pv.Rule)
-                        .data(psth_yScale.ticks(fig.yticks))
-                        .bottom(psth_yScale)
-                        .strokeStyle(function(d) d ? "#eee" : "#000");
-
-                      psth_y.anchor("left").add(pv.Label)
-                        .text(psth_yScale.tickFormat);
-
-                    psth_panel.add(pv.Rule)
-                        .data(xScale.ticks(5))
-                        .left(xScale)
-                        .strokeStyle(function(d) d ? "#eee" : "#000")
-                      .anchor("bottom").add(pv.Label)
-                        .text(xScale.tickFormat);
-
-                    psth_panel.add(pv.Label)
-                        .top(-1)
-                        .textBaseline("bottom")
-                        .left(w/2)
-                        .textAlign("center")
-                        .text("PSTH");
-
-                    /* X-axis label */
-                    psth_panel.add(pv.Label)
-                        .bottom(-10)
-                        .textBaseline("top")
-                        .left(w/2)
-                        .textAlign("center")
-                        .textStyle("grey")
-                        .text("Time (ms)");
-
-                    psth_panel.add(pv.Label)
-                        .top(-1)
-                        .textBaseline("bottom")
-                        .left(-25)
-                        .textAlign("left")
-                        .textStyle("grey")
-                        .text("Hz");
-
-
-                    var psth_area = psth_panel.add(pv.Area)
-                        .data(psth)
-                        .left(function(d) xScale(this.index))
-                        .bottom(1)
-                        .height(function(d) psth_yScale(d))
-                        .fillStyle("rgba(0, 0, 0, 0) ")
-                        .interpolate("cardinal");
-
-                    /* Number of spikes label */
-                    psth_area.anchor("top").add(pv.Line)
-                        .strokeStyle("#000")
-                        .lineWidth(3);
-
-                    vis.render();
-
-                    function update() {
-                        psth_calc();
-                        psth_yScale = pv.Scale.linear(0, pv.max(psth, function(d) d)+1).range(0, h2);
-
-                        psth_y.data(psth_yScale.ticks(fig.yticks))
-                            .bottom(psth_yScale);
-
-                        psth_area.data(psth)
-                            .height(function(d) psth_yScale(d));
-                        vis.render();
-                    }; 
+                    vis = prep_vis();
+                    vis.render()
 
                     $( "input#kernel_width" ).bind("change mouseup mouseout keyup", function () { 
                             kw = parseFloat($(this).val());
-                            update();
+                            vis.render();
                     });
-
-                    $( ".term" ).bind("click", function(e) {
-                            e.preventDefault();
-                            $( ".term" ).removeClass('activated');
-                            $(this).addClass('activated');
-                            if (this.id == 'count') {
-                                nr_spikes = times.length;
-                            } else {
-                                nr_spikes = 1;
-                            };
-                            update();
-                    });                  
+              
 
                     $(function() {
-                            $( "input#kernel_width" ).SpinEdit({'min': 1, 'step': 50}).val(kw);
+                            $( "input#kernel_width" ).SpinEdit({'min': 10, 'step': 30}).val(kw);
                     });
 
                 </script>
@@ -247,10 +62,6 @@
                 <p>
                     <label for "kernel_width"> Kernel width: </label>
                     <input type="text" class="spinedit" id="kernel_width"/> ms
-<!--                    <span style="float:right">
-                        <span style="cursor:pointer" class="term activated" id="rate">rate</span> /
-                        <span style="cursor:pointer" class="term" id="count">count</span>
-                    <span>-->
                 </p>
 
             </div>

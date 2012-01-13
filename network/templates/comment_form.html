@@ -1,0 +1,29 @@
+{% if comment_form %}
+    <script type="text/javascript">
+        $( "form#comment-form" ).live('submit',  function(e) {
+                e.preventDefault();
+                $.post('{% url result_comment result_obj.id %}',
+                    $( this ).serialize(), function(data){
+                        $( "#history_{{result_obj.local_id}} a" ).attr('title',data).tipTip({defaultPosition:'left'});
+                }, 'html');
+        });
+    </script>
+
+    <form action="." method="POST" class="portlet" id="comment-form">
+        <div class="portlet-header portlet-toggle" title="">
+            Comment
+        </div>
+
+        <div class="portlet-content">
+            {% csrf_token %}
+
+            <div class="comment-form-content field-wrapper" title="Here you can enter a short description of what you did in order to relate to the simulation in the future.">
+                {{ comment_form.comment }}
+            </div>
+
+            <div class="buttons">
+                <button type="submit" class="check" id="submit-comment-form">Save</button>
+            </div>
+        </div>
+    </form>
+{% endif %}

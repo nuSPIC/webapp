@@ -9,6 +9,7 @@ urlpatterns = patterns('network.views',
     
     # Following requests are responsing with AJAX.
     url(r'^ajax/(?P<network_id>\d+)/(?P<version_id>\d+)/simulate/$', 'simulate', name='simulate'),
+    url(r'^ajax/(?P<network_id>\d+)/device_csv/$', 'device_csv', name='device_csv'),
     url(r'^ajax/(?P<network_id>\d+)/device_preview/$', 'device_preview', name='device_preview'),
     url(r'^ajax/(?P<network_id>\d+)/device_commit/$', 'device_commit', name='device_commit'),
     

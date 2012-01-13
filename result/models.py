@@ -3,9 +3,6 @@ from django.db import models
 from reversion.models import Revision
 
 import lib.json as json
-
-from network.templatetags.network_filters import readable
-
 import numpy as np
 
 
@@ -46,7 +43,7 @@ class Result(models.Model):
             return float(voltmeter[0][1]['interval'])
         return 1.0
 
-    def voltmeter_targets(self, data=True):
+    def voltmeter_targets(self, data=False):
         """ Return a list of neurons are connected to voltmeter. """
         voltmeter = self.network.device_list(label='voltmeter')
         if voltmeter:
@@ -55,6 +52,7 @@ class Result(models.Model):
                 return [neuron for neuron in self.network.device_list(modeltype='neuron') if int(neuron[0]['id']) in targets]
             return targets
         return []
+   
         
     def voltmeter_points(self):
         """ Number of points in voltmeter data. Useful for quick loading of the page. """
@@ -71,7 +69,7 @@ class Result(models.Model):
                 
             V_m = json.decode(str(self.voltmeter_json))['V_m']
             times = np.arange(1.0, self.network.duration, self.voltmeter_interval())
-            targets = self.voltmeter_targets(data=False)
+            targets = self.voltmeter_targets()
             V_m = np.reshape(np.array(V_m), [self.network.duration-1, len(targets)]).T
             
             target_list = [target for target in self.network.device_list() if int(target[0]['id']) in targets]

@@ -4,16 +4,14 @@ from django.db import models
 import numpy as np
 
 import lib.json as json
+from network.network_settings import SPIC_CHOICES, PARAMS_ORDER
 from network.helpers import id_escape
+
+from result.models import Result
 
 __all__ = ["Network"]
 
-SPIC_CHOICES = (('0','Sandbox'),
-                ('1','SPIC1'),
-                ('2','SPIC2'),
-                ('3','SPIC3'),
-                ('4','SPIC4'))
-
+               
 class Network(models.Model):
     user_id = models.IntegerField()
     SPIC_id = models.CharField(max_length=6, choices=SPIC_CHOICES)
@@ -38,6 +36,9 @@ class Network(models.Model):
             return 'architect'
         else:
             return User.objects.get(pk=self.user_id)
+
+    def filter_results(self):
+        return Result.objects.filter(revision__version__object_id=str(self.pk)).order_by('-date_simulated')
 
     def root_status(self):
         """ Returns status data from the field status_json."""
@@ -160,6 +161,41 @@ class Network(models.Model):
                 
             return device_list
         return []
+        
+        
+    def list_for_csv(self):
+        device_list = self.device_list()
+        
+        lst = []
+        if device_list:
+            for status,params,conns in device_list:
+                if status['type'] == 'neuron' and  self.SPIC_id == '1':
+                    continue
+                      
+                st = "%s;%s" %(status['label'], status['id'])
+                if conns:
+                    if 'targets' in conns:
+                        st += ";%s" %conns['targets']
+                    elif 'sources' in conns:
+                        st += ";%s" %conns['sources']
+                    if 'weight' in conns:
+                        st += ";%s" %conns['weight']  
+                    if 'delay' in conns:
+                        st += ";%s" %conns['delay']
+                        
+                if params and status['label'] in PARAMS_ORDER:
+                    for part in PARAMS_ORDER[status['label']]:
+                        for key in part:
+                            if key in params:
+                                st += ";%s" %params[key]
+                        
+                lst.append(st)
+        return lst 
+        
+    def csv(self):
+        lst = self.list_for_csv()
+        return "\r\n".join(lst)
+         
 
     def last_device_id(self):
         """

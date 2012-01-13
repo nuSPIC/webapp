@@ -37,7 +37,7 @@
             {% regroup network_list|dictsort:"SPIC_id" by SPIC_id as network_by_SPIC %}
 
             {% for group in network_by_SPIC %}
-                {{ flatpage.content|split:forloop.counter0 }}
+                {{ flatpage.content|index:forloop.counter0 }}
 
                 {% if group.grouper != '0' %}
 {#                <div style="text-align:right; font-size:0.8em; font-weight:bold; margin-right:5px">Version</div>#}
@@ -65,7 +65,7 @@
 
             {% endfor %}
 
-            {{ flatpage.content|split:-1 }}
+            {{ flatpage.content|index:-1 }}
         </div>
 
 {% endblock %}

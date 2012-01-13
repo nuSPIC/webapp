@@ -1,79 +1,88 @@
-<html>
+<script type="text/javascript">
+    $( ".portlet-header" ).find( ".ui-icon-newwin" ).live('click', function(e) {
+            e.preventDefault();
+            var popup = $( this ).parents( ".portlet" );
+            width = ($(popup).find( ".portlet-content" ).width()+80);
+            height = ($(popup).find( ".portlet-content" ).height()+110);
+            newPopup = window.open('{% url network_layout network_obj.SPIC_id network_obj.local_id %}',
+                        'network_layout',
+                        'left=50,width='+ width.toString() +',height='+ height.toString() +',toolbar=no,location=yes,directories=no,status=no,menubar=no,scrollbars=no,copyhistory=no');
+            newPopup.moveTo(screen.availWidth/2 - width/2, screen.availHeight/2 - height /2);
+            newPopup.focus();
+//             $( popup ).find( ".toggle" ).toggleClass( "ui-icon-minusthick" ).toggleClass( "ui-icon-plusthick" );
+//             $( popup ).find( ".portlet-content" ).slideToggle();
+    });
 
-<head>
-    <link href="{{ MEDIA_URL }}css/default.css" type="text/css" rel="stylesheet" />
-    <link href="{{ MEDIA_URL }}css/nuspic/jquery-ui-1.8.14.custom.css" type="text/css" rel="stylesheet" />
-    <link href="{{ MEDIA_URL }}css/jquery-ui.custom.css" type="text/css" rel="stylesheet" />
-    <link href="{{ MEDIA_URL }}css/network.css" type="text/css" rel="stylesheet" />
+    $( "button#save-layout" ).live('click', function(e) {
+            e.preventDefault();
+            var devices_json = JSON.stringify(device_list);
+            $.post('{% url save_layout network_obj.id %}',
+                    {'csrfmiddlewaretoken':"{{ csrf_token }}", 'devices_json':devices_json},
+                    function(data) {
+                        layoutSize = data["layoutSize"];
+                        $( "#holder" ).height(layoutSize["y"]+30)
+                                      .width(layoutSize["x"]+30)
+                                      .html('')
+                                      .loadLayout(device_list);
+                        $( "#position" ).html("saved").show();
+            }, 'json');
+    });
+
+    $( "button#default-layout" ).live('click', function(e) {
+            e.preventDefault();
+            $.getJSON('{% url default_layout network_obj.id %}', //'/network/ajax/'+ {{ network_obj.id }} +'/default_layout/',
+                                        function(data) {
+                                            device_list = data["device_list"];
+                                            layoutSize = data["layoutSize"];
+                                            $( "#holder" ).height(layoutSize["y"]+30)
+                                                          .width(layoutSize["x"]+30)
+                                                          .html('')
+                                                          .loadLayout(device_list);
+                                    });
+    });
+
+    $( "button#layout-legend" ).live('click', function() {
+        $(this).toggleClass("ui-state-highlight");
+        $( "div#layout-legend-content" ).slideToggle();
+    });
+
+    $(document).ready(function() {
+
+        if (neuron_ids.length > 0) {
+            $( "#holder" ).loadLayout( device_list );
+        } else {
+            $( "#holder" ).parents( ".portlet" ).hide();
+        }
+       
+    });
 
 
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.6.2.min.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.8.14.custom.min.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/json2.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/network.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/raphael-min.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/raphael-networkLayout.js"></script>
+</script>
 
-    <script type="text/javascript">
-        var device_list = new Array(),
-        edgelist = [];
-        
-        {% if network_obj.devices_json %}
-            var device_list = {{ network_obj.device_list|safe }},
-            edgelist = {{ network_obj.edgelist|safe }},
-            connect_to_input = {{ network_obj.connect_to_input }},
-            connect_to_output = {{ network_obj.connect_to_output }},
-            layoutSize = {{ network_obj.layout_size|safe }};
-        {% endif %}
+<div class="portlet" id="network_layout">
+    <div class="portlet-header portlet-toggle" title="">
+        Network layout
+        <span class="ui-icon dialog ui-icon-newwin" style="float:right"></span>
+    </div>
 
-        
-        $(function() {
-                $( ".portlet" ).loadTheme( {'tipTip':false} );
-                $( "#holder" ).loadLayout( device_list );
-        });
+    <div class="portlet-content">
+        <div id=holder></div>
 
-
-        $( "button#save-layout" ).live('click', function(e) {
-                e.preventDefault();
-                var devices_json = JSON.stringify(device_list);
-                $.post('{% url save_layout network_obj.id %}',
-                        {'csrfmiddlewaretoken':"{{ csrf_token }}", 'devices_json':devices_json},
-                        function(data) {
-                            layoutSize = data["layoutSize"];
-                            $( "#holder" ).height(layoutSize["y"]+30)
-                                          .width(layoutSize["x"]+30)
-                                          .html('')
-                                          .loadLayout(device_list);
-                            $( "#position" ).html("saved").show();
-                }, 'json');
-        });
-
-        
-    </script>
-
-    <title>Network layout</title>
-</head>
-
-<body>
-
-    <div>
-        {% if network_obj.devices_json %}
-            <div class="portlet" style="float:left" id="network_layout">
-                
-                <div class="portlet-content">
-                    <div id=holder></div>
-                    
-                    <div class="buttons">
-                        <button class="check" id="save-layout">Save</button>
-                        <button class="reset" id="default-layout">Default</button>
-                        <small style="float:right" id="position"></small>
-                    </div>
-                </div>
-            </div>
-        {% endif %}
+        <div class="buttons">
+            <button class="check" id="save-layout">Save</button>
+            <button class="reset" id="default-layout">Default</button>
+            <button id="layout-legend">Legend</button>
+            <small style="float:right" id="position"></small>
+        </div>
 
     </div>
 
-</body>
-
-</html>
+    <div class="portlet-content collapse" id="layout-legend-content">
+        <p><b>blue line</b> - excitatory connection</p>
+        <p><b>red line</b> - inhibitory connection</p>
+        <p><b>left dot</b> - then neuron receives external input.</p>
+        <p><b>right dot</b> - then neurons are being recorded.</p>
+        <br>
+        <p><b>NOTE</b>: neurons can be dragged around.</p>
+    </div>
+</div>

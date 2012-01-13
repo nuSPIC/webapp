@@ -75,11 +75,6 @@ td {
     }
 
 
-#ui-dialog {
-    display: none;
-    font-size : .9em;
-}
-
 .collapse {
     display:none;
 }
@@ -96,12 +91,12 @@ td {
 /* Step Helper
 *************************/
 
-    #help-steps li {
-        cursor: pointer;
-        border: none;
-        font-size: .85em;
-        padding: .2em;
-    }
+#help-steps li {
+    cursor: pointer;
+    border: none;
+    font-size: .85em;
+    padding: .2em;
+}
 
 /* Device Table
 ************************/
@@ -116,10 +111,6 @@ td {
 
     table#device-table input {
         margin: 0;
-    }
-
-    table#device-table td.model {
-        width: 8.5em;
     }
 
     table#device-table td.disabled {

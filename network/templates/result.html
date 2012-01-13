@@ -1,0 +1,172 @@
+{% if result_obj.is_recorded %}
+
+    <script type="text/javascript">
+
+        $(function() {
+
+                $( "div#results-tabs" ).tabs({cookie: { expires: 7, name: "results-cookie"}, cache: false});
+
+        });
+
+        {% if result_obj.has_voltmeter %}
+
+            function voltmeter_enlarge(target_id) {
+                $( ".resultView" ).attr('src', '/result/{{result_obj.id}}/voltmeter/?neuron='+ target_id);
+                $( ".resultView" ).css('height', 400);
+
+                $( "#dialog-resultView" ).dialog({
+                        title: 'Voltmeter view of Neuron ['+ target_id +']',
+                        height: 470,
+                        width: 800,
+//                         modal: true,
+                });
+            };
+
+            $( "button#reload" ).live('click', function(e) {
+                    $( "div#VoltmeterThumbnail" ).html('<iframe src="{% url voltmeter_thumbnail result_obj.id %}"> </iframe>');
+            });
+
+            $( "select#voltmeter-select" ).live('change',function(e) {
+                    voltmeter_enlarge($(this).val())
+                    $( "#voltmeter-select option:first" ).attr('selected', 'selected');
+            });
+
+        {% endif %}
+
+
+        {% if result_obj.has_spike_detector %}
+
+            function spike_detector_enlarge() {
+                $( ".resultView" ).attr('src', "{% url spike_detector result_obj.id %}?view=large");
+                $( ".resultView" ).css('height', {{ network_obj.neuron_ids|length }} * 15 + 230);
+
+                $( "#dialog-resultView" ).dialog({
+                        title: 'Spike Detector view of all connected neurons',
+                        height: {{ network_obj.neuron_ids|length }} * 15 + 320,
+                        width: 800,
+//                         modal: true,
+                });
+            };
+
+            $( "button#spike_detector-link" ).live('click',function(e) {
+                $( ".resultView" ).attr('src', "{% url spike_detector result_obj.id %}?view=large");
+                $( ".resultView" ).css('height', {{ network_obj.neuron_ids|length }} * 15 + 230);
+
+                $( "#dialog-resultView" ).dialog({
+                        title: 'Spike Detector view of all connected neurons',
+                        height: {{ network_obj.neuron_ids|length }} * 15 + 320,
+                        width: 800,
+//                         modal: true,
+                });
+            });
+
+        {% endif %}
+
+
+        $(document).ready(function() {
+
+            {% if result_obj.has_voltmeter %}
+                setTimeout('$( "#VoltmeterThumbnail" ).contents().find("span").each(function() { $(this).click(function() {voltmeter_enlarge(this.id)}); })', 1000.)
+            {% endif %}
+
+
+            {% if result_obj.has_spike_detector %}
+                setTimeout('$( "#SpikeDetectorThumbnail" ).contents().find("span").click(function() {spike_detector_enlarge()})', 1000.)
+            {% endif %}
+            
+        })
+    </script>
+
+
+    <div class="portlet" id="result">
+
+        <div class="portlet-header portlet-toggle" title="Simulation was succeed. So you can explore the view of results.">
+            Results
+        </div>
+
+        <div class="portlet-content" id="results-tabs">
+
+            <ul>
+                {% if result_obj.has_spike_detector %}
+                    <li><a href="#spike_detector-tab" class="spike_detector-tab">Spike Detector</a></li>
+                {% endif %}
+                {% if result_obj.has_voltmeter %}
+                    <li><a href="#voltmeter-tab" class="voltmeter-tab-header">Voltmeter</a></li>
+                {% endif %}
+            </ul>
+
+<!--             SPIKE DETECTOR TAB -->
+            <div id="spike_detector-tab">
+                {% if result_obj.has_spike_detector %}
+
+                    <div>
+
+                        <iframe scrolling="no" src="{% url spike_detector result_obj.id %}?view=small" id="SpikeDetectorThumbnail"></iframe>
+
+                    </div>
+
+<!--                            <div class="buttons">
+                        <button class="zoomin" id="spike_detector-link">Larger view</button>
+                    </div>-->
+
+                {% endif %}
+            </div>
+
+<!--             VOLTMETER TAB -->
+            <div id="voltmeter-tab">
+                {% if result_obj.has_voltmeter %}
+                    <div>
+                        {% if result_obj.voltmeter_points < 15000 %}
+
+                            <iframe src="{% url voltmeter_thumbnail result_obj.id %}" id="VoltmeterThumbnail"></iframe>
+
+                        {% else %}
+
+                            The number of points is too big.
+
+                            <div class="field-wrapper" title="">
+
+                                <label for="voltmeter-select">View larger screen</label>
+
+                                <select id="voltmeter-select">
+                                    <option>--- Select a neuron ---</option>
+
+                                    {% for targets in result_obj.voltmeter_targets %}
+                                        <option value="{{targets}}">
+                                            Neuron [{{targets}}]
+                                        </option>
+                                    {% endfor %}
+
+                                </select>
+
+                            </div>
+
+                        {% endif %}
+                    </div>
+
+                    <div class="buttons" style="font-size:1em">
+
+                        <button id="reload">Reload</button>
+
+                    </div>
+
+                {% endif %}
+            </div>
+
+            <div class="buttons" style="font-size:1em">
+
+                <a class="document" href="{% url data result_obj.id %}">Download Results</a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="ui-dialog" title="result view" id="dialog-resultView">
+
+        <iframe class="resultView" scrolling="no"></iframe>
+
+    </div>
+{% endif %}

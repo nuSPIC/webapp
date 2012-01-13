@@ -1,0 +1,139 @@
+<script type="text/javascript">
+    var device_list_preview = function (data) {
+        var label = data[0]['label'].replace("_", " "),
+        title = [], status = data[1];
+        for (var i in status) {
+            title.push(' '+ i.toString() +': '+ status[i].toString());
+            }
+
+        // Add new device to the list
+        if (selected_device_id == last_device_id + 1) {
+            var device = $( "#device-table > tbody tr:last" );
+            $(device).after( $(device).clone() );
+            $(device).attr('id', selected_device_id).addClass('enabled');
+
+            $(device).find( "td.id" ).html(selected_device_id).end()
+                .find(" td.model" ).html(label);
+
+            var term = 'added';
+            last_device_id++;
+        } else {
+            var device = $( "#"+ selected_device_id );
+            var term = 'changed';
+        }
+
+        if ('targets' in data[2]) { $(device).find( "td.targets" ).html(data[2]['targets'])}
+        else if ('sources' in data[2]) { $(device).find( "td.targets" ).html(data[2]['sources'])};
+
+        if ('weight' in data[2]) {$(device).find( "td.weight" ).html(data[2]['weight'])}
+        if ('delay' in data[2]) {$(device).find( "td.delay" ).html(data[2]['delay'])};
+
+        if (title) {
+        $(device).attr('title', title.join(",")).fadeIn().tipTip({defaultPosition: 'right',});
+        } else {
+        $(device).attr('title', 'no status').fadeIn().tipTip({defaultPosition: 'right',});
+        }
+
+        result_id = 0;
+        $( "#device-message" ).html("<li>"+ label +" ["+ selected_device_id +"] was "+ term +" successfully.</li>");
+        $( "#device-list" ).find( ".portlet-content" ).show();
+    };
+
+
+    $( "form.device-form" ).live('submit',  function(e) {
+        e.preventDefault();
+        var form_data = $( this ).serialize();
+        var post_data = form_data.concat('&neuron_ids='+ JSON.stringify(neuron_ids));
+        $.post('{% url device_preview network_obj.id %}',
+            post_data, function(data){
+                var form = $( "#"+ data.id_label +"-form" )
+                $(form).html(data.responseHTML);
+                if (data.valid != -1) {
+                    $( "ul.errorlist" ).remove();
+                    if ($( "select#id_label" ).val() == 'voltmeter' || $("select#id_label" ).val() == 'spike_detector') {
+                        $( "select#id_label option:selected" ).hide()
+                    };
+                    $( "option:first" ).attr('selected', 'selected');
+
+                    device = data.device;
+                    device[0]["id"] = parseInt(selected_device_id);
+
+                    if (device[0]["type"] == 'output') {
+                        if ("targets" in device[2]) {
+                            connect_to_output.push(device[2]["targets"]);
+                        } else {
+                            connect_to_output.push(device[2]["sources"]);
+                        };
+                    } else if (device[0]["type"] == 'input') {
+                        connect_to_input.push(device[2]["targets"]);
+                    } else if (device[0]["type"] == 'neuron') {
+                        neuron_ids.push(device[0]["id"])
+                    }
+
+                    if (selected_device_id > device_list.length || selected_device_id > last_device_id) {
+                        device_list.push(device);
+                    } else {
+                        position = device_list[selected_device_id-1][0]["position"];
+                        device[0]["position"] = position;
+                        device_list[selected_device_id-1] = device;
+                    };
+                    device_list_preview(device);
+                };
+        }, 'json');
+    });
+
+    $( "#id_step" ).live('keyup', function() {
+        var step = parseFloat(this.value);
+        var spike_times = [];
+        if (step > 0) {
+            var start = $(this).parents( ".advanced" ).find( "#id_start" ).val();
+            var stop = $(this).parents( ".advanced" ).find( "#id_stop" ).val();
+            if (stop == 'inf') {
+                stop = {{network_obj.duration|safe}}
+            }
+            var spike_times = [];
+            for (var tt = parseFloat(start); tt <= parseFloat(stop); tt += step) {
+                spike_times.push(tt);
+            };
+        };
+        $(this).parents( ".device-form" ).find( "#id_spike_times" ).val(spike_times.toString());
+    });
+
+    $( ".required input" ).live('keyup', function() {
+        if (this.value == '') {
+            $(this).addClass('ui-state-hover');
+        } else {
+            $(this).removeClass('ui-state-hover');
+        }
+    });
+
+    $(document).ready(function() {
+        $( ".required input" ).each(function() {
+            if ($(this).val() == '') {$(this).addClass('ui-state-hover')};
+            });
+
+    });
+
+</script>
+
+<div class="portlet" id="device-form">
+    <div class="portlet-header" title="" id="device-form-header">
+      <span id="selected_device_id"></span> - <span id="selected_device_label"></span>
+    </div>
+
+    {% for forms in device_formsets %}
+
+        <form action="." method="POST" class="portlet-content device-form" id="{{forms.id_label}}">
+            {% csrf_token %}
+            <div id="{{forms.id_label}}-form">
+                {{forms.formsHTML}}
+            </div>
+
+            <div class="buttons">
+                <button type="submit" class="check" id="submit-device-form">Apply</button>
+                <button type="reset" class="reset" id="reset-device-form">Reset</button>
+            </div>
+
+        </form>
+    {% endfor %}
+</div>

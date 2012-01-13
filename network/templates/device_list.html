@@ -1,0 +1,303 @@
+{% load lib_filters %}
+{% load network_filters %}
+
+<script type="text/javascript">
+
+    $(function() {
+         $( "div#device-list-content" ).tabs({cookie: { expires: 7, name: "device-list-cookie"}, cache: false});
+
+        $( "div#step-helper" ).dialog({
+                                title: 'How to use it?',
+                                resizable: false,
+                                height: 450,
+                                width: 550,
+              }).parent().hide();
+    });
+
+    // SELECT DEVICE TO CHANGE PARAMETERS
+    $( "tr.enabled" ).find( "td.selectable" ).live('click', function(e) {
+            e.preventDefault();
+            $( "ul.errorlist" ).remove();
+            $( "option:first" ).attr('selected', 'selected');
+            selected_device_id = $(this).parent( ".enabled" ).attr('id')
+            var device = device_list[selected_device_id-1];
+            var form = $( "#"+device[0].label );
+
+            if ($( form ).is(":visible")) {
+                $( "#device_id" ).html("");
+                $( form ).toggle();
+                $( "#device-form" ).hide();
+            } else {
+                $( "#device_id" ).html(selected_device_id)
+                $( "tr.enabled" ).each(function() {
+                        if ($(this).attr('id') != selected_device_id && $(this).children("td").hasClass("ui-state-highlight")) {
+                            $(this).children("td").toggleClass("ui-state-highlight");
+                        }
+                });
+                $( ".device-form:visible" ).toggle();
+                $( form ).reset();
+                var form_content = $( form ).children();
+                $(form_content)
+                    .find( "#id_model" ).val(device[0]['label']);
+                for (var key in device[1]) {
+                    $(form_content).find( "#id_"+ key ).val(device[1][key]).removeClass('ui-state-hover');
+                };
+                for (var key in device[2]) {
+                    $(form_content).find( "#id_"+ key ).val(device[2][key]).removeClass('ui-state-hover');
+                };
+                $( form ).toggle();
+                $( "#device-form" )
+                      .find( "#selected_device_id" ).html(selected_device_id).end()
+                      .find( "#selected_device_label" ).html(device[0]['label'].replace(/_/g, ' ')).end()
+                      .show();
+            }
+    });
+
+    // DELETE DEVICE
+    $( "button#delete-devices" ).live('click', function(e) {
+            e.preventDefault();
+            $( this ).toggleClass( "ui-state-highlight" )
+                if ($( "table#device-table .delete" ).is(":visible") && $( "table#device-table .delete" ).find( "input" ).is(":checked")) {
+                $(".devices-form").submit();
+            } else {
+                $( "table#device-table .delete" ).toggle();
+            };
+    });
+
+    // SAVE DEVICE
+    $( "button#save-devices" ).live('click', function(e) {
+            e.preventDefault();
+            $( ".device-form" ).hide();
+            var devices_json = JSON.stringify(device_list);
+            $.post('{% url device_commit network_obj.id %}',
+                    {'csrfmiddlewaretoken':"{{ csrf_token }}", 'devices_json':devices_json},
+                    function() {
+                            $( "#dialog-msg p" ).html("Loading... please wait.");
+                            $( "#dialog-msg #loading_icon" ).show();
+                            $( "#dialog-msg" ).dialog({
+                                    height: 150,
+                                    resizable: false,
+                                    modal: true,
+                            });
+                            window.setTimeout(function() {
+                                window.location.href = '{% url network network_obj.SPIC_id network_obj.local_id %}'}, 1000);
+            }, 'json');
+    });
+
+    // GET HELP
+
+    $( "button#help-network" ).live('click',function(e) {
+        e.preventDefault();
+        $( "#step-helper" ).parent().slideToggle();
+    });
+
+    // SAVE CSV
+    $( "form#device-csv-form" ).live('submit',  function(e) {
+        e.preventDefault();
+        $.post('{% url device_csv network_obj.id %}',
+            $( this ).serialize(), function(data){
+                if (data['valid'] == 1) {
+                    var current_url =  window.location.href.split('?')[0].split('#');
+                    window.location.href = current_url[0]
+                } else {
+                    $( "#device-csv-form-content" ).html(data['responseHTML']);
+                    $( "textarea" ).addClass("ui-corner-all");
+                };
+            }, 'json');
+    });
+
+    // RESET CSV
+    $( "#reset" ).live('click',  function(e) {
+        e.preventDefault();
+        $.get('{% url device_csv network_obj.id %}',
+            function(data){$( "#device-csv-form-content" ).html(data)}, 'html');
+    });
+
+    // SELECT A DEVICE TO ADD
+    $( "select#id_label" ).live('change', function(e) {
+            e.preventDefault()
+            $( ".device-form:visible" ).hide();
+            $( "#device-form" ).hide();
+            $( "ul.errorlist" ).remove();
+            selected_device_id = last_device_id+1
+            $( "span#device_id" ).html(selected_device_id);
+            $( "tr.enabled" ).each(function() {
+                        if ($(this).attr('id') != selected_device_id && $(this).children("td").hasClass("ui-state-highlight")) {
+                            $(this).children("td").toggleClass("ui-state-highlight");
+                        }
+                });
+
+            var form = $( "#"+ $(this).val() );
+            if ($(this).val() != "") {
+                $( form ).reset().find( "#selected_device_id" ).html(selected_device_id).end()
+                    .find( "#id_model" ).attr('value', $(this).val()).end()
+                    .show();
+
+                $( "#device-form" )
+                    .find( "#selected_device_id" ).html(selected_device_id).end()
+                    .find( "#selected_device_label" ).html($(this).val().toString().replace(/_/g, ' ')).end()
+                    .show();
+            }
+    });
+
+    $(document).ready(function() {
+
+        $( "table#device-table tr" ).each(function(){
+                $( this ).addClass("tipTip-right");
+        });
+        $( "table th" ).each(function(){
+                $( this ).addClass("ui-state-default");
+        });
+        $( "table td" ).each(function(){
+                $( this ).addClass("ui-widget-content");
+        });
+        $( "table tr.enabled" ).hover(
+                function(){
+                    $( this ).children("td").addClass("ui-state-hover");
+                },function(){
+                    $( this ).children("td").removeClass("ui-state-hover");
+        });
+        $( "table tr.enabled" ).click(function(){
+                $( this ).children( "td" ).toggleClass("ui-state-highlight");
+        });
+
+        if (neuron_ids.length == 0) {
+            $( "#device-list" ).find( "#device-list-content" ).hide();
+        };
+
+    });
+</script>
+
+
+<div class="portlet" id="device-list">
+    <div class="portlet-header" title="Hover a device to get more parameters or click a enabled device to modify it.">
+        Devices
+    </div>
+
+    <div class="portlet-content" id="device-list-content">
+        <ul>
+            <li><a href="#device-table-tab">Table</a></li>
+            <li><a href="#csv-tab">CSV</a></li>
+        </ul>
+
+
+        <div id="device-table-tab">
+            <form action="." method="POST" class="devices-form">
+                {% csrf_token %}
+                <table id="device-table">
+                    <thead>
+                        <tr title="">
+                            <th class="delete collapse"></th>
+                            <th>Id</th>
+                            <th>Device</th>
+                            <th>Targets</th>
+                            <th>Weight (pA)</th>
+                            <th>Delay (ms)</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% if network_obj.device_list|length > 0 %}
+                            {% for model, status, connections in network_obj.device_list %}
+                                <tr {% if network_obj.SPIC_id != "1" or model.type != "neuron" %} class="enabled" {% endif %}"
+                                    title="{{ status|itemize:model.label|default_if_none:'no status' }}" id="{{ model.id }}">
+                                    <td class="delete collapse">
+                                        <input type="checkbox" name="device_ids" value="{{model.id}}" {% if network_obj.SPIC_id == "1" and model.type == "neuron" %} disabled {% endif %}>
+                                    </td>
+                                    <td class="selectable id"><b>{{ model.id }}</b></td>
+                                    <td class="selectable model {% if network_obj.SPIC_id == "1" and model.type == "neuron" %} disabled {% endif %}" style="width: 9em">
+                                        {% if network_obj.SPIC_id == "1" and model.type == 'neuron' %}
+                                            Neuron
+                                        {% else %}
+                                            {{ model.label|label_escape }}
+                                        {% endif %}
+                                    </td>
+                                    <td class="selectable targets">
+                                        {% if connections.targets %}
+                                                {{ connections.targets|truncate:"15"}}
+                                        {% else %}
+                                                {{ connections.sources|truncate:"15"}}
+                                        {% endif %}
+                                    </td>
+                                    <td class="selectable weight">{{ connections.weight|truncate:"9" }}</td>
+                                    <td class="selectable delay">{{ connections.delay|truncate:"9" }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+
+                        <tr class="collapse">
+                            <td class="delete collapse"></td>
+                            <td class="selectable id"></td>
+                            <td class="selectable model"></td>
+                            <td class="selectable targets"></td>
+                            <td class="selectable weight"></td>
+                            <td class="selectable delay"></td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+                <div class="buttons" style="font-size:1em">
+                    <button class="delete" id="delete-devices">Delete</button>
+                    <button class="check" id="save-devices">Save</button>
+                    <button class="help" id="help-network">Help</button>
+                </div>
+
+                <ul class="messagelist" id="device-message"></ul>
+
+            </form>
+        </div>
+
+        <div title="" id="csv-tab">
+            <form action="." method="POST" id="device-csv-form">
+                {% csrf_token %}
+                <div id="device-csv-form-content">
+                    {{ device_csv_form.as_div }}
+                </div>
+
+                <div class="buttons">
+                    <button class="submit" id="save-devices-csv">Save</button>
+                    <button class="reset" id="reset">Reset</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="portlet-content" id="device-form-content">
+        <div class="field-wrapper" title="">
+            <label for="id_label">Add a device:</label>
+            <select id="id_label">
+                <option value="">--- select a device ---</option>
+                {% for device in device_choices %}
+                    <option value="{{device.id_label}}" style="color:{% ifequal device.model_type 'input'%}#467ab3{% else %}#6B4226{% endifequal %}">{{device.id_label|label_escape}}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+</div>
+
+
+<div class="ui-dialog" id="step-helper">
+    <h2 class="delimiter">Ten steps to work with SPIC</h2>
+
+    <ol>
+        <li>Add <b>new devices</b> and set their status.</li>
+        <li>Once done, save the <b>device table</b>.</li>
+        <li>Explore the <b>network layout</b>.</li>
+        <li>Explore the <b>connectivity matrix</b>.</li>
+        <li>Modify <b>the devices</b> if necessary save the table.</li>
+        <li>Run the <b>simulation</b>.</li>
+        <li>View the <b>results</b>.</li>
+    </ol>
+
+    Each successful simulation appears in the history list. The same list can be used to retrieve past simulations together with the results.
+    The recorded events (spikes, membrane potential etc.) are plotted online. They can also be downloaded as text files.
+
+    <h4>Optional:</h4>
+    Add comments to each simulation describing what you did it, why you did it, what were the results etc. This will help also when retrieving old simulations.
+
+    <p>Give some feedback in the forum.</p>
+
+</div>
+

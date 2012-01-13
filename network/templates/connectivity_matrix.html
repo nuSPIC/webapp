@@ -1,0 +1,157 @@
+{% if network_obj.neuron_ids|length <= 10 and network_obj.weight_list %}
+
+    <script type="text/javascript">
+
+        $(function() {
+
+            $( "div#connections-tabs" ).tabs({cookie: { expires: 7, name: "connections-cookie"}, cache: false });
+
+        });
+
+        $(document).ready(function() {
+
+            if (neuron_ids.length == 0) {
+
+                $( "div#connectivity_matrix" ).hide();
+
+            };
+          
+        });
+
+    </script>
+
+    <div class="portlet" id="connectivity_matrix">
+
+        <div class="portlet-header portlet-toggle" title="">
+            Connectivity matrix
+        </div>
+
+        <div class="portlet-content" id="connections-tabs">
+
+            <ul>
+                {% if network_obj.weight_list %}
+                    <li>
+                        <a href="#weights-tab"><strong>Weights (pA)</strong></a>
+                    </li>
+                {% endif %}
+
+                {% if network_obj.delay_list %}
+                    <li>
+                        <a href="#delays-tab"><strong>Delays (ms)</strong></a>
+                    </li>
+                {% endif %}
+            </ul>
+
+<!--                 WEIGHT TAB -->
+            {% if network_obj.weight_list %}
+
+                <div id="weights-tab">
+                    <table class="connections-table" id="weight-table">
+
+                        <thead>
+                            <tr>
+                                <td colspan="{{network_obj.neuron_ids|length|add:2}}">
+                                    <span class="connections-tabs" id="target_title">Target</span>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th></th>
+                                <th>Id</th>
+
+                                {% for neuron_id in network_obj.neuron_ids %}
+                                    <th class="connections-table" id="weight_{{neuron_id}}">{{ neuron_id }}</th>
+                                {% endfor %}
+
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for id, weights in network_obj.weight_list %}
+
+                                <tr id="neuron_{{ id }}">
+                                    {% if forloop.first %}
+
+                                        <td class="first-col" rowspan="{{network_obj.weight_list|length}}">
+                                            <span class="connections-tabs {% if network_obj.weight_list|length > 3 %}verticaltext{% endif %}" id="source_title">Source</span>
+                                        </td>
+
+                                    {% endif %}
+
+                                    <td class="connections-table">
+                                        <b>{{ id }}</b>
+                                    </td>
+
+                                    {% for weight in weights %}
+                                        <td class="connections-table">{{ weight }}</td>
+                                    {% endfor %}
+
+                                </tr>
+
+                            {% endfor %}
+                        <tbody>
+
+                    </table>
+                </div>
+
+            {% endif %}
+
+
+<!--                 DELAY TAB -->
+            {% if network_obj.delay_list %}
+
+                <div id="delays-tab">
+                    <table class="connections-table" id="delay-table">
+
+                        <thead>
+                            <tr>
+                                <td colspan="{{network_obj.neuron_ids|length|add:2}}">
+                                    <span class="connections-tabs" id="target_title">Target</span>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th></th>
+                                <th>Id</th>
+
+                                {% for neuron_id in network_obj.neuron_ids %}
+                                    <th class="connections-table" id="delay_{{neuron_id}}">{{ neuron_id }}</th>
+                                {% endfor %}
+
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for id, delays in network_obj.delay_list %}
+
+                                <tr id="neuron_{{ id }}">
+                                    {% if forloop.first %}
+
+                                        <td class="first-col" rowspan="{{network_obj.delay_list|length}}">
+                                            <span class="connections-tabs {% if network_obj.delay_list|length > 3 %}verticaltext{% endif %}" id="source_title">Source</span>
+                                        </td>
+
+                                    {% endif %}
+
+                                    <td class="connections-table">
+                                        <b>{{ id }}</b>
+                                    </td>
+
+                                    {% for delay in delays %}
+                                        <td class="connections-table">{{ delay }}</td>
+                                    {% endfor %}
+                                </tr>
+
+                            {% endfor %}
+                        <tbody>
+
+                    </table>
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+{% endif %}
