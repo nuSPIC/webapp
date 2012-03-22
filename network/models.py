@@ -53,7 +53,7 @@ class Network(models.Model):
             return '%s' %self.local_id
             
     class Meta:
-        ordering = ('-id',)
+        ordering = ('SPIC','id')
 
     def user(self):
         """
