@@ -121,7 +121,7 @@ def network_layout(request, SPIC_group, SPIC_id, local_id):
 def network_mini(request, SPIC_group, SPIC_id, local_id):
 
     SPIC_obj = SPIC.objects.get(group=SPIC_group, local_id=SPIC_id)
-    network_list = Network.objects.raw('SELECT id,local_id,label,date_simulated,has_voltmeter,has_spike_detector FROM network_network WHERE user_id = %s AND SPIC_id = %s AND deleted = 0', [request.user.pk, SPIC_obj.pk])
+    network_list = Network.objects.raw('SELECT id,local_id,label,date_simulated,has_voltmeter,has_spike_detector FROM network_network WHERE user_id = %s AND SPIC_id = %s AND deleted = 0 ORDER BY id DESC', [request.user.pk, SPIC_obj.pk])
 
     while True:
         try:
@@ -308,7 +308,7 @@ def network(request, SPIC_group, SPIC_id, local_id):
   
     # get objects from database
     SPIC_obj = SPIC.objects.get(group=SPIC_group, local_id=SPIC_id)
-    network_list = Network.objects.raw('SELECT id,local_id,label,date_simulated,has_voltmeter,has_spike_detector FROM network_network WHERE user_id = %s AND SPIC_id = %s AND deleted = 0', [request.user.pk, SPIC_obj.pk])
+    network_list = Network.objects.raw('SELECT id,local_id,label,date_simulated,has_voltmeter,has_spike_detector FROM network_network WHERE user_id = %s AND SPIC_id = %s AND deleted = 0 ORDER BY id DESC', [request.user.pk, SPIC_obj.pk])
     network_obj = get_object_or_404(Network, user_id=request.user.pk, SPIC=SPIC_obj, local_id=local_id, deleted=False)
 
     # if request is POST, then it executes any deletions
