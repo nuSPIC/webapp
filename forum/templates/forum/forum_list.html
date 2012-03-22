@@ -16,6 +16,7 @@
 
 {% block content %}
     <div id="forum_list">
+        <h2 class="delimiter">Discussions</h2>
 
         {% if user.is_authenticated %}
             <div class="forum_list_menu">
@@ -25,8 +26,12 @@
 
         <div class="forum_search">
             <form action="{% url search %}" method="get">
-                {{ search_form.term }}
-                <input type="submit" value="Search" />
+                <div class="field-wrapper">
+                    <div class="field-box">
+                        {{ search_form.term }}
+                    </div>
+                    <button class="ui-corner-right" type="submit" >Search</button>
+                </div>
             </form>
         </div>
         

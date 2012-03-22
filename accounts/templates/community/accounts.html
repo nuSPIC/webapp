@@ -6,31 +6,36 @@
 {% block title %}Community{% endblock %}
 
 {% block content %}
+    <h2 class="delimiter">Community</h2>
 
-<div style="overflow:hidden; margin-top:50px">
-    <form action="." method="get" id="accounts-search-form" style="float:right;">
-        {{ search_form.term }}
-        <input type="submit" value="Search" />
-    </form>
-    
-    Sort by:
-    <a href="{% url accounts %}{% if search_term %}?{{ search_term }}{% endif %}">last name</a> |
-    <a href="{% url accounts_by_date %}{% if search_term %}?{{ search_term }}{% endif %}">registration date</a>
-</div>
-
-<div id="accounts">
-    {% for column in page.object_list|columns:4 %}
-        <div class="column">
-            {% for profile in column %}
-                <div class="profile">
-                    <a href="{{ profile.get_absolute_url }}" class="username">
-                        <strong>{{ profile.user.get_full_name }}</strong>
-                    </a>
-                    Registration date: {{ profile.user.date_joined|date:"DATE_FORMAT" }}
+    <div style="overflow:hidden; margin-top:50px">
+        <form action="." method="get" id="accounts-search-form" style="float:right;">
+            <div class="field-wrapper">
+                <div class="field-box">
+                    {{ search_form.term }}
                 </div>
-            {% endfor %}
-        </div>
-    {% endfor %}
-</div>
-{% pagination page "user" search_term %}
+                <button class="ui-corner-right" type="submit" >Search</button>
+            </div>
+        </form>
+        
+        Sort by:
+        <a href="{% url accounts %}{% if search_term %}?{{ search_term }}{% endif %}">last name</a> |
+        <a href="{% url accounts_by_date %}{% if search_term %}?{{ search_term }}{% endif %}">registration date</a>
+    </div>
+
+    <div id="accounts">
+        {% for column in page.object_list|columns:4 %}
+            <div class="column">
+                {% for profile in column %}
+                    <div class="profile">
+                        <a href="{{ profile.get_absolute_url }}" class="username">
+                            <strong>{{ profile.user.get_full_name }}</strong>
+                        </a>
+                        Registration date: {{ profile.user.date_joined|date:"DATE_FORMAT" }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+    {% pagination page "user" search_term %}
 {% endblock %}

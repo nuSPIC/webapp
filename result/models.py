@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
+from django.contrib.auth.models import User
 from django.db import models
+
+from network.models import Network
 from reversion.models import Revision
 
 import lib.json as json
@@ -23,14 +26,13 @@ class Result(models.Model):
     def __unicode__(self):
         return '%s - %s' %(self.local_id, self.date_simulated)
 
+    class Meta:
+        ordering = ('id',)
+
     @property
     def network(self):
         """ Get the network for this result. """
         return self.revision.version_set.all()[0].object_version.object
-
-    def revision_date_created(self):
-        """ Get the date of created revision. """
-        return self.revision.date_created
 
     def is_recorded(self):
         """ Check if the network is recorded. """
@@ -38,18 +40,19 @@ class Result(models.Model):
 
     def voltmeter_interval(self):
         """ Get the interval of measured data from voltmeter. Default is 1.0 """
-        voltmeter = self.network.device_list(label='voltmeter')
-        if 'interval' in voltmeter[0][1]:
-            return float(voltmeter[0][1]['interval'])
+        voltmeter = self.network.device_list(model='voltmeter')
+        if 'interval' in voltmeter[0]:
+            return float(voltmeter[0]['interval'])
         return 1.0
 
     def voltmeter_targets(self, data=False):
         """ Return a list of neurons are connected to voltmeter. """
-        voltmeter = self.network.device_list(label='voltmeter')
+        network_obj = self.network
+        voltmeter = network_obj.device_list(model='voltmeter')
         if voltmeter:
-            targets = json.decode('['+ str(voltmeter[0][2]['targets']) + ']')
+            targets = json.decode('['+ str(voltmeter[0]['targets']) + ']')
             if data:
-                return [neuron for neuron in self.network.device_list(modeltype='neuron') if int(neuron[0]['id']) in targets]
+                return [neuron for neuron in network_obj.device_list(modeltype='neuron') if int(neuron['id']) in targets]
             return targets
         return []
    
@@ -64,19 +67,22 @@ class Result(models.Model):
     def voltmeter_data(self, sender=None):
         """ Decode voltmeter data from json. """
         if self.has_voltmeter:
-            def prep_to_vis(status, values):  
-                return {'status':status, 'values': values.tolist()}
+            network_obj = self.network
+            voltmeter = network_obj.device_list(model='voltmeter')
+            if voltmeter:
+                def prep_to_vis(status, values):  
+                    return {'status':status, 'values': values.tolist()}
+                    
+                V_m = json.decode(str(self.voltmeter_json))['V_m']
+                times = np.arange(1., network_obj.duration, 1.)
+                targets = json.decode('['+ str(voltmeter[0]['targets']) + ']')
+                V_m = np.reshape(np.array(V_m), [network_obj.duration-1, len(targets)]).T
                 
-            V_m = json.decode(str(self.voltmeter_json))['V_m']
-            times = np.arange(1.0, self.network.duration, self.voltmeter_interval())
-            targets = self.voltmeter_targets()
-            V_m = np.reshape(np.array(V_m), [self.network.duration-1, len(targets)]).T
-            
-            target_list = [target for target in self.network.device_list() if int(target[0]['id']) in targets]
-            if sender in targets:
-                V_m = [V_m[targets.index(sender)]]
-                target_list = [target_list[targets.index(sender)]]
-            return {'V_m': map(prep_to_vis, target_list, V_m), 'times':times.tolist()}
+                target_list = [target for target in network_obj.device_list() if int(target['id']) in targets]
+                if sender in targets:
+                    V_m = [V_m[targets.index(sender)]]
+                    target_list = [target_list[targets.index(sender)]]
+                return {'V_m': map(prep_to_vis, target_list, V_m), 'times':times.tolist()}
         return {}
         
     def spike_detector_points(self):

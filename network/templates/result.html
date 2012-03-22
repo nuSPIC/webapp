@@ -1,4 +1,4 @@
-{% if result_obj.is_recorded %}
+{% if network_obj.is_recorded %}
 
     <script type="text/javascript">
 
@@ -8,10 +8,10 @@
 
         });
 
-        {% if result_obj.has_voltmeter %}
+        {% if network_obj.has_voltmeter %}
 
             function voltmeter_enlarge(target_id) {
-                $( ".resultView" ).attr('src', '/result/{{result_obj.id}}/voltmeter/?neuron='+ target_id);
+                $( ".resultView" ).attr('src', '/network/ajax/{{ network_obj.pk }}/voltmeter/?neuron='+ target_id);
                 $( ".resultView" ).css('height', 400);
 
                 $( "#dialog-resultView" ).dialog({
@@ -23,7 +23,7 @@
             };
 
             $( "button#reload" ).live('click', function(e) {
-                    $( "div#VoltmeterThumbnail" ).html('<iframe src="{% url voltmeter_thumbnail result_obj.id %}"> </iframe>');
+                    $( "div#VoltmeterThumbnail" ).html('<iframe src="{% url voltmeter_thumbnail network_obj.pk %}"> </iframe>');
             });
 
             $( "select#voltmeter-select" ).live('change',function(e) {
@@ -34,11 +34,11 @@
         {% endif %}
 
 
-        {% if result_obj.has_spike_detector %}
+        {% if network_obj.has_spike_detector %}
 
             function spike_detector_enlarge() {
-                $( ".resultView" ).attr('src', "{% url spike_detector result_obj.id %}?view=large");
-                $( ".resultView" ).css('height', {{ network_obj.neuron_ids|length }} * 15 + 230);
+                $( ".resultView" ).attr('src', "{% url spike_detector network_obj.pk %}?view=large");
+                $( ".resultView" ).css('height', {{ network_obj.neuron_ids|length }} * 15 + 250);
 
                 $( "#dialog-resultView" ).dialog({
                         title: 'Spike Detector view of all connected neurons',
@@ -49,7 +49,7 @@
             };
 
             $( "button#spike_detector-link" ).live('click',function(e) {
-                $( ".resultView" ).attr('src', "{% url spike_detector result_obj.id %}?view=large");
+                $( ".resultView" ).attr('src', "{% url spike_detector network_obj.pk %}?view=large");
                 $( ".resultView" ).css('height', {{ network_obj.neuron_ids|length }} * 15 + 230);
 
                 $( "#dialog-resultView" ).dialog({
@@ -65,12 +65,12 @@
 
         $(document).ready(function() {
 
-            {% if result_obj.has_voltmeter %}
+            {% if network_obj.has_voltmeter %}
                 setTimeout('$( "#VoltmeterThumbnail" ).contents().find("span").each(function() { $(this).click(function() {voltmeter_enlarge(this.id)}); })', 1000.)
             {% endif %}
 
 
-            {% if result_obj.has_spike_detector %}
+            {% if network_obj.has_spike_detector %}
                 setTimeout('$( "#SpikeDetectorThumbnail" ).contents().find("span").click(function() {spike_detector_enlarge()})', 1000.)
             {% endif %}
             
@@ -87,21 +87,21 @@
         <div class="portlet-content" id="results-tabs">
 
             <ul>
-                {% if result_obj.has_spike_detector %}
+                {% if network_obj.has_spike_detector %}
                     <li><a href="#spike_detector-tab" class="spike_detector-tab">Spike Detector</a></li>
                 {% endif %}
-                {% if result_obj.has_voltmeter %}
+                {% if network_obj.has_voltmeter %}
                     <li><a href="#voltmeter-tab" class="voltmeter-tab-header">Voltmeter</a></li>
                 {% endif %}
             </ul>
 
 <!--             SPIKE DETECTOR TAB -->
             <div id="spike_detector-tab">
-                {% if result_obj.has_spike_detector %}
+                {% if network_obj.has_spike_detector %}
 
                     <div>
 
-                        <iframe scrolling="no" src="{% url spike_detector result_obj.id %}?view=small" id="SpikeDetectorThumbnail"></iframe>
+                        <iframe scrolling="no" src="{% url spike_detector network_obj.pk %}?view=small" id="SpikeDetectorThumbnail"></iframe>
 
                     </div>
 
@@ -114,11 +114,11 @@
 
 <!--             VOLTMETER TAB -->
             <div id="voltmeter-tab">
-                {% if result_obj.has_voltmeter %}
+                {% if network_obj.has_voltmeter %}
                     <div>
-                        {% if result_obj.voltmeter_points < 15000 %}
+                        {% if network_obj.voltmeter_points < 15000 %}
 
-                            <iframe src="{% url voltmeter_thumbnail result_obj.id %}" id="VoltmeterThumbnail"></iframe>
+                            <iframe src="{% url voltmeter_thumbnail network_obj.pk %}" id="VoltmeterThumbnail"></iframe>
 
                         {% else %}
 
@@ -131,7 +131,7 @@
                                 <select id="voltmeter-select">
                                     <option>--- Select a neuron ---</option>
 
-                                    {% for targets in result_obj.voltmeter_targets %}
+                                    {% for targets in network_obj.voltmeter_targets %}
                                         <option value="{{targets}}">
                                             Neuron [{{targets}}]
                                         </option>
@@ -155,7 +155,7 @@
 
             <div class="buttons" style="font-size:1em">
 
-                <a class="document" href="{% url data result_obj.id %}">Download Results</a>
+                <a class="document" href="{% url data network_obj.pk %}">Download Results</a>
 
             </div>
 
@@ -164,7 +164,7 @@
     </div>
 
 
-    <div class="ui-dialog" title="result view" id="dialog-resultView">
+    <div class="ui-dialog" title="result view" id="dialog-resultView" style="width:0">
 
         <iframe class="resultView" scrolling="no"></iframe>
 

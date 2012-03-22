@@ -2,6 +2,14 @@
 
 {% block title %}{{ profile.user.get_full_name }} &raquo; Edit profile{% endblock %}
 
+{% block extrahead %}
+    <style type="text/css">
+        .field-box {
+            width: 95%;
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
     <h2>Edit profile</h2>
     
@@ -17,7 +25,74 @@
         <fieldset>
             <legend>Optional fields</legend>
             
-            {{ profile_form.as_div }}
+            {{ profile_form.non_field_errors }}
+            {{ profile_form.id }}
+
+            <div class="field-wrapper">
+                <div class="label_tag">
+                    {{ profile_form.present_occupation.label_tag }}:
+                </div>
+                {{ profile_form.present_occupation.errors }}
+                {{ profile_form.present_occupation }}
+                <span class="help_text">{{ profile_form.present_occupation.help_text }}</span>
+            </div>
+
+            <div class="field-wrapper">
+                <div class="label_tag">
+                    {{ profile_form.academic_affiliation.label_tag }}:
+                </div>
+
+                {{ profile_form.academic_affiliation.errors }}
+                <div class="field-box">
+                    {{ profile_form.academic_affiliation }}
+                </div>
+
+                <button class="ui-corner-right help_text" title="{{ profile_form.academic_affiliation.help_text }}">?</button>
+            </div>
+
+            <div class="field-wrapper">
+                <div class="label_tag">
+                    {{ profile_form.public_email.label_tag }}:
+                </div>
+
+                {{ profile_form.public_email.errors }}
+                <div class="field-box">
+                    {{ profile_form.public_email }}
+                </div>
+
+                <button class="ui-corner-right help_text" title="{{ profile_form.public_email.help_text }}">?</button>
+            </div>
+
+            <div class="field-wrapper">
+                <div class="label_tag">
+                    {{ profile_form.web_page.label_tag }}:
+                </div>
+
+                {{ profile_form.web_page.errors }}
+                <div class="field-box">
+                    {{ profile_form.web_page }}
+                </div>
+
+                <button class="ui-corner-right help_text" title="{{ profile_form.web_page.help_text }}">?</button>
+            </div>
+
+
+            <div class="field-wrapper">
+                <div class="label_tag">
+                    {{ profile_form.notes.label_tag }}:
+                </div>
+                {{ profile_form.notes.errors }}
+                {{ profile_form.notes }}
+                <span class="help_text">{{ profile_form.notes.help_text }}</span>
+            </div>
+
+            <div class="field-wrapper">
+                <span class="label_tag">
+                    {{ profile_form.forum_email_notification.label_tag }}:
+                </span>
+                {{ profile_form.forum_email_notification }}
+                <span class="help_text">{{ profile_form.forum_email_notification.help_text }}</span>
+            </div>
         </fieldset>
         
         <input type="submit" value="Save" />

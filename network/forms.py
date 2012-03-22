@@ -9,29 +9,47 @@ from network.network_settings import PARAMS_ORDER
 
 import numpy as np
 
-__all__ = ["NetworkForm", "DeviceCSVForm",
+__all__ = ["NetworkForm", "NetworkLabelForm", "DeviceCSVForm", "UploadFileForm",
           "HhPscAlphaForm", "IafCondAlphaForm", "IafNeuronForm", "IafPscAlphaForm", 'ParrotForm',
           "ACGeneratorForm", "DCGeneratorForm", "NoiseGeneratorForm", "PoissonGeneratorForm", "SmpGeneratorForm", "SpikeGeneratorForm",
-          "SourceForm", "TargetForm"]
+          "SpikeDetectorForm", "VoltmeterForm"]
 
 class NetworkForm(BetterModelForm):
     """ Form for network object """
     duration = forms.FloatField(help_text="Enter positive value.")
     same_seed = forms.BooleanField(required=False, initial=True)
-    resolution = forms.FloatField(required=False, help_text='')
+    devices_json = forms.CharField(max_length=10000, widget=forms.HiddenInput())
     
     class Meta:
         model = Network
-        fieldsets = (('main', {'fields': ['duration', 'same_seed']}),
+        fieldsets = (('main', {'fields': ['duration', 'same_seed'], 'classes': ['required']}),
                     ('Advanced', {'fields': [], 'classes': ['advanced', 'collapse']}))
 
-class DeviceCSVForm(BetterForm):
-    data = forms.CharField(max_length=1000, required=False, widget=forms.Textarea, 
-          help_text='Enter values in correct order, seperated by semicolon. e.g. [device];[ID];[targets/sources];[weight];[delay];[optional params]')
+
+class NetworkLabelForm(forms.ModelForm):
+    
+    class Meta:
+        model = Network
+        fields = ('label',)
+
+    def as_div(self):
+        return self._html_output(u'<div class="field-wrapper">%(label)s %(errors)s %(field)s</div>', u'%s', '</div>', u'%s', False)
+
+
+class DeviceCSVForm(forms.Form):
+    csv = forms.CharField(max_length=1000, required=False, widget=forms.Textarea, 
+          help_text='Enter values in correct order, seperated by semicolon. e.g. [model]; [ID]; [targets/sources]; [weight]; [delay]; [optional params]')
 
     def as_div(self):
         return self._html_output(u'<div class="field-wrapper" title="%(help_text)s">%(errors)s %(field)s</div>', u'%s', '</div>', u'%s', False)
-        
+
+
+class UploadFileForm(forms.Form):
+    file  = forms.FileField()
+
+    def as_div(self):
+        return self._html_output(u'<div class="field-wrapper" title="%(help_text)s">%(label)s %(errors)s %(field)s</div>', u'%s', '</div>', u'%s', False)
+
 
 class NeuronForm(BetterForm):
     """ Parent form for input and neuron devices """    
@@ -40,15 +58,15 @@ class NeuronForm(BetterForm):
         if args:
             self.neuron_ids = json.decode(str(args[0]['neuron_ids']))
         super(NeuronForm, self).__init__(*args, **kwargs)
-    
+
+    id = forms.IntegerField(widget=forms.HiddenInput())
+    type = forms.CharField(max_length=32, widget=forms.HiddenInput(), initial='neuron')
     model = forms.CharField(max_length=32, widget=forms.HiddenInput())
+    label = forms.CharField(max_length=32, required=False, widget=forms.HiddenInput())
     targets = forms.CharField(max_length=1000, required=False, help_text="Enter neuron id(s), e.g. '1,2,3' or '1-4'")
     weight = forms.CharField(max_length=1000, required=False, initial=1.0, label='Weight (pA)', help_text="Enter either positive or negative values.")
     delay = forms.CharField(max_length=1000, required=False, initial=1.0, label='Delay (ms)', help_text="Enter positive values < 10ms.")
     #synapse_type = forms.ChoiceField(choices=(('static_synapse', 'static synapse'),('tsodyks_synapse', 'tsodyks synapse')), help_text='')
-
-    def as_div(self):
-        return self._html_output(u'<div class="field-wrapper" title="%(help_text)s">%(label)s %(errors)s %(field)s</div>', u'%s', '</div>', u'%s', False)
 
     def clean_targets(self):
         targets = self.cleaned_data.get('targets')
@@ -120,10 +138,8 @@ class HhPscAlphaForm(NeuronForm):
     I_e = forms.FloatField(required=False, initial=0., label='Constant external input current (pA)', help_text='')
 
     class Meta:
-        fieldsets = (('main', {'fields': ['model'] + PARAMS_ORDER['hh_psc_alpha'][0], 'classes': ['required']}),
-                    ('Advanced', {
-                        'fields': ['targets', 'weight', 'delay'] + PARAMS_ORDER['hh_psc_alpha'][1], 
-                        'classes': ['advanced']}))
+        fieldsets = (('main', {'fields': PARAMS_ORDER['hh_psc_alpha'][0], 'classes': ['required']}),
+                    ('Advanced', {'fields': PARAMS_ORDER['hh_psc_alpha'][1], 'classes': ['advanced']}))
         row_attrs = {'model': {'is_hidden': True}}
 
 class IafCondAlphaForm(NeuronForm):
@@ -141,10 +157,8 @@ class IafCondAlphaForm(NeuronForm):
     I_e = forms.FloatField(required=False, initial=0., label='Constant input current (pA)', help_text='')
 
     class Meta:
-        fieldsets = (('main', {'fields': ['model'] + PARAMS_ORDER['iaf_cond_alpha'][0], 'classes': ['required']}),
-                    ('Advanced', {
-                        'fields': ['targets', 'weight', 'delay'] + PARAMS_ORDER['iaf_cond_alpha'][1], 
-                        'classes': ['advanced']}))
+        fieldsets = (('main', {'fields': PARAMS_ORDER['iaf_cond_alpha'][0], 'classes': ['required']}),
+                    ('Advanced', {'fields': PARAMS_ORDER['iaf_cond_alpha'][1], 'classes': ['advanced']}))
         row_attrs = {'model': {'is_hidden': True}}
 
 class IafNeuronForm(NeuronForm):
@@ -159,10 +173,8 @@ class IafNeuronForm(NeuronForm):
     I_e = forms.FloatField(required=False, initial=0., label='Constant external input current (pA)', help_text='')
 
     class Meta:
-        fieldsets = (('main', {'fields': ['model'] + PARAMS_ORDER['iaf_neuron'][0], 'classes': ['required']}),
-                    ('Advanced', {
-                        'fields': ['targets', 'weight', 'delay'] + PARAMS_ORDER['iaf_neuron'][1], 
-                        'classes': ['advanced']}))
+        fieldsets = (('main', {'fields': PARAMS_ORDER['iaf_neuron'][0], 'classes': ['required']}),
+                    ('Advanced', {'fields': PARAMS_ORDER['iaf_neuron'][1], 'classes': ['advanced']}))
         row_attrs = {'model': {'is_hidden': True}}
         
 class IafPscAlphaForm(NeuronForm):
@@ -177,19 +189,15 @@ class IafPscAlphaForm(NeuronForm):
     I_e = forms.FloatField(required=False, initial=0., label='Constant input current (pA)', help_text='')
 
     class Meta:
-        fieldsets = (('main', {'fields': ['model'] + PARAMS_ORDER['iaf_psc_alpha'][0], 'classes': ['required']}),
-                    ('Advanced', {
-                        'fields': ['targets', 'weight', 'delay'] + PARAMS_ORDER['iaf_psc_alpha'][1], 
-                        'classes': ['advanced']}))
+        fieldsets = (('main', {'fields': PARAMS_ORDER['iaf_psc_alpha'][0], 'classes': ['required']}),
+                    ('Advanced', {'fields': PARAMS_ORDER['iaf_psc_alpha'][1], 'classes': ['advanced']}))
         row_attrs = {'model': {'is_hidden': True}}
 
 class ParrotForm(NeuronForm):
   
      class Meta:
-        fieldsets = (('main', {'fields': ['model', 'targets', 'weight', 'delay'] + PARAMS_ORDER['parrot'][0], 'classes': ['required']}),
-                    ('Advanced', {
-                        'fields': [] + PARAMS_ORDER['parrot'][1], 
-                        'classes': ['advanced']}))
+        fieldsets = (('main', {'fields': PARAMS_ORDER['parrot'][0], 'classes': ['required']}),
+                    ('Advanced', {'fields': PARAMS_ORDER['parrot'][1], 'classes': ['advanced']}))
         row_attrs = {'model': {'is_hidden': True}}
 
 """ 
@@ -203,15 +211,15 @@ class DeviceForm(BetterForm):
         if args:
             self.neuron_ids = json.decode(str(args[0]['neuron_ids']))
         super(DeviceForm, self).__init__(*args, **kwargs)
-    
+
+    id = forms.IntegerField(widget=forms.HiddenInput())
+    type = forms.CharField(max_length=32, widget=forms.HiddenInput(), initial='input')
     model = forms.CharField(max_length=32, widget=forms.HiddenInput())
+    label = forms.CharField(max_length=32, required=False, widget=forms.HiddenInput())
     targets = forms.CharField(max_length=1000, help_text="Enter neuron id(s), e.g. '1,2,3' or '1-4'")
     weight = forms.CharField(max_length=1000, initial=1.0, label='Weight (pA)', help_text="Enter either positive or negative values.")
     delay = forms.CharField(max_length=1000, initial=1.0, label='Delay (ms)', help_text="Enter positive values < 10ms.")
     #synapse_type = forms.ChoiceField(choices=(('static_synapse', 'static synapse'),('tsodyks_synapse', 'tsodyks synapse')), help_text='')
-
-    def as_div(self):
-        return self._html_output(u'<div class="field-wrapper" title="%(help_text)s">%(label)s %(errors)s %(field)s</div>', u'%s', '</div>', u'%s', False)
 
     def clean_targets(self):
         targets = self.cleaned_data.get('targets')
@@ -269,8 +277,8 @@ class DeviceForm(BetterForm):
 class ACGeneratorForm(DeviceForm):
     amplitude = forms.FloatField(required=False, initial=0., label='Amplitude (pA)', help_text='Enter only values > 0.')
     frequency = forms.FloatField(required=False, initial=0., label='Frequency (Hz)', help_text='Enter only positive values.')
-    offset = forms.FloatField(required=False, label='Constant amplitude offset (pA)', help_text='')
-    phase = forms.FloatField(required=False, label='Phase of sine current (0-360 deg)', help_text='Enter only values between 0 and 360.')
+    offset = forms.FloatField(required=False, label='Constant amplitude (pA)', help_text='')
+    phase = forms.FloatField(required=False, label='Phase (0-360 deg)', help_text='Enter only values between 0 and 360.')
 
 
     def clean_amplitude(self):
@@ -313,21 +321,21 @@ class ACGeneratorForm(DeviceForm):
         return phase
 
     class Meta:
-        fieldsets = (('main', {'fields': ['model', 'targets', 'weight', 'delay'] + PARAMS_ORDER['ac_generator'][0], 'classes': ['required']}),
+        fieldsets = (('main', {'fields': PARAMS_ORDER['ac_generator'][0], 'classes': ['required']}),
                     ('Advanced', {'fields': PARAMS_ORDER['ac_generator'][1], 'classes': ['advanced']}))
         row_attrs = {'model': {'is_hidden': True}}
 
 class DCGeneratorForm(DeviceForm):
-    amplitude = forms.FloatField(label='Amplitude of current (pA)', help_text='')
+    amplitude = forms.FloatField(label='Amplitude (pA)', help_text='')
 
     class Meta:
-        fieldsets = (('main', {'fields': ['model', 'targets', 'weight', 'delay'] + PARAMS_ORDER['dc_generator'][0], 'classes': ['required']}),
+        fieldsets = (('main', {'fields': PARAMS_ORDER['dc_generator'][0], 'classes': ['required']}),
                     ('Advanced', {'fields': PARAMS_ORDER['dc_generator'][1], 'classes': ['advanced']}))
         row_attrs = {'model': {'is_hidden': True}}
 
 class NoiseGeneratorForm(DeviceForm):
-    mean = forms.FloatField(required=False, label='Mean value of the noise current (pA)', help_text='')
-    std = forms.FloatField(required=False, label='Standard deviation of noise current (pA)', help_text='Enter only positive values.')
+    mean = forms.FloatField(required=False, label='Mean value (pA)', help_text='')
+    std = forms.FloatField(required=False, label='Standard deviation (pA)', help_text='Enter only positive values.')
     dt = forms.FloatField(required=False, label='Time steps (ms)', help_text='Enter only values > 0.')
     start = forms.FloatField(required=False, label='Start (ms)', help_text='Enter only positive values.')
     stop = forms.FloatField(required=False, label='Stop (ms)', help_text='Enter only values > 0.')
@@ -381,7 +389,7 @@ class NoiseGeneratorForm(DeviceForm):
         return stop
 
     class Meta:
-        fieldsets = (('main', {'fields': ['model', 'targets', 'weight', 'delay'] + PARAMS_ORDER['noise_generator'][0], 'classes': ['required']}),
+        fieldsets = (('main', {'fields': PARAMS_ORDER['noise_generator'][0], 'classes': ['required']}),
                     ('Advanced', {'fields': PARAMS_ORDER['noise_generator'][1], 'classes': ['advanced']}))
         row_attrs = {'model': {'is_hidden': True}}
 
@@ -428,7 +436,7 @@ class PoissonGeneratorForm(DeviceForm):
         return stop
 
     class Meta:
-        fieldsets = (('main', {'fields': ['model', 'targets', 'weight', 'delay'] + PARAMS_ORDER['poisson_generator'][0], 'classes': ['required']}),
+        fieldsets = (('main', {'fields': PARAMS_ORDER['poisson_generator'][0], 'classes': ['required']}),
                     ('Advanced', {'fields': PARAMS_ORDER['poisson_generator'][1], 'classes': ['advanced']}))
         row_attrs = {'model': {'is_hidden': True}}
 
@@ -451,7 +459,7 @@ class SmpGeneratorForm(DeviceForm):
         return freq
 
     class Meta:
-        fieldsets = (('main', {'fields': ['model', 'targets', 'weight', 'delay'] + PARAMS_ORDER['smp_generator'][0], 'classes': ['required']}),
+        fieldsets = (('main', {'fields': PARAMS_ORDER['smp_generator'][0] , 'classes': ['required']}),
                     ('Advanced', {'fields': PARAMS_ORDER['smp_generator'][1], 'classes': ['advanced']}))
         row_attrs = {'model': {'is_hidden': True}}
 
@@ -515,64 +523,27 @@ class SpikeGeneratorForm(DeviceForm):
         return step
         
     class Meta:
-        fieldsets = (('main', {'fields': ['model', 'targets', 'weight', 'delay'] + PARAMS_ORDER['spike_generator'][0], 'classes': ['required']}),
+        fieldsets = (('main', {'fields': ['label'] + PARAMS_ORDER['spike_generator'][0], 'classes': ['required']}),
                     ('Advanced', {'fields': PARAMS_ORDER['spike_generator'][1], 'classes': ['advanced']}))
         row_attrs = {'model': {'is_hidden': True}}
 
 
 """ 
-General Forms
+Output Forms
 """
 
-class SourceForm(BetterForm):
+class SpikeDetectorForm(BetterForm):
     def __init__(self, network_obj=None, *args, **kwargs):
         self.instance = network_obj
         if args:
             self.neuron_ids = json.decode(str(args[0]['neuron_ids']))
-        super(SourceForm, self).__init__(*args, **kwargs)
+        super(SpikeDetectorForm, self).__init__(*args, **kwargs)
         
+    id = forms.IntegerField(widget=forms.HiddenInput())  
+    type = forms.CharField(max_length=32, widget=forms.HiddenInput(), initial='output')
     model = forms.CharField(max_length=32, widget=forms.HiddenInput())
-    targets = forms.CharField(max_length=1000, help_text="Enter neuron id(s), e.g. '1,2,3' or '1-4'")
-
-
-    def as_div(self):
-        return self._html_output(u'<div class="field-wrapper" title="%(help_text)s">%(label)s %(errors)s %(field)s</div>', u'%s', '</div>', u'%s', False)
-
-    def clean_targets(self):
-        targets = self.cleaned_data.get('targets').replace(' ','')
-        try:
-            extended_list = values_extend(targets, unique=True)
-        except:
-            raise forms.ValidationError("Enter neuron id(s), e.g. '1,2,3' or '1-4'")
-        
-        # check if all targets are neurons
-        neuron_ids = self.instance.neuron_ids()
-        parrot_ids = self.instance.neuron_ids(label='parrot_neuron')
-        
-        for target in extended_list:
-            if not (target in neuron_ids or target in self.neuron_ids):
-                raise forms.ValidationError("Targets should be neurons.")
-            if target in parrot_ids:
-                raise forms.ValidationError("Some of the targets are not recordable.")
-            
-        return targets
-
-    class Meta:
-        fieldsets = (('main', {'fields': ['model', 'targets'], 'classes': ['required']}),
-                    ('Advanced', {'fields': [], 'classes': ['advanced']}))
-
-class TargetForm(BetterForm):
-    def __init__(self, network_obj=None, *args, **kwargs):
-        self.instance = network_obj
-        if args:
-            self.neuron_ids = json.decode(str(args[0]['neuron_ids']))
-        super(TargetForm, self).__init__(*args, **kwargs)
-        
-    model = forms.CharField(max_length=32, widget=forms.HiddenInput())
+    label = forms.CharField(max_length=32, required=False, widget=forms.HiddenInput())
     sources = forms.CharField(max_length=1000, help_text="Enter neuron id(s), e.g. '1,2,3' or '1-4'")
-
-    def as_div(self):
-        return self._html_output(u'<div class="field-wrapper" title="%(help_text)s">%(label)s %(errors)s %(field)s</div>', u'%s', '</div>', u'%s', False)
 
     def clean_sources(self):
         sources = self.cleaned_data.get('sources').replace(' ','')
@@ -583,7 +554,7 @@ class TargetForm(BetterForm):
         
         # check if all sources are neurons
         neuron_ids = self.instance.neuron_ids()
-        parrot_ids = self.instance.neuron_ids(label='parrot_neuron')
+        parrot_ids = self.instance.neuron_ids(model='parrot_neuron')
 
         for source in extended_list:
             if not (source in neuron_ids or source in self.neuron_ids):
@@ -594,5 +565,43 @@ class TargetForm(BetterForm):
         return sources
 
     class Meta:
-        fieldsets = (('main', {'fields': ['model', 'sources'], 'classes': ['required']}),
-                    ('Advanced', {'fields': [], 'classes': ['advanced']}))
+        fieldsets = (('main', {'fields': PARAMS_ORDER['spike_detector'][0], 'classes': ['required']}),
+                    ('Advanced', {'fields': PARAMS_ORDER['spike_detector'][1], 'classes': ['advanced']}))
+
+
+class VoltmeterForm(BetterForm):
+    def __init__(self, network_obj=None, *args, **kwargs):
+        self.instance = network_obj
+        if args:
+            self.neuron_ids = json.decode(str(args[0]['neuron_ids']))
+        super(VoltmeterForm, self).__init__(*args, **kwargs)
+
+    id = forms.IntegerField(widget=forms.HiddenInput())
+    type = forms.CharField(max_length=32, widget=forms.HiddenInput(), initial='output')
+    model = forms.CharField(max_length=32, widget=forms.HiddenInput())
+    label = forms.CharField(max_length=32, required=False,  widget=forms.HiddenInput())
+    targets = forms.CharField(max_length=1000, help_text="Enter neuron id(s), e.g. '1,2,3' or '1-4'")
+
+    def clean_targets(self):
+        targets = self.cleaned_data.get('targets').replace(' ','')
+        try:
+            extended_list = values_extend(targets, unique=True)
+        except:
+            raise forms.ValidationError("Enter neuron id(s), e.g. '1,2,3' or '1-4'")
+        
+        # check if all targets are neurons
+        neuron_ids = self.instance.neuron_ids()
+        parrot_ids = self.instance.neuron_ids(model='parrot_neuron')
+        
+        for target in extended_list:
+            if not (target in neuron_ids or target in self.neuron_ids):
+                raise forms.ValidationError("Targets should be neurons.")
+            if target in parrot_ids:
+                raise forms.ValidationError("Some of the targets are not recordable.")
+            
+        return targets
+
+    class Meta:
+        fieldsets = (('main', {'fields': PARAMS_ORDER['voltmeter'][0], 'classes': ['required']}),
+                    ('Advanced', {'fields': PARAMS_ORDER['voltmeter'][1], 'classes': ['advanced']}))
+

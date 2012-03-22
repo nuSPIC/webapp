@@ -68,8 +68,8 @@ INSTALLED_APPS = (
     'news',
 
     'network',
-    'reversion',
-    'result',
+    #'reversion',
+    #'result',
 
     'djcelery',
     'djkombu',

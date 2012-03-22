@@ -7,39 +7,27 @@ from lib.decorators import render_to
 import lib.json as json
 
 from network.helpers import id_escape
+from network.models import Network
 
-from models import Result
-from forms import CommentForm
-
-
-def result_comment(request, result_id):
-    """
-    Comment forms of result
-    """
-    
-    result_obj = get_object_or_404(Result, pk=result_id)
-    
-    if request.is_ajax():
-        if request.method == 'POST':
-            form = CommentForm(request.POST, instance=result_obj)
-            result_obj = form.save()
-            return HttpResponse(result_obj.comment)
-        
-    return HttpResponse()
+from result.models import Result
 
 def data(request, result_id):
     result_obj = get_object_or_404(Result, pk=result_id)
-    
-    voltmeter = result_obj.voltmeter_data()
-    spike_detector = result_obj.spike_detector_data()
+    network_obj = get_object_or_404(Network, result_id=result_id)
     
     response = {
-        'voltmeter': voltmeter,
-        'spike_detector' : spike_detector,
+        'network': network_obj.device_list(),
+        'result' : {}
     }
     
+    if result_obj.has_voltmeter:
+        response['result']['voltmeter'] = json.decode(result_obj.voltmeter_json)
+        
+    if result_obj.has_spike_detector:
+        response['result']['spike_detector'] = json.decode(result_obj.spike_detector_json)
+    
     response = HttpResponse(json.encode(response), mimetype='application/force-download')
-    response['Content-Disposition'] = 'attachment; filename=%s_%s.txt' %(result_obj.network, result_obj)
+    response['Content-Disposition'] = 'attachment; filename=%s_%s' %(network_obj, result_obj)
 
     return response
 
@@ -72,7 +60,11 @@ def voltmeter_thumbnail(request, result_id):
     """
     
     result_obj = get_object_or_404(Result, pk=result_id)
-    return {'result_obj': result_obj}
+    network_obj = Network.objects.get(result_id=result_obj.pk)
+    return {
+        'network_obj': network_obj,
+        'result_obj': result_obj
+    }
 
 @render_to('spike_detector.html')
 def spike_detector(request, result_id):
@@ -81,22 +73,22 @@ def spike_detector(request, result_id):
     """
     
     result_obj = get_object_or_404(Result, pk=result_id)
-    network_obj = result_obj.network
+    network_obj = Network.objects.get(result_id=result_obj.pk)
     output_list = network_obj.device_list(modeltype='output')
     
     spike_detector = result_obj.spike_detector_data()
     assert len(spike_detector['senders']) == len(spike_detector['times'])
 
     neurons = network_obj.neuron_ids()
-    spike_detector['neurons'] = network_obj._connect_to(label='spike_detector')
+    spike_detector['neurons'] = network_obj._connect_to(model='spike_detector')
     spike_detector['neuronScale'] = [ii+1 for ii,v in enumerate(spike_detector['neurons'])]
 
     id_filterbank = network_obj.id_filterbank()
-    neuron_id_filterbank = network_obj.neuron_id_filterbank(label="spike_detector")
+    neuron_id_filterbank = network_obj.neuron_id_filterbank(model="spike_detector")
     spike_detector['senders'] = [id_escape(id_filterbank, sender) for sender in spike_detector['senders']]
     spike_detector['senders'] = [id_escape(neuron_id_filterbank, sender) for sender in spike_detector['senders']]
     
-    spike_detector['simTime'] = result_obj.revision.version_set.all()[0].object_version.object.duration
+    spike_detector['simTime'] = network_obj.duration
     
     if request.GET.get('view') == 'small':
         spike_detector['fig'] = {'width':250, 'height':300, 'w':210, 'h2':50, 'yticks':3}

@@ -50,7 +50,7 @@
                         });
                         var result = task['result'];
                         window.setTimeout(function() {
-                                window.location.href = '{% url network network_obj.SPIC_id network_obj.local_id %}' + result['result_local_id'] + '/'
+                            window.location.href = '/network/{{SPIC_obj.group}}/{{SPIC_obj.local_id}}/' + local_id +'/{{mini}}'
                         }, 1000);
                     };
                 }
@@ -61,9 +61,8 @@
         var form = $( "#network-form" ).serialize();
         var devices_json = JSON.stringify(device_list);
         var post_data = form.concat('&devices_json='+ devices_json);
-        result_id = result_id > 0 ? result_id : 0;
         $( "#submit-network-form" ).attr("disabled", true);
-        $.post('/network/ajax/'+ {{ network_obj.id }} +'/'+ result_id +'/simulate/',
+        $.post('/network/ajax/'+ {{ network_obj.id }} +'/simulate/',
             post_data, function(data){
                 if (data.valid == -1) {
                     $( ".network-form-content" ).html(data.responseHTML);
@@ -92,8 +91,7 @@
                             modal: true,
                             buttons: {
                                 'Abort': function() {
-                                    $.getJSON('/network/ajax/'+ {{ network_obj.id }} +'/'+ result_id +'/simulate/',
-                                        {'task_id': task_id},
+                                    $.get('/network/ajax/'+ task_id +'/abort/',
                                         function() {
                                             $( this ).dialog( "close" );
                                             get_task_status();
@@ -103,6 +101,7 @@
                     });
                     task_id = data.task_id;
                     $( "#task_id" ).html(task_id);
+                    local_id = data.local_id;
                     get_task_status();
                 };
         }, 'json');
@@ -181,20 +180,33 @@
             {% if network_form.fieldsets %}
                 {% for fieldset in network_form.fieldsets %}
                     <div class="{{ fieldset.classes }}">
-                    {% if fieldset.description %}
-                        <p class="description">{{ fieldset.description }}</p>
-                    {% endif %}
-                    {% for field in fieldset %}
-                        {% if field.is_hidden %}
-                        {{ field }}
-                        {% else %}
-                        <div class="field-wrapper" title="{{ field.help_text }}" >
-                            {{ field.errors }}
-                            {{ field.label_tag }}
-                            {{ field }}
-                        </div>
+
+                        {% if fieldset.description %}
+                            <p class="description">{{ fieldset.description }}</p>
                         {% endif %}
-                    {% endfor %}
+
+                        <div class="field-wrapper">
+                            <div class="label_tag">
+                                {{ fieldset.form.duration.label_tag }}:
+                            </div>
+
+                            {{ fieldset.form.duration.errors }}
+                            <div class="field-box">
+                                {{ fieldset.form.duration }}
+                            </div>
+
+                            <button class="ui-corner-right help_text" title="{{ fieldset.form.duration.help_text }}">?</button>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <span class="label_tag">
+                                {{ fieldset.form.same_seed.label_tag }}:
+                            </span>
+
+                            {{ fieldset.form.same_seed }}
+                            <span class="help_text">{{ fieldset.form.same_seed.help_text }}</span>
+                        </div>
+
                     </div>
                 {% endfor %}
             {% else %}
@@ -204,15 +216,6 @@
 
         <div class="buttons">
             <button type="submit" class="play" id="submit-network-form">Save & simulate</button>
-            <!--{% with network_form.fieldsets.fieldsets|last|last as advanced %}
-                {% if advanced.fields|length > 1 %}
-                    {% if 'collapse' in advanced.classes %}
-                        <button class="toggle" id="toggle-device-form">Expand</button>
-                    {% else %}
-                        <button class="toggle ui-state-highlight" id="toggle-device-form">Collapse</button>
-                    {% endif %}
-                {% endif %}
-            {% endwith%}-->
             <div style="float:right" id="task_status"></div>
         </div>
     </div>

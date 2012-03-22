@@ -4,17 +4,20 @@
 }
 
 @font-face {
-    font-family: 'Biolinum-bold';
-    src: url('/media/files/fonts/Libertine/LinBiolinum_RB.woff') format('woff');
-    font-weight: bold;
-    font-style: normal;
+    font-family: 'Daniel';
+    src: url('/media/files/fonts/Daniel/danielbd-webfont.woff') format('woff');
 }
 
+
 @font-face {
-    font-family: 'Biolinum-italic';
-    src: url('/media/files/fonts/Libertine/LinBiolinum_RI.woff') format('woff');
-    font-style: normal;
+    font-family: 'Quicksand';
+    src: url('/media/files/fonts/Quicksand/Quicksand_Book-webfont.woff') format('woff');
 }
+@font-face {
+    font-family: 'Quicksand-bold';
+    src: url('/media/files/fonts/Quicksand/Quicksand_Bold-webfont.woff') format('woff');
+}
+
 
 @font-face {
     font-family: 'Sansation';
@@ -24,13 +27,12 @@
         url('/media/files/fonts/Sansation/sansation_regular-webFont.ttf') format('truetype'),
         url('/media/files/fonts/Sansation/sansation_regular-webFont.svg#webfont') format('svg');
 }
-html {
-    overflow-y:scroll;
-}
+
 
 body {
-    font-family: /*Sansation,*/ Helvetica, Arial, sans-serif;
-    font-size: 13px;
+/*     overflow: hidden; */
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 12px;
     color: #2B2924;
     background-color: #FAFAF9 ;
     padding: 0px;
@@ -59,70 +61,132 @@ a:hover {
 /* Layout
 ***********************/
 
-#header {
-    color: #CCCCCC;
-    background-color: #2B2924;
-    padding: 8px 10px 6px 10px;
+#wrapper {
+    margin: auto;
+    width : 960px;
 }
 
-    #header .top_links {
-        float: right;
-        text-align: right;
-    }
+#header {
+    color: #2B2924;
+    font-family: sans-serif;
+    padding: 0;
+}
 
-    #header .navigation {
-        overflow: hidden;
-    }
+#header_top {
+/*     background-color: #29496A; */
+/*     background: url(/media/images/icons/header-bg.png); */
+    padding-bottom: 2px;
+}
 
-    #header a {
-        color:  #CCCCCC;
-    }
-
-    #header a:hover {
-        color:  #FAFAF9;
-    }
-
-    #header #competition {
-           color: #FFCE2E;
-        }
-
-    #header #competition:hover {
-           color: #ff652e;
-        }
-
-#content-inner, #logo{
-    width : 900px;
+#banner {
+/*     background-color: #FAFAF9 ; */
     margin: auto;
 }
 
-    #content #content-inner {
-        padding: 10px 10px 40px 10px;
-    }
-
-    #content #banner {
-        height: 171px;
-    }
-
-
-#footer {
-    /*background-color: #2B2924;*//*#d0e5f5; #a6c9e2*/
-    text-align: center;
-    padding: 8px 10px 6px 10px;
+.logo {
+    background: url(/media/images/special/nuspic_logo.png) no-repeat;
+    height: 171px;
+    width : 396px;
+    margin: auto;
 }
 
-    /*#footer a {*/
-        /*color:  #CCCCCC;*/
-    /*}*/
+.logo_small {
+    background: url(/media/images/special/nuspic_banner_small.png) no-repeat;
+    height: 85px;
+    width : 880px;
+}
 
-    /*#footer a:hover {*/
-        /*color:  #FAFAF9;*/
-    /*}*/
+#header .navigation {
+    padding-top: 1px;
+    height: 30px;
+    position: relative;
+}
+
+    #main_menu ul {
+        bottom: -1;
+        position: absolute;
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    #main_menu li {
+        cursor: pointer;
+        display: inline-block; 
+        padding: 10px 9px 4px 9px; 
+        border: 1px solid #CCCCCC;
+        border-bottom: none;
+        margin-right: 2px;
+    }
+
+    #main_menu a {
+        color: #666666;
+        text-decoration: none;
+    }
+
+    #main_menu #competition a {
+        color: #29496A; /*#865e34;*/
+        font-weight: bold;
+    }
+
+    #main_menu li:hover {
+        background-color: #FAFAF9;
+        border: 1px solid #A2A2A2;
+        border-bottom: 2px solid #FFCE2E;
+    }
+
+    #main_menu li:hover a {
+        color: #2B2924;
+    }
+
+        #main_menu li.currentpage {
+            cursor: default;
+            background-color: #FAFAF9;
+            border: 1px solid #A2A2A2;
+            border-bottom: 1px solid #FAFAF9;
+        }
+
+        #main_menu li.currentpage a {
+            color: #2B2924;
+            cursor: default;
+        }
+
+    #header .top_links {
+        padding: 11px 5px 4px 5px;
+        position: absolute;
+        right: 0;
+        top: 0;
+    }
+
+
+#content {
+    border: 1px solid #A2A2A2;
+    background-color: #FAFAF9;
+    min-height: 640px;
+    padding: 5px 10px;
+}
+
+#footer {
+    margin-top: 2px;
+    background: url(/media/images/icons/footer-bg.png);
+    background-color: #29496A;
+    padding: 8px 10px 6px 10px;
+    text-align: center;
+}
+
+    #footer a {
+        color:  #CCCCCC;
+    }
+
+    #footer a:hover {
+        color:  #FAFAF9;
+    }
 
 /* Flatpages
 *********************/
 
 .flatpage {
-    font-size: 16px;
+    font-size: 1.2em;
     line-height: 1.5em;
 }
 
@@ -130,9 +194,7 @@ a:hover {
 *********************/
 
 #news {
-    background-color: #FAFAF9 ;
     float: right;
-    margin-left: 40px;
     padding-left: 10px;
     border-left: 1px solid #CCCCCC;
 }
@@ -144,7 +206,6 @@ a:hover {
 }
 
 .news-block {
-
 }
 
     .news-block .news-date {
@@ -240,56 +301,101 @@ ul.errorlist {
         list-style      : none;
     }
 
+input, textarea, keygen, select, button, isindex {
+    margin: 0em;
+}
+
 .field-wrapper {
     margin-bottom: 5px;
+
 }
 
     .field-wrapper label {
         font-weight: bold;
     }
 
-    .field-wrapper input {
-        width           : 98%;
-        font-weight     : bold;
-        background-color: #EEEEEE;
-        display         : block;
-        border          : 1px solid #BBBBBB;
-        padding         : 4px;
+    .field-wrapper .field-box {
+        border : 1px solid #BBBBBB;
+        height: 26px;
+        vertical-align: middle;
+        display:inline-block;
+        overflow: hidden;
     }
 
+    .field-wrapper .label_tag {
+        font-weight: bold;
+    }
+
+    .field-wrapper .field-input {
+        border : 1px solid #BBBBBB;
+        height: 26px;
+        vertical-align: middle;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .field-wrapper input {
+        width: 260px;
+        width: 95%;
+        color: #333333;
+        background-color: transparent;
+        border : none;
+        padding: 5px 6px;
+    }
+
+    .field-wrapper button {
+        color: #333333;
+        background-color: #F1F1F1;
+        outline: none;
+        border: 1px solid #BBBBBB;
+        display: inline-block;
+        height: 28px;
+        vertical-align: middle;
+        overflow: hidden;
+        margin-left: -5px;
+    }
+
+    .field-wrapper button:hover {
+        cursor: pointer;
+        color: #2B2924;
+        background-color: #FAFAF9;
+        border: 1px solid #A2A2A2;
+    }
+    
     .field-wrapper ul {
         padding: 0;
         margin: 0;
         list-style: none;
     }
 
-    .field-wrapper .radio-select {
+    .field-wrapper .radio-select, .field-wrapper input[type='radio'] {
         width: auto;
+        margin-left: 30px;
         float: left;
     }
 
-    .field-wrapper .checkbox {
+    .field-wrapper .checkbox, .field-wrapper input[type='checkbox'] {
         width: auto;
         float: right;
     }
 
     .field-wrapper select {
-        font-weight     : bold;
+        font-weight : bold;
         background-color: #EEEEEE;
-        display         : block;
-        border          : 1px solid #BBBBBB;
-        padding         : 2px;
+        display : block;
+        border : 1px solid #BBBBBB;
+        padding : 2px;
     }
 
         .field-wrapper select option {
-            padding         : 1px 5px;
+            padding : 1px 5px;
         }
 
     .field-wrapper textarea {
-        width            : 99%;
+        width : 97%;
         background-color: #EEEEEE;
-        border          : 1px solid #BBBBBB;
-        padding         : 4px;
+        border : 1px solid #BBBBBB;
+        padding : 4px;
     }
 
 
@@ -348,31 +454,57 @@ h2.delimiter {
 }
 
 .delimiter {
-	border-bottom: 1px solid #CCCCCC;
-	overflow	 : hidden;
+    border-bottom: 1px solid #CCCCCC;
+    overflow     : hidden;
 }
+
 
 #logo {
     margin-top: 100px;
-    overflow:  hidden;
+    overflow  :  hidden;
 }
 
     #logo img {
-        padding: 15px;
-        height: 75px;
+        padding       : 15px;
+        height        : 75px;
         vertical-align: bottom;
     }
 
 .ui-shadow {
-    box-shadow: 2px 2px 7px #444;
-    -o-box-shadow: 2px 2px 7px #444;
-    -webkit-box-shadow: 2px 2px 7px #444;
-    -moz-box-shadow: 2px 2px 7px #444;
+    box-shadow        : 2px 2px 2px #444;
+    -o-box-shadow     : 2px 2px 2px #444;
+    -webkit-box-shadow: 2px 2px 2px #444;
+    -moz-box-shadow   : 2px 2px 2px #444;
 }
 
 .ui-inner-shadow {
-    box-shadow: inset 0 0 10px #000;
-    -o-box-shadow: inset 0 0 10px #000;
+    box-shadow        : inset 0 0 10px #000;
+    -o-box-shadow     : inset 0 0 10px #000;
     -webkit-box-shadow: inset 0 0 10px #000;
-    -moz-box-shadow: inset 0 0 10px #000;
+    -moz-box-shadow   : inset 0 0 10px #000;
+}
+
+
+/* Colored Underline
+************************/
+
+.blue {
+    border-bottom: 2px solid #467AB3;
+}
+
+.red {
+    border: 1px solid #B4464F !important;
+    background-color: #ecd1d3 !important;
+}
+
+.green {
+    border-bottom: 2px solid #46B469;
+}
+
+.orange {
+    border-bottom: 2px solid #FFCE2E;
+}
+
+.limette {
+    border-bottom: 2px solid #A7B446;
 }

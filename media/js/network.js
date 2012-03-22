@@ -9,7 +9,7 @@ $.fn.loadTheme = function (options) {
                     .addClass( "ui-widget-header ui-corner-top tipTip-top" )
                     .end()
             .find( ".portlet-toggle" )
-                    .prepend( "<span class='ui-icon toggle ui-icon-minusthick'></span>")
+                    .prepend( '<div class="ui-widget-header ui-corner-all" style="float:right"><span class="ui-icon toggle ui-icon-minusthick"></span></div>')
                     .end()
             .find( ".portlet-content" )
                     .addClass( "ui-widget-content ui-shadow" );
@@ -72,13 +72,4 @@ $.fn.loadTheme = function (options) {
                         primary: "ui-icon-star"
                     }})
                 .end();
-
-        if ('tipTip' in options && options['tipTip']) {
-            $( this ).find( "div.field-wrapper" ).tipTip({
-                defaultPosition: 'right',
-                delay: 500
-            });
-        }
-                
-
 };

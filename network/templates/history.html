@@ -8,9 +8,6 @@
 
     $(document).ready(function() {
 
-
-        $( "#history_"+ result_id).addClass( "ui-state-highlight" );
-
         $( "ul#history-list li" ).each(function(){
             $( this ).addClass("ui-widget-content");
         });
@@ -44,47 +41,39 @@
 </script>
 
 <div class="portlet" id="history">
+
     <div class="portlet-header portlet-toggle" title="Click a simulated network version to load it.">
         History
     </div>
 
-    <div class="portlet-content">
-
+    <div class="portlet-content" id="history">
         <form action="." method="POST" class="versions-form">
             {% csrf_token %}
+
             <ul class="pager" id="history-list">
-                {% for result in results %}
-                      <li class="tipTip-left"
-                        title="{{result.comment|default_if_none:'no comment'}}" id="history_{{result.local_id|default:0}}">
-                        <input style="float:right" type="checkbox" name="result_ids" value="{{result.id}}">
-                        {% if result.favorite %}<div class="ui-icon ui-icon-star" style="float:right"></div>{% endif %}
+                {% for network in network_list %}
+                    <li class="tipTip-left {% ifequal network.id network_obj.id %}ui-state-highlight{% endifequal %}"
+                        title="{{ network.comment|default_if_none:'no comment' }}" id="history_{{ network.local_id }}">
+
+                        <input style="float:right" type="checkbox" name="network_ids" value="{{ network.id }}" {% ifequal network.local_id 0 %}disabled{% endifequal %}>
+
+                        {% if network.favorite %}
+                            <div class="ui-icon ui-icon-star" style="float:right"></div>
+                        {% endif %}
+
                         <div class="version-link">
-                            <a href="{% url network_simulated network_obj.SPIC_id network_obj.local_id result.local_id|default:0 %}?version=revert" id="{{result.local_id}}">
-                                {% if result %}
-                                    <b>{{ result.local_id }}</b> -
-                                    {% if result.date_simulated %}
-                                        {% if result.has_spike_detector %} [Sd] {% endif %}
-                                        {% if result.has_voltmeter %} [Vm] {% endif %}
-                                        - {{ result.date_simulated|timesince }} ago
-                                    {% else %}
-                                        no simulation
-                                    {% endif %}
+                            <a href="{% url network SPIC_obj.group SPIC_obj.local_id network.local_id|default_if_none:0 %}" id="{{ network.local_id }}">
+                                {% if network %}
+                                    <b>{{ network.local_id }}</b> - {{ network.label }} -
+                                    {{ network.date_simulated|timesince|default:"not simulated" }}{% if network.date_simulated %} ago {% endif %}
                                 {% else %}
-                                    NaN - no result found
+                                    NaN - no network found
                                 {% endif %}
                             </a>
                         </div>
+
                     </li>
                 {% endfor %}
-
-                <li class="tipTip-left"
-                    title="" id="history_0">
-                    <div class="version-link">
-                        <a href="{% url network network_obj.SPIC_id network_obj.local_id %}?version=first">
-                            Initial version of network
-                        </a>
-                    </div>
-                </li>
             </ul>
 
             <div class="buttons field-wrapper" title="" >
@@ -96,9 +85,10 @@
                         <option value="favorite">Mark as favorite</option>
                         <option value="unfavorite">Unmark as favorite</option>
                     </select>
-
                 </form>
             </div>
+
         </form>
     </div>
+
 </div>

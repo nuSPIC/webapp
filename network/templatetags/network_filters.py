@@ -26,19 +26,24 @@ def itemize(s, label=None):
     if s:
         if label:
             st = ''
-            params = PARAMS_ORDER[str(label)]
-            params = params[0] + params[1]
+            params = PARAMS_ORDER.get(str(label))
             if params:
-                for param in params:
+                params = params[0] + params[1]
+                for param in params[1:]:
                     if param in s:
-                        if ',' in s[param]:
+                        if ',' in str(s[param]):
                             if len(s[param]) < 20:
-                                st += '%s:%s, ' %(param.replace('_', ' '), s[param])
+                                st += '%s: %s, ' %(param, s[param])
                             else:
-                                st += '%s:%s.., ' %(param.replace('_', ' '), s[param][:20])
+                                st += '%s: %s.., ' %(param, s[param][:20])
                         else:
-                            if s[param]:
-                                st += '%s:%.2f, ' %(param.replace('_', ' '), float(s[param]))
+                            if str(s[param]).isdigit():
+                                st += '%s: %d, ' %(param, int(s[param]))
+                            else:
+                                try:
+                                    st += '%s: %.2f, ' %(param, float(s[param]))
+                                except:
+                                    st += '%s: %s, ' %(param, s[param])
                 st = st[:-2]
                 return st   
         l = s.items()
@@ -55,3 +60,15 @@ def index(s, index):
     return str(l[int(index)])
 index.is_safe = True
 index = stringfilter(index)
+
+@register.filter()
+def modeltype(model):
+        # get modeltype of device.
+    if 'generator' in model:
+        return 'input'
+    elif 'meter' in model or 'detector' in model:
+        return 'output'
+    else:
+        return 'neuron'
+        
+    

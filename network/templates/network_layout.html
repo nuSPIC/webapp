@@ -4,7 +4,7 @@
             var popup = $( this ).parents( ".portlet" );
             width = ($(popup).find( ".portlet-content" ).width()+80);
             height = ($(popup).find( ".portlet-content" ).height()+110);
-            newPopup = window.open('{% url network_layout network_obj.SPIC_id network_obj.local_id %}',
+            newPopup = window.open('{% url network_layout network_obj.SPIC.group network_obj.SPIC.local_id network_obj.local_id %}',
                         'network_layout',
                         'left=50,width='+ width.toString() +',height='+ height.toString() +',toolbar=no,location=yes,directories=no,status=no,menubar=no,scrollbars=no,copyhistory=no');
             newPopup.moveTo(screen.availWidth/2 - width/2, screen.availHeight/2 - height /2);
@@ -62,7 +62,9 @@
 <div class="portlet" id="network_layout">
     <div class="portlet-header portlet-toggle" title="">
         Network layout
-        <span class="ui-icon dialog ui-icon-newwin" style="float:right"></span>
+        <div class="ui-widget-header ui-corner-all" style="float:right">
+            <span class="ui-icon dialog ui-icon-newwin" style="float:right"></span>
+        </div>
     </div>
 
     <div class="portlet-content">
@@ -75,14 +77,14 @@
             <small style="float:right" id="position"></small>
         </div>
 
-    </div>
+        <div class="collapse" id="layout-legend-content">
+            <p><b>blue line</b> - excitatory connection</p>
+            <p><b>red line</b> - inhibitory connection</p>
+            <p><b>left dot</b> - then neuron receives external input.</p>
+            <p><b>right dot</b> - then neurons are being recorded.</p>
+            <br>
+            <p><b>NOTE</b>: neurons can be dragged around.</p>
+        </div>
 
-    <div class="portlet-content collapse" id="layout-legend-content">
-        <p><b>blue line</b> - excitatory connection</p>
-        <p><b>red line</b> - inhibitory connection</p>
-        <p><b>left dot</b> - then neuron receives external input.</p>
-        <p><b>right dot</b> - then neurons are being recorded.</p>
-        <br>
-        <p><b>NOTE</b>: neurons can be dragged around.</p>
     </div>
 </div>

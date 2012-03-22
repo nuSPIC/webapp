@@ -1,14 +1,19 @@
 # -*- coding: utf-8 -*-
 from reversion import revision
-from result.models import Result
-import numpy as np
 
-@revision.create_on_success
-def revision_create(obj, result=False, **kwargs):
-    """ Create a revision for network object. """
-    obj.save()
-    if result:
-        revision.add_meta(Result, **kwargs)
+import numpy as np
+from network.network_settings import PARAMS_ORDER
+
+params_order = {}
+for key, val in PARAMS_ORDER.items():
+    params_order[key] = val[0] + val[1]
+
+#@revision.create_on_success
+#def revision_create(obj, result=False, **kwargs):
+    #""" Create a revision for network object. """
+    #obj.save()
+    #if result:
+        #revision.add_meta(Result, **kwargs)
         
 def values_extend(values, unique=False, toString=False):
     """ Extend targets/sources e.g. if target is '1-3, 5', it converts into '1,2,3,5'. """
@@ -57,3 +62,28 @@ def id_identify(id_filterbank, vid=None):
         return tids[vids.tolist().index(float(vid))]
         
     return np.array([], dtype=int)
+    
+def dict_to_JSON(valDict):
+    params_order = PARAMS_ORDER[valDict['model']][0] + PARAMS_ORDER[valDict['model']][1]
+    valList = []
+    
+    for keyJSON in params_order:
+        if keyJSON in valDict:
+            if valDict[keyJSON]:
+                valList.append('"%s":"%s"' %(keyJSON, valDict[keyJSON]))
+                continue
+        valList.append('"%s":""' %keyJSON)
+        
+    return '{' + ', '.join(valList) + '}'
+    
+def csv_to_dict(csv):
+    csvList = csv.split('\r\n')
+    devList = []
+    for device in csvList:
+        statusList = device.split(';')
+        statusList = [status.lstrip() for status in statusList]
+        statusList[1] = int(statusList[1])
+        if statusList[0] in params_order:
+            params = params_order[statusList[0]]
+            devList.append(dict(zip(params,statusList)))
+    return devList

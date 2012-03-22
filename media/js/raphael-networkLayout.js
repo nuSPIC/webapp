@@ -179,7 +179,7 @@ $.fn.loadLayout = function (device_list) {
 //         inputs[this.neuron_id-1].animate({"fill-opacity": 1}, 500);
 //         outputs[this.neuron_id-1].animate({"fill-opacity": 1}, 500);
 
-        device_list[this.neuron_label-1][0]["position"] = [this.bb.x > 0 ? this.cx : 18, this.bb.y > 0 ? this.cy : 13];
+        device_list[this.neuron_label-1]["position"] = [this.bb.x > 0 ? this.cx : 18, this.bb.y > 0 ? this.cy : 13];
         $('#position').fadeOut();
         };
 
@@ -191,10 +191,10 @@ $.fn.loadLayout = function (device_list) {
     id = 0;
     for (var ii = 0; ii < device_list.length; ii++) {
         device = device_list[ii];
-        if ("position" in device[0]) {
-            x = device[0]["position"][0];
-            y = device[0]["position"][1];
-            label = device[0]["id"];
+        if ("position" in device) {
+            x = device["position"][0];
+            y = device["position"][1];
+            label = device["id"];
 
             shapes.push(
                 paper.ellipse(x, y, 17, 12)
@@ -202,7 +202,7 @@ $.fn.loadLayout = function (device_list) {
                      .data("label", label)
                      .data("input", connect_to_input.inArray(label))
                      .data("output", connect_to_output.inArray(label))
-                     .data("targets", device[2]["targets"])
+                     .data("targets", device["targets"])
                      .attr({cursor: "move",
                            fill: "#fff",
                            "fill-opacity": 0.1,
@@ -270,8 +270,8 @@ $.fn.loadLayout = function (device_list) {
                     $( "table#delay-table" ).find( "tr#neuron_"+ neuron_label ).find( "td.connections-table" ).addClass( "ui-state-highlight" );
                     
                     device = device_list[neuron_label-1];
-                    if ("targets" in device[2]) {
-                        var targets = device[2]["targets"].split(",");
+                    if ("targets" in device) {
+                        var targets = device["targets"].split(",");
                             for (idx in targets) {
                                 var tgt = (targets[idx]);
                                 $( "table#weight-table" )

@@ -1,22 +1,29 @@
 {% if form.fieldsets %}
     {% for fieldset in form.fieldsets %}
-        <div class="{{ fieldset.classes }}">
-            {% if fieldset.description %}
-                <p class="description">{{ fieldset.description }}</p>
-            {% endif %}
+        {% if fieldset.description %}
+            <p class="description">{{ fieldset.description }}</p>
+        {% endif %}
 
-            {% for field in fieldset %}
-                {% if field.is_hidden %}
-                    {{ field }}
-                {% else %}
-                    <div class="field-wrapper" title="{{ field.help_text }}">
+        {% for field in fieldset %}
+            {% if field.is_hidden %}
+                {{ field }}
+            {% else %}
+
+                <div class="field-wrapper" title="">
+
+                    <div>
                         {{ field.label_tag }}
-                        {{ field.errors }}
+                    </div>
+                    {{ field.errors }}
+
+                    <div class="field-box {{ fieldset.classes }}">
                         {{ field }}
                     </div>
-                {% endif %}
-            {% endfor %}
-        </div>
+
+                    <button class="ui-corner-right help_text" title="{{ field.help_text }}">?</button>
+                </div>
+            {% endif %}
+        {% endfor %}
     {% endfor %}
 {% else %}
     {{ form.as_div }}

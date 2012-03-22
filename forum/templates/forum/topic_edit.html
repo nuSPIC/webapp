@@ -114,12 +114,12 @@
 {% block content %}
     <h2 class="delimiter">Edit topic</h2>
     <div class="breadcrumbs">&raquo; <a href="{% url forum %}">Discussions</a> &raquo; <a href="{{ forum.get_absolute_url }}">{{ forum.name }}</a> &raquo; <a href="{{ topic.get_absolute_url }}">{{ topic.name }}</a></div>
-	
+
     <div id="preview"></div>
-    
+
     <form action="." method="post" id="edit_topic_form">
         {% csrf_token %}
-        
+
         {{ topic_form.as_div }}
         
         {% post_editor post_form %}

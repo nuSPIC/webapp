@@ -1,21 +1,34 @@
 {% if form.fieldsets %}
     {% for fieldset in form.fieldsets %}
-    <div class="{{ fieldset.classes }}">
-    {% if fieldset.description %}
-        <p class="description">{{ fieldset.description }}</p>
-    {% endif %}
-    {% for field in fieldset %}
-        {% if field.is_hidden %}
-        {{ field }}
-        {% else %}
-        <div class="field-wrapper" title="{{ field.help_text }}" >
-        {{ field.label_tag }}
-        {{ field.errors }}
-        {{ field }}
+        <div class="{{ fieldset.classes }}">
+
+            {% if fieldset.description %}
+                <p class="description">{{ fieldset.description }}</p>
+            {% endif %}
+
+            {% for field in fieldset %}
+                {% if field.is_hidden %}
+                    {{ field }}
+                {% else %}
+                    <div class="field-wrapper" title="{{ field.help_text }}" >
+
+                        {{ field.label_tag }}
+                        {{ field.errors }}
+
+                        <div class="field-input" style="height:23px">
+                            {{ field }}
+                        {% if field.help_text %}
+                            <div class="ui-widget-content device_help tipTip-bottom" title="{{ field.help_text }}" style="display:inline-block; vertical-align: middle">
+                                <span class="ui-icon ui-icon-help" style="vertical-align: middle" ></span>
+                            </div>
+                        {% endif %}
+                        </div>
+
+                    </div>
+                {% endif %}
+            {% endfor %}
+
         </div>
-        {% endif %}
-    {% endfor %}
-    </div>
     {% endfor %}
 {% else %}
     {{ form.as_div }}

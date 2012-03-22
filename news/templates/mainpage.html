@@ -7,7 +7,11 @@
 {% block title %}{{ flatpage.title }}{% endblock %}
 
 {% block content %}
-    <div style="width: 27%;" id="news">
+    <div class="logo"></div>
+
+    <div style="width: 28%;" id="news">
+        <h2 class="delimiter">Announcements</h2>
+
         {% for news in news_list %}
             <div>
                 <strong><span style="color:#AAAAAA">{{ news.pub_date|date:"DATE_FORMAT" }}</span> <br> &raquo; {{ news.title }}</strong>

@@ -10,67 +10,110 @@
 
         <link rel="icon" href="{{ MEDIA_URL }}nuSPIC_blue.ico" type="image/x-icon" />
         <link rel="shortcut icon" href="{{ MEDIA_URL }}nuSPIC_blue.ico" type="image/x-icon" />
+
+        <link href="{{ MEDIA_URL }}css/nuspic/jquery-ui-1.8.14.custom.css" type="text/css" rel="stylesheet" />
+        <link href="{{ MEDIA_URL }}css/jquery-ui.custom.css" type="text/css" rel="stylesheet" />
         <link href="{{ MEDIA_URL }}css/default.css" type="text/css" rel="stylesheet" />
+
+        <script type="text/javascript" src="/media/js/jquery-1.6.2.min.js"></script>
+        <script type="text/javascript" src="/media/js/jquery-ui-1.8.14.custom.min.js"></script>
         
+        <script type="text/javascript" >
+            if (typeof String.prototype.startsWith != 'function') {
+              String.prototype.startsWith = function (str){
+                return this.indexOf(str) == 0;
+              };
+            }
+
+            $(document).ready(function() {
+                $( ".navigation li" ).each(function() {
+                    if (window.location.pathname.startsWith($(this).find( "a" ).attr("href"))) {
+                        $(this).addClass("currentpage")
+                    };
+                }).click(function() {
+                    window.location.href = $(this).find("a").attr("href");
+                });
+
+                if (window.location.pathname.length > 1) {
+                    $( ".navigation li:first" ).removeClass("currentpage")
+                };
+
+                $( "button.help_text" ).click(function(e) {
+                    e.preventDefault();
+                });
+
+            });
+        </script>
+
         {% block feeds %}{% endblock %}
         {% block extrahead %}{% endblock %}
     </head>
     
-    <body>
-        <div id="header">
-            <div class="top_links">
-                {% if user.is_authenticated %}
-                    Welcome, <a href="{% url profile user.profile.id %}">{{ user.get_full_name }}</a> | <a href="{% url logout %}">Logout</a>
-                {% else %}
-                    <a href="{% url login %}">Login</a> or <a href="{% url registration %}">register</a>
-                {% endif %}
-            </div>
-            
-            <div class="navigation">
-                <a href="{% url mainpage %}">Home</a> |
-                <a href="{% url news_archive %}">News</a> |
-                <a href="{% url network_list %}" id="competition"><strong>Competition</strong></a> |
-                <a href="/about/">About</a> |
-                <a href="/faq/">FAQ</a> |
-                <a href="{% url accounts %}">Community</a> |
-                <a href="{% url forum %}">Discussions</a> |
-                <a href="/contact/">Contact</a>
-                
-            </div>
-        </div>
+    <body style="background-color: #F1F1F1">
+        <div id="wrapper">
 
-        
-        <div id="content">
-            <div class="ui-inner-shadow" id="content-head">
+            <div id="header">
 
-                <div id="content-inner">
-                    <div id="banner" style="background: url(/media/images/special/nuspic_logo.png) no-repeat;"></div>
-                    {% block content %}{% endblock %}
+                <div class="ui-corner-br" id="header_top">
+                    <div class="logo_small" id="banner"></div>
+                </div>
+
+                <div class="navigation">
+
+                    <div class="top_links">
+                        {% if user.is_authenticated %}
+                            Welcome,
+                            <a href="{% url profile user.profile.id %}">{{ user.get_full_name }}</a> |
+                            {% if user.is_staff %}
+                                <a href="/admin/">admin</a> |
+                            {% endif %}
+                            <a href="{% url logout %}">Logout</a>
+                        {% else %}
+                            <a href="{% url login %}">Login</a>
+                            <span>or</span>
+                            <a href="{% url registration %}">register</a>
+                        {% endif %}
+                    </div>
+
+                    <div id="main_menu">
+                        <ul >
+                            <li class="ui-corner-tl"><a href="{% url mainpage %}">Home</a></li>
+                            <li><a href="{% url news_archive %}">News</a></li>
+                            <li id="competition"><a href="{% url network_list %}">Competition</a></li>
+                            <li><a href="/about/">About</a></li>
+                            <li><a href="/faq/">FAQ</a></li>
+                            <li><a href="{% url accounts %}">Community</a></li>
+                            <li><a href="{% url forum %}">Discussions</a></li>
+                            <li class="ui-corner-tr"><a href="/contact/">Contact</a></li>
+                        <ul>
+                    </div>
+
                 </div>
 
             </div>
-
-            <div id="content-footer">
-                {% block footer %}{% endblock %}
-            </div>
-
-        </div>
-
-        <div id="footer">
-            <div class="navigation">
-                <a href="{% url mainpage %}">Home</a> |
-                <a href="{% url news_archive %}">News</a> |
-                <a href="{% url network_list %}">Competition</a> |
-                <a href="/about/">About</a> |
-                <a href="/faq/">FAQ</a> |
-                <a href="{% url accounts %}">Community</a> |
-                <a href="{% url forum %}">Discussions</a> |
-                <a href="/contact/">Contact</a>
-            </div>
             
-            <div class="feeds">
-                {% block footer_feeds %}{% endblock %}
+            <div class="ui-corner-tr" id="content">
+                {% block content %}{% endblock %}
             </div>
+
+            <div id="footer">
+
+                <div class="navigation">
+                    <a href="{% url mainpage %}">Home</a> |
+                    <a href="{% url news_archive %}">News</a> |
+                    <a href="{% url network_list %}">Competition</a> |
+                    <a href="/about/">About</a> |
+                    <a href="/faq/">FAQ</a> |
+                    <a href="{% url accounts %}">Community</a> |
+                    <a href="{% url forum %}">Discussions</a> |
+                    <a href="/contact/">Contact</a>
+                </div>
+                
+                <div class="feeds">
+                    {% block footer_feeds %}{% endblock %}
+                </div>
+            </div>
+
         </div>
     </body>
 </html>

@@ -1,83 +1,85 @@
 <script type="text/javascript">
-    var device_list_preview = function (data) {
-        var label = data[0]['label'].replace("_", " "),
-        title = [], status = data[1];
-        for (var i in status) {
-            title.push(' '+ i.toString() +': '+ status[i].toString());
+    function device_list_preview (status) {
+        var model = status['model'].replace("_", " ");
+
+        var title = [];
+        for (var statusKey in status) {
+            title.push(statusKey +": "+ status[statusKey].toString())
             }
 
         // Add new device to the list
         if (selected_device_id == last_device_id + 1) {
             var device = $( "#device-table > tbody tr:last" );
             $(device).after( $(device).clone() );
-            $(device).attr('id', selected_device_id).addClass('enabled');
+            $(device).attr('id', "device_"+ selected_device_id).addClass('enabled');
 
             $(device).find( "td.id" ).html(selected_device_id).end()
-                .find(" td.model" ).html(label);
+                .find(" td.model" ).html(model);
 
             var term = 'added';
             last_device_id++;
         } else {
-            var device = $( "#"+ selected_device_id );
+            var device = $( "#device_"+ selected_device_id );
             var term = 'changed';
         }
 
-        if ('targets' in data[2]) { $(device).find( "td.targets" ).html(data[2]['targets'])}
-        else if ('sources' in data[2]) { $(device).find( "td.targets" ).html(data[2]['sources'])};
+        if ('targets' in status) { $(device).find( "td.targets" ).html(status['targets'])}
+        else if ('sources' in status) { $(device).find( "td.targets" ).html(status['sources'])};
 
-        if ('weight' in data[2]) {$(device).find( "td.weight" ).html(data[2]['weight'])}
-        if ('delay' in data[2]) {$(device).find( "td.delay" ).html(data[2]['delay'])};
+        if ('weight' in status) {$(device).find( "td.weight" ).html(status['weight'])}
+        if ('delay' in status) {$(device).find( "td.delay" ).html(status['delay'])};
 
-        if (title) {
-        $(device).attr('title', title.join(",")).fadeIn().tipTip({defaultPosition: 'right',});
-        } else {
-        $(device).attr('title', 'no status').fadeIn().tipTip({defaultPosition: 'right',});
-        }
+        $(device).attr('title', title.join(", ")).fadeIn().tipTip({defaultPosition: 'right',});
+
 
         result_id = 0;
-        $( "#device-message" ).html("<li>"+ label +" ["+ selected_device_id +"] was "+ term +" successfully.</li>");
+        $( "#device-message" ).html("<li>"+ model +" ["+ selected_device_id +"] was "+ term +" successfully.</li>");
         $( "#device-list" ).find( ".portlet-content" ).show();
     };
 
 
     $( "form.device-form" ).live('submit',  function(e) {
         e.preventDefault();
+        var form_content = $( this ).find( ".form-content" );
         var form_data = $( this ).serialize();
-        var post_data = form_data.concat('&neuron_ids='+ JSON.stringify(neuron_ids));
         $.post('{% url device_preview network_obj.id %}',
-            post_data, function(data){
-                var form = $( "#"+ data.id_label +"-form" )
-                $(form).html(data.responseHTML);
-                if (data.valid != -1) {
+            form_data.concat('&neuron_ids='+ JSON.stringify(neuron_ids)), function(data){
+                if (data.valid == -1) {
+                    $(form_content).html(data.responseHTML);
+                } else {
                     $( "ul.errorlist" ).remove();
-                    if ($( "select#id_label" ).val() == 'voltmeter' || $("select#id_label" ).val() == 'spike_detector') {
-                        $( "select#id_label option:selected" ).hide()
+                    if ($( "select#id_model" ).val() == 'voltmeter' || $("select#id_model" ).val() == 'spike_detector') {
+                        $( "select#id_model option:selected" ).hide()
                     };
                     $( "option:first" ).attr('selected', 'selected');
 
-                    device = data.device;
-                    device[0]["id"] = parseInt(selected_device_id);
+                    var status = data.status,
+                    statusJSON = data.statusJSON;
+                    status["id"] = parseInt(selected_device_id);
 
-                    if (device[0]["type"] == 'output') {
-                        if ("targets" in device[2]) {
-                            connect_to_output.push(device[2]["targets"]);
+                    if (status["type"] == 'output') {
+                        if ("targets" in status) {
+                            connect_to_output.push(status["targets"]);
                         } else {
-                            connect_to_output.push(device[2]["sources"]);
+                            connect_to_output.push(status["sources"]);
                         };
-                    } else if (device[0]["type"] == 'input') {
-                        connect_to_input.push(device[2]["targets"]);
-                    } else if (device[0]["type"] == 'neuron') {
-                        neuron_ids.push(device[0]["id"])
+                    } else if (status["type"] == 'input') {
+                        connect_to_input.push(status["targets"]);
+                    } else if (status["type"] == 'neuron') {
+                        neuron_ids.push(status["id"])
                     }
 
                     if (selected_device_id > device_list.length || selected_device_id > last_device_id) {
-                        device_list.push(device);
+                        device_list.push(status);
                     } else {
-                        position = device_list[selected_device_id-1][0]["position"];
-                        device[0]["position"] = position;
-                        device_list[selected_device_id-1] = device;
+                        position = device_list[selected_device_id-1]["position"];
+                        status["position"] = position;
+                        device_list[selected_device_id-1] = status;
                     };
-                    device_list_preview(device);
+                    
+                    csvDict = JSONtoCSV(statusJSON)
+                    device_list_preview(JSON.parse(statusJSON));
+                    $( "#fields #id_model-"+ status.id ).find( "input.deviceCSV" ).attr( "value", csvDict['val']);
                 };
         }, 'json');
     });
@@ -97,35 +99,29 @@
             };
         };
         $(this).parents( ".device-form" ).find( "#id_spike_times" ).val(spike_times.toString());
+
     });
 
-    $( ".required input" ).live('keyup', function() {
+    $( ".required input" ).live('change', function() {
         if (this.value == '') {
-            $(this).addClass('ui-state-hover');
+            $(this).parent(".field-box").addClass('red');
         } else {
-            $(this).removeClass('ui-state-hover');
+            $(this).parent(".field-box").removeClass('red');
         }
-    });
-
-    $(document).ready(function() {
-        $( ".required input" ).each(function() {
-            if ($(this).val() == '') {$(this).addClass('ui-state-hover')};
-            });
-
     });
 
 </script>
 
 <div class="portlet" id="device-form">
     <div class="portlet-header" title="" id="device-form-header">
-      <span id="selected_device_id"></span> - <span id="selected_device_label"></span>
+      <span id="selected_device_id"></span> - <span id="selected_device_model"></span>
     </div>
 
     {% for forms in device_formsets %}
 
-        <form action="." method="POST" class="portlet-content device-form" id="{{forms.id_label}}">
+        <form action="." method="POST" class="portlet-content device-form" id="{{forms.id_model}}">
             {% csrf_token %}
-            <div id="{{forms.id_label}}-form">
+            <div class="form-content" id="{{forms.id_model}}-form">
                 {{forms.formsHTML}}
             </div>
 

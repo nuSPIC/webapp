@@ -16,10 +16,10 @@ function prep_vis() {
             var d1 = x.invert(i.x),
             d2 = x.invert(i.x + i.dx),
             dd = data.slice(
-                Math.max(0, pv.search.index(data, d1, function(d) d.x) - 1),
-                pv.search.index(data, d2, function(d) d.x) + 1);
+                Math.max(0, pv.search.index(data, d1, function(d) {return d.x}) - 1),
+                pv.search.index(data, d2, function(d) {return d.x}) + 1);
             fx.domain(d1, d2);
-            fy.domain(scale.checked ? [pv.min(dd, function(d) d.y)-0.001, pv.max(dd, function(d) d.y)] : y.domain());
+            fy.domain(scale.checked ? [pv.min(dd, function(d) {return d.y})-0.001, pv.max(dd, function(d) {return d.y})] : y.domain());
             return dd;
         })
         .top(0)
@@ -27,7 +27,7 @@ function prep_vis() {
 
     /* X-axis ticks. */
     focus.add(pv.Rule)
-        .data(function() fx.ticks())
+        .data(function() {return fx.ticks()})
         .left(fx)
         .strokeStyle("#eee")
     .anchor("bottom").add(pv.Label)
@@ -35,7 +35,7 @@ function prep_vis() {
 
     /* Y-axis ticks. */
     focus.add(pv.Rule)
-        .data(function() fy.ticks(7))
+        .data(function() {return fy.ticks(7)})
         .bottom(fy)
         .strokeStyle("#eee")
     .anchor("left").add(pv.Label)
@@ -46,14 +46,14 @@ function prep_vis() {
         .overflow("hidden");
 
     var line = focus.add(pv.Line)
-        .data(function() focus.init())
-        .left(function(d) fx(d.x))
-        .bottom(function(d) fy(d.y));
+        .data(function() {return focus.init()})
+        .left(function(d) {return fx(d.x)})
+        .bottom(function(d) {return fy(d.y)});
 
     var j = -1;
     var dot = line.add(pv.Dot)
-        .visible(function() j >= 0)
-        .data(function() [data[j]])
+        .visible(function() {return j >= 0})
+        .data(function() {return [data[j]]})
         .fillStyle("#ff7f0e")
         .strokeStyle("#000")
         .size(20)
@@ -63,7 +63,7 @@ function prep_vis() {
         .left(10)
         .top(0)
       .anchor("right").add(pv.Label)
-        .text(function(d) d.x.toFixed(2) +"ms: "+ d.y.toFixed(2) +"mV");
+        .text(function(d) {return d.x.toFixed(2) +"ms: "+ d.y.toFixed(2) +"mV"});
 
 
     focus.add(pv.Bar)
@@ -74,7 +74,7 @@ function prep_vis() {
           })
         .event("mousemove", function() {
             var mx = fx.invert(focus.mouse().x);
-            j = pv.search(data.map(function(d) d.x), mx);
+            j = pv.search(data.map(function(d) {return d.x}), mx);
             j = j < 0 ? (-j - 2) : j;
             return focus;
           });
@@ -101,8 +101,8 @@ function prep_vis() {
     /* Context area chart. */
     context.add(pv.Line)
         .data(data)
-        .left(function(d) x(d.x))
-        .bottom(function(d) y(d.y));
+        .left(function(d) {return x(d.x)})
+        .bottom(function(d) {return y(d.y)});
 
     /* The selectable, draggable focus region. */
     context.add(pv.Panel)
@@ -112,8 +112,8 @@ function prep_vis() {
         .event("mousedown", pv.Behavior.select())
         .event("select", focus)
     .add(pv.Bar)
-        .left(function(d) d.x)
-        .width(function(d) d.dx)
+        .left(function(d) {return d.x})
+        .width(function(d) {return d.dx})
         .fillStyle("rgba(255, 128, 128, .4)")
         .cursor("move")
         .event("mousedown", pv.Behavior.drag())

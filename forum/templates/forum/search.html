@@ -30,10 +30,14 @@
         
         <div class="forum_search">
             <form action="{% url search %}" method="get">
-                {{ search_form.non_field_errors }}
-                {{ search_form.term.errors }}
-                {{ search_form.term }}
-                <input type="submit" value="Search" class="submit" />
+                <div class="field-wrapper">
+                    {{ search_form.non_field_errors }}
+                    {{ search_form.term.errors }}
+                    <div class="field-box">
+                        {{ search_form.term }}
+                    </div>
+                    <button class="ui-corner-right" type="submit" >Search</button>
+                </div>
             </form>
         </div>
                 

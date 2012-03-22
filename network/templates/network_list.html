@@ -16,8 +16,8 @@
             $( "#tutorial_vid" ).dialog({
                                    title: 'Tutorial',
                                    resizable: false,
-                                   height: 395,
-                                   width: 600,
+                                   height: 420,
+                                   width: 660,
                  }).parent().hide();
 
             $( "#tutorial" ).click(function(e) {
@@ -32,40 +32,36 @@
 {% endblock %}
 
 {% block content %}
-        <div class="flatpage">
+    <div class="flatpage">
 
-            {% regroup network_list|dictsort:"SPIC_id" by SPIC_id as network_by_SPIC %}
+        {% regroup network_list by SPIC.group as network_by_SPIC %}
 
-            {% for group in network_by_SPIC %}
-                {{ flatpage.content|index:forloop.counter0 }}
+        {% for item in network_by_SPIC %}
+            {{ flatpage.content|index:forloop.counter0 }}
 
-                {% if group.grouper != '0' %}
-{#                <div style="text-align:right; font-size:0.8em; font-weight:bold; margin-right:5px">Version</div>#}
+            {% if item.grouper != '0' %}
                 <ul style="margin-top:0;">
-                    {% for network in group.list %}
-                        <li id="{{ network.local_id }}">
-                            <a href="{% url network network.SPIC_id network.local_id %}">
-                                {{ network.title|default_if_none:"Network" }}
-                            </a>
-                            : <span style="font-size:0.8em">{{ network.description|default:"no description" }}</span>
 
-{#                            <div style="float:right; font-size:0.8em">#}
-{#                                <a href="{% url network network.SPIC_id network.local_id %}?version=first">#}
-{#                                    first#}
-{#                                </a>#}
-{#                                 |#}
-{#                                <a href="{% url network network.SPIC_id network.local_id %}?version=last">#}
-{#                                    last#}
-{#                                </a>#}
-{#                            </div>#}
+                    {% for network in item.list %}
+                        <li id="{{ network.title }}">
+
+                            <a href="{% url network_initial network.SPIC.group network.SPIC.local_id %}">
+                                {{ network.SPIC.title|default_if_none:"Network" }}:
+                            </a>
+
+                            <span style="font-size:0.8em">
+                                <span>{{ network.SPIC.description|default:"no description" }}</span>
+                            </span>
+
                         </li>
                     {% endfor %}
+
                 </ul>
-                {% endif %}
+            {% endif %}
 
-            {% endfor %}
+        {% endfor %}
 
-            {{ flatpage.content|index:-1 }}
-        </div>
+        {{ flatpage.content|index:-1 }}
+    </div>
 
 {% endblock %}

@@ -1,12 +1,20 @@
 
 /* Component containers
 ----------------------------------*/
-.ui-widget { font-family: Helvetica, sans-serif; }
-.ui-widget .ui-widget { font-size: .9em; }
+/*.ui-widget { font-family: Helvetica, sans-serif; }*/
+.ui-widget .ui-widget { font-size: 1em; }
 .ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button { font-size: .85em; }
 
-.ui-widget-header { padding: 5px; }
+.ui-widget-header { padding: 0px; border:none; background: url(/media/images/icons/portlet-header-bg.png);}
+.ui-widget-header .ui-icon { margin: 0 2px }
+
 .ui-widget-header a { font-weight: bold;}
+
+
+.ui-icon {
+    cursor:pointer
+}
+
 
 /* Button
 ----------------------------------*/
@@ -17,10 +25,10 @@ input.ui-button { padding: .2em .5em; font-size: .85em; }
 ----------------------------------*/
 .ui-dialog { padding: 0; }
 .ui-dialog .ui-dialog-titlebar { padding: .2em .5em; }
-.ui-dialog .ui-dialog-content { font-size: .9em;}
+.ui-dialog .ui-dialog-content { font-size: 1em;}
 
 /* Tabs
 ----------------------------------*/
 .ui-tabs .ui-tabs-nav { font-size: 1em; }
 .ui-tabs .ui-tabs-nav li a { padding: .1em 1em; }
-.ui-tabs .ui-tabs-panel { padding: .5em; }
+.ui-tabs .ui-tabs-panel { padding: 0; padding-top: 5px}

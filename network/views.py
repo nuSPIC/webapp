@@ -14,83 +14,125 @@ from lib.helpers import get_flatpage_or_none
 from lib.tasks import Simulation
 import lib.json as json
 
-from network.helpers import revision_create, values_extend, id_escape, id_identify
+from network.helpers import values_extend, id_escape, id_identify, dict_to_JSON, csv_to_dict
 from network.forms import *
-from network.models import Network
-from network.network_settings import PARAMS_ORDER
+from network.models import SPIC, Network
+from network.network_settings import ALL_PARAMS_ORDER
 
-from result.forms import CommentForm
 from result.models import Result
 
 import numpy as np
 import os
+import re
+import time
 
 # Define models with its modeltype, label and form.
-MODELS = [
-    #{'model_type': 'neuron',  'id_label': 'hh_psc_alpha',         'form': HhPscAlphaForm,},
-    {'model_type': 'neuron',  'id_label': 'iaf_cond_alpha',       'form': IafCondAlphaForm,},
-    {'model_type': 'neuron',  'id_label': 'iaf_neuron',           'form': IafNeuronForm,},
-    {'model_type': 'neuron',  'id_label': 'iaf_psc_alpha',        'form': IafPscAlphaForm,},
-    #{'model_type': 'input',   'id_label': 'parrot_neuron',        'form': ParrotForm,},
+FORMS = {
+    #'hh_psc_alpha': HhPscAlphaForm,
+    'iaf_cond_alpha': IafCondAlphaForm,
+    'iaf_neuron': IafNeuronForm,
+    'iaf_psc_alpha': IafPscAlphaForm,
+    #'parrot_neuron': ParrotForm,
     
-    {'model_type': 'input',   'id_label': 'ac_generator',         'form': ACGeneratorForm,},
-    {'model_type': 'input',   'id_label': 'dc_generator',         'form': DCGeneratorForm,},
-    {'model_type': 'input',   'id_label': 'poisson_generator',    'form': PoissonGeneratorForm,},
-    {'model_type': 'input',   'id_label': 'noise_generator',      'form': NoiseGeneratorForm,},
-    #{'model_type': 'input',   'id_label': 'smp_generator',       'form': SmpGeneratorForm,},
-    {'model_type': 'input',     'id_label': 'spike_generator',    'form': SpikeGeneratorForm,},   
+    'ac_generator': ACGeneratorForm,
+    'dc_generator': DCGeneratorForm,
+    'poisson_generator': PoissonGeneratorForm,
+    'noise_generator': NoiseGeneratorForm,
+    #'smp_generator': SmpGeneratorForm,
+    'spike_generator': SpikeGeneratorForm,   
     
-    {'model_type': 'output',  'id_label': 'spike_detector',       'form': TargetForm,},
-    {'model_type': 'output',  'id_label': 'voltmeter',            'form': SourceForm,},
-]
+    'spike_detector': SpikeDetectorForm,
+    'voltmeter': VoltmeterForm,
+    }
+
 
 @render_to('network_list.html')
 def network_list(request):
     """ Get a list of network from architect (unchanged networks). """    
     flatpage = get_flatpage_or_none(request)
     network_list = Network.objects.filter(user_id=0)
-    
+
     return {
         'flatpage': flatpage,
         'network_list': network_list,
-    }        
+    }   
 
-@render_to('network_main.html')
 @login_required
-def network(request, SPIC_id, local_id):
-    return network_simulated(request, SPIC_id, local_id, -1)
+def network_initial(request, SPIC_group, SPIC_id):
+    SPIC_obj = get_object_or_404(SPIC, group=SPIC_group, local_id=SPIC_id)
+    network_obj, created = Network.objects.get_or_create(user_id=request.user.pk, SPIC=SPIC_obj, local_id=0, deleted=False)
     
+    if created:
+        # Check if prototype exists
+        prototype = get_object_or_404(Network, user_id=0, SPIC=SPIC_obj)
+        network_obj.devices_json = prototype.devices_json
+        network_obj.save()
+
+    return network(request, SPIC_group, SPIC_id, 0)
+
+
+def network_latest(request, SPIC_group, SPIC_id, local_id=0):
+
+    network_list = Network.objects.filter(user_id=request.user.id, SPIC__group=SPIC_group, SPIC__local_id=SPIC_id, deleted=False)
+    if network_list:
+        network_obj = network_list.latest('id')
+        local_id = network_obj.local_id
+
+    return network(request, SPIC_group, SPIC_id, local_id)
+
+
+@render_to('network_split.html')
+@login_required
+def network_split(request, SPIC_group, SPIC_id):
+    SPIC_obj = get_object_or_404(SPIC, group=SPIC_group, local_id=SPIC_id)
+    
+    left_local_id = request.GET.get('left')
+    if not left_local_id:
+        left_local_id = '0'
+        
+    right_local_id = request.GET.get('right')
+    if not right_local_id:
+        right_local_id = 0  
+    
+    response = {
+        'SPIC_obj': SPIC_obj,
+        'left_local_id': left_local_id,
+        'right_local_id': right_local_id,
+    }
+    
+    return response   
+
+
+   
 @render_to('network_layout_popup.html')
 @login_required
-def network_layout(request, SPIC_id, local_id):
-    network_obj = get_object_or_404(Network, user_id=request.user.pk, SPIC_id=SPIC_id, local_id=local_id)
+def network_layout(request, SPIC_group, SPIC_id, local_id):
+    network_obj = get_object_or_404(Network, user_id=request.user.pk, SPIC__group=SPIC_group, SPIC__local_id=SPIC_id, local_id=local_id)
     
     response = {
         'network_obj': network_obj,
     }
     
     return response
-    
-@render_to('network_main.html')
-@login_required
-def network_simulated(request, SPIC_id, local_id, result_id):
-    """ Main view for network workplace """
-    
-    # If network is created, then it create a copy from prototype and an initial version of network.
-    network_obj, created = Network.objects.get_or_create(user_id=request.user.pk, SPIC_id=SPIC_id, local_id=local_id)
-    if created:
-        # Check if prototype exists
-        prototype = get_object_or_404(Network, user_id=0, SPIC_id=SPIC_id, local_id=local_id)
-      
-        network_obj.title = prototype.title
-        network_obj.description = prototype.description
-        network_obj.devices_json = prototype.devices_json
-        revision_create(network_obj)
 
-   
+
+@render_to('network_mini.html')
+@login_required
+def network_mini(request, SPIC_group, SPIC_id, local_id):
+
+    SPIC_obj = SPIC.objects.get(group=SPIC_group, local_id=SPIC_id)
+    network_list = Network.objects.raw('SELECT id,local_id,label,date_simulated,has_voltmeter,has_spike_detector FROM network_network WHERE user_id = %s AND SPIC_id = %s AND deleted = 0', [request.user.pk, SPIC_obj.pk])
+
+    while True:
+        try:
+            network_obj = Network.objects.get(user_id=request.user.pk, SPIC=SPIC_obj, local_id=local_id, deleted=False)
+            break
+        except:
+            local_id = int(local_id) - 1
+
     # If request is POST, then it executes any deletions
     if request.method == "POST":
-        
+
         # Delete selected devices from database.
         if request.POST.get('result_ids'):
             result_ids = request.POST.getlist('result_ids')
@@ -101,9 +143,6 @@ def network_simulated(request, SPIC_id, local_id, result_id):
                 if action == 'delete':
                     result.delete()
                     result_obj = None
-                    
-                    version_edit = result.revision.version_set.latest('id')
-                    version_edit.delete()
                         
                 elif action == 'favorite':
                     result.favorite = True
@@ -118,162 +157,303 @@ def network_simulated(request, SPIC_id, local_id, result_id):
             device_ids = np.array(request.POST.getlist('device_ids'), dtype=int)
             del_vids = device_ids.copy()
 
-            device_dict = network_obj.device_dict()
+            statusDict = network_obj.device_dict()
             id_filterbank = network_obj.id_filterbank()
-            device_list = network_obj.device_list()
+            deviceList = network_obj.device_list()
 
-            for model, status, conns in device_list:
-                if model['type'] == 'input' or model['type'] == 'output' and conns != {}:
-                    if 'targets' in conns:
+            for device in deviceList:
+                if device['type'] == 'input' or device['type'] == 'output':
+                    if 'targets' in device:
                         term = 'targets'
-                    elif 'sources' in conns:        
+                    elif 'sources' in device:        
                         term = 'sources'
                         
-                    neurons = np.array(conns[term].split(','), dtype=int)
+                    neuronList = np.array(device[term].split(','), dtype=int)
                     del_term = True
-                    for neuron in neurons:
+                    for neuron in neuronList:
                         if not neuron in device_ids:
                             del_term = False
                             
                     if del_term:
-                        del_vids = np.append(del_vids, model['id'])
+                        del_vids = np.append(del_vids, device['id'])
 
-            id_updater = np.zeros(len(device_list))
+            id_updater = np.zeros(len(deviceList))
             id_updater[del_vids-1] = 1
             
             id_updatebank = network_obj.device_list(key='id')
             id_updatebank = np.array([id_updatebank, id_updatebank]).T
             id_updatebank[:,1] -= id_updater.cumsum()
 
-            for model, status, conns in device_list:
+            for device in deviceList:
                
-               
-                if not model['id'] in del_vids:
+                if not device['id'] in del_vids:
                     # correct device IDs
-                    old_id = model['id']
+                    old_id = device['id']
                     tid = id_identify(id_filterbank, old_id)                
-                    model['id'] = int(id_escape(id_updatebank, old_id))
+                    device['id'] = int(id_escape(id_updatebank, old_id))
 
                     # delete target/source
                     new_conns = {}
-                    if conns != {}:
-                        if 'targets' in conns:
+                    if 'targets' in device or 'sources' in device:
+                        if 'targets' in device:
                             term = 'targets'
-                        elif 'sources' in conns:        
+                        elif 'sources' in device:        
                             term = 'sources'
                             
-                        value_list = conns[term].split(',')
+                        value_list = device[term].split(',')
                         value_array = np.array([item for item in enumerate(value_list) if int(item[1]) not in del_vids], dtype=int)
                         
                         if value_array.any():
                             value_list = [str(id_escape(id_updatebank, val)) for val in value_array[:,1]]
-                                
-                            new_conns[term] = ','.join(value_list)
+                            device[term] = ','.join(value_list)
                         
                             # delete weight and delay
-                            if 'weight' in conns:
-                                weight_list = conns['weight'].split(',')
+                            if 'weight' in device:
+                                weight_list = device['weight'].split(',')
                                 weight_list = [str(item[1]) for item in enumerate(weight_list) if item[0] in value_array[:,0]]
                                 if not weight_list == ['']:
-                                    new_conns['weight'] = ','.join(weight_list)
+                                    device['weight'] = ','.join(weight_list)
                                 
-                            if 'delay' in conns:
-                                delay_list = conns['delay'].split(',')
+                            if 'delay' in device:
+                                delay_list = device['delay'].split(',')
                                 delay_list = [str(item[1]) for item in enumerate(delay_list) if item[0] in value_array[:,0]]
                                 if not delay_list == ['']:
-                                    new_conns['delay'] = ','.join(delay_list)
+                                    device['delay'] = ','.join(delay_list)
                             
                     # merge all status
-                    device_dict[('%4d' %tid).replace(' ','0')] = [model, status, new_conns]
+                    statusDict[('%4d' %tid).replace(' ','0')] = device
                     
             # remove selected device from dict
-            new_device_dict = {}
+            new_statusDict = {}
             for old_vid, new_vid in id_updatebank:
                 if new_vid > 0 and old_vid not in del_vids:
-                    new_device_dict[('%4d' %id_identify(id_filterbank, new_vid)).replace(' ','0')] = device_dict[('%4d' %id_identify(id_filterbank, old_vid)).replace(' ','0')]
+                    new_statusDict[('%4d' %id_identify(id_filterbank, new_vid)).replace(' ','0')] = statusDict[('%4d' %id_identify(id_filterbank, old_vid)).replace(' ','0')]
                     
             hidden_device_tids = id_identify(id_filterbank, -1)
             for hidden_device_tid in hidden_device_tids:
-                new_device_dict[('%4d' %hidden_device_tid).replace(' ','0')] = device_dict[('%4d' %hidden_device_tid).replace(' ','0')]
+                new_statusDict[('%4d' %hidden_device_tid).replace(' ','0')] = statusDict[('%4d' %hidden_device_tid).replace(' ','0')]
                 
-            network_obj.devices_json = json.encode(new_device_dict)
+            network_obj.devices_json = json.encode(new_statusDict)
             network_obj.save()
             
-            
-    # Get a list of results in reversed date is simulated.
-    results = Result.objects.filter(revision__version__object_id=str(network_obj.pk)).order_by('-date_simulated')
-    result_ids = [result.local_id for result in results]
-    
-    
-    # Revert selected version
-    version_term = request.GET.get('version')
-    if version_term:
-        if version_term == 'revert' and int(result_id) in result_ids:
-            result_obj = results.get(local_id=int(result_id))
-            result_obj.revision.revert()
-        
-        elif version_term == 'last':
-            result_obj = results.latest('local_id')
-            result_obj.revision.revert()
-            result_id = result_obj.local_id
-            
-        elif version_term == 'last_simulated':
-            result_obj = results.latest('date_simulated')
-            result_obj.revision.revert()
-            result_id = result_obj.local_id
-            
-        elif version_term == 'first':
-            versions = Version.objects.get_for_object(network_obj)
-            versions[0].revision.revert()
-            result_id = 0
-            
-        elif version_term == 'first_simulated':
-            result_obj = results.order_by('date_simulated')[0]
-            result_obj.revision.revert()
-            result_id = result_obj.local_id
-            
-        network_obj = Network.objects.get(user_id=request.user.pk, SPIC_id=SPIC_id, local_id=local_id)
-        
-        
-    # Get result object for plotting.
-    if int(result_id) in result_ids:
-        result_obj = results.get(local_id=result_id)
-    else:
-        result_obj = None
-        
+        elif request.POST.get('csv'):
+            csv = request.POST['csv']
+            deviceList = csv_to_dict(csv)
+            network_obj.update(deviceList)
+            network_obj.save()
+       
+    label_form = NetworkLabelForm(instance=network_obj)
         
     # Get CSV for expert.
-    device_csv_form = DeviceCSVForm({'data':network_obj.csv()})    
+    device_csv_form = DeviceCSVForm({'csv':network_obj.csv()})    
         
     # Get a choice list for adding new device.
-    if network_obj.devices_json:
-        device_choices = []
-        outputs = network_obj.outputs()
-        for device in MODELS:
-            if not device['id_label'] in outputs:
-                device_choices.append(device)
-    else:
-        device_choices = MODELS
-        
+    device_choices = []
+    outputs = network_obj.outputs()
+    for id_model, forms in FORMS.items():
+        if not id_model in outputs:
+            # get modeltype of device.
+            if 'generator' in id_model:
+                device_choices.append({'id_model':id_model, 'forms':forms, 'model_type':'input'})
+            elif 'meter' in id_model or 'detector' in id_model:
+                device_choices.append({'id_model':id_model, 'forms':forms, 'model_type':'output'})
+            else:
+                device_choices.append({'id_model':id_model, 'forms':forms, 'model_type':'neuron'})
+            device_choices.sort(key=lambda x:x['model_type'])
+    
             
     # If SPIC1, then pop out neurons from choice list
-    if network_obj.SPIC_id == "1":
+    if network_obj.SPIC.group == "1":
         device_choices = [device for device in device_choices if device['model_type'] != 'neuron']
         
     
     # Get a list of forms for all devices.
     device_formsets = []
-    for device in MODELS:
-        device_form = device['form'](network_obj=network_obj)
-        formsHTML = render_to_string('device_form.html', {'id_label':device['id_label'], 'form':device_form})
-        device_formsets.append({'id_label':device['id_label'], 'formsHTML':formsHTML})
+    for id_model, form in FORMS.items():
+        device_form = form(network_obj=network_obj)
+        formsHTML = render_to_string('device_form.html', {'id_model':id_model, 'form':device_form})
+        device_formsets.append({'id_model':id_model, 'formsHTML':formsHTML})
+        
+    # Get root status
+    root_status = network_obj.root_status()
+    if 'rng_seeds' in root_status or 'grng_seed' in root_status:
+        if root_status['rng_seeds'] == [1] or root_status['grng_seed'] == 1:
+            network_form = NetworkForm(instance=network_obj, initial={'same_seed': True})
+        else:
+            network_form = NetworkForm(instance=network_obj, initial={'same_seed': False})
+    else:
+        network_form = NetworkForm(instance=network_obj, initial={'same_seed': True})
+    
+       
+    # Prepare for template
+    response = {
+        'SPIC_obj': SPIC_obj,
+        'network_list': network_list,
+        'network_obj': network_obj,
+        'label_form': label_form,
+        'device_csv_form': device_csv_form,
+        'network_form': network_form,
+        'device_choices': device_choices,
+        'device_formsets': device_formsets,
+        'params_order': ALL_PARAMS_ORDER,
+        'mini': 'mini/',
+    }
+        
+    return response
+
+
+@render_to('network_mainpage.html')
+@login_required
+def network(request, SPIC_group, SPIC_id, local_id):
+  
+    # get objects from database
+    SPIC_obj = SPIC.objects.get(group=SPIC_group, local_id=SPIC_id)
+    network_list = Network.objects.raw('SELECT id,local_id,label,date_simulated,has_voltmeter,has_spike_detector FROM network_network WHERE user_id = %s AND SPIC_id = %s AND deleted = 0', [request.user.pk, SPIC_obj.pk])
+    network_obj = get_object_or_404(Network, user_id=request.user.pk, SPIC=SPIC_obj, local_id=local_id, deleted=False)
+
+    # if request is POST, then it executes any deletions
+    if request.method == "POST":
+              
+        # delete selected network and its result from database.
+        if request.POST.get('network_ids'):
+            network_ids = request.POST.getlist('network_ids')
+            action = request.POST.get('action')
+            for network_id in network_ids:
+                network = Network.objects.get(pk=int(network_id))
+                
+                if network.local_id > 0:
+                    if action == 'delete':
+                        network.deleted = True  
+                    elif action == 'favorite':
+                        network.favorite = True
+                    elif action == 'unfavorite':
+                        network.favorite = False
+                        
+                    network.save()
+        
+        # delete selected device 
+        elif request.POST.get('device_ids'):
+            
+            device_ids = np.array(request.POST.getlist('device_ids'), dtype=int)
+            del_vids = device_ids.copy()
+
+            statusDict = network_obj.device_dict()
+            id_filterbank = network_obj.id_filterbank()
+            deviceList = network_obj.device_list()
+
+            for device in deviceList:
+                if device['type'] == 'input' or device['type'] == 'output':
+                    if 'targets' in device:
+                        term = 'targets'
+                    elif 'sources' in device:        
+                        term = 'sources'
+                        
+                    neuronList = np.array(device[term].split(','), dtype=int)
+                    del_term = True
+                    for neuron in neuronList:
+                        if not neuron in device_ids:
+                            del_term = False
+                            
+                    if del_term:
+                        del_vids = np.append(del_vids, device['id'])
+
+            id_updater = np.zeros(len(deviceList))
+            id_updater[del_vids-1] = 1
+            
+            id_updatebank = network_obj.device_list(key='id')
+            id_updatebank = np.array([id_updatebank, id_updatebank]).T
+            id_updatebank[:,1] -= id_updater.cumsum()
+
+            for device in deviceList:
+               
+                if not device['id'] in del_vids:
+                    # correct device IDs
+                    old_id = device['id']
+                    tid = id_identify(id_filterbank, old_id)                
+                    device['id'] = int(id_escape(id_updatebank, old_id))
+
+                    # delete target/source
+                    new_conns = {}
+                    if 'targets' in device or 'sources' in device:
+                        if 'targets' in device:
+                            term = 'targets'
+                        elif 'sources' in device:        
+                            term = 'sources'
+                            
+                        value_list = device[term].split(',')
+                        value_array = np.array([item for item in enumerate(value_list) if int(item[1]) not in del_vids], dtype=int)
+                        
+                        if value_array.any():
+                            value_list = [str(id_escape(id_updatebank, val)) for val in value_array[:,1]]
+                            device[term] = ','.join(value_list)
+                        
+                            # delete weight and delay
+                            if 'weight' in device:
+                                weight_list = device['weight'].split(',')
+                                weight_list = [str(item[1]) for item in enumerate(weight_list) if item[0] in value_array[:,0]]
+                                if not weight_list == ['']:
+                                    device['weight'] = ','.join(weight_list)
+                                
+                            if 'delay' in device:
+                                delay_list = device['delay'].split(',')
+                                delay_list = [str(item[1]) for item in enumerate(delay_list) if item[0] in value_array[:,0]]
+                                if not delay_list == ['']:
+                                    device['delay'] = ','.join(delay_list)
+                            
+                    # merge all status
+                    statusDict[('%4d' %tid).replace(' ','0')] = device
+                    
+            # remove selected device from dict
+            new_statusDict = {}
+            for old_vid, new_vid in id_updatebank:
+                if new_vid > 0 and old_vid not in del_vids:
+                    new_statusDict[('%4d' %id_identify(id_filterbank, new_vid)).replace(' ','0')] = statusDict[('%4d' %id_identify(id_filterbank, old_vid)).replace(' ','0')]
+                    
+            hidden_device_tids = id_identify(id_filterbank, -1)
+            for hidden_device_tid in hidden_device_tids:
+                new_statusDict[('%4d' %hidden_device_tid).replace(' ','0')] = statusDict[('%4d' %hidden_device_tid).replace(' ','0')]
+                
+            network_obj.devices_json = json.encode(new_statusDict)
+            network_obj.save()
+            
+        elif request.POST.get('csv'):
+            csv = request.POST['csv']
+            deviceList = csv_to_dict(csv)
+            network_obj.update(deviceList)
+            network_obj.save()
+            
+        
+    # Get CSV for expert.
+    device_csv_form = DeviceCSVForm({'csv':network_obj.csv()})    
+        
+    # Get a choice list for adding new device.
+    device_choices = []
+    outputs = network_obj.outputs()
+    for id_model, forms in FORMS.items():
+        if not id_model in outputs:
+            # get modeltype of device.
+            if 'generator' in id_model:
+                device_choices.append({'id_model':id_model, 'forms':forms, 'model_type':'input'})
+            elif 'meter' in id_model or 'detector' in id_model:
+                device_choices.append({'id_model':id_model, 'forms':forms, 'model_type':'output'})
+            else:
+                device_choices.append({'id_model':id_model, 'forms':forms, 'model_type':'neuron'})
+            device_choices.sort(key=lambda x:x['model_type'])
+    
+            
+    # If SPIC1, then pop out neurons from choice list
+    if network_obj.SPIC.group == "1":
+        device_choices = [device for device in device_choices if device['model_type'] != 'neuron']
+        
+    
+    # Get a list of forms for all devices.
+    device_formsets = []
+    for id_model, form in FORMS.items():
+        device_form = form(network_obj=network_obj)
+        formsHTML = render_to_string('device_form.html', {'id_model':id_model, 'form':device_form})
+        device_formsets.append({'id_model':id_model, 'formsHTML':formsHTML})
         
 
-    # If result exist, then get form for comment.
-    if result_obj:
-        comment_form = CommentForm(instance=result_obj)
-    else:
-        comment_Form = None
         
         
     # Get root status
@@ -286,105 +466,50 @@ def network_simulated(request, SPIC_id, local_id, result_id):
     else:
         network_form = NetworkForm(instance=network_obj, initial={'same_seed': True})
         
-        
     # Prepare for template
     response = {
+        'SPIC_obj': SPIC_obj,
+        'network_list': network_list,
         'network_obj': network_obj,
         'device_csv_form': device_csv_form,
         'network_form': network_form,
         'device_choices': device_choices,
         'device_formsets': device_formsets,
-        'results': results,
-        'result_id': result_id,
+        'params_order': ALL_PARAMS_ORDER,
     }
-        
-    if result_obj:
-        response['result_obj'] = result_obj
-        response['comment_form'] = comment_form
-        
+    
     return response
 
 def device_csv(request, network_id):
     """ AJAX: Check POST request for validation without saving it in database. """
     network_obj = get_object_or_404(Network, pk=network_id)
     layoutSize = network_obj.layout_size()
-    
+
     if request.is_ajax():
         if request.method == 'POST':
-            post = request.POST
-            device_csv_form = DeviceCSVForm(post)
-            data = post['data'].split('\r\n')
+            neuron_ids = request.POST.get('neuron_ids')
+            valid = 1
+            errorsMsg = {}
+            devDict = {}
             
-            neuron_ids = []
-            for dev in data:
-                params = dev.split(';')
-                if 'neuron' in params[0] and params[1].isdigit():
-                    neuron_ids.append(int(params[1]))
+            for model_id, valJSON in request.POST.items():
+                if model_id not in ['csrfmiddlewaretoken','neuron_ids']:
+                    valDict = json.decode(valJSON)
+                    valDict['neuron_ids'] = neuron_ids
+                    
+                    form = FORMS[valDict['model']](network_obj, valDict)
 
-            invalid = []
-            device_dict = {}
-            for dev in data:
-                params = dev.split(';')
-                params_dict = {'neuron_ids': neuron_ids}
-                
-                if params[1].isdigit():
-                    if 'generator' in params[0]:
-                        modeltype = 'input'
-                    elif 'detector' in params[0] or 'meter' in params[0]:
-                        modeltype = 'output'
+                    if form.is_valid():
+                        devDict[('%4d' %int(valDict['id'])).replace(' ', '0')] = form.cleaned_data
                     else:
-                        modeltype = 'neuron'
-                  
-                    model = {'id': int(params[1]), 'label': str(params[0]), 'type':modeltype}
-                    params_dict['model'] = params[0]
+                        errorsMsg[str(valDict['id'])] = form.errors
+                        valid = -1
                     
-                    # Set or get position for network layout
-                    if modeltype == 'neuron':
-                        device_dict_db = network_obj.device_dict()
-                        try:
-                            model['position'] = device_dict_db[('%4d' %model['id']).replace(' ', '0')][0]['position']
-                        except:
-                            model['position'] = [np.random.random_integers(17, layoutSize['x']), np.random.random_integers(14, layoutSize['y']+30)]
+            if valid:
+                network_obj.device_json = json.encode(devDict)
                 
-                conns = {}
-                if len(params) > 2:
-                    if params[0] == 'spike_detector':
-                        conns['sources'] = str(params[2])
-                    else:
-                        conns['targets'] = str(params[2])
-                if len(params) > 3:
-                    conns['weight'] = str(params[3])
-                    conns['delay'] = str(params[4])
-                params_dict.update(conns)
-                    
-                status = {}
-                if len(params) > 5:
-                    paranames = PARAMS_ORDER[params[0]]
-                    paranames = paranames[0] + paranames[1]
-                    for idx, p_val in enumerate(params[5:]):
-                        status[paranames[idx]] = str(p_val)
-                params_dict.update(status)
-                
-                id_labels = [device['id_label'] for device in MODELS]
-                device = MODELS[id_labels.index(params[0])]
-                form = device['form'](network_obj, params_dict)
-                
-                if form.is_valid():
-                    device_dict[('%4d' %int(params[1])).replace(' ', '0')] = ([model,status,conns])
-                else:
-                    invalid.append('%s[%s]' %(params[0], params[1]))
-                    
-            valid = -1           
-            if len(invalid) > 1:
-                device_csv_form.errors['data'] = [', '.join(invalid[:-1]) + ' and %s are wrong.' % invalid[-1]]
-            elif len(invalid) == 1:
-                device_csv_form.errors['data'] = ['%s is wrong.' % invalid[0]]
-            else:
-                network_obj.devices_json = json.encode(device_dict)
-                network_obj.save()
-                valid = 1
-                
-            response = {'responseHTML': device_csv_form.as_div(), 'valid':valid}
+            
+            response = {'errorsMsg': errorsMsg, 'valid':valid}
             return HttpResponse(json.encode(response), mimetype='application/json')
             
         else:
@@ -392,81 +517,25 @@ def device_csv(request, network_id):
             device_csv_form = DeviceCSVForm({'data': network_obj.csv()})
             return HttpResponse(device_csv_form.as_div())
 
+
+
 def device_preview(request, network_id):
     """ AJAX: Check POST request for validation without saving it in database. """
     network_obj = get_object_or_404(Network, pk=network_id)
     
     if request.is_ajax():
         if request.method == 'POST':
-          
-            post = request.POST
-            id_label = post.get('model')
-            id_labels = [device['id_label'] for device in MODELS]
-            device = MODELS[id_labels.index(id_label)]
-            form = device['form'](network_obj, post)
-            
 
+            id_model = request.POST.get('model')
+            form = FORMS[id_model](network_obj, request.POST)
+            
             # check if form is valid.
             if form.is_valid():
-                data = form.data.copy()
-                data.pop('csrfmiddlewaretoken')
-                data.pop('neuron_ids')
-                label = data.pop('model')[0]
-                
-                
-                # get modeltype of device.
-                model = {'id': None, 'label':label}
-                if 'generator' in label:
-                    model['type'] = 'input'
-                elif 'meter' in label or 'detector' in label:
-                    model['type'] = 'output'
-                else:
-                    model['type'] = 'neuron'
-                    
-                
-                # get sources or targets.
-                if 'targets' in data:
-                    term = 'targets'
-                elif 'sources' in data:
-                    term = 'sources'
-                    
-                    
-                # it doesn't save weight, delay and synapse_type, if they don't exist.
-                conns = {term: data.pop(term)[0]}
-                if 'weight' in data:
-                    conns['weight'] = data.pop('weight')[0]
-                if 'delay' in data:
-                    conns['delay'] = data.pop('delay')[0]
-                    
-                if 'synapse_type' in data:
-                    synapse_type = data.pop('synapse_type')[0]
-                    if synapse_type != 'static_synapse':
-                        conns['synapse_type'] = synapse_type
-                            
-                if not conns[term]:
-                    conns = {}
-                    
-                    
-                # after poping connection information save status of devices.
-                status = {}
-                for key, value in data.iteritems():
-                    if form.fields[key].initial:
-                        if value and float(value) != float(form.fields[key].initial):
-                            status[key] = value
-                    else:
-                        status[key] = value
-                        
-                if id_label == 'spike_generator' and 'step' in status:
-                    if status['step']:
-                        status.pop('step')
-                    
-                response = {'valid': 1, 'device':[model, status, conns]}
-                
+                response = {'valid': 1, 'status': form.cleaned_data, 'statusJSON': dict_to_JSON(form.cleaned_data)}
             else:
-                response = {'valid': -1, 'id_label':id_label}
+                responseHTML = render_to_string('device_form.html', {'form':form})
+                response = {'valid': -1, 'responseHTML':responseHTML}
         
-            responseHTML = render_to_string('device_form.html', {'id_label':device['id_label'], 'form':form})
-            response['responseHTML'] = responseHTML
             return HttpResponse(json.encode(response), mimetype='application/json')
                     
     return HttpResponse()
@@ -479,187 +548,93 @@ def device_commit(request, network_id):
     if request.is_ajax():
         if request.method == 'POST':
 
-            post = request.POST
-            device_list = json.decode(str(post['devices_json']))
-            
-            device_dict = network_obj.device_dict()
-            edgelist = network_obj.connections(modeltype='neuron')
-            id_filterbank = network_obj.id_filterbank()
-            layoutSize = network_obj.layout_size()
-            
-            for gid, device in enumerate(device_list):
-                model, status, conns = device
+            edgeList = network_obj.connections(modeltype='neuron')
+            deviceList = json.decode(str(request.POST['devices_json']))
 
-                if model['type'] == 'neuron':
-                    if 'targets' in conns:
-                        extended_list = values_extend(conns['targets'], unique=True)
-                        extended_converted_list = [str(id_identify(id_filterbank, vid)) for vid in extended_list if vid in id_filterbank[:,1]]
-                        if extended_converted_list:
-                            device[2]['targets'] = ','.join(extended_converted_list)
-
-                    if not 'position' in model:
-                        device[0]['position'] = [np.random.random_integers(17, layoutSize['x']), np.random.random_integers(14, layoutSize['y']+30)]
-                 
-                    if id_filterbank.any():
-                        tid = id_identify(id_filterbank, device[0]['id'])
-                        if not tid:
-                            tid = id_filterbank[-1][0]+1
-                            id_filterbank = np.append(id_filterbank, np.array([[tid, device[0]['id']]], dtype=int), axis=0)
-                    else:
-                        tid = 1
-                        id_filterbank = np.array([[tid, device[0]['id']]], dtype=int)
-                    device_dict[('%4d' %tid).replace(' ', '0')] = device
-
-            for gid, device in enumerate(device_list):
-                model, status, conns = device
-                
-                if model['type'] != 'neuron':
-                    if 'targets' in conns or 'sources' in conns:
-                        if 'targets' in conns:
-                            term = 'targets'
-                        else:
-                            term = 'sources'
-
-                        extended_list = values_extend(conns[term], unique=True)
-                        extended_converted_list = [str(id_identify(id_filterbank, vid)) for vid in extended_list if vid in id_filterbank[:,1]]
-                        if extended_converted_list:
-                            device[2][term] = ','.join(extended_converted_list)
-
-                    tid = id_identify(id_filterbank, device[0]['id'])
-                    if not tid:
-                        tid = id_filterbank[-1][0]+1
-                        id_filterbank = np.append(id_filterbank, np.array([[tid, device[0]['id']]], dtype=int), axis=0)
-                    device_dict[('%4d' %tid).replace(' ', '0')] = device
-
-            network_obj.devices_json = json.encode(device_dict)
+            network_obj = network_obj.update(deviceList)
             network_obj.save()
             
-            if edgelist != network_obj.connections(modeltype='neuron'):
+            # if all neurons are new, create positions for them.
+            if edgeList != network_obj.connections(modeltype='neuron'):
                 default_layout(request, network_obj.pk)
-            return HttpResponse(json.encode({'saved':1}), mimetype='application/json')
+            return HttpResponse(json.encode({'saved':1, 'local_id':network_obj.local_id}), mimetype='application/json')
             
     return HttpResponse()
 
 
-def simulate(request, network_id, version_id):
+def simulate(request, network_id):
     """
     AJAX: If version_id is 0, it creates a new version of network and then simulates.
     If already simulated, it won't resimulate.
     If task_id is in request.GET, then it aborts the simulation task.
     """
     network_obj = get_object_or_404(Network, pk=network_id)
-    
+
     if request.is_ajax():
         if request.method == 'POST':
-          
-            post = request.POST
-            device_list = json.decode(str(post['devices_json']))
-            
-            edgelist = network_obj.connections(modeltype='neuron')
-            device_dict = network_obj.device_dict()
-
-            id_filterbank = network_obj.id_filterbank()
-            for gid, device in enumerate(device_list):
-                model, status, conns = device
-                
-                cleaned_status = {}
-                for status_key, status_value in status.iteritems():
-                    if status_value:
-                        cleaned_status[status_key] = status_value
-                device[1] = cleaned_status
-                
-                if 'targets' in conns or 'sources' in conns:
-                    if 'targets' in conns:
-                        term = 'targets'
-                    else:
-                        term = 'sources'
-                        
-                    try:
-                        extended_list = values_extend(conns[term], unique=True)
-                        extended_converted_list = [str(id_identify(id_filterbank, vid)) for vid in extended_list]
-                    except:
-                        extended_converted_list = []
-                        
-                    device[2][term] = ','.join(extended_converted_list)
-
-                if id_filterbank.any():
-                    tid = id_identify(id_filterbank, device[0]['id'])
-                    if not tid:
-                        tid = id_filterbank[-1][0]+1
-                        id_filterbank = np.append(id_filterbank, np.array([[tid, device[0]['id']]], dtype=int), axis=0)
-                else:
-                    tid = 1
-                    id_filterbank = np.array([[tid, device[0]['id']]], dtype=int)
-                device_dict[('%4d' %tid).replace(' ', '0')] = device
-
-                        
-            network_obj.devices_json = json.encode(device_dict)
-            network_obj.save()
-            
-            if edgelist != network_obj.connections(modeltype='neuron'):
-                default_layout(request, network_obj.pk)
-            
             form = NetworkForm(request.POST, instance=network_obj)
-            versions = Version.objects.get_for_object(network_obj).reverse()
-            
+
             # check if network form is valid.
             if form.is_valid():
-
-                # if network form is changed or version_id is 0, a new version will be created. 
-                # Otherwise it simulates without creating new version.
-                if form.has_changed():
-                    version_id = 0
-                    
+                
+                # if not same_seed, generate seeds for root_status
                 if form.cleaned_data['same_seed']:
                     root_status = {'rng_seeds': [1], 'grng_seed': 1}
                 else:
                     rng_seeds, grng_seed = np.random.random_integers(0,1000,2)
                     root_status = {'rng_seeds': [int(rng_seeds)], 'grng_seed': int(grng_seed)}
-                    
                 network_obj.status_json = json.encode(root_status)
-                network_obj.save()        
-                        
-                if int(version_id) > 0:
-                    # check if it is already simulated, it prevents from simulating.
-                    results = network_obj.filter_results()
-                    result_obj = results.get(local_id=version_id)
-                    if result_obj.is_recorded():
-                        response = {'recorded':1, 'valid': 1}
-                        return HttpResponse(json.encode(response), mimetype='application/json')
-                        
-                try:
-                    last_local_id = versions[0].revision.result.local_id
-                    revision_create(form, result=True, local_id=last_local_id+1)
-                except:
-                    revision_create(form, result=True)
-
-                task = Simulation.delay(network_id=network_id, form=form, version_id=version_id)
+                
+                edgeList = network_obj.connections(modeltype='neuron')
+                
+                # update deviceList to deviceDict
+                deviceList = json.decode(str(request.POST['devices_json']))
+                network_obj = network_obj.update(deviceList)
+                network_obj.save()  
+                
+                # if all neurons are new, create positions for them.
+                if edgeList != network_obj.connections(modeltype='neuron'):
+                    default_layout(request, network_obj.pk)
+                 
+                task = Simulation.delay(network_obj.id)
                     
-                response = {'task_id':task.task_id}
+                response = {'task_id':task.task_id, 'local_id':network_obj.local_id}
                 return HttpResponse(json.encode(response), mimetype='application/json')
                     
             else:
+              
                 responseHTML = render_to_string('network_form.html', {'form': form})
                 response = {'responseHTML':responseHTML, 'valid': -1}
-                return HttpResponse(json.encode(response), mimetype='application/json')
-            
-        else:
-            # check if task_id exists, then a simulation will be aborted.
-            if 'task_id' in request.GET:            
-                task_id = request.GET.get('task_id')
-                abortable_async_result = AbortableAsyncResult(task_id)
-                abortable_async_result.abort()
-                                
-                response = {'aborted':1}
                 return HttpResponse(json.encode(response), mimetype='application/json')
                 
     return HttpResponse()
 
+def abort(request, task_id):
+
+    abortable_async_result = AbortableAsyncResult(task_id)
+    abortable_async_result.abort()
+                    
+    return HttpResponse()
+
+def label_save(request, network_id):
+    """ AJAX: Save network layout."""
+    network_obj = get_object_or_404(Network, pk=network_id)
+    
+    if request.is_ajax():
+        if request.method == 'POST':
+            network_obj.label = request.POST['label']
+            network_obj.save()
+            
+            response = {'label':network_obj.label}
+            return HttpResponse(json.encode(response), mimetype='application/json')
+            
+    return HttpResponse()       
+            
 
 def layout_save(request, network_id):
     """ AJAX: Save network layout."""
     network_obj = get_object_or_404(Network, pk=network_id)
-    
+
     if request.is_ajax():
         if request.method == 'POST':
         
@@ -668,13 +643,12 @@ def layout_save(request, network_id):
             id_filterbank = network_obj.id_filterbank()
             device_dict = network_obj.device_dict()
 
-            for gid, device in enumerate(device_list):
-                model, status, conns = device
+            for gid, status in enumerate(device_list):
                 
-                if 'position' in model:
-                    tid = id_identify(id_filterbank, model['id'])
+                if 'position' in status:
+                    tid = id_identify(id_filterbank, status['id'])
                     if tid:
-                        device_dict[('%4d' %tid).replace(' ', '0')][0]['position'] = model['position']
+                        device_dict[('%4d' %tid).replace(' ', '0')]['position'] = status['position']
                 
             network_obj.devices_json = json.encode(device_dict)
             network_obj.save()
@@ -693,20 +667,98 @@ def default_layout(request, network_id):
         edgelist = network_obj.connections(modeltype='neuron')
         pos = networkx(edgelist, layout='circo')
 
-        device_dict = network_obj.device_dict()
+        deviceDict = network_obj.device_dict()
         id_filterbank = network_obj.id_filterbank()
         neuron_id_filterbank = network_obj.neuron_id_filterbank()
         
         for nid, value in pos.iteritems():
             vid = id_identify(neuron_id_filterbank, nid)
             tid = ("%4d" %id_identify(id_filterbank, vid)).replace(" ", "0")
-            device_dict[tid][0]['position'] = list(value)
+            deviceDict[tid]['position'] = list(value)
         
-        devices_json = json.encode(device_dict)
-        network_obj.devices_json = devices_json
+        devicesJSON = json.encode(deviceDict)
+        network_obj.devices_json = devicesJSON
         network_obj.save()
         
         response = {'device_list':network_obj.device_list(), 'layoutSize': network_obj.layout_size()}
         return HttpResponse(json.encode(response), mimetype='application/json')
 
     return HttpResponse()
+    
+
+def data(request, network_id):
+    network_obj = get_object_or_404(Network, pk=network_id)
+    
+    response = {
+        'network': network_obj.device_list(),
+        'result' : {}
+    }
+    
+    if network_obj.has_voltmeter:
+        response['result']['voltmeter'] = json.decode(network_obj.voltmeter_json)
+        
+    if network_obj.has_spike_detector:
+        response['result']['spike_detector'] = json.decode(network_obj.spike_detector_json)
+    
+    response = HttpResponse(json.encode(response), mimetype='application/force-download')
+    response['Content-Disposition'] = 'attachment; filename=%s_%s.json' %(network_obj.date_simulated.date(), network_obj)
+
+    return response
+
+
+@render_to('voltmeter.html')
+def voltmeter(request, network_id):
+    """
+    Large View of Voltmeter data for selected neuron (sender)
+    """
+    
+    network_obj = get_object_or_404(Network, pk=network_id)
+    neuron = int(request.GET.get('neuron'))
+    
+    voltmeter = network_obj.voltmeter_data(neuron)
+    V_m = voltmeter['V_m'][0]
+    assert (len(voltmeter['times']) == len(V_m['values']))
+    status = V_m['status']
+
+    response = {
+        'values': V_m['values'],
+        'times': voltmeter['times'],
+    }
+    
+    return {'voltmeter': json.encode(response)}
+    
+@render_to('voltmeter_thumbnail.html')
+def voltmeter_thumbnail(request, network_id):
+    """
+    Small View of Voltmeter data
+    """
+    
+    network_obj = get_object_or_404(Network, pk=network_id)
+    return {'network_obj': network_obj}
+
+@render_to('spike_detector.html')
+def spike_detector(request, network_id):
+    """
+    View of Spike Detector data
+    """
+    
+    network_obj = get_object_or_404(Network, pk=network_id)
+    spike_detector = network_obj.spike_detector_data()
+    assert len(spike_detector['senders']) == len(spike_detector['times'])
+
+    spike_detector['neurons'] = network_obj._connect_to(model='spike_detector')
+    spike_detector['neuronScale'] = [ii+1 for ii,v in enumerate(spike_detector['neurons'])]
+
+    id_filterbank = network_obj.id_filterbank()
+    neuron_id_filterbank = network_obj.neuron_id_filterbank(model="spike_detector")
+    spike_detector['senders'] = [id_escape(id_filterbank, sender) for sender in spike_detector['senders']]
+    spike_detector['senders'] = [id_escape(neuron_id_filterbank, sender) for sender in spike_detector['senders']]
+    
+    spike_detector['simTime'] = network_obj.duration
+    
+    if request.GET.get('view') == 'small':
+        spike_detector['fig'] = {'width':250, 'height':300, 'w':210, 'h2':50, 'yticks':3}
+    else:
+        spike_detector['fig'] = {'width':750, 'height':500, 'w':700, 'h2':150, 'yticks':6}
+    
+    return spike_detector

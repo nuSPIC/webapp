@@ -75,13 +75,13 @@ function prep_vis() {
         .top(yScale)
         .strokeStyle("rgbs(0,0,0,0)")
       .anchor("left").add(pv.Label)
-        .text(function () neurons[this.index]);
+        .text(function () {return neurons[this.index]});
 
     /* The dot plot! */
     spikes_panel.add(pv.Dot)
         .data(times)
-        .left(function(d) xScale(d))
-        .top(function() yScale(senders[this.index]))
+        .left(function(d) {return xScale(d)})
+        .top(function() {return yScale(senders[this.index])})
         .strokeStyle("#000")
         .fillStyle("#000")
         .size(1);
@@ -107,7 +107,7 @@ function prep_vis() {
     var psth_panel = vis.add(pv.Panel)
         .def("init", function() {
             var psth = psth_calc();
-            psth_yScale.domain(0, pv.max(psth, function(d) d+1));
+            psth_yScale.domain(0, pv.max(psth, function(d) {return d+1}));
             return psth;
             })
         .bottom(10)
@@ -117,7 +117,7 @@ function prep_vis() {
     var psth_y = psth_panel.add(pv.Rule)
         .data(psth_yScale.ticks(fig.yticks))
         .bottom(psth_yScale)
-        .strokeStyle(function(d) d ? "#eee" : "#000");
+        .strokeStyle(function(d) {return d ? "#eee" : "#000"});
 
     psth_y.anchor("left").add(pv.Label)
         .text(psth_yScale.tickFormat);
@@ -125,7 +125,7 @@ function prep_vis() {
     psth_panel.add(pv.Rule)
         .data(xScale.ticks(5))
         .left(xScale)
-        .strokeStyle(function(d) d ? "#eee" : "#000")
+        .strokeStyle(function(d) {return d ? "#eee" : "#000"})
       .anchor("bottom").add(pv.Label)
         .text(xScale.tickFormat);
 
@@ -154,10 +154,10 @@ function prep_vis() {
         .text("Hz");
         
     var psth_area = psth_panel.add(pv.Area)
-        .data(function() psth_panel.init())
-        .left(function(d) xScale(this.index))
+        .data(function() {return psth_panel.init()})
+        .left(function(d) {return xScale(this.index)})
         .bottom(1)
-        .height(function(d) psth_yScale(d))
+        .height(function(d) {return psth_yScale(d)})
         .fillStyle("rgba(0, 0, 0, 0) ")
         .interpolate("cardinal");
 
