@@ -1,0 +1,132 @@
+{% if network_obj.is_recorded %}
+
+    <script type="text/javascript">
+
+
+        {% if network_obj.has_voltmeter %}
+
+            function voltmeter_enlarge(target_id) {
+                $( ".resultView" ).attr('src', '/network/ajax/{{ network_obj.pk }}/voltmeter/?neuron='+ target_id);
+                $( ".resultView" ).css('height', 400);
+
+                $( "#dialog-resultView" ).dialog({
+                        title: 'Voltmeter view of Neuron ['+ target_id +']',
+                        height: 470,
+                        width: 800,
+//                         modal: true,
+                });
+            };
+
+            $( "button#reload" ).live('click', function(e) {
+                    $( "div#VoltmeterThumbnail" ).html('<iframe src="{% url voltmeter_thumbnail network_obj.pk %}"> </iframe>');
+            });
+
+            $( "select#voltmeter-select" ).live('change',function(e) {
+                    voltmeter_enlarge($(this).val())
+                    $( "#voltmeter-select option:first" ).attr('selected', 'selected');
+            });
+
+        {% endif %}
+
+
+        {% if network_obj.has_spike_detector %}
+
+            function spike_detector_enlarge() {
+                $( ".resultView" ).attr('src', "{% url spike_detector network_obj.pk %}?view=large");
+                $( ".resultView" ).css('height', {{ network_obj.neuron_ids|length }} * 15 + 250);
+
+                $( "#dialog-resultView" ).dialog({
+                        title: 'Spike Detector view of all connected neurons',
+                        height: {{ network_obj.neuron_ids|length }} * 15 + 320,
+                        width: 800,
+//                         modal: true,
+                });
+            };
+
+            $( "button#spike_detector-link" ).live('click',function(e) {
+                $( ".resultView" ).attr('src', "{% url spike_detector network_obj.pk %}?view=large");
+                $( ".resultView" ).css('height', {{ network_obj.neuron_ids|length }} * 15 + 230);
+
+                $( "#dialog-resultView" ).dialog({
+                        title: 'Spike Detector view of all connected neurons',
+                        height: {{ network_obj.neuron_ids|length }} * 15 + 320,
+                        width: 800,
+//                         modal: true,
+                });
+            });
+
+        {% endif %}
+
+
+        $(document).ready(function() {
+
+            {% if network_obj.has_voltmeter %}
+                setTimeout('$( "#VoltmeterThumbnail" ).contents().find("span").each(function() { $(this).click(function() {voltmeter_enlarge(this.id)}); })', 1000.)
+            {% endif %}
+
+
+            {% if network_obj.has_spike_detector %}
+                setTimeout('$( "#SpikeDetectorThumbnail" ).contents().find("span").click(function() {spike_detector_enlarge()})', 1000.)
+            {% endif %}
+
+            
+        })
+    </script>
+
+
+<!--             SPIKE DETECTOR iframe -->
+<div style="float:left">
+    {% if network_obj.has_spike_detector %}
+       <div><strong>Spike Detector</strong></div>
+       
+        <iframe src="{% url spike_detector network_obj.pk %}?view=small" style="margin:1px; height:{{ network_obj.iframe_height }}; width:250px; border: 1px solid #ccc" id="SpikeDetectorThumbnail" scrolling="no"></iframe>
+
+    {% endif %}
+</div>
+
+
+<!--             VOLTMETER iframe -->
+<div style="float:left">
+    {% if network_obj.has_voltmeter %}
+       <div><strong>Voltmeter</strong></div>
+            {% if network_obj.voltmeter_points < 15000 %}
+
+                <iframe src="{% url voltmeter_thumbnail network_obj.pk %}" style="margin:1px; height:{{ network_obj.iframe_height }}; width:380px; border: 1px solid #ccc" id="VoltmeterThumbnail" ></iframe>
+
+            {% else %}
+
+                The number of points is too big.
+
+                <div class="field-wrapper" title="">
+
+                    <label for="voltmeter-select">View larger screen</label>
+
+                    <select id="voltmeter-select">
+                        <option>--- Select a neuron ---</option>
+
+                        {% for targets in network_obj.voltmeter_targets %}
+                            <option value="{{targets}}">
+                                Neuron [{{targets}}]
+                            </option>
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+            {% endif %}
+
+    {% endif %}
+</div>
+
+<div style="padding:10px">
+    <a class="document" href="{% url data network_obj.pk %}">Download Results</a>
+</div>
+
+
+<div class="ui-dialog" title="result view" id="dialog-resultView" style="z-index:-1">
+
+    <iframe class="resultView" scrolling="no"></iframe>
+
+</div>
+{% endif %}

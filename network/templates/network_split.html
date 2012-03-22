@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% load lib_filters %}
+{% load network_filters %}
+{% load network_tags %}
+{% load humanize %}
+
+{% block extrahead %}
+
+<link href="{{ MEDIA_URL }}css/nuspic/jquery-ui-1.8.14.custom.css" type="text/css" rel="stylesheet" />
+<link href="{{ MEDIA_URL }}css/jquery-ui.custom.css" type="text/css" rel="stylesheet" />
+<link href="{{ MEDIA_URL }}css/layout-default.css" type="text/css" rel="stylesheet" />
+<link href="{{ MEDIA_URL }}css/network.css" type="text/css" rel="stylesheet" />
+<link href="{{ MEDIA_URL }}css/tipTip.css" type="text/css" rel="stylesheet" />
+
+<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.layout.min-1.2.0.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cookie.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.tipTip.minified.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/json2.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/network.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/quickpager.jquery.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/raphael-min.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/raphael-networkLayout.js"></script>
+
+<script type="text/javascript">
+
+    $(function() {
+        $( "#blockcontent" ).removeClass('center');
+        $( "#competition ").addClass("currentpage");
+        $( "#footer" ).remove()
+
+        $( "iframe" ).css('height', window.innerHeight-177);
+        $( "#container" ).css('height', window.innerHeight-170);
+        $( "#container" ).css('width', window.innerWidth-40);
+
+    });
+
+
+
+</script>
+
+{% endblock %}
+
+{% block title %}{{ SPIC_obj.title }} - split view {% endblock %}
+
+
+{% block content %}
+    <div style="float:right; margin-right: 10px">
+        <a href="{% url network SPIC_obj.group SPIC_obj.local_id left_local_id %}">
+            switch view
+        </a>
+    </div>
+
+    <div class="banner">
+        <a href="{% url network_list %}">Network</a>
+
+        <span id="network_title" style="font-size:1.2em; padding:5px"><strong>&raquo; {{ SPIC_obj.title }}</strong></span>
+        &raquo; <span id="network_description" >{{ SPIC_obj.description|default:"no description" }}</span>
+    </div>
+
+<div id="container">
+    <div class="twocolumns left">
+        <iframe src="{% url network_mini SPIC_obj.group SPIC_obj.local_id left_local_id %}" style="margin: 0; width:100%"></iframe>
+    </div>
+
+    <div class="twocolumns left">
+        <iframe src="{% url network_mini SPIC_obj.group SPIC_obj.local_id right_local_id %}" style="margin: 0; width:100%"></iframe>
+    </div>
+</div>
+
+{% endblock %}

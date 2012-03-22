@@ -1,0 +1,35 @@
+<html style="overflow-y: auto">
+
+<head>
+    <title>Voltmeter Thumbnail</title>
+    <link rel="stylesheet" href="/media/css/default.css"></link>
+    <link rel="stylesheet" href="/media/css/result.css"></link>
+
+    <script type="text/javascript" src="/media/js/protovis.min.js"></script>
+    <script type="text/javascript" src="/media/js/protovis.voltmeter_thumbnail.js"></script>
+    
+</head>
+
+<body>
+    <div id="center">
+        <div id="fig">
+            {% for targets in network_obj.voltmeter_targets %}
+                <span id="{{targets}}"></span>
+            {% endfor %}
+
+            <script type="text/javascript+protovis">
+                var voltmeter = {{ network_obj.voltmeter_data|safe }};
+                var data = voltmeter.V_m,
+                times = voltmeter.times;
+                  
+                var w = 100,
+                    h = 50,
+                    numberFormat = pv.Format.number().fractionDigits(0, 2);
+
+                var vis = prep_vis();
+                vis.render();
+            </script>
+        </div>
+    </div>
+</body>
+</html>
