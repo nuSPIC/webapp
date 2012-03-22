@@ -400,7 +400,7 @@
                                     <td class="id_model-{{device.id}} selectable id"><b>{{ device.id }}</b></td>
 
                                     <td class="id_model-{{device.id}} selectable model {% if network_obj.SPIC.group == "1" and device.type == "neuron" %} disabled {% endif %}" style="width: 9em">
-                                        {% if network_obj.SPIC_id == "1" and device.type == 'neuron' %}
+                                        {% if network_obj.SPIC.group == "1" and device.type == 'neuron' %}
                                             Neuron
                                         {% else %}
                                             {{ device.label|title }}
