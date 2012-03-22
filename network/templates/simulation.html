@@ -8,7 +8,6 @@
                 if (status == 'PENDING') {
                     window.setTimeout(function() {get_task_status()}, 2000);
                 } else {
-                    $( "#dialog-msg #loading_icon" ).fadeOut();
                     $( "#submit-network-form" ).attr("disabled", false);
                     if (status == 'ABORTED') {
                         $( "#task_status" ).html('ABORT');
@@ -58,10 +57,10 @@
     };
 
     var save_and_simulate = function () {
+        $( "#submit-network-form" ).attr("disabled", true);
         var form = $( "#network-form" ).serialize();
         var devices_json = JSON.stringify(device_list);
         var post_data = form.concat('&devices_json='+ devices_json);
-        $( "#submit-network-form" ).attr("disabled", true);
         $.post('/network/ajax/'+ {{ network_obj.id }} +'/simulate/',
             post_data, function(data){
                 if (data.valid == -1) {
@@ -179,35 +178,37 @@
         <div class="network-form-content">
             {% if network_form.fieldsets %}
                 {% for fieldset in network_form.fieldsets %}
-                    <div class="{{ fieldset.classes }}">
+                    {% if forloop.first %}
+                        <div class="{{ fieldset.classes }}">
 
-                        {% if fieldset.description %}
-                            <p class="description">{{ fieldset.description }}</p>
-                        {% endif %}
+                            {% if fieldset.description %}
+                                <p class="description">{{ fieldset.description }}</p>
+                            {% endif %}
 
-                        <div class="field-wrapper">
-                            <div class="label_tag">
-                                {{ fieldset.form.duration.label_tag }}:
+                            <div class="field-wrapper">
+                                <div class="label_tag">
+                                    {{ fieldset.form.duration.label_tag }}:
+                                </div>
+
+                                {{ fieldset.form.duration.errors }}
+                                <div class="field-box">
+                                    {{ fieldset.form.duration }}
+                                </div>
+
+                                <button class="ui-corner-right help_text" title="{{ fieldset.form.duration.help_text }}">?</button>
                             </div>
 
-                            {{ fieldset.form.duration.errors }}
-                            <div class="field-box">
-                                {{ fieldset.form.duration }}
+                            <div class="field-wrapper">
+                                <span class="label_tag">
+                                    {{ fieldset.form.same_seed.label_tag }}:
+                                </span>
+
+                                {{ fieldset.form.same_seed }}
+                                <span class="help_text">{{ fieldset.form.same_seed.help_text }}</span>
                             </div>
 
-                            <button class="ui-corner-right help_text" title="{{ fieldset.form.duration.help_text }}">?</button>
                         </div>
-
-                        <div class="field-wrapper">
-                            <span class="label_tag">
-                                {{ fieldset.form.same_seed.label_tag }}:
-                            </span>
-
-                            {{ fieldset.form.same_seed }}
-                            <span class="help_text">{{ fieldset.form.same_seed.help_text }}</span>
-                        </div>
-
-                    </div>
+                    {% endif %}
                 {% endfor %}
             {% else %}
                 {{ network_form.as_div }}

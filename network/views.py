@@ -576,7 +576,13 @@ def simulate(request, network_id):
 
             # check if network form is valid.
             if form.is_valid():
+                edgeList = network_obj.connections(modeltype='neuron')
                 
+                # update deviceList to deviceDict
+                deviceList = json.decode(str(request.POST['devices_json']))
+                network_obj = network_obj.update(deviceList)
+                
+                network_obj.duration = form.cleaned_data['duration']
                 # if not same_seed, generate seeds for root_status
                 if form.cleaned_data['same_seed']:
                     root_status = {'rng_seeds': [1], 'grng_seed': 1}
@@ -584,19 +590,15 @@ def simulate(request, network_id):
                     rng_seeds, grng_seed = np.random.random_integers(0,1000,2)
                     root_status = {'rng_seeds': [int(rng_seeds)], 'grng_seed': int(grng_seed)}
                 network_obj.status_json = json.encode(root_status)
-                
-                edgeList = network_obj.connections(modeltype='neuron')
-                
-                # update deviceList to deviceDict
-                deviceList = json.decode(str(request.POST['devices_json']))
-                network_obj = network_obj.update(deviceList)
-                network_obj.save()  
+
+                network_obj.save()
+                time.sleep(1)
                 
                 # if all neurons are new, create positions for them.
                 if edgeList != network_obj.connections(modeltype='neuron'):
                     default_layout(request, network_obj.pk)
-                 
-                task = Simulation.delay(network_obj.id)
+                    
+                task = Simulation.delay(network_obj.pk)
                     
                 response = {'task_id':task.task_id, 'local_id':network_obj.local_id}
                 return HttpResponse(json.encode(response), mimetype='application/json')

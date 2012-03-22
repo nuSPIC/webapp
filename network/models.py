@@ -53,7 +53,7 @@ class Network(models.Model):
             return '%s' %self.local_id
             
     class Meta:
-        ordering = ('id',)
+        ordering = ('-id',)
 
     def user(self):
         """
@@ -269,7 +269,7 @@ class Network(models.Model):
         
         # create a new network if corresponding result exists,
         if self.is_recorded() or self.local_id == 0:
-            network_list = Network.objects.filter(user_id=self.user_id, SPIC=self.SPIC, delete=False)
+            network_list = Network.objects.filter(user_id=self.user_id, SPIC=self.SPIC, deleted=False)
             self.local_id = network_list.latest('id').local_id + 1
             
             return Network(user_id=self.user_id, SPIC=self.SPIC, local_id=self.local_id, duration=self.duration, status_json=self.status_json, devices_json=self.devices_json)
