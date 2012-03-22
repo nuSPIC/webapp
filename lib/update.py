@@ -206,3 +206,17 @@ def jsonConverter(user_id=1, id=None):
                 network_obj.devices_json = json.encode(devicesDict)
                 network_obj.save()
                 print('successfully saved.')
+                
+                
+def updateInitial():
+    architect_networks = Network.objects.filter(user_id=0)
+    
+    for arch_net in architect_networks:
+        all_networks = Network.objects.filter(SPIC=arch_net.SPIC, local_id=0)
+        
+        for net in all_networks:
+            net.status_json = arch_net.status_json
+            net.devices_json = arch_net.devices_json
+            net.duration = arch_net.duration
+            
+            net.save()

@@ -42,7 +42,7 @@ class NetworkAdmin(admin.ModelAdmin):
         'favorite',
         'deleted',
         )
-    list_filter = ['SPIC','has_spike_detector','has_voltmeter','favorite','deleted','user_id']
+    list_filter = ['SPIC','has_spike_detector','has_voltmeter','favorite','deleted','user_id','local_id']
     date_hierarchy = 'date_simulated'
     actions = ['make_deleted']
 
