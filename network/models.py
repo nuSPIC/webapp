@@ -325,7 +325,7 @@ class Network(models.Model):
                     params_order = ALL_PARAMS_ORDER[model]
                     statusList = []
                     for key in params_order:
-                        if key in statusDict and key not in ['label']:
+                        if key in statusDict and key not in ['label', 'type']:
                             if statusDict[key]:
                                 statusList.append(str(statusDict[key]))
                             
