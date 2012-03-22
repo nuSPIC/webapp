@@ -215,6 +215,9 @@ def updateInitial():
         all_networks = Network.objects.filter(SPIC=arch_net.SPIC, local_id=0)
         
         for net in all_networks:
+            if net.user_id == 0:
+                continue
+              
             net.status_json = arch_net.status_json
             net.devices_json = arch_net.devices_json
             net.duration = arch_net.duration
