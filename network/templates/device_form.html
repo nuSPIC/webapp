@@ -20,7 +20,7 @@
                         {{ field }}
                     </div>
 
-                    <button class="ui-corner-right help_text" title="{{ field.help_text }}">?</button>
+                    <button class="help_text" {% if field.help_text %} title="{{ field.help_text }}" {% else %} disabled {% endif %}>?</button>
                 </div>
             {% endif %}
         {% endfor %}

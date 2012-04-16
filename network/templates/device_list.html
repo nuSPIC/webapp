@@ -183,7 +183,7 @@
                                     modal: true,
                             });
                             window.setTimeout(function() {
-                                window.location.href = '/network/{{network_obj.SPIC.group}}/{{network_obj.SPIC.local_id}}/'+ data.local_id +'/{{mini}}'}, 1000);
+                                window.location.href = '/network/{{network_obj.SPIC.group}}/{{network_obj.SPIC.local_id}}/'+ data.local_id +'/{{term}}'}, 1000);
             }, 'json');
     });
 
@@ -343,13 +343,16 @@
             $( "#device-list" ).find( "#device-list-content" ).hide();
         };
 
-        $( ".tipTip-right" ).tipTip({
-            defaultPosition: 'right',
-        }); 
-
-        $( ".tipTip-bottom" ).tipTip({
-            defaultPosition: 'bottom',
+        $( ".tipTip-top" ).tipTip({
+                delay: 1000,
+                defaultPosition: 'top',
         });
+
+        $( ".tipTip-right" ).tipTip({
+                defaultPosition: 'right',
+        });
+
+        $( ".portlet-content" ).removeClass("ui-corner-all")
 
     });
 </script>
@@ -361,7 +364,7 @@
         Devices
     </div>
 
-    <div class="portlet-content" id="device-list-content" style="overflow:visible">
+    <div class="portlet-content" id="device-list-content">
 
         <ul>
             <li><a href="#device-table-tab">Table</a></li>
@@ -399,7 +402,7 @@
 
                                     <td class="id_model-{{device.id}} selectable id"><b>{{ device.id }}</b></td>
 
-                                    <td class="id_model-{{device.id}} selectable model {% if network_obj.SPIC.group == "1" and device.type == "neuron" %} disabled {% endif %}" style="width: 9em">
+                                    <td class="id_model-{{device.id}} selectable model {% if network_obj.SPIC.group == "1" and device.type == "neuron" %} disabled {% endif %}" style="width: 10em">
                                         {% if network_obj.SPIC.group == "1" and device.type == 'neuron' %}
                                             Neuron
                                         {% else %}

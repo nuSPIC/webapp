@@ -7,37 +7,42 @@
 
 {% block extrahead %}
 
-<link href="{{ MEDIA_URL }}css/nuspic/jquery-ui-1.8.14.custom.css" type="text/css" rel="stylesheet" />
-<link href="{{ MEDIA_URL }}css/jquery-ui.custom.css" type="text/css" rel="stylesheet" />
-<link href="{{ MEDIA_URL }}css/layout-default.css" type="text/css" rel="stylesheet" />
-<link href="{{ MEDIA_URL }}css/network.css" type="text/css" rel="stylesheet" />
-<link href="{{ MEDIA_URL }}css/tipTip.css" type="text/css" rel="stylesheet" />
-
-<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.layout.min-1.2.0.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cookie.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.tipTip.minified.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}js/json2.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}js/network.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}js/quickpager.jquery.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}js/raphael-min.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}js/raphael-networkLayout.js"></script>
-
-<script type="text/javascript">
-
-    $(function() {
-        $( "#blockcontent" ).removeClass('center');
-        $( "#competition ").addClass("currentpage");
-        $( "#footer" ).remove()
-
-        $( "iframe" ).css('height', window.innerHeight-177);
-        $( "#container" ).css('height', window.innerHeight-170);
-        $( "#container" ).css('width', window.innerWidth-40);
-
-    });
+    <link href="{{ MEDIA_URL }}css/network.css" type="text/css" rel="stylesheet" />
 
 
+    <style type="text/css">
+        body { overflow: hidden}
 
-</script>
+        #content {
+            overflow: hidden;
+            margin-bottom: -1;
+            min-height: 0;
+            border-bottom: 1px solid #FAFAF9;
+        }
+
+        #container {
+            overflow: hidden;
+            position: absolute;
+            width: 1600px;
+            left: 0;
+            padding: 5px 10px;
+            margin: 5px 10px;
+            z-index:-1;
+        }
+    </style>
+
+    <script type="text/javascript">
+
+        $(function() {
+            $( "#footer" ).remove()
+
+            $( "iframe" ).css('height', window.innerHeight-177);
+            $( "#container" ).css('height', window.innerHeight-170);
+            $( "#container" ).css('width', window.innerWidth-40);
+
+        });
+
+    </script>
 
 {% endblock %}
 

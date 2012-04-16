@@ -68,7 +68,7 @@ def versionConverter(user_id=1):
         versionList = Version.objects.get_for_object(network_obj)
         versionList = versionList.order_by('id')
         
-        if user_id = 0:
+        if user_id == 0:
             versionList = [versionList.latest('id')]
         
         network_obj.SPIC_tmp = network_obj.SPIC_id

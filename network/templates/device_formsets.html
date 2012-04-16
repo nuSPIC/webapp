@@ -88,8 +88,8 @@
         var step = parseFloat(this.value);
         var spike_times = [];
         if (step > 0) {
-            var start = $(this).parents( ".advanced" ).find( "#id_start" ).val();
-            var stop = $(this).parents( ".advanced" ).find( "#id_stop" ).val();
+            var start = $(this).parents( ".form-content" ).find( "#id_start" ).val();
+            var stop = $(this).parents( ".form-content" ).find( "#id_stop" ).val();
             if (stop == 'inf') {
                 stop = {{network_obj.duration|safe}}
             }
@@ -98,7 +98,7 @@
                 spike_times.push(tt);
             };
         };
-        $(this).parents( ".device-form" ).find( "#id_spike_times" ).val(spike_times.toString());
+        $(this).parents( ".form-content" ).find( "#id_spike_times" ).val(spike_times.toString());
 
     });
 

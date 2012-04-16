@@ -3,9 +3,9 @@ from django.conf.urls.defaults import patterns, url
 
 urlpatterns = patterns('network.views',
     url(r'^$', 'network_list', name='network_list'),
-    
-    url(r'^(?P<SPIC_group>\d+)/(?P<SPIC_id>\d+)/$', 'network_initial', name='network_initial'),
-    url(r'^(?P<SPIC_group>\d+)/(?P<SPIC_id>\d+)/latest/$', 'network_latest', name='network_latest'),
+
+    url(r'^(?P<SPIC_group>\d+)/(?P<SPIC_id>\d+)/$', 'network_latest', name='network_latest'),
+    url(r'^(?P<SPIC_group>\d+)/(?P<SPIC_id>\d+)/initial/$', 'network_initial', name='network_initial'),
     url(r'^(?P<SPIC_group>\d+)/(?P<SPIC_id>\d+)/split/$', 'network_split', name='network_split'),
     
     url(r'^(?P<SPIC_group>\d+)/(?P<SPIC_id>\d+)/(?P<local_id>\d+)/$', 'network', name='network'),

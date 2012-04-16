@@ -24,10 +24,11 @@
                     </div>
 
                     {{ field.errors }}
-                <div class="field-input" style="width: 100%">
+                <div class="field-box">
                     {{ field }}
                 </div>
 
+                <button class="help_text" {% if field.help_text %} title="{{ field.help_text }}" {% else %} disabled {% endif %}>?</button>
             </div>
         {% endfor %}
         

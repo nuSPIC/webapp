@@ -26,8 +26,8 @@ class Network(models.Model):
     local_id = models.IntegerField(null=True)
 
     #SPIC_id = models.CharField(max_length=6, choices=SPIC_CHOICES)
-    SPIC_tmp = models.CharField(max_length=6, choices=SPIC_CHOICES)
-    title = models.CharField(max_length=32)
+    SPIC_tmp = models.CharField(max_length=6, blank=True, choices=SPIC_CHOICES)
+    title = models.CharField(max_length=32, blank=True)
     description = models.TextField(blank=True)
 
     label = models.CharField(max_length=16, blank=True, null=True, verbose_name='Title')

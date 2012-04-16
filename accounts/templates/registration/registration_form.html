@@ -19,7 +19,85 @@
         <fieldset>
             <legend>Required fields</legend>
             
-            {{ user_form.as_div }}
+            {{ user_form.non_field_errors }}
+            {{ user_form.id }}
+
+            <div class="field-wrapper">
+                <div class="label_tag">
+                    {{ user_form.username.label_tag }}:
+                </div>
+                {{ user_form.username.errors }}
+                <div class="field-box">
+                    {{ user_form.username }}
+                </div>
+
+                <button class="help_text" {% if user_form.username.help_text %} title="{{ user_form.username.help_text }}" {% else %} disabled {% endif %}>?</button>
+            </div>
+
+            <div class="field-wrapper">
+                <div class="label_tag">
+                    {{ user_form.first_name.label_tag }}:
+                </div>
+                {{ user_form.first_name.errors }}
+                <div class="field-box">
+                    {{ user_form.first_name }}
+                </div>
+
+                <button class="help_text" {% if user_form.first_name.help_text %} title="{{ user_form.first_name.help_text }}" {% else %} disabled {% endif %}>?</button>
+            </div>
+
+            <div class="field-wrapper">
+                <div class="label_tag">
+                    {{ user_form.last_name.label_tag }}:
+                </div>
+                {{ user_form.last_name.errors }}
+                <div class="field-box">
+                    {{ user_form.last_name }}
+                </div>
+
+                <button class="help_text" {% if user_form.last_name.help_text %} title="{{ user_form.last_name.help_text }}" {% else %} disabled {% endif %}>?</button>
+            </div>
+
+            <div class="field-wrapper">
+                <div class="label_tag">
+                    {{ user_form.email.label_tag }}:
+                </div>
+                {{ user_form.email.errors }}
+                <div class="field-box">
+                    {{ user_form.email }}
+                </div>
+
+                <button class="help_text" {% if user_form.email.help_text %} title="{{ user_form.email.help_text }}" {% else %} disabled {% endif %}>?</button>
+            </div>
+
+            <div class="field-wrapper">
+                <div class="label_tag">
+                    {{ user_form.password.label_tag }}:
+                </div>
+                {{ user_form.password.errors }}
+                <div class="field-box">
+                    {{ user_form.password }}
+                </div>
+
+                <button class="help_text" {% if user_form.password.help_text %} title="{{ user_form.password.help_text }}" {% else %} disabled {% endif %}>?</button>
+
+            </div>
+
+            <div class="field-wrapper">
+                <div class="label_tag">
+                    {{ user_form.password_confirmation.label_tag }}:
+                </div>
+                {{ user_form.password_confirmation.errors }}
+                <div class="field-box">
+                    {{ user_form.password_confirmation }}
+                </div>
+
+                <button class="help_text" {% if user_form.password_confirmation.help_text %} title="{{ user_form.password_confirmation.help_text }}" {% else %} disabled {% endif %}>?</button>
+            </div>
+
+            <div class="field-wrapper">
+                {{ user_form.captcha }}
+            </div>
         </fieldset>
     
         <fieldset>
@@ -41,39 +119,36 @@
                 <div class="label_tag">
                     {{ profile_form.academic_affiliation.label_tag }}:
                 </div>
-
                 {{ profile_form.academic_affiliation.errors }}
                 <div class="field-box">
                     {{ profile_form.academic_affiliation }}
                 </div>
 
-                <button class="ui-corner-right help_text" title="{{ profile_form.academic_affiliation.help_text }}">?</button>
+                <button class="help_text" {% if profile_form.academic_affiliation.help_text %} title="{{ profile_form.academic_affiliation.help_text }}" {% else %} disabled {% endif %}>?</button>
             </div>
 
             <div class="field-wrapper">
                 <div class="label_tag">
                     {{ profile_form.public_email.label_tag }}:
                 </div>
-
                 {{ profile_form.public_email.errors }}
                 <div class="field-box">
                     {{ profile_form.public_email }}
                 </div>
 
-                <button class="ui-corner-right help_text" title="{{ profile_form.public_email.help_text }}">?</button>
+                <button class="help_text" {% if profile_form.public_email.help_text %} title="{{ profile_form.public_email.help_text }}" {% else %} disabled {% endif %}>?</button>
             </div>
 
             <div class="field-wrapper">
                 <div class="label_tag">
                     {{ profile_form.web_page.label_tag }}:
                 </div>
-
                 {{ profile_form.web_page.errors }}
                 <div class="field-box">
                     {{ profile_form.web_page }}
                 </div>
 
-                <button class="ui-corner-right help_text" title="{{ profile_form.web_page.help_text }}">?</button>
+                <button class="help_text" {% if profile_form.web_page.help_text %} title="{{ profile_form.web_page.help_text }}" {% else %} disabled {% endif %}>?</button>
             </div>
 
 

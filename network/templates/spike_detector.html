@@ -42,20 +42,27 @@
                     var xScale = pv.Scale.linear(0, simTime).range(0, w),
                     yScale = pv.Scale.linear(1,lenNeuronScale).range(0, h1);
 
-                    var psth = psth_calc();                    
-                    var psth_yScale = pv.Scale.linear(0, pv.max(psth, function(d) {return d+1})).range(0, h2);
+                    var psth = psth_calc();
+
+                    if (times.length/simTime > 1) {
+                        var psth_smooth = gaussSmooth(psth, kw);
+                    } else {
+                        var psth_smooth = triangleSmooth(psth, kw);                   
+                    }
+
+                    var psth_yScale = pv.Scale.linear(0, pv.max(psth_smooth, function(d) {return d+1})).range(0, h2);
 
                     vis = prep_vis();
                     vis.render()
 
-                    $( "input#kernel_width" ).bind("change mouseup mouseout keyup", function () { 
+                    $( "input#kernel_width" ).bind("change mouseup mouseout", function () { 
                             kw = parseFloat($(this).val());
                             vis.render();
                     });
               
 
                     $(function() {
-                            $( "input#kernel_width" ).SpinEdit({'min': 10, 'step': 30}).val(kw);
+                            $( "input#kernel_width" ).SpinEdit({'min': 10, 'max': 1000, 'step': 30}).val(kw);
                     });
 
                 </script>

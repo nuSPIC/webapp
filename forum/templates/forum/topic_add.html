@@ -114,8 +114,20 @@
     
     <form action="." method="post" id="add_topic_form">
         {% csrf_token %}
-        
-        {{ topic_form.as_div }}
+
+        {{ topic_form.non_field_errors }}
+        <div class="field-wrapper">
+                <div class="label_tag">
+                    {{ topic_form.name.label_tag }}:
+                </div>
+
+                {{ topic_form.name.errors }}
+            <div class="field-box">
+                {{ topic_form.name }}
+            </div>
+
+            <button class="help_text" {% if topic_form.name.help_text %} title="{{ topic_form.name.help_text }}" {% else %} disabled {% endif %}>?</button>
+        </div>
 
         {% post_editor post_form %}
         

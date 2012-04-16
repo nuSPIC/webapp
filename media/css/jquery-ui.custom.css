@@ -10,10 +10,7 @@
 
 .ui-widget-header a { font-weight: bold;}
 
-
-.ui-icon {
-    cursor:pointer
-}
+.ui-icon {cursor:pointer}
 
 
 /* Button
@@ -23,7 +20,7 @@ input.ui-button { padding: .2em .5em; font-size: .85em; }
 
 /* Dialog
 ----------------------------------*/
-.ui-dialog { padding: 0; }
+.ui-dialog { padding: 0}
 .ui-dialog .ui-dialog-titlebar { padding: .2em .5em; }
 .ui-dialog .ui-dialog-content { font-size: 1em;}
 

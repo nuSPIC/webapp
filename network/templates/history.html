@@ -27,7 +27,7 @@
                         resizable: false,
                         modal: true,
                 });
-                window.location.href = $( this ).find( "a" ).attr('href')
+                document.location.href = $( this ).find( "a" ).attr('href')
         });
 
         $( "button#go-versions" ).click(function(e) {
@@ -81,7 +81,8 @@
                 <form action="#">
                     <select name="action" id="versions-select">
                         <option>Select an action</option>
-                        <option value="delete">Delete</option>
+                        <option value="delete_network">Delete network</option>
+                        <option value="delete_results">Delete results</option>
                         <option value="favorite">Mark as favorite</option>
                         <option value="unfavorite">Unmark as favorite</option>
                     </select>

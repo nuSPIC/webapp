@@ -15,7 +15,7 @@
         <link href="{{ MEDIA_URL }}css/jquery-ui.custom.css" type="text/css" rel="stylesheet" />
         <link href="{{ MEDIA_URL }}css/default.css" type="text/css" rel="stylesheet" />
 
-        <script type="text/javascript" src="/media/js/jquery-1.6.2.min.js"></script>
+        <script type="text/javascript" src="/media/js/jquery-1.7.1.min.js"></script>
         <script type="text/javascript" src="/media/js/jquery-ui-1.8.14.custom.min.js"></script>
         
         <script type="text/javascript" >
@@ -38,7 +38,7 @@
                     $( ".navigation li:first" ).removeClass("currentpage")
                 };
 
-                $( "button.help_text" ).click(function(e) {
+                $( "button.help_text" ).addClass('ui-corner-right').click(function(e) {
                     e.preventDefault();
                 });
 

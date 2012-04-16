@@ -57,20 +57,6 @@
 
         {% endif %}
 
-
-        $(document).ready(function() {
-
-            {% if network_obj.has_voltmeter %}
-                setTimeout('$( "#VoltmeterThumbnail" ).contents().find("span").each(function() { $(this).click(function() {voltmeter_enlarge(this.id)}); })', 1000.)
-            {% endif %}
-
-
-            {% if network_obj.has_spike_detector %}
-                setTimeout('$( "#SpikeDetectorThumbnail" ).contents().find("span").click(function() {spike_detector_enlarge()})', 1000.)
-            {% endif %}
-
-            
-        })
     </script>
 
 
@@ -79,7 +65,7 @@
     {% if network_obj.has_spike_detector %}
        <div><strong>Spike Detector</strong></div>
        
-        <iframe src="{% url spike_detector network_obj.pk %}?view=small" style="margin:1px; height:{{ network_obj.iframe_height }}; width:250px; border: 1px solid #ccc" id="SpikeDetectorThumbnail" scrolling="no"></iframe>
+        <iframe style="margin:1px; height:{{ network_obj.iframe_height }}; width:250px; border: 1px solid #ccc" id="SpikeDetectorThumbnail" scrolling="no"></iframe>
 
     {% endif %}
 </div>
@@ -91,7 +77,7 @@
        <div><strong>Voltmeter</strong></div>
             {% if network_obj.voltmeter_points < 15000 %}
 
-                <iframe src="{% url voltmeter_thumbnail network_obj.pk %}" style="margin:1px; height:{{ network_obj.iframe_height }}; width:380px; border: 1px solid #ccc" id="VoltmeterThumbnail" ></iframe>
+                <iframe style="margin:1px; height:{{ network_obj.iframe_height }}; width:380px; border: 1px solid #ccc" id="VoltmeterThumbnail"></iframe>
 
             {% else %}
 

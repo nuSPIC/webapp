@@ -55,7 +55,20 @@ def network_list(request):
     return {
         'flatpage': flatpage,
         'network_list': network_list,
-    }   
+    }  
+
+@login_required
+def network_latest(request, SPIC_group, SPIC_id):
+    SPIC_obj = get_object_or_404(SPIC, group=SPIC_group, local_id=SPIC_id)
+    network_list = Network.objects.raw('SELECT id,local_id,label,date_simulated,has_voltmeter,has_spike_detector FROM network_network WHERE user_id = %s AND SPIC_id = %s AND deleted = 0 ORDER BY id DESC', [request.user.pk, SPIC_obj.pk])
+
+    if network_list:
+        network_obj = network_list[0]
+        local_id = network_obj.local_id
+
+        return network(request, SPIC_group, SPIC_id, local_id)
+    else:
+        return network_initial(request, SPIC_group, SPIC_id)
 
 @login_required
 def network_initial(request, SPIC_group, SPIC_id):
@@ -70,17 +83,6 @@ def network_initial(request, SPIC_group, SPIC_id):
 
     return network(request, SPIC_group, SPIC_id, 0)
 
-
-def network_latest(request, SPIC_group, SPIC_id, local_id=0):
-
-    network_list = Network.objects.filter(user_id=request.user.id, SPIC__group=SPIC_group, SPIC__local_id=SPIC_id, deleted=False)
-    if network_list:
-        network_obj = network_list.latest('id')
-        local_id = network_obj.local_id
-
-    return network(request, SPIC_group, SPIC_id, local_id)
-
-
 @render_to('network_split.html')
 @login_required
 def network_split(request, SPIC_group, SPIC_id):
@@ -88,11 +90,11 @@ def network_split(request, SPIC_group, SPIC_id):
     
     left_local_id = request.GET.get('left')
     if not left_local_id:
-        left_local_id = '0'
+        left_local_id = 0
         
     right_local_id = request.GET.get('right')
     if not right_local_id:
-        right_local_id = 0  
+        right_local_id = 0
     
     response = {
         'SPIC_obj': SPIC_obj,
@@ -101,8 +103,6 @@ def network_split(request, SPIC_group, SPIC_id):
     }
     
     return response   
-
-
    
 @render_to('network_layout_popup.html')
 @login_required
@@ -121,7 +121,11 @@ def network_layout(request, SPIC_group, SPIC_id, local_id):
 def network_mini(request, SPIC_group, SPIC_id, local_id):
 
     SPIC_obj = SPIC.objects.get(group=SPIC_group, local_id=SPIC_id)
-    network_list = Network.objects.raw('SELECT id,local_id,label,date_simulated,has_voltmeter,has_spike_detector FROM network_network WHERE user_id = %s AND SPIC_id = %s AND deleted = 0 ORDER BY id DESC', [request.user.pk, SPIC_obj.pk])
+    network_list = Network.objects.filter(user_id=request.user.pk, SPIC=SPIC_obj).order_by('-id')
+    #network_list = Network.objects.raw('SELECT id,local_id,label,date_simulated,has_voltmeter,has_spike_detector FROM network_network WHERE user_id = %s AND SPIC_id = %s AND deleted = 0 ORDER BY id DESC', [request.user.pk, SPIC_obj.pk])
+
+    if local_id == '-1':
+        local_id = network_list[0].local_id
 
     while True:
         try:
@@ -296,11 +300,10 @@ def network_mini(request, SPIC_group, SPIC_id, local_id):
         'device_choices': device_choices,
         'device_formsets': device_formsets,
         'params_order': ALL_PARAMS_ORDER,
-        'mini': 'mini/',
+        'term': 'mini/',
     }
         
     return response
-
 
 @render_to('network_mainpage.html')
 @login_required
@@ -308,7 +311,8 @@ def network(request, SPIC_group, SPIC_id, local_id):
   
     # get objects from database
     SPIC_obj = SPIC.objects.get(group=SPIC_group, local_id=SPIC_id)
-    network_list = Network.objects.raw('SELECT id,local_id,label,date_simulated,has_voltmeter,has_spike_detector FROM network_network WHERE user_id = %s AND SPIC_id = %s AND deleted = 0 ORDER BY id DESC', [request.user.pk, SPIC_obj.pk])
+    network_list = Network.objects.filter(user_id=request.user.pk, SPIC=SPIC_obj, deleted=False).order_by('-id')
+    #network_list = Network.objects.raw('SELECT id,local_id,label,date_simulated,has_voltmeter,has_spike_detector FROM network_network WHERE user_id = %s AND SPIC_id = %s AND deleted = 0 ORDER BY id DESC', [request.user.pk, SPIC_obj.pk])
     network_obj = get_object_or_404(Network, user_id=request.user.pk, SPIC=SPIC_obj, local_id=local_id, deleted=False)
 
     # if request is POST, then it executes any deletions
@@ -322,14 +326,19 @@ def network(request, SPIC_group, SPIC_id, local_id):
                 network = Network.objects.get(pk=int(network_id))
                 
                 if network.local_id > 0:
-                    if action == 'delete':
-                        network.deleted = True  
+                    if action == 'delete_network':
+                        network.deleted = True
+                    elif action == 'delete_results':
+                        network.has_spike_detector = False
+                        network.has_voltmeter = False
+                        network.date_simulated = None
                     elif action == 'favorite':
                         network.favorite = True
                     elif action == 'unfavorite':
                         network.favorite = False
                         
                     network.save()
+            network_obj = get_object_or_404(Network, user_id=request.user.pk, SPIC=SPIC_obj, local_id=local_id, deleted=False)
         
         # delete selected device 
         elif request.POST.get('device_ids'):
@@ -476,6 +485,7 @@ def network(request, SPIC_group, SPIC_id, local_id):
         'device_choices': device_choices,
         'device_formsets': device_formsets,
         'params_order': ALL_PARAMS_ORDER,
+        'term': '',
     }
     
     return response

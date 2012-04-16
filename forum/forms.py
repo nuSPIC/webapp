@@ -19,9 +19,6 @@ class TopicForm(forms.ModelForm):
     class Meta:
         model = Topic
         fields = ('name',)
-    
-    def as_div(self):
-        return self._html_output(u'<div class="field-wrapper"><div>%(label)s</div> %(errors)s <div class="field-box">%(field)s</div><button class="ui-corner-right help_text" title="%(help_text)s">?</button></div>', u'%s', '</div>', u'<span class="help_text">%s</span>', False)
 
 class TopicMoveForm(forms.ModelForm):
     class Meta:

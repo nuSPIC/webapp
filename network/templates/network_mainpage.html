@@ -6,122 +6,141 @@
 {% load humanize %}
 
 {% block extrahead %}
+    <link href="{{ MEDIA_URL }}css/nuspic/jquery-ui-1.8.14.custom.css" type="text/css" rel="stylesheet" />
+    <link href="{{ MEDIA_URL }}css/jquery-ui.custom.css" type="text/css" rel="stylesheet" />
+    <link href="{{ MEDIA_URL }}css/layout-default.css" type="text/css" rel="stylesheet" />
+    <link href="{{ MEDIA_URL }}css/network.css" type="text/css" rel="stylesheet" />
+    <link href="{{ MEDIA_URL }}css/tipTip.css" type="text/css" rel="stylesheet" />
 
-<link href="{{ MEDIA_URL }}css/nuspic/jquery-ui-1.8.14.custom.css" type="text/css" rel="stylesheet" />
-<link href="{{ MEDIA_URL }}css/jquery-ui.custom.css" type="text/css" rel="stylesheet" />
-<link href="{{ MEDIA_URL }}css/layout-default.css" type="text/css" rel="stylesheet" />
-<link href="{{ MEDIA_URL }}css/network.css" type="text/css" rel="stylesheet" />
-<link href="{{ MEDIA_URL }}css/tipTip.css" type="text/css" rel="stylesheet" />
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.8.14.custom.min.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.layout.min-1.2.0.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.tipTip.minified.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/json2.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/network.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/quickpager.jquery.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/raphael-min.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/raphael-networkLayout.js"></script>
 
-<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.7.1.min.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.8.14.custom.min.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.layout.min-1.2.0.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cookie.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.tipTip.minified.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}js/json2.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}js/network.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}js/quickpager.jquery.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}js/raphael-min.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}js/raphael-networkLayout.js"></script>
+    <style type="text/css">
+        .field-wrapper {
+            width:100%
+        }
 
-<style type="text/css">
-    .field-wrapper {
-        width:100%
-    }
+        .field-box {
+            height:23px;
+            width: 92%;
+        }
 
-    .field-box {
-        height:23px;
-        width: 92%;
-    }
-</style>
+        #content {
+            overflow: hidden;
+            margin-bottom: -1;
+            min-height: 0;
+            border-bottom: 1px solid #FAFAF9;
+        }
 
-<script type="text/javascript">
-    var None = '';
-    var device_list = {{ network_obj.device_list|safe }},
-    neuron_ids = {{ network_obj.neuron_ids|safe }},
-    edgelist = {{ network_obj.edgelist|safe }},
-    connect_to_input = {{ network_obj.connect_to_input|safe }},
-    connect_to_output = {{ network_obj.connect_to_output|safe }},
-    layoutSize = {{ network_obj.layout_size|safe }},
-    last_device_id = {{ network_obj.last_device_id|safe }},
-    params_order = {{ params_order|safe }};
+        #workplace {
+            overflow: hidden;
+            position: absolute;
+            left: 0;
+            padding: 5px 10px;
+            margin: 0;
+            z-index:-1;
+        }
+    </style>
 
-    var selected_device_id,
-    task_id;
+    <script type="text/javascript">
+        var None = '';
+        var device_list = {{ network_obj.device_list|safe }},
+        neuron_ids = {{ network_obj.neuron_ids|safe }},
+        edgelist = {{ network_obj.edgelist|safe }},
+        connect_to_input = {{ network_obj.connect_to_input|safe }},
+        connect_to_output = {{ network_obj.connect_to_output|safe }},
+        layoutSize = {{ network_obj.layout_size|safe }},
+        last_device_id = {{ network_obj.last_device_id|safe }},
+        params_order = {{ params_order|safe }};
 
+        var selected_device_id,
+        task_id;
 
-    $(function() {
+        $(function() {
+            $( "#footer" ).remove();
 
-        $( "#footer" ).remove();
+            $( "#workplace" ).css('height', window.innerHeight-155);
+            $( "#workplace" ).css('width', window.innerWidth-20);
+            
+            $( "#container" ).css('height', window.innerHeight-155);
+            $( "#container" ).css('width', Math.min(window.innerWidth-20, $('#devices').width() + $('#network').width() + Math.max(layoutSize['x']+45, $('#GUI').width()) + $('#simulation').width() + 75));
 
-        $( "#container" ).css('height', window.innerHeight-170);
-        $( "#container" ).css('width', window.innerWidth-40);
+            $( "#container" ).resizable({
+                containment: "#workplace",
+                handles: 'e',
+            });
 
+            $( ".column" ).sortable({
+                    cancel: ".portlet-content",
+                    connectWith: ".column",
+                    cursor: 'move',
+                    opacity: 0.7,
+            });
 
-        $( ".column" ).sortable({
-                cancel: ".portlet-content",
-                connectWith: ".column",
-                cursor: 'move',
-                opacity: 0.7,
+            $( ".portlet" ).loadTheme({
+                "tipTip": true,
+                "shadow": true,
+                "toggable": true,
+            });
+            $( ".portlet-content" ).addClass( "ui-corner-all" )
+            $( ".pager li" ).addClass("ui-corner-all")
+    //         $( "select" ).addClass("ui-corner-all")
+
+            // ADMIN
+            $( "span#device_id" ).html(selected_device_id);
+            $( "span#last_device_id" ).html(last_device_id);
+
+    //                 $( "#dialog-msg p" ).html("Loading... please wait.");
+    //                 $( "#dialog-msg #loading_icon" ).show();
+    //                 $( "#dialog-msg" ).dialog({
+    //                         height: 150,
+    //                         resizable: false,
+    //                         modal: true,
+    //                 });
+
         });
 
-        $( ".portlet" ).loadTheme({"tipTip":true});
 
-        $( ".portlet-content" ).addClass( "ui-corner-all" )
-        $( ".pager li" ).addClass("ui-corner-all")
-//         $( "select" ).addClass("ui-corner-all")
+        $(document).ready(function() {
 
-        // ADMIN
-        $( "span#device_id" ).html(selected_device_id);
-        $( "span#last_device_id" ).html(last_device_id);
+            // tipTip
+            $( ".tipTip-top" ).tipTip({
+                    delay: 1000,
+                    defaultPosition: 'top',
+            });
 
-//                 $( "#dialog-msg p" ).html("Loading... please wait.");
-//                 $( "#dialog-msg #loading_icon" ).show();
-//                 $( "#dialog-msg" ).dialog({
-//                         height: 150,
-//                         resizable: false,
-//                         modal: true,
-//                 });
+            $( ".tipTip-right" ).tipTip({
+                    defaultPosition: 'right',
+            });
 
-    });
+            $( ".tipTip-left" ).tipTip({
+                    defaultPosition: 'left',
+            });
 
+            $( ".ui-icon" ).hover(function(){$(this).parent().addClass('ui-state-hover')}, 
+                function(){$(this).parent().removeClass('ui-state-hover')})
 
-    $(document).ready(function() {
-
-        // tipTip
-        $( ".tipTip-top" ).tipTip({
-                delay: 1000,
-                defaultPosition: 'top',
         });
 
-        $( ".tipTip-right" ).tipTip({
-                defaultPosition: 'right',
-        });
-
-        $( ".tipTip-left" ).tipTip({
-                defaultPosition: 'left',
-        });
-
-        $( ".ui-icon" ).hover(function(){$(this).parent().addClass('ui-state-hover')}, 
-            function(){$(this).parent().removeClass('ui-state-hover')})
-
-        $( "button.help_text" ).click(function(e) {
-            e.preventDefault();
-        });
-
-    });
-
-</script>
+    </script>
 
 {% endblock %}
 
-{% block title %}{{ SPIC_obj.title }} - {{network_obj.local_id}}{% endblock %}
+{% block title %}{{ SPIC_obj.title }} - {{ local_id }}{% endblock %}
 
 
 {% block content %}
 
 <div style="float:right; margin-right: 10px">
-    <a href="{% url network_split SPIC_obj.group SPIC_obj.local_id %}?left={{network_obj.local_id}}">
+    <a href="{% url network_split SPIC_obj.group SPIC_obj.local_id %}?left={{ network_obj.local_id }}">
         switch view
     </a>
 </div>
@@ -134,76 +153,77 @@
     &raquo; <span id="network_description" >{{ SPIC_obj.description|default:"no description" }}</span>
 </div>
 
-
 <!--<div style="width:56px; height: 54px; position:absolute; right:30px; bottom:20px" id="loading_icon">
     <img src="/media/images/icons/bcf_logo-loader.gif" style="height:100%;width:100%;">
 </div>-->
 
+<div id="workplace">
+    <div id="container">
 
-<div id="container" style="padding: 5px 10px">
+    <!-- COLUMN 1 -->
+        <div class="column" id="devices">
 
-<!-- COLUMN 1 -->
-    <div class="column" id="devices">
+    <!--         DEVICE LIST -->
+            {% include "device_list.html" %}
 
-<!--         DEVICE LIST -->
-        {% include "device_list.html" %}
-
-<!--         DEVICE FORMS -->
-        {% include "device_formsets.html" %}
-
-    </div>
-
-
-<!-- COLUMN 2 -->
-    {% if network_obj.connections %}
-        <div class="column" id="network">
-
-<!--             CONNECTIVITY MATRIX   -->
-            {% include "connectivity_matrix.html" %}
-
-<!--             SIMULATION -->
-            {% include "simulation.html" %}
+    <!--         DEVICE FORMS -->
+            {% include "device_formsets.html" %}
 
         </div>
-    {% endif %}
 
 
-<!-- COLUMN 3 -->
-{% if network_obj.devices_json %}
-    <div class="column" id="GUI">
+    <!-- COLUMN 2 -->
+        {% if network_obj.connections %}
+            <div class="column" id="network">
 
-<!--             NETWORK LAYOUT -->
-        {% include "network_layout.html" %}
+    <!--             CONNECTIVITY MATRIX   -->
+                {% include "connectivity_matrix.html" %}
 
-<!--             COMMENT FORM -->
-        {% include "comment_form.html" %}
+    <!--             SIMULATION -->
+                {% include "simulation.html" %}
+
+            </div>
+        {% endif %}
+
+
+    <!-- COLUMN 3 -->
+        {% if network_obj.devices_json %}
+            <div class="column" id="GUI">
+
+        <!--             NETWORK LAYOUT -->
+                {% include "network_layout.html" %}
+
+        <!--             COMMENT FORM -->
+                {% include "comment_form.html" %}
+            </div>
+
+        {% endif %}
+
+    <!-- COLUMN 4 -->
+        <div class="column" id="simulation">
+
+        <!--         SIMULATION HISTORY -->
+            {% include "history.html" %}
+
+
+        <!--        RESULT_DATA-->
+            {% include "result.html" %}
+
+        </div>
+
+
+    <!-- POPUP DIALOG -->
+        <div class="ui-dialog" id="dialog-msg" title="Network messenger">
+
+            <div style="width:56px; height: 54px; margin:auto; padding:12px; display:none; float:left; vertical-align:bottom" id="loading_icon">
+                <img src="/media/images/icons/bcf_logo-loader.gif" style="height:100%;width:100%;">
+            </div>
+
+            <p id="dialog-msg" style="margin-top: 60px"></p>
+
+        </div>
+
     </div>
-
-{% endif %}
-
-<!-- COLUMN 4 -->
-    <div class="column">
-
-    <!--         SIMULATION HISTORY -->
-        {% include "history.html" %}
-
-
-    <!--        RESULT_DATA-->
-        {% include "result.html" %}
-
-    </div>
-
-</div>
-
-<!-- POPUP DIALOG -->
-<div class="ui-dialog" id="dialog-msg" title="Network messenger">
-
-    <div style="width:56px; height: 54px; margin:auto; padding:12px; display:none; float:left; vertical-align:bottom" id="loading_icon">
-        <img src="/media/images/icons/bcf_logo-loader.gif" style="height:100%;width:100%;">
-    </div>
-
-    <p id="dialog-msg" style="margin-top: 60px"></p>
-
 </div>
 
 {% endblock %}

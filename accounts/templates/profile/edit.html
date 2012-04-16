@@ -18,8 +18,23 @@
         
         <fieldset>
             <legend>Required fields</legend>
+            {% csrf_token %}
+            {{ user_form.non_field_errors }}
             
-            {{ user_form.as_div }}
+            {% for field in user_form %}
+                <div class="field-wrapper">
+                        <div class="label_tag">
+                            {{ field.label_tag }}:
+                        </div>
+
+                        {{ field.errors }}
+                    <div class="field-box">
+                        {{ field }}
+                    </div>
+
+                    <button class="help_text" {% if field.help_text %} title="{{ field.help_text }}" {% else %} disabled {% endif %}>?</button>
+                </div>
+            {% endfor %}
         </fieldset>
     
         <fieldset>
@@ -47,7 +62,7 @@
                     {{ profile_form.academic_affiliation }}
                 </div>
 
-                <button class="ui-corner-right help_text" title="{{ profile_form.academic_affiliation.help_text }}">?</button>
+                <button class="help_text" {% if profile_form.academic_affiliation.help_text %} title="{{ profile_form.academic_affiliation.help_text }}" {% else %} disabled {% endif %}>?</button>
             </div>
 
             <div class="field-wrapper">
@@ -60,7 +75,7 @@
                     {{ profile_form.public_email }}
                 </div>
 
-                <button class="ui-corner-right help_text" title="{{ profile_form.public_email.help_text }}">?</button>
+                <button class="help_text" {% if profile_form.public_email.help_text %} title="{{ profile_form.public_email.help_text }}" {% else %} disabled {% endif %}>?</button>
             </div>
 
             <div class="field-wrapper">
@@ -73,7 +88,7 @@
                     {{ profile_form.web_page }}
                 </div>
 
-                <button class="ui-corner-right help_text" title="{{ profile_form.web_page.help_text }}">?</button>
+                <button class="help_text" {% if profile_form.web_page.help_text %} title="{{ profile_form.web_page.help_text }}" {% else %} disabled {% endif %}>?</button>
             </div>
 
 

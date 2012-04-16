@@ -58,6 +58,10 @@ a:hover {
     color: #432f1a; /*#593f23;*/ /*#6c3a09;*/
 }
 
+iframe {
+    border: none;
+}
+
 /* Layout
 ***********************/
 
@@ -344,6 +348,7 @@ input, textarea, keygen, select, button, isindex {
     }
 
     .field-wrapper button {
+        cursor: pointer;
         color: #333333;
         background-color: #F1F1F1;
         outline: none;
@@ -355,8 +360,12 @@ input, textarea, keygen, select, button, isindex {
         margin-left: -5px;
     }
 
-    .field-wrapper button:hover {
-        cursor: pointer;
+    .field-wrapper button:disabled {
+        cursor: default;
+        color: #BBBBBB;
+    }
+
+    .field-wrapper button:not([disabled]):hover {
         color: #2B2924;
         background-color: #FAFAF9;
         border: 1px solid #A2A2A2;
@@ -493,7 +502,7 @@ h2.delimiter {
 }
 
 .red {
-    border: 1px solid #B4464F !important;
+    border-color: #B4464F !important;
     background-color: #ecd1d3 !important;
 }
 

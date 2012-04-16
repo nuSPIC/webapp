@@ -27,10 +27,11 @@ def itemize(s, label=None):
         if label:
             st = ''
             params = PARAMS_ORDER.get(str(label))
+            
             if params:
                 params = params[0] + params[1]
                 for param in params[1:]:
-                    if param in s:
+                    if param in s and not param in ['label', 'model', 'type']:
                         if ',' in str(s[param]):
                             if len(s[param]) < 20:
                                 st += '%s: %s, ' %(param, s[param])

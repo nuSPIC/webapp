@@ -45,7 +45,7 @@
                     {% for network in item.list %}
                         <li id="{{ network.title }}">
 
-                            <a href="{% url network_initial network.SPIC.group network.SPIC.local_id %}">
+                            <a href="{% url network_latest network.SPIC.group network.SPIC.local_id %}">
                                 {{ network.SPIC.title|default_if_none:"Network" }}:
                             </a>
 

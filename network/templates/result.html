@@ -66,13 +66,15 @@
         $(document).ready(function() {
 
             {% if network_obj.has_voltmeter %}
-                setTimeout('$( "#VoltmeterThumbnail" ).contents().find("span").each(function() { $(this).click(function() {voltmeter_enlarge(this.id)}); })', 1000.)
+                setTimeout('$( "#VoltmeterThumbnail" ).contents().find("span").each(function() {$(this).click(function() {voltmeter_enlarge(this.id)})})', 2500.)
             {% endif %}
 
 
             {% if network_obj.has_spike_detector %}
-                setTimeout('$( "#SpikeDetectorThumbnail" ).contents().find("span").click(function() {spike_detector_enlarge()})', 1000.)
+                setTimeout('$( "#SpikeDetectorThumbnail" ).contents().find("span").click(function() {spike_detector_enlarge()})', 2500.)
             {% endif %}
+
+            $( ".portlet-content" ).removeClass("ui-corner-all")
             
         })
     </script>

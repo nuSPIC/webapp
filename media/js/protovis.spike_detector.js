@@ -1,3 +1,8 @@
+Array.prototype.sum = function(){
+    for(var i=0,sum=0;i<this.length;sum+=this[i++]);
+    return sum;
+}
+
 function newFilledArray(len, val) {
     var rv = new Array(len);
     while (--len >= 0) {
@@ -5,7 +10,6 @@ function newFilledArray(len, val) {
     }
     return rv;
 }
-
 
 Object.prototype.clone = function() {
     var newObj = (this instanceof Array) ? [] : {};
@@ -17,41 +21,54 @@ Object.prototype.clone = function() {
         } return newObj;
     };
 
-Object.prototype.smooth = function () {
-    var smooth = this.clone();
-    for (idx in bins) {
-        var nr_bins = 0;
-        x = -kw;
-        while (x <= kw) {
-            if (parseInt(idx) + x > 0 && parseInt(idx)+x < this.length) {
-                nr_bins += (kw-Math.abs(x))/kw * bins[parseInt(idx)+x].y
-                };
-            x++;
-            };
-        smooth[idx].y = nr_bins;
-        } return smooth;
-  };
-  
 function psth_calc() {
-
-    /* Update PSTH */
     psth = newFilledArray(simTime, 0);
-
     for (var n = 0; n < times.length; n++) {
-        psth[parseInt(times[n])] += 2/kw * 1000 / nr_spikes;
-        for (var m = 1; m <= kw/2; m++) {
-            if (parseInt(times[n] - m) >= 0) {
-                psth[parseInt(times[n] - m)] += 2/kw * ( 1 - (2/kw) * m) * 1000 / nr_spikes;
-            }
-            if (parseInt(times[n] + m) < psth.length) {
-                psth[parseInt(times[n] + m)] += 2/kw * ( 1 - (2/kw) * m) * 1000 / nr_spikes;
-            }
-        }
+        psth[parseInt(times[n])] += 1000;
     };
-    
     return psth
 };
 
+function triangleSmooth(list, degree) {
+    smoothed = newFilledArray(list.length, 0);
+    for (var n = 0; n < times.length; n++) {
+        smoothed[parseInt(times[n])] += 2/kw * 1000 / nr_spikes;
+        for (var m = 1; m <= kw/2; m++) {
+            if (parseInt(times[n] - m) >= 0) {
+                smoothed[parseInt(times[n] - m)] += 2/kw * ( 1 - (2/kw) * m) * 1000 / nr_spikes;
+            }
+            if (parseInt(times[n] + m) < smoothed.length) {
+                smoothed[parseInt(times[n] + m)] += 2/kw * ( 1 - (2/kw) * m) * 1000 / nr_spikes;
+            }
+        }
+    };
+    return smoothed
+};
+
+function gaussSmooth(list, degree) {
+    var win = degree*2-1;
+    weightGauss = [];
+    for (i=0;i<=win;i++) {
+        j = i-degree+1;
+        frac = j/win;
+        gauss = 1 / Math.exp((4*(frac))*(4*(frac)));
+        weightGauss.push(gauss);
+    }
+    weightGaussSum = weightGauss.sum()
+    
+    first_val = newFilledArray(degree-1, list.slice(0,degree).sum()/degree)
+    last_val = newFilledArray(degree, list[list.length-1])
+    new_list = first_val.concat(list, last_val)
+    
+    smoothed = newFilledArray(list.length, 0.)
+    for (i=0; i < smoothed.length; i++) {
+        list_slice = new_list.slice(i, i+win)
+        val_gauss = list_slice.map(function(element,index,array){return element*weightGauss[index]})
+        smoothed[i] = val_gauss.sum() / weightGaussSum
+        }
+    return smoothed;
+};
+  
 function prep_vis() {
     
     /* The root panel. */
@@ -106,9 +123,13 @@ function prep_vis() {
     /* The PSTH panel */
     var psth_panel = vis.add(pv.Panel)
         .def("init", function() {
-            var psth = psth_calc();
-            psth_yScale.domain(0, pv.max(psth, function(d) {return d+1}));
-            return psth;
+            if (times.length/simTime > 1) {
+                var psth_smooth = gaussSmooth(psth, kw);
+            } else {
+                var psth_smooth = triangleSmooth(psth, kw);                   
+            }
+            psth_yScale.domain(0, pv.max(psth_smooth, function(d) {return d+1}));
+            return psth_smooth;
             })
         .bottom(10)
         .height(h2);
@@ -156,8 +177,8 @@ function prep_vis() {
     var psth_area = psth_panel.add(pv.Area)
         .data(function() {return psth_panel.init()})
         .left(function(d) {return xScale(this.index)})
-        .bottom(1)
         .height(function(d) {return psth_yScale(d)})
+        .bottom(1)
         .fillStyle("rgba(0, 0, 0, 0) ")
         .interpolate("cardinal");
 
@@ -167,6 +188,4 @@ function prep_vis() {
         .lineWidth(3);
 
         return vis;
-//     return [vis, psth_y, psth_area];
-
 }; 

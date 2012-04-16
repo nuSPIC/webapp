@@ -4,21 +4,27 @@ $.fn.reset = function () {
 };
 
 $.fn.loadTheme = function (options) {
+        
         $( this ).addClass( "ui-widget ui-helper-clearfix" )
             .find( ".portlet-header" )
                     .addClass( "ui-widget-header ui-corner-top tipTip-top" )
                     .end()
-            .find( ".portlet-toggle" )
-                    .prepend( '<div class="ui-widget-header ui-corner-all" style="float:right"><span class="ui-icon toggle ui-icon-minusthick"></span></div>')
-                    .end()
             .find( ".portlet-content" )
-                    .addClass( "ui-widget-content ui-shadow" );
+                    .addClass( "ui-widget-content" );
                     
-                    
-        $( this ).find( ".portlet-header .toggle" ).click(function() {
-                $( this ).toggleClass( "ui-icon-minusthick" ).toggleClass( "ui-icon-plusthick" );
-                $( this ).parents( ".portlet:first" ).find( "div.portlet-content" ).slideToggle("slow");
-        });
+        if (options.shadow) {  
+            $( this ).find( ".portlet-content" ).addClass( "ui-shadow" );
+        };
+           
+        if (options.toggable) {  
+            $( this ).find( ".portlet-toggle" )
+                    .prepend( '<div class="ui-widget-header ui-corner-all" style="float:right"><span class="ui-icon toggle ui-icon-minusthick"></span></div>')
+          
+            $( this ).find( ".portlet-header .toggle" ).click(function() {
+                    $( this ).toggleClass( "ui-icon-minusthick" ).toggleClass( "ui-icon-plusthick" );
+                    $( this ).parents( ".portlet:first" ).find( "div.portlet-content" ).slideToggle("slow");
+            });
+        }
         
         $( this ).find( ".buttons" )
             .find( "button" ).button().end()
