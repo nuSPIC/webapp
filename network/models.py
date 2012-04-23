@@ -46,15 +46,15 @@ class Network(models.Model):
     favorite = models.BooleanField()
     deleted = models.BooleanField()
 
+    class Meta:
+        ordering = ('SPIC','id')
+
     def __unicode__(self):
         try:
             return '%s_%s_%s' %(self.user(), self.SPIC, self.local_id)
         except:
             return '%s' %self.local_id
             
-    class Meta:
-        ordering = ('SPIC','id')
-
     def user(self):
         """
         Get user object from the django model 'auth' by user_id.

@@ -554,7 +554,7 @@
                 <option value="">--- select a device ---</option>
 
                 {% for device in device_choices %}
-                    <option value="{{device.id_model}}" style="color:{% ifequal device.model_type 'input' %}#467ab3{% else %}#6B4226{% endifequal %}">{{device.id_model|label_escape}}</option>
+                    <option value="{{device.id_model}}" style="color:{% ifequal device.model_type 'neuron' %}#6B4226{% else %}#467ab3{% endifequal %}">{{device.id_model|label_escape}}</option>
                 {% endfor %}
 
             </select>
@@ -566,7 +566,7 @@
 
 
 <div class="ui-dialog" id="step-helper">
-    <h2 class="delimiter">Ten steps to work with SPIC</h2>
+    <h2 class="delimiter">Seven steps to work with SPIC</h2>
 
     <ol>
         <li>Add <b>new devices</b> and set their status.</li>
