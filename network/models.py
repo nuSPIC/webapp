@@ -51,9 +51,9 @@ class Network(models.Model):
 
     def __unicode__(self):
         try:
-            return '%s_%s_%s' %(self.user(), self.SPIC, self.local_id)
+            return '%s_%s_%s' %(self.user_id, self.SPIC, self.local_id)
         except:
-            return '%s' %self.local_id
+            return '%s' %self.pk
             
     def user(self):
         """

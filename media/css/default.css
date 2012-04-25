@@ -40,13 +40,13 @@ body {
 }
 
 div.centered-404 {
-    /*position: absolute;*/
-    /*left: 50%;*/
-    /*top: 50%;*/
-    /*width: 760px;*/
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 760px;
     height: 500px;
-    /*margin-left: -380px;*/
-    /*margin-top: -250px;*/
+    margin-left: -380px;
+    margin-top: -250px;
 }
 
 a {

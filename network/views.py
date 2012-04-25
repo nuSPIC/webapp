@@ -121,39 +121,34 @@ def network_layout(request, SPIC_group, SPIC_id, local_id):
 def network_mini(request, SPIC_group, SPIC_id, local_id):
 
     SPIC_obj = SPIC.objects.get(group=SPIC_group, local_id=SPIC_id)
-    network_list = Network.objects.filter(user_id=request.user.pk, SPIC=SPIC_obj).order_by('-id')
-    #network_list = Network.objects.raw('SELECT id,local_id,label,date_simulated,has_voltmeter,has_spike_detector FROM network_network WHERE user_id = %s AND SPIC_id = %s AND deleted = 0 ORDER BY id DESC', [request.user.pk, SPIC_obj.pk])
-
-    if local_id == '-1':
-        local_id = network_list[0].local_id
-
-    while True:
-        try:
-            network_obj = Network.objects.get(user_id=request.user.pk, SPIC=SPIC_obj, local_id=local_id, deleted=False)
-            break
-        except:
-            local_id = int(local_id) - 1
+    network_list = Network.objects.filter(user_id=request.user.pk, SPIC=SPIC_obj).values('id', 'local_id', 'label', 'comment', 'date_simulated', 'favorite').order_by('-id')
+    network_obj = get_object_or_404(Network, user_id=request.user.pk, SPIC__group=SPIC_group, SPIC__local_id=SPIC_id, local_id=local_id)
 
     # If request is POST, then it executes any deletions
     if request.method == "POST":
 
         # Delete selected devices from database.
-        if request.POST.get('result_ids'):
-            result_ids = request.POST.getlist('result_ids')
+        if request.POST.get('network_ids'):
+            network_ids = request.POST.getlist('network_ids')
             action = request.POST.get('action')
-            for result_id in result_ids:
-                result = Result.objects.get(pk=int(result_id))
+            
+            for network_id in network_ids:
+                network = Network.objects.get(pk=int(network_id))
+                
+                if network.local_id > 0:
+                    if action == 'delete_network':
+                        network.deleted = True
+                    elif action == 'delete_results':
+                        network.has_spike_detector = False
+                        network.has_voltmeter = False
+                        network.date_simulated = None
+                    elif action == 'favorite':
+                        network.favorite = True
+                    elif action == 'unfavorite':
+                        network.favorite = False
+                    network.save()
                     
-                if action == 'delete':
-                    result.delete()
-                    result_obj = None
-                        
-                elif action == 'favorite':
-                    result.favorite = True
-                    result.save()
-                elif action == 'unfavorite':
-                    result.favorite = False
-                    result.save()
+            network_obj = get_object_or_404(Network, user_id=request.user.pk, SPIC=SPIC_obj, local_id=local_id, deleted=False)
         
         # Delete selected device 
         elif request.POST.get('device_ids'):
@@ -311,7 +306,7 @@ def network(request, SPIC_group, SPIC_id, local_id):
   
     # get objects from database
     SPIC_obj = SPIC.objects.get(group=SPIC_group, local_id=SPIC_id)
-    network_list = Network.objects.filter(user_id=request.user.pk, SPIC=SPIC_obj, deleted=False).order_by('-id')
+    network_list = Network.objects.filter(user_id=request.user.pk, SPIC=SPIC_obj, deleted=False).values('id', 'local_id', 'label', 'date_simulated', 'favorite').order_by('-id')
     #network_list = Network.objects.raw('SELECT id,local_id,label,date_simulated,has_voltmeter,has_spike_detector FROM network_network WHERE user_id = %s AND SPIC_id = %s AND deleted = 0 ORDER BY id DESC', [request.user.pk, SPIC_obj.pk])
     network_obj = get_object_or_404(Network, user_id=request.user.pk, SPIC=SPIC_obj, local_id=local_id, deleted=False)
 
@@ -323,7 +318,7 @@ def network(request, SPIC_group, SPIC_id, local_id):
             network_ids = request.POST.getlist('network_ids')
             action = request.POST.get('action')
             for network_id in network_ids:
-                network = Network.objects.get(pk=int(network_id))
+                network = Network.objects.filter(pk=int(network_id))
                 
                 if network.local_id > 0:
                     if action == 'delete_network':
@@ -336,8 +331,8 @@ def network(request, SPIC_group, SPIC_id, local_id):
                         network.favorite = True
                     elif action == 'unfavorite':
                         network.favorite = False
-                        
                     network.save()
+                    
             network_obj = get_object_or_404(Network, user_id=request.user.pk, SPIC=SPIC_obj, local_id=local_id, deleted=False)
         
         # delete selected device 
@@ -713,7 +708,7 @@ def data(request, network_id):
         response['result']['spike_detector'] = json.decode(network_obj.spike_detector_json)
     
     response = HttpResponse(json.encode(response), mimetype='application/force-download')
-    response['Content-Disposition'] = 'attachment; filename=%s_%s.json' %(network_obj.date_simulated.date(), network_obj)
+    response['Content-Disposition'] = 'attachment; filename=%s_%s_%s.json' %(network_obj.date_simulated.strftime('%y%m%d'), network_obj.SPIC, network_obj.local_id)
 
     return response
 
