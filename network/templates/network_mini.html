@@ -246,7 +246,7 @@
             <button {% if network_obj.neuron_ids|length <= 10 and network_obj.weight_list %} class="ui-state-hover" {% else %} disabled {% endif %} style="border-top:none; border-bottom:none;" id="connectivity-toggle">Connectivity Matrix</button>
             <button {% if network_obj.connections %} class="ui-state-hover" {% else %} disabled {% endif %} style="border-top:none; border-bottom:none;" id="layout-toggle">Network Layout</button>
             <button class="ui-state-hover" style="border-top:none; border-bottom:none;" id="simulation-toggle">Simulation</button>
-            <button {% if network_obj.is_recorded %} class="ui-state-active" {% else %} disabled {% endif %} style="border-top:none; border-bottom:none;" id="results-toggle">Results</button>
+            <button {% if network_obj.is_recorded %} class="ui-state-hover ui-state-active" {% else %} disabled {% endif %} style="border-top:none; border-bottom:none;" id="results-toggle">Results</button>
 
         </div>
 
