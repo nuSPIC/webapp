@@ -107,7 +107,7 @@ def network_split(request, SPIC_group, SPIC_id):
 @render_to('network_layout_popup.html')
 @login_required
 def network_layout(request, SPIC_group, SPIC_id, local_id):
-    network_obj = get_object_or_404(Network, user_id=request.user.pk, SPIC__group=SPIC_group, SPIC__local_id=SPIC_id, local_id=local_id)
+    network_obj = get_object_or_404(Network, user_id=request.user.pk, SPIC__group=SPIC_group, SPIC__local_id=SPIC_id, local_id=local_id, deleted=False)
     
     response = {
         'network_obj': network_obj,
@@ -122,7 +122,7 @@ def network_mini(request, SPIC_group, SPIC_id, local_id):
 
     SPIC_obj = SPIC.objects.get(group=SPIC_group, local_id=SPIC_id)
     network_list = Network.objects.filter(user_id=request.user.pk, SPIC=SPIC_obj).values('id', 'local_id', 'label', 'comment', 'date_simulated', 'favorite').order_by('-id')
-    network_obj = get_object_or_404(Network, user_id=request.user.pk, SPIC__group=SPIC_group, SPIC__local_id=SPIC_id, local_id=local_id)
+    network_obj = get_object_or_404(Network, user_id=request.user.pk, SPIC__group=SPIC_group, SPIC__local_id=SPIC_id, local_id=local_id, deleted=False)
 
     # If request is POST, then it executes any deletions
     if request.method == "POST":
