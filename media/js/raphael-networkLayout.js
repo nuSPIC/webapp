@@ -141,10 +141,11 @@ $.fn.loadLayout = function (device_list) {
     var start = function () {
         this.ox = this.attr("cx");
         this.oy = this.attr("cy");
-        this.neuron_id = this.data("id");
+        this.device_idx = this.data("device_idx");
+        this.neuron_idx = this.data("neuron_idx");
         this.neuron_label = this.data("label");
         
-        this.draggableset = draggablesets[this.neuron_id];
+        this.draggableset = draggablesets[this.neuron_idx];
         this.draggableset.oBB = this.draggableset.getBBox();
         this.bb = this.draggableset.getBBox();
 
@@ -171,34 +172,36 @@ $.fn.loadLayout = function (device_list) {
             }
         paper.safari();
         
-        $('#position').fadeIn().html([this.cx, this.cy].toString());
+        $('#position').fadeIn().html([this.neuron_idx, this.cx, this.cy].toString());
         },
     
     up = function () {
 //         this.trial.animate({"opacity": 0}, 1000);
-//         inputs[this.neuron_id-1].animate({"fill-opacity": 1}, 500);
-//         outputs[this.neuron_id-1].animate({"fill-opacity": 1}, 500);
-
-        device_list[this.neuron_label-1]["position"] = [this.bb.x > 0 ? this.cx : 18, this.bb.y > 0 ? this.cy : 13];
+//         inputs[this.neuron_id].animate({"fill-opacity": 1}, 500);
+//         outputs[this.neuron_id].animate({"fill-opacity": 1}, 500);
+        device_list[this.device_idx]["position"] = [this.bb.x > 0 ? this.cx : 18, this.bb.y > 0 ? this.cy : 13];
         $('#position').fadeOut();
         };
 
-    var x, y, id, edge, wcolors, 
+    var x, y, edge, wcolors, 
     paper = Raphael("holder", layoutSize["x"]+30, layoutSize["y"]+30),
     shapes = [], connections = [];
     
     paper.clear();
-    id = 0;
-    for (var ii = 0; ii < device_list.length; ii++) {
-        device = device_list[ii];
-        if ("position" in device) {
+    idx = 0;
+    for (var device_idx = 0; device_idx < device_list.length; device_idx++) {
+        device = device_list[device_idx];
+        if (device.type == 'neuron' && 'position' in device) {
             x = device["position"][0];
             y = device["position"][1];
             label = device["id"];
+            device_idx = device_idx;
+            neuron_idx = idx++;
 
             shapes.push(
                 paper.ellipse(x, y, 17, 12)
-                     .data("id", id++)
+                     .data("device_idx", device_idx)
+                     .data("neuron_idx", neuron_idx)                     
                      .data("label", label)
                      .data("input", connect_to_input.inArray(label))
                      .data("output", connect_to_output.inArray(label))
@@ -265,15 +268,16 @@ $.fn.loadLayout = function (device_list) {
                     this.animate({"stroke-width": 3}, 500);
                    
                     var neuron_label = this.data("label");
+                    var device_idx = this.data("device_idx")
                     $( "table#device-table" ).find( "tr#"+ neuron_label).find( "td" ).addClass( "ui-state-highlight" );
                     $( "table#weight-table" ).find( "tr#neuron_"+ neuron_label ).find( "td.connections-table" ).addClass( "ui-state-highlight" );
                     $( "table#delay-table" ).find( "tr#neuron_"+ neuron_label ).find( "td.connections-table" ).addClass( "ui-state-highlight" );
                     
-                    device = device_list[neuron_label-1];
+                    device = device_list[device_idx];
                     if ("targets" in device) {
                         var targets = device["targets"].split(",");
-                            for (idx in targets) {
-                                var tgt = (targets[idx]);
+                            for (tgt_idx in targets) {
+                                var tgt = (targets[tgt_idx]);
                                 $( "table#weight-table" )
                                     .find( "th#weight_" + tgt )
                                     .addClass( "ui-state-highlight" );

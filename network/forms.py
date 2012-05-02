@@ -507,7 +507,9 @@ class SpikeGeneratorForm(DeviceForm):
             
             except:
                 raise forms.ValidationError('Enter only positive values.')
-              
+        
+        if stop == np.inf:
+            return
         return stop
               
     def clean_step(self):

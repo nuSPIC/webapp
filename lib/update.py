@@ -223,3 +223,71 @@ def updateInitial():
             net.duration = arch_net.duration
             
             net.save()
+
+
+def seqDict(deviceDict):
+    items = deviceDict['visible'].items() +  deviceDict['hidden'].items()
+    items = sorted(items, key=lambda x: int(x[0]))
+    
+    visItems = deviceDict['visible'].items()
+    visItems = sorted(visItems, key=lambda x: int(x[0]))
+  
+    deviceDict['meta'] = {}
+    deviceDict['meta']['last_seq'] = int(items[-1][0])
+    deviceDict['meta']['last_device_id'] = int(visItems[-1][1]['id'])
+    
+    json.encode(deviceDict)
+    return deviceDict
+    
+def runSeqDict(test=True):
+    networks = Network.objects.all()
+    for net in networks:
+        deviceDict = net.device_dict()
+        if deviceDict:
+            new = seqDict(deviceDict)
+            net.devices_json = json.encode(new)
+            if test:
+                print(net.devices_json)
+            else:
+                net.save()
+
+def forkDict(deviceDict):
+    items = deviceDict['visible'].items() +  deviceDict['hidden'].items()
+    items = sorted(items, key=lambda x: int(x[0]))
+    
+    visible, hidden = {}, {}
+    for k,v in items:
+        if 'id' in v:
+            visible[str(int(k))] = v
+        else:
+            hidden[str(int(k))] = v
+    
+    meta = {}
+    meta['last_seq'] = int(items[-1][0])
+    
+    last_vis_seq = meta['last_seq']
+    
+    while last_vis_seq > 0:
+        if str(last_vis_seq) in deviceDict['visible']:
+            break
+        else:
+            last_vis_seq -= 1
+            
+    if last_vis_seq > 0:
+        meta['last_device_id'] = int(deviceDict['visible'][str(last_vis_seq)]['id'])
+        
+    return {'visible': visible, 'hidden': hidden, 'meta': meta}
+
+
+def runForkDict(test=True):
+    networks = Network.objects.all()
+        
+    for net in networks:
+        deviceDict = net.device_dict()
+        if deviceDict:
+            new = forkDict(deviceDict)
+            net.devices_json = json.encode(new)
+        if test:
+            print(net.devices_json)
+        else:
+            net.save()

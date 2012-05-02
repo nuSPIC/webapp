@@ -152,7 +152,7 @@
     $( "tr.enabled" ).find( "td.selectable" ).live('click', function(e) {
             e.preventDefault();
             $( "#id_model option:first" ).attr('selected', 'selected');
-            var device = device_list[$(this).parent( ".enabled" ).attr('id').split("_")[1]-1];
+            var device = device_list[$(this).parent( ".enabled" ).attr('id').split("_")[1]];
             setForm(device);
     });
 
@@ -394,10 +394,10 @@
                         {% if network_obj.device_list|length > 0 %}
                             {% for device in network_obj.device_list %}
                                 <tr class="id_model-{{device.id}} {% if network_obj.SPIC.group != "1" or device.type != "neuron" %} enabled {% endif %}"
-                                    title="{{ device|itemize:device.model|default_if_none:'no status' }}" id="device_{{ device.id }}">
+                                    title="{{ device|itemize:device.model|default_if_none:'no status' }}" id="device_{{ forloop.counter0 }}">
 
                                     <td class="id_model-{{device.id}} delete collapse">
-                                        <input type="checkbox" name="device_ids" value="{{device.id}}" {% if network_obj.SPIC.group == "1" and device.type == "neuron" %} disabled {% endif %}>
+                                        <input type="checkbox" name="device_ids" value="{{ device.id }}" {% if network_obj.SPIC.group == "1" and device.type == "neuron" %} disabled {% endif %}>
                                     </td>
 
                                     <td class="id_model-{{device.id}} selectable id"><b>{{ device.id }}</b></td>

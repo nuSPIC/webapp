@@ -14,7 +14,7 @@ from lib.helpers import get_flatpage_or_none
 from lib.tasks import Simulation
 import lib.json as json
 
-from network.helpers import values_extend, id_escape, id_identify, dict_to_JSON, csv_to_dict
+from network.helpers import values_extend, id_escape, id_identify, dict_to_JSON, csv_to_dict, delete_devices
 from network.forms import *
 from network.models import SPIC, Network
 from network.network_settings import ALL_PARAMS_ORDER
@@ -152,98 +152,19 @@ def network_mini(request, SPIC_group, SPIC_id, local_id):
         
         # Delete selected device 
         elif request.POST.get('device_ids'):
-            
             device_ids = np.array(request.POST.getlist('device_ids'), dtype=int)
-            del_vids = device_ids.copy()
-
-            statusDict = network_obj.device_dict()
-            id_filterbank = network_obj.id_filterbank()
-            deviceList = network_obj.device_list()
-
-            for device in deviceList:
-                if device['type'] == 'input' or device['type'] == 'output':
-                    if 'targets' in device:
-                        term = 'targets'
-                    elif 'sources' in device:        
-                        term = 'sources'
-                        
-                    neuronList = np.array(device[term].split(','), dtype=int)
-                    del_term = True
-                    for neuron in neuronList:
-                        if not neuron in device_ids:
-                            del_term = False
-                            
-                    if del_term:
-                        del_vids = np.append(del_vids, device['id'])
-
-            id_updater = np.zeros(len(deviceList))
-            id_updater[del_vids-1] = 1
-            
-            id_updatebank = network_obj.device_list(key='id')
-            id_updatebank = np.array([id_updatebank, id_updatebank]).T
-            id_updatebank[:,1] -= id_updater.cumsum()
-
-            for device in deviceList:
-               
-                if not device['id'] in del_vids:
-                    # correct device IDs
-                    old_id = device['id']
-                    tid = id_identify(id_filterbank, old_id)                
-                    device['id'] = int(id_escape(id_updatebank, old_id))
-
-                    # delete target/source
-                    new_conns = {}
-                    if 'targets' in device or 'sources' in device:
-                        if 'targets' in device:
-                            term = 'targets'
-                        elif 'sources' in device:        
-                            term = 'sources'
-                            
-                        value_list = device[term].split(',')
-                        value_array = np.array([item for item in enumerate(value_list) if int(item[1]) not in del_vids], dtype=int)
-                        
-                        if value_array.any():
-                            value_list = [str(id_escape(id_updatebank, val)) for val in value_array[:,1]]
-                            device[term] = ','.join(value_list)
-                        
-                            # delete weight and delay
-                            if 'weight' in device:
-                                weight_list = device['weight'].split(',')
-                                weight_list = [str(item[1]) for item in enumerate(weight_list) if item[0] in value_array[:,0]]
-                                if not weight_list == ['']:
-                                    device['weight'] = ','.join(weight_list)
-                                
-                            if 'delay' in device:
-                                delay_list = device['delay'].split(',')
-                                delay_list = [str(item[1]) for item in enumerate(delay_list) if item[0] in value_array[:,0]]
-                                if not delay_list == ['']:
-                                    device['delay'] = ','.join(delay_list)
-                            
-                    # merge all status
-                    statusDict[('%4d' %tid).replace(' ','0')] = device
-                    
-            # remove selected device from dict
-            new_statusDict = {}
-            for old_vid, new_vid in id_updatebank:
-                if new_vid > 0 and old_vid not in del_vids:
-                    new_statusDict[('%4d' %id_identify(id_filterbank, new_vid)).replace(' ','0')] = statusDict[('%4d' %id_identify(id_filterbank, old_vid)).replace(' ','0')]
-                    
-            hidden_device_tids = id_identify(id_filterbank, -1)
-            for hidden_device_tid in hidden_device_tids:
-                new_statusDict[('%4d' %hidden_device_tid).replace(' ','0')] = statusDict[('%4d' %hidden_device_tid).replace(' ','0')]
-                
-            network_obj.devices_json = json.encode(new_statusDict)
-            network_obj.save()
+            deviceList = delete_devices(network_obj.device_list(), device_ids)
             
         elif request.POST.get('csv'):
             csv = request.POST['csv']
             deviceList = csv_to_dict(csv)
-            network_obj.update(deviceList)
-            network_obj.save()
+            
+        # update device json in network object
+        network_obj.update(deviceList)
+        network_obj.save()
        
+    # Get label and CSV form for expert.
     label_form = NetworkLabelForm(instance=network_obj)
-        
-    # Get CSV for expert.
     device_csv_form = DeviceCSVForm({'csv':network_obj.csv()})    
         
     # Get a choice list for adding new device.
@@ -318,7 +239,7 @@ def network(request, SPIC_group, SPIC_id, local_id):
             network_ids = request.POST.getlist('network_ids')
             action = request.POST.get('action')
             for network_id in network_ids:
-                network = Network.objects.filter(pk=int(network_id))
+                network = Network.objects.get(pk=int(network_id))
                 
                 if network.local_id > 0:
                     if action == 'delete_network':
@@ -335,98 +256,19 @@ def network(request, SPIC_group, SPIC_id, local_id):
                     
             network_obj = get_object_or_404(Network, user_id=request.user.pk, SPIC=SPIC_obj, local_id=local_id, deleted=False)
         
-        # delete selected device 
+        # delete selected devices
         elif request.POST.get('device_ids'):
-            
             device_ids = np.array(request.POST.getlist('device_ids'), dtype=int)
-            del_vids = device_ids.copy()
-
-            statusDict = network_obj.device_dict()
-            id_filterbank = network_obj.id_filterbank()
-            deviceList = network_obj.device_list()
-
-            for device in deviceList:
-                if device['type'] == 'input' or device['type'] == 'output':
-                    if 'targets' in device:
-                        term = 'targets'
-                    elif 'sources' in device:        
-                        term = 'sources'
-                        
-                    neuronList = np.array(device[term].split(','), dtype=int)
-                    del_term = True
-                    for neuron in neuronList:
-                        if not neuron in device_ids:
-                            del_term = False
-                            
-                    if del_term:
-                        del_vids = np.append(del_vids, device['id'])
-
-            id_updater = np.zeros(len(deviceList))
-            id_updater[del_vids-1] = 1
-            
-            id_updatebank = network_obj.device_list(key='id')
-            id_updatebank = np.array([id_updatebank, id_updatebank]).T
-            id_updatebank[:,1] -= id_updater.cumsum()
-
-            for device in deviceList:
-               
-                if not device['id'] in del_vids:
-                    # correct device IDs
-                    old_id = device['id']
-                    tid = id_identify(id_filterbank, old_id)                
-                    device['id'] = int(id_escape(id_updatebank, old_id))
-
-                    # delete target/source
-                    new_conns = {}
-                    if 'targets' in device or 'sources' in device:
-                        if 'targets' in device:
-                            term = 'targets'
-                        elif 'sources' in device:        
-                            term = 'sources'
-                            
-                        value_list = device[term].split(',')
-                        value_array = np.array([item for item in enumerate(value_list) if int(item[1]) not in del_vids], dtype=int)
-                        
-                        if value_array.any():
-                            value_list = [str(id_escape(id_updatebank, val)) for val in value_array[:,1]]
-                            device[term] = ','.join(value_list)
-                        
-                            # delete weight and delay
-                            if 'weight' in device:
-                                weight_list = device['weight'].split(',')
-                                weight_list = [str(item[1]) for item in enumerate(weight_list) if item[0] in value_array[:,0]]
-                                if not weight_list == ['']:
-                                    device['weight'] = ','.join(weight_list)
-                                
-                            if 'delay' in device:
-                                delay_list = device['delay'].split(',')
-                                delay_list = [str(item[1]) for item in enumerate(delay_list) if item[0] in value_array[:,0]]
-                                if not delay_list == ['']:
-                                    device['delay'] = ','.join(delay_list)
-                            
-                    # merge all status
-                    statusDict[('%4d' %tid).replace(' ','0')] = device
+            deviceList = delete_devices(network_obj.device_list(), device_ids)
                     
-            # remove selected device from dict
-            new_statusDict = {}
-            for old_vid, new_vid in id_updatebank:
-                if new_vid > 0 and old_vid not in del_vids:
-                    new_statusDict[('%4d' %id_identify(id_filterbank, new_vid)).replace(' ','0')] = statusDict[('%4d' %id_identify(id_filterbank, old_vid)).replace(' ','0')]
-                    
-            hidden_device_tids = id_identify(id_filterbank, -1)
-            for hidden_device_tid in hidden_device_tids:
-                new_statusDict[('%4d' %hidden_device_tid).replace(' ','0')] = statusDict[('%4d' %hidden_device_tid).replace(' ','0')]
-                
-            network_obj.devices_json = json.encode(new_statusDict)
-            network_obj.save()
-            
         elif request.POST.get('csv'):
             csv = request.POST['csv']
             deviceList = csv_to_dict(csv)
-            network_obj.update(deviceList)
-            network_obj.save()
+
+        # update device json in network object
+        network_obj.update(deviceList)
+        network_obj.save()
             
-        
     # Get CSV for expert.
     device_csv_form = DeviceCSVForm({'csv':network_obj.csv()})    
         
@@ -456,9 +298,6 @@ def network(request, SPIC_group, SPIC_id, local_id):
         device_form = form(network_obj=network_obj)
         formsHTML = render_to_string('device_form.html', {'id_model':id_model, 'form':device_form})
         device_formsets.append({'id_model':id_model, 'formsHTML':formsHTML})
-        
-
-        
         
     # Get root status
     root_status = network_obj.root_status()
@@ -505,14 +344,13 @@ def device_csv(request, network_id):
                     form = FORMS[valDict['model']](network_obj, valDict)
 
                     if form.is_valid():
-                        devDict[('%4d' %int(valDict['id'])).replace(' ', '0')] = form.cleaned_data
+                        devDict[str(valDict['id'])] = form.cleaned_data
                     else:
                         errorsMsg[str(valDict['id'])] = form.errors
                         valid = -1
                     
             if valid:
                 network_obj.device_json = json.encode(devDict)
-                
             
             response = {'errorsMsg': errorsMsg, 'valid':valid}
             return HttpResponse(json.encode(response), mimetype='application/json')
@@ -540,7 +378,6 @@ def device_preview(request, network_id):
             else:
                 responseHTML = render_to_string('device_form.html', {'form':form})
                 response = {'valid': -1, 'responseHTML':responseHTML}
-        
             return HttpResponse(json.encode(response), mimetype='application/json')
                     
     return HttpResponse()
@@ -644,20 +481,9 @@ def layout_save(request, network_id):
 
     if request.is_ajax():
         if request.method == 'POST':
-        
-            post = request.POST
-            device_list = json.decode(str(post['devices_json']))
-            id_filterbank = network_obj.id_filterbank()
-            device_dict = network_obj.device_dict()
-
-            for gid, status in enumerate(device_list):
-                
-                if 'position' in status:
-                    tid = id_identify(id_filterbank, status['id'])
-                    if tid:
-                        device_dict[('%4d' %tid).replace(' ', '0')]['position'] = status['position']
-                
-            network_obj.devices_json = json.encode(device_dict)
+            deviceList = json.decode(request.POST.get('devices_json'))
+            
+            network_obj = network_obj.update(deviceList, force_self=True)
             network_obj.save()
         
         response = {'layoutSize':network_obj.layout_size()}
@@ -673,20 +499,20 @@ def default_layout(request, network_id):
     if request.is_ajax():
         edgelist = network_obj.connections(modeltype='neuron')
         pos = networkx(edgelist, layout='circo')
-
-        deviceDict = network_obj.device_dict()
-        id_filterbank = network_obj.id_filterbank()
+        
+        deviceList = network_obj.device_list()
         neuron_id_filterbank = network_obj.neuron_id_filterbank()
         
-        for nid, value in pos.iteritems():
-            vid = id_identify(neuron_id_filterbank, nid)
-            tid = ("%4d" %id_identify(id_filterbank, vid)).replace(" ", "0")
-            deviceDict[tid]['position'] = list(value)
+        for idx, device in enumerate(deviceList):
+            if device['type'] == 'neuron':
+                neuron_idx = id_escape(neuron_id_filterbank, device['id'])
+                if neuron_idx in pos:
+                    device['position'] = list(pos[neuron_idx])
+                    deviceList[idx] = device
         
-        devicesJSON = json.encode(deviceDict)
-        network_obj.devices_json = devicesJSON
+        network_obj = network_obj.update(deviceList, force_self=True)
         network_obj.save()
-        
+       
         response = {'device_list':network_obj.device_list(), 'layoutSize': network_obj.layout_size()}
         return HttpResponse(json.encode(response), mimetype='application/json')
 

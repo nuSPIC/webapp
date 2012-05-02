@@ -42,24 +42,24 @@ def values_extend(values, unique=False, toString=False):
 
 def id_escape(id_filterbank, tid=None):
     """ Return user visible id from true id. """
-    tids = np.array(id_filterbank[:,0], dtype=float)
+    tids = np.array(id_filterbank[:,0], dtype=int)
     vids = np.array(id_filterbank[:,1], dtype=int)
 
-    if float(tid) in tids: 
-        return vids[tids.tolist().index(float(tid))]
+    if int(tid) in tids: 
+        return vids[tids.tolist().index(int(tid))]
         
     return np.array([], dtype=int)
     
 def id_identify(id_filterbank, vid=None):
     """ Return true id from user visible id. """
     tids = np.array(id_filterbank[:,0], dtype=int)
-    vids = np.array(id_filterbank[:,1], dtype=float)
+    vids = np.array(id_filterbank[:,1], dtype=int)
     
     if vid == -1:
         return tids[vids == -1]
     
-    if float(vid) in vids: 
-        return tids[vids.tolist().index(float(vid))]
+    if int(vid) in vids: 
+        return tids[vids.tolist().index(int(vid))]
         
     return np.array([], dtype=int)
     
@@ -87,3 +87,74 @@ def csv_to_dict(csv):
             params = params_order[statusList[0]]
             devList.append(dict(zip(params,statusList)))
     return devList
+    
+def delete_devices(deviceList, device_ids):
+    del_ids = device_ids.copy()
+    
+    # check if inputs/outputs also should be deleted.
+    id_updatebank = []
+    for device in deviceList:
+        id_updatebank.append((device['id'], device['id']))
+        if device['type'] == 'input' or device['type'] == 'output':
+            if 'sources' in device:        
+                term = 'sources'
+            else:
+                term = 'targets'
+                
+            if device.get(term):
+                neuronList = np.array(device[term].split(','), dtype=int)
+                delete = True
+                for neuron in neuronList:
+                    if not neuron in device_ids:
+                        delete = False
+                        
+                if delete:
+                    del_ids = np.append(del_ids, device['id'])
+    
+    # update targets/sources in not deleted devices
+    #id_updater = np.zeros(len(id_updatebank))
+    #id_updater[del_ids-1] = 1
+    #id_updater_cumsum = id_updater.cumsum()
+    #id_updatebank = np.array(id_updatebank)
+    #id_updatebank[:,1] -= id_updater_cumsum
+
+    new_deviceList = []
+    for device in deviceList:
+        if not device['id'] in del_ids:
+          
+            # correct device IDs
+            #device['id'] = int(id_escape(id_updatebank, device['id']))
+
+            # delete target/source
+            new_conns = {}
+            if 'targets' in device or 'sources' in device:
+                if 'targets' in device:
+                    term = 'targets'
+                elif 'sources' in device:        
+                    term = 'sources'
+                    
+                if device.get(term):
+                    value_list = device[term].split(',')
+                    value_array = np.array([item for item in enumerate(value_list) if int(item[1]) not in del_ids], dtype=int)
+                    
+                    if value_array.any():
+                        #value_list = [str(id_escape(id_updatebank, val)) for val in value_array[:,1]]
+                        #device[term] = ','.join(value_list)
+                    
+                        # delete weight and delay
+                        if device.get('weight'):
+                            weight_list = device['weight'].split(',')
+                            weight_list = [str(item[1]) for item in enumerate(weight_list) if item[0] in value_array[:,0]]
+                            if not weight_list == ['']:
+                                device['weight'] = ','.join(weight_list)
+                            
+                        if device.get('delay'):
+                            delay_list = device['delay'].split(',')
+                            delay_list = [str(item[1]) for item in enumerate(delay_list) if item[0] in value_array[:,0]]
+                            if not delay_list == ['']:
+                                device['delay'] = ','.join(delay_list)
+                    
+            # append all status to new list
+            new_deviceList.append(device)
+            
+    return new_deviceList

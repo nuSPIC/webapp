@@ -10,6 +10,7 @@ from network.forms import NetworkForm
 from network.models import Network
 
 import datetime
+import numpy as np
 
 class Simulation(AbortableTask):
     """
@@ -54,13 +55,15 @@ class Simulation(AbortableTask):
                 for statusKey in statusDefaults.keys():
                     statusVal = statusDict.get(statusKey)
                     if statusVal and statusKey not in ['model']:
-                        if type(statusDefaults[statusKey]) == list:
-                            statusList = statuVal.split(',')
-                            statusList = [float(val) for val in statusList if val]
-                            device_params[statusKey] = statusList
-                        elif type(statusDefaults[statusKey]) == float:
+                        if isinstance(statusDefaults[statusKey],np.ndarray):
+                            statusList = statusVal.split(',')
+                            device_params[statusKey] = np.array([float(val) for val in statusList if val])
+                        elif isinstance(statusDefaults[statusKey],list):
+                            statusList = statusVal.split(',')
+                            device_params[statusKey] = [float(val) for val in statusList if val]
+                        elif isinstance(statusDefaults[statusKey],float):
                             device_params[statusKey] = float(statusVal)
-                        elif type(statusDefaults[statusKey]) == int:
+                        elif isinstance(statusDefaults[statusKey],int):
                             device_params[statusKey] = int(statusVal)  
                         else:
                             device_params[statusKey] = statusVal  

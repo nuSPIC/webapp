@@ -7,6 +7,7 @@ import lib.json as json
 from network.network_settings import SPIC_CHOICES, ALL_PARAMS_ORDER
 from network.helpers import values_extend, id_escape, id_identify
 
+import pdb
 #from result.models import Result
 
 class SPIC(models.Model):
@@ -84,8 +85,7 @@ class Network(models.Model):
 
     def id_filterbank(self):
         deviceDict = self.device_dict()
-        deviceItems = deviceDict.items()
-        deviceItems.sort()
+        deviceItems = sorted(deviceDict['visible'].iteritems(), key=lambda x: int(x[0]))
 
         idList = []
         for tid, device in deviceItems:
@@ -111,15 +111,17 @@ class Network(models.Model):
         its default is None, choices are 'neuron', 'input' or 'output'.
         """
         deviceDict = self.device_dict()
+        
         if deviceDict:
-            deviceItems = deviceDict.items()
-            deviceItems.sort()
-                                    
             if term == 'all':
+                deviceItems = deviceDict['visible'].items() + deviceDict['hidden'].items()
+                deviceItems = sorted(deviceItems, key=lambda x: int(x[0]))
                 deviceList = [dev[1] for dev in deviceItems]
                 
             elif term == 'visible':
                 id_filterbank = self.id_filterbank()
+                
+                deviceItems = sorted(deviceDict['visible'].iteritems(), key=lambda x: int(x[0]))
                 deviceList = [dev[1] for dev in deviceItems if 'id' in dev[1]]
                 
                 for idx, dev in enumerate(deviceList):
@@ -136,8 +138,7 @@ class Network(models.Model):
                         new_weights, new_delays = [], []
                         for idx_tgt, tgt in enumerate(targets):
                             if tgt:
-                                tid = ('%4d' %int(tgt)).replace(' ', '0')
-                                new_tgt = id_escape(id_filterbank, tid)
+                                new_tgt = id_escape(id_filterbank, tgt)
                             
                                 if new_tgt > 0:
                                     new_targets.append(str(new_tgt))
@@ -163,8 +164,7 @@ class Network(models.Model):
                         new_sources = []
                         for idx_src, src in enumerate(sources):
                             if src:
-                                tid = ('%4d' %int(src)).replace(' ', '0')
-                                new_src = id_escape(id_filterbank, tid)
+                                new_src = id_escape(id_filterbank, src)
 
                                 if new_src > 0:
                                     new_sources.append(str(new_src))
@@ -172,6 +172,7 @@ class Network(models.Model):
                         deviceList[idx]['sources'] = ','.join(new_sources)
 
             elif term == 'hidden':
+                deviceItems = sorted(deviceDict['hidden'].iteritems(), key=lambda x: int(x[0]))
                 deviceList = [dev[1] for dev in deviceItems if not 'id' in dev[1]]
                 
             if modeltype:
@@ -185,13 +186,35 @@ class Network(models.Model):
         return []
         
         
-    def update(self, deviceList):
+    def update(self, deviceList, force_self=False):
+        """
+        Get device list, worked through filterbank and update device json.
+        In case it is recorded it returns a new network object. Otherwise it returns itself.
+        """
 
         deviceDict = self.device_dict()
+
+        # refresh id filterbank
         id_filterbank = self.id_filterbank()
-        layoutSize = self.layout_size()
         
-        for gid, statusDict in enumerate(deviceList):
+        if deviceDict.get('meta'):
+            last_seq = deviceDict['meta']['last_seq']
+        elif filterbank.any():
+            last_seq = int(id_filterbank[-1][0])
+        else:
+            last_seq = 0
+            
+        for idx, statusDict in enumerate(deviceList):
+            # add new ids to filterbank
+            seq = id_identify(id_filterbank, statusDict['id'])
+            if not seq:
+                last_seq += 1
+                id_filterbank = np.append(id_filterbank, np.array([[last_seq, statusDict['id']]], dtype=int), axis=0)
+
+        visible = {}
+        # update status of neurons
+        layoutSize = self.layout_size()
+        for statusDict in deviceList:
             
             # get modeltype of device.
             if statusDict['type'] == 'neuron':
@@ -204,41 +227,33 @@ class Network(models.Model):
                 # get true targets of neurons
                 if statusDict.get('targets'):
                     extended_list = values_extend(statusDict['targets'], unique=True)
-                    extended_converted_list = [str(id_identify(id_filterbank, vid)) for vid in extended_list if vid in id_filterbank[:,1]]
+                    extended_converted_list = [str(id_identify(id_filterbank, idx)) for idx in extended_list if idx in id_filterbank[:,1]]
                     if extended_converted_list:
                         statusDict['targets'] = ','.join(extended_converted_list)
                         
                 # add new ids to filterbank
-                if id_filterbank.any():
-                    tid = id_identify(id_filterbank, statusDict['id'])
-                    if not tid:
-                        tid = id_filterbank[-1][0]+1
-                        id_filterbank = np.append(id_filterbank, np.array([[tid, statusDict['id']]], dtype=int), axis=0)
-                else:
-                    tid = 1
-                    id_filterbank = np.array([[tid, statusDict['id']]], dtype=int)
+                seq = id_identify(id_filterbank, statusDict['id'])
                     
                 # generate position of neurons if not existed
                 if 'position' not in statusDict:
-                    if deviceDict.get(('%4d' %tid).replace(' ', '0')):
-                        if 'position' in deviceDict[('%4d' %tid).replace(' ', '0')]:
-                            statusDict['position'] = deviceDict[('%4d' %tid).replace(' ', '0')]['position']
+                    if deviceDict.get(str(seq)):
+                        if 'position' in deviceDict[str(seq)]:
+                            statusDict['position'] = deviceDict[str(seq)]['position']
                         else:
                             statusDict['position'] = [np.random.random_integers(17, layoutSize['x']), np.random.random_integers(14, layoutSize['y']+30)]
                     else:
                         statusDict['position'] = [np.random.random_integers(17, layoutSize['x']), np.random.random_integers(14, layoutSize['y']+30)]
                 
-                deviceDict[('%4d' %tid).replace(' ', '0')] = statusDict
+                visible[str(seq)] = statusDict
                 
-
-        for gid, statusDict in enumerate(deviceList):
+        # update status of inputs/outputs
+        for statusDict in deviceList:
             
             # get modeltype of device.
             if statusDict['type'] == 'neuron':
                 continue
               
             model = statusDict['model']
-            
             statusDict =  dict([(key, val) for key, val in statusDict.iteritems() if val])
             if not statusDict.get('label'):
                 statusDict['label'] = model.replace("_", " ")
@@ -252,29 +267,32 @@ class Network(models.Model):
 
                 if statusDict[term]:
                     extended_list = values_extend(statusDict[term], unique=True)
-                    extended_converted_list = [str(id_identify(id_filterbank, vid)) for vid in extended_list if vid in id_filterbank[:,1]]
+                    extended_converted_list = [str(id_identify(id_filterbank, idx)) for idx in extended_list if idx in id_filterbank[:,1]]
                     if extended_converted_list:
                         statusDict[term] = ','.join(extended_converted_list)
 
                 # add new ids to filterbank
-                tid = id_identify(id_filterbank, statusDict['id'])
-                if not tid:
-                    tid = id_filterbank[-1][0]+1
-                    id_filterbank = np.append(id_filterbank, np.array([[tid, statusDict['id']]], dtype=int), axis=0)
-                    
-                deviceDict[('%4d' %tid).replace(' ', '0')] = statusDict
+                seq = id_identify(id_filterbank, statusDict['id'])
+                visible[str(seq)] = statusDict
        
-        # update devices with true ids
-        self.devices_json = json.encode(deviceDict)
+        # update meta data
+        meta = {}
+        hidden = deviceDict['hidden']
+        seqList = hidden.keys() + visible.keys()
+        seqList = sorted(seqList, key=lambda x: int(x))
+        meta['last_seq'] = int(seqList[-1])
+        meta['last_device_id'] = int(id_filterbank[:,1].max())
         
-        # create a new network if corresponding result exists,
-        if self.is_recorded() or self.local_id == 0:
+        new_deviceDict = {'visible': visible, 'hidden': hidden, 'meta': meta}
+        # create a new network if its corresponding result exists or if it is initial network.
+        if (self.is_recorded() or self.local_id == 0) and not force_self:
             network_list = Network.objects.filter(user_id=self.user_id, SPIC=self.SPIC, deleted=False)
-            self.local_id = network_list.latest('id').local_id + 1
-            
-            return Network(user_id=self.user_id, SPIC=self.SPIC, local_id=self.local_id, duration=self.duration, status_json=self.status_json, devices_json=self.devices_json)
-            
-        return self
+            local_id = network_list.latest('id').local_id + 1
+            return Network(user_id=self.user_id, SPIC=self.SPIC, local_id=local_id, duration=self.duration, status_json=self.status_json, devices_json=json.encode(new_deviceDict))
+        else:
+            # update devices with true ids
+            self.devices_json = json.encode(new_deviceDict)     
+            return self
         
     def device_csv_list(self):
         deviceList = self.device_list()
@@ -310,7 +328,6 @@ class Network(models.Model):
                 
         return lst
         
-        
     def csv_list(self):
         deviceList = self.device_list()
         
@@ -343,9 +360,9 @@ class Network(models.Model):
         Return in case of existing devices the last ID of device 
         as a marker for adding new device. Otherwise it returns None.
         """
-        device_list = self.device_list()
-        if device_list:
-            return device_list[-1]['id']
+        deviceDict = self.device_dict()
+        if 'last_device_id' in deviceDict['meta']:
+            return int(deviceDict['meta']['last_device_id'])
         return 0
     
     def has_device(self, model, modeltype=None, term='visible'):
@@ -414,18 +431,16 @@ class Network(models.Model):
         """
         Get a listed tuple of source and target in each connection.
         If data is True, it also returns dictionary of weight and delay.
-        modeltype default is None, choices are 'neuron', 'input' or 'output'.
+        modeltype default is None, choices are 'neuron', 'input', 'output' or 'IO_device'.
         -> see the method device_list.
         """        
-        deviceList = self.device_list(term, modeltype=modeltype)
-        neuron_id_filterbank = self.neuron_id_filterbank()
-
-        connections = []
-        if deviceList:
-            if modeltype == 'IO_device':
-                connections.extend(self.connections(term=term, data=data, modeltype='input'))
-                connections.extend(self.connections(term=term, data=data, modeltype='output'))
-            else:
+        if modeltype == 'IO_device':
+            return self.connections(term, data, 'input') + self.connections(term, data, 'output')
+        else:
+            deviceList = self.device_list(term, modeltype=modeltype)
+            if deviceList:
+                neuron_id_filterbank = self.neuron_id_filterbank()
+                connections = []
                 for gid, device in enumerate(deviceList):
                     gid += 1
                     #if 'id' in model:
@@ -466,7 +481,7 @@ class Network(models.Model):
                                             connections.append([gid, int(target), connection_params, connection_model])
                                         else:
                                             connections.append([gid, int(target)])
-        return connections
+                return connections
         
     def edgelist(self):
         """ Get a list of neoron edges for graph. """
