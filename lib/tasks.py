@@ -42,7 +42,6 @@ class Simulation(AbortableTask):
         if root_status:
             nest.SetStatus([0], root_status)
 
-
         # Create models in NEST and set its status
         device_list = network_obj.device_list('all')
         outputs = []
@@ -70,10 +69,9 @@ class Simulation(AbortableTask):
                 gid = nest.Create(statusDict['model'], params=device_params)
             else:
                 gid = nest.Create(statusDict['model'])
-
+                
             if statusDict['type'] == 'output':
                 outputs.extend(gid)
-
 
         # Make connections in nest
         connections = network_obj.connections('all', data=True)

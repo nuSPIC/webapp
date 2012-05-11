@@ -29,13 +29,15 @@
             margin: 5px 10px;
             z-index:-1;
         }
+
+        #footer {
+            display: none;
+        }
     </style>
 
     <script type="text/javascript">
 
         $(function() {
-            $( "#footer" ).remove()
-
             $( "iframe" ).css('height', window.innerHeight-177);
             $( "#container" ).css('height', window.innerHeight-170);
             $( "#container" ).css('width', window.innerWidth-40);

@@ -104,18 +104,6 @@ def network_split(request, SPIC_group, SPIC_id):
     
     return response   
    
-@render_to('network_layout_popup.html')
-@login_required
-def network_layout(request, SPIC_group, SPIC_id, local_id):
-    network_obj = get_object_or_404(Network, user_id=request.user.pk, SPIC__group=SPIC_group, SPIC__local_id=SPIC_id, local_id=local_id, deleted=False)
-    
-    response = {
-        'network_obj': network_obj,
-    }
-    
-    return response
-
-
 @render_to('network_mini.html')
 @login_required
 def network_mini(request, SPIC_group, SPIC_id, local_id):
@@ -160,7 +148,7 @@ def network_mini(request, SPIC_group, SPIC_id, local_id):
             deviceList = csv_to_dict(csv)
             
         # update device json in network object
-        network_obj.update(deviceList)
+        network_obj = network_obj.update(deviceList)
         network_obj.save()
        
     # Get label and CSV form for expert.
@@ -218,6 +206,21 @@ def network_mini(request, SPIC_group, SPIC_id, local_id):
         'params_order': ALL_PARAMS_ORDER,
         'term': 'mini/',
     }
+    
+    if network_obj.has_spike_detector:
+        spike_detector = network_obj.spike_detector_data()
+        assert len(spike_detector['senders']) == len(spike_detector['times'])
+
+        spike_detector['neurons'] = network_obj._connect_to(model='spike_detector')
+
+        id_filterbank = network_obj.id_filterbank()
+        neuron_id_filterbank = network_obj.neuron_id_filterbank(model="spike_detector")
+        spike_detector['senders'] = [id_escape(id_filterbank, sender) for sender in spike_detector['senders']]
+        spike_detector['senders'] = [id_escape(neuron_id_filterbank, sender) for sender in spike_detector['senders']]
+        
+        spike_detector['simTime'] = network_obj.duration
+        
+        response['spike_detector'] = spike_detector
         
     return response
 
@@ -259,14 +262,17 @@ def network(request, SPIC_group, SPIC_id, local_id):
         # delete selected devices
         elif request.POST.get('device_ids'):
             device_ids = np.array(request.POST.getlist('device_ids'), dtype=int)
-            deviceList = delete_devices(network_obj.device_list(), device_ids)
-                    
+            deviceList = network_obj.device_list()
+            deviceList = delete_devices(deviceList, device_ids)
+            print deviceList
+            
+            
         elif request.POST.get('csv'):
             csv = request.POST['csv']
             deviceList = csv_to_dict(csv)
 
         # update device json in network object
-        network_obj.update(deviceList)
+        network_obj = network_obj.update(deviceList)
         network_obj.save()
             
     # Get CSV for expert.
@@ -308,7 +314,7 @@ def network(request, SPIC_group, SPIC_id, local_id):
             network_form = NetworkForm(instance=network_obj, initial={'same_seed': False})
     else:
         network_form = NetworkForm(instance=network_obj, initial={'same_seed': True})
-        
+
     # Prepare for template
     response = {
         'SPIC_obj': SPIC_obj,
@@ -321,6 +327,21 @@ def network(request, SPIC_group, SPIC_id, local_id):
         'params_order': ALL_PARAMS_ORDER,
         'term': '',
     }
+    
+    if network_obj.has_spike_detector:
+        spike_detector = network_obj.spike_detector_data()
+        assert len(spike_detector['senders']) == len(spike_detector['times'])
+
+        spike_detector['neurons'] = network_obj._connect_to(model='spike_detector')
+
+        id_filterbank = network_obj.id_filterbank()
+        neuron_id_filterbank = network_obj.neuron_id_filterbank(model="spike_detector")
+        spike_detector['senders'] = [id_escape(id_filterbank, sender) for sender in spike_detector['senders']]
+        spike_detector['senders'] = [id_escape(neuron_id_filterbank, sender) for sender in spike_detector['senders']]
+        
+        spike_detector['simTime'] = network_obj.duration
+        
+        response['spike_detector'] = spike_detector
     
     return response
 
@@ -361,7 +382,6 @@ def device_csv(request, network_id):
             return HttpResponse(device_csv_form.as_div())
 
 
-
 def device_preview(request, network_id):
     """ AJAX: Check POST request for validation without saving it in database. """
     network_obj = get_object_or_404(Network, pk=network_id)
@@ -374,7 +394,15 @@ def device_preview(request, network_id):
             
             # check if form is valid.
             if form.is_valid():
-                response = {'valid': 1, 'status': form.cleaned_data, 'statusJSON': dict_to_JSON(form.cleaned_data)}
+                device_id = form.cleaned_data['id']
+                device_ids = network_obj.device_list(key='id')
+                if device_id in device_ids:
+                    idx = device_ids.index(device_id)
+                else:
+                    idx = -1
+                
+                
+                response = {'valid': 1, 'idx': idx, 'status': form.cleaned_data, 'statusJSON': dict_to_JSON(form.cleaned_data)}
             else:
                 responseHTML = render_to_string('device_form.html', {'form':form})
                 response = {'valid': -1, 'responseHTML':responseHTML}
@@ -392,13 +420,13 @@ def device_commit(request, network_id):
 
             edgeList = network_obj.connections(modeltype='neuron')
             deviceList = json.decode(str(request.POST['devices_json']))
-
+            
             network_obj = network_obj.update(deviceList)
             network_obj.save()
             
             # if all neurons are new, create positions for them.
             if edgeList != network_obj.connections(modeltype='neuron'):
-                default_layout(request, network_obj.pk)
+                layout_default(request, network_obj.pk)
             return HttpResponse(json.encode({'saved':1, 'local_id':network_obj.local_id}), mimetype='application/json')
             
     return HttpResponse()
@@ -438,7 +466,7 @@ def simulate(request, network_id):
                 
                 # if all neurons are new, create positions for them.
                 if edgeList != network_obj.connections(modeltype='neuron'):
-                    default_layout(request, network_obj.pk)
+                    layout_default(request, network_obj.pk)
                     
                 task = Simulation.delay(network_obj.pk)
                     
@@ -475,6 +503,17 @@ def label_save(request, network_id):
     return HttpResponse()       
             
 
+@render_to('raphael.network_layout_popup.html')
+@login_required
+def network_layout(request, SPIC_group, SPIC_id, local_id):
+    network_obj = get_object_or_404(Network, user_id=request.user.pk, SPIC__group=SPIC_group, SPIC__local_id=SPIC_id, local_id=local_id, deleted=False)
+    
+    response = {
+        'network_obj': network_obj,
+    }
+    
+    return response
+
 def layout_save(request, network_id):
     """ AJAX: Save network layout."""
     network_obj = get_object_or_404(Network, pk=network_id)
@@ -491,8 +530,7 @@ def layout_save(request, network_id):
 
     return HttpResponse()
 
-
-def default_layout(request, network_id):
+def layout_default(request, network_id):
     """ AJAX: Set network layout to default."""
     network_obj = get_object_or_404(Network, pk=network_id)
     
@@ -539,7 +577,7 @@ def data(request, network_id):
     return response
 
 
-@render_to('voltmeter.html')
+@render_to('protovis.voltmeter.html')
 def voltmeter(request, network_id):
     """
     Large View of Voltmeter data for selected neuron (sender)
@@ -560,7 +598,7 @@ def voltmeter(request, network_id):
     
     return {'voltmeter': json.encode(response)}
     
-@render_to('voltmeter_thumbnail.html')
+@render_to('protovis.voltmeter_thumbnail.html')
 def voltmeter_thumbnail(request, network_id):
     """
     Small View of Voltmeter data
@@ -569,7 +607,7 @@ def voltmeter_thumbnail(request, network_id):
     network_obj = get_object_or_404(Network, pk=network_id)
     return {'network_obj': network_obj}
 
-@render_to('spike_detector.html')
+@render_to('d3.spike_detector.html')
 def spike_detector(request, network_id):
     """
     View of Spike Detector data
@@ -590,8 +628,8 @@ def spike_detector(request, network_id):
     spike_detector['simTime'] = network_obj.duration
     
     if request.GET.get('view') == 'small':
-        spike_detector['fig'] = {'width':250, 'height':300, 'w':210, 'h2':50, 'yticks':3}
+        spike_detector['fig'] = {'width':300, 'height':300, 'w':300, 'h2':50, 'xticks':5, 'yticks':3}
     else:
-        spike_detector['fig'] = {'width':750, 'height':500, 'w':700, 'h2':150, 'yticks':6}
+        spike_detector['fig'] = {'width':750, 'height':500, 'w':1200, 'h2':500, 'xticks':20, 'yticks':6}
     
     return spike_detector

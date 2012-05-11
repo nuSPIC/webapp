@@ -1,6 +1,6 @@
 {% if comment_form %}
     <script type="text/javascript">
-        $( "form#comment-form" ).live('submit',  function(e) {
+        $( "form#comment-form" ).on('submit',  function(e) {
                 e.preventDefault();
                 $.post('{% url result_comment result_obj.id %}',
                     $( this ).serialize(), function(data){

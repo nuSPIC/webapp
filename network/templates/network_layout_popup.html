@@ -32,7 +32,6 @@
                 $( "#holder" ).loadLayout( device_list );
         });
 
-
         $( "button#save-layout" ).live('click', function(e) {
                 e.preventDefault();
                 var devices_json = JSON.stringify(device_list);

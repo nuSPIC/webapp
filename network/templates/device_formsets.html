@@ -1,5 +1,5 @@
 <script type="text/javascript">
-    function device_list_preview (status) {
+    function device_list_preview (idx, status) {
         var model = status['model'].replace("_", " ");
 
         var title = [];
@@ -8,7 +8,7 @@
             }
 
         // Add new device to the list
-        if (selected_device_id == last_device_id + 1) {
+        if (idx == -1) {
             var device = $( "#device-table > tbody tr:last" );
             $(device).after( $(device).clone() );
             $(device).attr('id', "device_"+ selected_device_id).addClass('enabled');
@@ -19,7 +19,7 @@
             var term = 'added';
             last_device_id++;
         } else {
-            var device = $( "#device_"+ selected_device_id );
+            var device = $( "#device_"+ idx );
             var term = 'changed';
         }
 
@@ -30,7 +30,6 @@
         if ('delay' in status) {$(device).find( "td.delay" ).html(status['delay'])};
 
         $(device).attr('title', title.join(", ")).fadeIn().tipTip({defaultPosition: 'right',});
-
 
         result_id = 0;
         $( "#device-message" ).html("<li>"+ model +" ["+ selected_device_id +"] was "+ term +" successfully.</li>");
@@ -55,7 +54,7 @@
 
                     var status = data.status,
                     statusJSON = data.statusJSON;
-                    status["id"] = parseInt(selected_device_id);
+//                     status["id"] = parseInt(selected_device_id);
 
                     if (status["type"] == 'output') {
                         if ("targets" in status) {
@@ -72,14 +71,12 @@
                     if (selected_device_id > device_list.length || selected_device_id > last_device_id) {
                         device_list.push(status);
                     } else {
-                        position = device_list[selected_device_id-1]["position"];
+                        position = device_list[data.idx]["position"];
                         status["position"] = position;
-                        device_list[selected_device_id-1] = status;
+                        device_list[data.idx] = status;
                     };
                     
-                    csvDict = JSONtoCSV(statusJSON)
-                    device_list_preview(JSON.parse(statusJSON));
-                    $( "#fields #id_model-"+ status.id ).find( "input.deviceCSV" ).attr( "value", csvDict['val']);
+                    device_list_preview(data.idx, JSON.parse(statusJSON));
                 };
         }, 'json');
     });

@@ -1,0 +1,78 @@
+<html>
+
+    <head>
+        <link href="{{ MEDIA_URL }}css/nuspic/jquery-ui.custom.css?ver=1.8.14" type="text/css" rel="stylesheet" />
+        <link href="{{ MEDIA_URL }}css/jquery-ui.custom.css" type="text/css" rel="stylesheet" />
+        <link href="{{ MEDIA_URL }}css/default.css" type="text/css" rel="stylesheet" />
+        <link href="{{ MEDIA_URL }}css/network.css" type="text/css" rel="stylesheet" />
+
+
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.min.js?ver=1.7.1"></script>
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui.custom.min.js?ver=1.8.14"></script>
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/json2.js"></script>
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/network.js"></script>
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/raphael.min.js"></script>
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/raphael.networkLayout.js"></script>
+
+        <script type="text/javascript">
+            var device_list = new Array(),
+            edgelist = [];
+            
+            {% if network_obj.devices_json %}
+                var device_list = {{ network_obj.device_list|safe }},
+                edgelist = {{ network_obj.edgelist|safe }},
+                connect_to_input = {{ network_obj.connect_to_input }},
+                connect_to_output = {{ network_obj.connect_to_output }},
+                layoutSize = {{ network_obj.layout_size|safe }};
+            {% endif %}
+
+            
+            $(function() {
+                    $( ".portlet" ).loadTheme( {'tipTip':false, 'shadow':true} );
+                    $( "#holder" ).loadLayout( device_list );
+            });
+
+            $( "button#save-layout" ).live('click', function(e) {
+                    e.preventDefault();
+                    var devices_json = JSON.stringify(device_list);
+                    $.post('{% url save_layout network_obj.id %}',
+                            {'csrfmiddlewaretoken':"{{ csrf_token }}", 'devices_json':devices_json},
+                            function(data) {
+                                layoutSize = data["layoutSize"];
+                                $( "#holder" ).height(layoutSize["y"]+30)
+                                              .width(layoutSize["x"]+30)
+                                              .html('')
+                                              .loadLayout(device_list);
+                                $( "#position" ).html("saved").show();
+                    }, 'json');
+            });
+
+            
+        </script>
+
+        <title>Network layout</title>
+    </head>
+
+    <body>
+
+        <div>
+            {% if network_obj.devices_json %}
+                <div class="portlet" style="float:left" id="network_layout">
+                    
+                    <div class="portlet-content">
+                        <div id=holder></div>
+                        
+                        <div class="buttons">
+                            <button class="check" id="save-layout">Save</button>
+                            <button class="reset" id="default-layout">Default</button>
+                            <small style="float:right" id="position"></small>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+        </div>
+
+    </body>
+
+</html>

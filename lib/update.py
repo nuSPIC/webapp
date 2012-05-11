@@ -207,7 +207,6 @@ def jsonConverter(user_id=1, id=None):
                 network_obj.save()
                 print('successfully saved.')
                 
-                
 def updateInitial():
     architect_networks = Network.objects.filter(user_id=0)
     
@@ -223,33 +222,6 @@ def updateInitial():
             net.duration = arch_net.duration
             
             net.save()
-
-
-def seqDict(deviceDict):
-    items = deviceDict['visible'].items() +  deviceDict['hidden'].items()
-    items = sorted(items, key=lambda x: int(x[0]))
-    
-    visItems = deviceDict['visible'].items()
-    visItems = sorted(visItems, key=lambda x: int(x[0]))
-  
-    deviceDict['meta'] = {}
-    deviceDict['meta']['last_seq'] = int(items[-1][0])
-    deviceDict['meta']['last_device_id'] = int(visItems[-1][1]['id'])
-    
-    json.encode(deviceDict)
-    return deviceDict
-    
-def runSeqDict(test=True):
-    networks = Network.objects.all()
-    for net in networks:
-        deviceDict = net.device_dict()
-        if deviceDict:
-            new = seqDict(deviceDict)
-            net.devices_json = json.encode(new)
-            if test:
-                print(net.devices_json)
-            else:
-                net.save()
 
 def forkDict(deviceDict):
     items = deviceDict['visible'].items() +  deviceDict['hidden'].items()
@@ -279,15 +251,18 @@ def forkDict(deviceDict):
     return {'visible': visible, 'hidden': hidden, 'meta': meta}
 
 
-def runForkDict(test=True):
+def runForkDict(commit=False):
     networks = Network.objects.all()
-        
+    
+    error = []
     for net in networks:
-        deviceDict = net.device_dict()
-        if deviceDict:
-            new = forkDict(deviceDict)
-            net.devices_json = json.encode(new)
-        if test:
-            print(net.devices_json)
-        else:
-            net.save()
+        try:
+            deviceDict = net.device_dict()
+            if deviceDict:
+                new = forkDict(deviceDict)
+                net.devices_json = json.encode(new)
+            if commit:
+                net.save()
+        except:
+            error.append(net.pk)
+    return error

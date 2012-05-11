@@ -21,7 +21,7 @@ urlpatterns = patterns('network.views',
     
     url(r'^ajax/(?P<network_id>\d+)/save_label/$', 'label_save', name='save_label'),   
     url(r'^ajax/(?P<network_id>\d+)/save_layout/$', 'layout_save', name='save_layout'),
-    url(r'^ajax/(?P<network_id>\d+)/default_layout/$', 'default_layout', name='default_layout'),
+    url(r'^ajax/(?P<network_id>\d+)/default_layout/$', 'layout_default', name='default_layout'),
     
     url(r'^ajax/(?P<network_id>\d+)/data/$', 'data', name='data'),
     url(r'^ajax/(?P<network_id>\d+)/voltmeter/$', 'voltmeter', name='voltmeter'),

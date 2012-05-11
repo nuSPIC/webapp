@@ -1,4 +1,7 @@
 {% if network_obj.is_recorded %}
+    {% if network_obj.has_spike_detector %}
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3.spike_detector.js"></script>
+    {% endif %}
 
     <script type="text/javascript">
 
@@ -36,18 +39,6 @@
 
         {% if network_obj.has_spike_detector %}
 
-            function spike_detector_enlarge() {
-                $( ".resultView" ).attr('src', "{% url spike_detector network_obj.pk %}?view=large");
-                $( ".resultView" ).css('height', {{ network_obj.neuron_ids|length }} * 15 + 250);
-
-                $( "#dialog-resultView" ).dialog({
-                        title: 'Spike Detector view of all connected neurons',
-                        height: {{ network_obj.neuron_ids|length }} * 15 + 320,
-                        width: 800,
-//                         modal: true,
-                });
-            };
-
             $( "button#spike_detector-link" ).live('click',function(e) {
                 $( ".resultView" ).attr('src', "{% url spike_detector network_obj.pk %}?view=large");
                 $( ".resultView" ).css('height', {{ network_obj.neuron_ids|length }} * 15 + 230);
@@ -71,7 +62,20 @@
 
 
             {% if network_obj.has_spike_detector %}
-                setTimeout('$( "#SpikeDetectorThumbnail" ).contents().find("span").click(function() {spike_detector_enlarge()})', 2500.)
+                    loadSpikeDetector();
+                    figures["spikeDetectorThumbnail"] = drawSpikeDetector("spikeDetectorThumbnail");
+
+                    $( "#spikeDetectorThumbnail" ).find( ".fig" ).click(function() {
+
+                        $( "#spikeDetectorView" ).dialog({
+                            title: 'Spike Detector view of all connected neurons',
+                            height: window.innerHeight - 200,
+                            width: window.innerWidth - 200,
+                            resizable: false,
+                            modal: true,
+                        });
+                        figures["spikeDetectorView"] = drawSpikeDetector("spikeDetectorView")
+                    });
             {% endif %}
 
             $( ".portlet-content" ).removeClass("ui-corner-all")
@@ -100,17 +104,13 @@
 <!--             SPIKE DETECTOR TAB -->
             <div id="spike_detector-tab">
                 {% if network_obj.has_spike_detector %}
-
-                    <div>
-
-                        <iframe scrolling="no" src="{% url spike_detector network_obj.pk %}?view=small" id="SpikeDetectorThumbnail"></iframe>
-
+                    <div class="spikeDetector" id="spikeDetectorThumbnail">
+                          {% if spike_detector.times %}
+                              {% include "d3.spike_detector.html" %}
+                          {% else %}
+                              <div style="padding-top: 20px; text-align:center">No spikes detected. Check your input devices.</div>
+                          {% endif %}
                     </div>
-
-<!--                            <div class="buttons">
-                        <button class="zoomin" id="spike_detector-link">Larger view</button>
-                    </div>-->
-
                 {% endif %}
             </div>
 
@@ -166,9 +166,15 @@
     </div>
 
 
-    <div class="ui-dialog" title="result view" id="dialog-resultView" style="width:0">
+<div class="ui-dialog spikeDetector" id="spikeDetectorView" style="display:none">
+    {% include "d3.spike_detector.html" %}
+</div>
 
-        <iframe class="resultView" scrolling="no"></iframe>
+<div class="ui-dialog" title="result view" id="dialog-resultView" style="width:0">
 
-    </div>
+    <iframe class="resultView" scrolling="no"></iframe>
+
+</div>
+
+
 {% endif %}

@@ -1,4 +1,7 @@
 {% if network_obj.is_recorded %}
+    {% if network_obj.has_spike_detector %}
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3.spike_detector.js"></script>
+    {% endif %}
 
     <script type="text/javascript">
 
@@ -12,7 +15,7 @@
                 $( "#dialog-resultView" ).dialog({
                         title: 'Voltmeter view of Neuron ['+ target_id +']',
                         height: 470,
-                        width: 800,
+                        width: window.innerWidth - 10,
 //                         modal: true,
                 });
             };
@@ -29,44 +32,43 @@
         {% endif %}
 
 
-        {% if network_obj.has_spike_detector %}
+        $(document).ready(function() {
 
-            function spike_detector_enlarge() {
-                $( ".resultView" ).attr('src', "{% url spike_detector network_obj.pk %}?view=large");
-                $( ".resultView" ).css('height', {{ network_obj.neuron_ids|length }} * 15 + 250);
+            {% if network_obj.has_spike_detector %}
+                loadSpikeDetector();
+                figures["spikeDetectorThumbnail"] = drawSpikeDetector("spikeDetectorThumbnail");
 
-                $( "#dialog-resultView" ).dialog({
+                $( "#spikeDetectorThumbnail" ).find( ".fig" ).click(function() {
+
+                    $( "#spikeDetectorView" ).dialog({
                         title: 'Spike Detector view of all connected neurons',
-                        height: {{ network_obj.neuron_ids|length }} * 15 + 320,
-                        width: 800,
-//                         modal: true,
+                        height: window.innerHeight - 200,
+                        width: window.innerWidth - 10,
+                        resizable: false,
+                        modal: true,
+                    });
+
+                    figures["spikeDetectorView"] = drawSpikeDetector("spikeDetectorView")
                 });
-            };
+            {% endif %}
 
-            $( "button#spike_detector-link" ).live('click',function(e) {
-                $( ".resultView" ).attr('src', "{% url spike_detector network_obj.pk %}?view=large");
-                $( ".resultView" ).css('height', {{ network_obj.neuron_ids|length }} * 15 + 230);
-
-                $( "#dialog-resultView" ).dialog({
-                        title: 'Spike Detector view of all connected neurons',
-                        height: {{ network_obj.neuron_ids|length }} * 15 + 320,
-                        width: 800,
-//                         modal: true,
-                });
-            });
-
-        {% endif %}
+        })
 
     </script>
 
 
-<!--             SPIKE DETECTOR iframe -->
+<!--             SPIKE DETECTOR thumbnail -->
 <div style="float:left">
     {% if network_obj.has_spike_detector %}
-       <div><strong>Spike Detector</strong></div>
-       
-        <iframe style="margin:1px; height:{{ network_obj.iframe_height }}; width:250px; border: 1px solid #ccc" id="SpikeDetectorThumbnail" scrolling="no"></iframe>
+       <div style="width: 250px; text-align: center; font-weight:bold">Spike Detector</div>
 
+        <div class="ui-widget spikeDetector" id="spikeDetectorThumbnail" >
+            {% if spike_detector.times %}
+                {% include "d3.spike_detector.html" %}
+            {% else %}
+                <div style="padding-top: 20px; text-align:center">No spikes detected. Check your input devices.</div>
+            {% endif %}
+        </div>
     {% endif %}
 </div>
 
@@ -74,10 +76,10 @@
 <!--             VOLTMETER iframe -->
 <div style="float:left">
     {% if network_obj.has_voltmeter %}
-       <div><strong>Voltmeter</strong></div>
+       <div style="width: 380px; text-align: center; font-weight:bold">Voltmeter</div>
             {% if network_obj.voltmeter_points < 15000 %}
 
-                <iframe style="margin:1px; height:{{ network_obj.iframe_height }}; width:380px; border: 1px solid #ccc" id="VoltmeterThumbnail"></iframe>
+                <iframe style="margin:1px; height: 210px; width:320px; padding: 5px; border: 1px solid #ccc" id="VoltmeterThumbnail"></iframe>
 
             {% else %}
 
@@ -105,10 +107,13 @@
     {% endif %}
 </div>
 
-<div style="padding:10px">
+<div style="position:absolute; bottom: 5px; right: 10px">
     <a class="document" href="{% url data network_obj.pk %}">Download Results</a>
 </div>
 
+<div class="ui-dialog spikeDetector" id="spikeDetectorView" style="display:none; z-index:-1">
+    {% include "d3.spike_detector.html" %}
+</div>
 
 <div class="ui-dialog" title="result view" id="dialog-resultView" style="z-index:-1">
 

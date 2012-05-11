@@ -3,17 +3,13 @@
     <script type="text/javascript">
 
         $(function() {
-
             $( "div#connections-tabs" ).tabs({cookie: { expires: 7, name: "connections-cookie"}, cache: false });
-
         });
 
         $(document).ready(function() {
 
             if (neuron_ids.length == 0) {
-
                 $( "div#connectivity_matrix" ).hide();
-
             };
 
             $( ".portlet-content" ).removeClass("ui-corner-all")

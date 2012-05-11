@@ -6,33 +6,26 @@
 {% load humanize %}
 
 {% block extrahead %}
-    <link href="{{ MEDIA_URL }}css/nuspic/jquery-ui-1.8.14.custom.css" type="text/css" rel="stylesheet" />
-    <link href="{{ MEDIA_URL }}css/jquery-ui.custom.css" type="text/css" rel="stylesheet" />
-    <link href="{{ MEDIA_URL }}css/layout-default.css" type="text/css" rel="stylesheet" />
-    <link href="{{ MEDIA_URL }}css/network.css" type="text/css" rel="stylesheet" />
-    <link href="{{ MEDIA_URL }}css/tipTip.css" type="text/css" rel="stylesheet" />
+<!--     <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/layout-default.css" /> -->
+    <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/tipTip.css" />
+    <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/network.css" />
+    <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/result.css" />
 
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.7.1.min.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.8.14.custom.min.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.layout.min-1.2.0.js"></script>
+<!--     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.layout.min.js?ver=1.2.0"></script> -->
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cookie.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.tipTip.minified.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.tipTip.min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/json2.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/network.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/quickpager.jquery.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/raphael-min.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/raphael-networkLayout.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/raphael.min.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/raphael.networkLayout.js"></script>
+
+    {% if network_obj.has_spike_detector %}
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.spinedit.js"></script>
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3.v2.min.js"></script>
+    {% endif %}
 
     <style type="text/css">
-        .field-wrapper {
-            width:100%
-        }
-
-        .field-box {
-            height:23px;
-            width: 92%;
-        }
-
         #content {
             overflow: hidden;
             margin-bottom: -1;
@@ -48,6 +41,24 @@
             margin: 0;
             z-index:-1;
         }
+
+        #container {
+            display: none;
+            width: 100%;
+        }
+
+        #footer {
+            display: none;
+        }
+
+        .field-wrapper {
+            width:100%
+        }
+
+        .field-box {
+            height:23px;
+            width: 92%;
+        }
     </style>
 
     <script type="text/javascript">
@@ -61,17 +72,21 @@
         last_device_id = {{ network_obj.last_device_id|safe }},
         params_order = {{ params_order|safe }};
 
+        {% if network_obj.has_spike_detector %}
+            var spike_detector_data = {{ spike_detector|safe }};
+        {% endif %}
+
         var selected_device_id,
         task_id;
 
-        $(function() {
-            $( "#footer" ).remove();
-
+        $(document).ready(function() {
             $( "#workplace" ).css('height', window.innerHeight-155);
             $( "#workplace" ).css('width', window.innerWidth-20);
-            
-            $( "#container" ).css('height', window.innerHeight-155);
-            $( "#container" ).css('width', Math.min(window.innerWidth-20, $('#devices').width() + $('#network').width() + Math.max(layoutSize['x']+45, $('#GUI').width()) + $('#simulation').width() + 75));
+
+
+            $( "#container" ).show()
+                .css('height', window.innerHeight-155)
+                .css('width', Math.min(window.innerWidth-20, $('#devices').width() + $('#network').width() + Math.max(layoutSize['x']+45, $('#GUI').width()) + $('#simulation').width() + 75));
 
             $( "#container" ).resizable({
                 containment: "#workplace",
@@ -90,6 +105,7 @@
                 "shadow": true,
                 "toggable": true,
             });
+
             $( ".portlet-content" ).addClass( "ui-corner-all" )
             $( ".pager li" ).addClass("ui-corner-all")
     //         $( "select" ).addClass("ui-corner-all")
@@ -98,18 +114,6 @@
             $( "span#device_id" ).html(selected_device_id);
             $( "span#last_device_id" ).html(last_device_id);
 
-    //                 $( "#dialog-msg p" ).html("Loading... please wait.");
-    //                 $( "#dialog-msg #loading_icon" ).show();
-    //                 $( "#dialog-msg" ).dialog({
-    //                         height: 150,
-    //                         resizable: false,
-    //                         modal: true,
-    //                 });
-
-        });
-
-
-        $(document).ready(function() {
 
             // tipTip
             $( ".tipTip-top" ).tipTip({
@@ -191,7 +195,7 @@
             <div class="column" id="GUI">
 
         <!--             NETWORK LAYOUT -->
-                {% include "network_layout.html" %}
+                {% include "raphael.network_layout.html" %}
 
         <!--             COMMENT FORM -->
                 {% include "comment_form.html" %}
@@ -224,6 +228,6 @@
         </div>
 
     </div>
-</div>
 
+</div>
 {% endblock %}

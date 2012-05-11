@@ -84,9 +84,7 @@
     function setForm(device) {
 
         // clear all stati and hide all form
-        $( "#device_" + selected_device_id).find( "td" ).removeClass( "ui-state-active" );
-        $( ".id_model-" + selected_device_id).find( "input.deviceCSV" ).removeClass( "ui-state-active" );
-        $( ".id_model-" + selected_device_id).find( ".device_edit" ).removeClass( "ui-state-active" );
+        $( "#device-table td" ).removeClass( "ui-state-active" );
 
         $( "#device_id" ).html("");
         $( ".device-form" ).hide();
@@ -107,7 +105,7 @@
             // highlights device row and edit button
             selected_device_id = device.id;
 
-            $( ".id_model-" + selected_device_id).find( "input.deviceCSV" ).addClass( "ui-state-active" );
+            $( ".id_model-" + selected_device_id).addClass( "ui-state-active" );
             $( ".id_model-" + selected_device_id).find( ".device_edit" ).addClass( "ui-state-active" );
             $( "#device_id" ).html(selected_device_id)
 
@@ -144,7 +142,6 @@
                                 height: 450,
                                 width: 550,
               }).parent().hide();
-
     });
 
 
@@ -170,7 +167,7 @@
     // SAVE DEVICE
     $( "button#save_devices_button" ).live('click', function(e) {
             e.preventDefault();
-            $( ".device-form" ).hide();
+            $( "#device-form" ).hide();
             var devices_json = JSON.stringify(device_list);
             $.post('{% url device_commit network_obj.id %}',
                     {'csrfmiddlewaretoken':"{{ csrf_token }}", 'devices_json':devices_json},
@@ -268,7 +265,7 @@
         }
         
     })
-
+/*
     $( ".device_trash" ).live('click', function(e) {
         $( this ).parent( ".buttonset" ).slideUp();
         $( this ).parents( ".field-wrapper" ).slideUp('fast').find( "input" ).val("");
@@ -283,8 +280,8 @@
         $( "#device_csv_form #fields" ).append(newField);
         autocomplete($(newField).find( "input.deviceCSV" ));
         $( newField ).slideDown();
-        
     });
+*/
 
     // SELECT A DEVICE TO ADD
     $( "select#id_model" ).live('change', function(e) {

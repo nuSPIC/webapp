@@ -33,6 +33,7 @@ def values_extend(values, unique=False, toString=False):
     # Make each target/source value unique and sorted
     if unique:
         extended_list = list(set(extended_list))
+    extended_list = sorted(extended_list, key=lambda x: int(x))
         
     # Convert each value into string
     if toString:
@@ -40,28 +41,30 @@ def values_extend(values, unique=False, toString=False):
         
     return extended_list
 
-def id_escape(id_filterbank, tid=None):
+def id_escape(id_filterbank, seq=None):
     """ Return user visible id from true id. """
-    tids = np.array(id_filterbank[:,0], dtype=int)
-    vids = np.array(id_filterbank[:,1], dtype=int)
+    if id_filterbank.any():
+        seqs = np.array(id_filterbank[:,0], dtype=int)
+        ids = np.array(id_filterbank[:,1], dtype=int)
 
-    if int(tid) in tids: 
-        return vids[tids.tolist().index(int(tid))]
+        if int(seq) in seqs: 
+            return ids[seqs.tolist().index(int(seq))]
         
-    return np.array([], dtype=int)
+    return -1
     
-def id_identify(id_filterbank, vid=None):
+def id_identify(id_filterbank, id=None):
     """ Return true id from user visible id. """
-    tids = np.array(id_filterbank[:,0], dtype=int)
-    vids = np.array(id_filterbank[:,1], dtype=int)
-    
-    if vid == -1:
-        return tids[vids == -1]
-    
-    if int(vid) in vids: 
-        return tids[vids.tolist().index(int(vid))]
+    if id_filterbank.any():
+        seqs = np.array(id_filterbank[:,0], dtype=int)
+        ids = np.array(id_filterbank[:,1], dtype=int)
         
-    return np.array([], dtype=int)
+        if id == -1:
+            return seqs[ids == -1]
+        
+        if int(id) in ids: 
+            return seqs[ids.tolist().index(int(id))]
+        
+    return -1
     
 def dict_to_JSON(valDict):
     params_order = PARAMS_ORDER[valDict['model']][0] + PARAMS_ORDER[valDict['model']][1]
@@ -92,9 +95,9 @@ def delete_devices(deviceList, device_ids):
     del_ids = device_ids.copy()
     
     # check if inputs/outputs also should be deleted.
-    id_updatebank = []
+    #id_updatebank = []
     for device in deviceList:
-        id_updatebank.append((device['id'], device['id']))
+        #id_updatebank.append((device['id'], device['id']))
         if device['type'] == 'input' or device['type'] == 'output':
             if 'sources' in device:        
                 term = 'sources'
@@ -144,13 +147,15 @@ def delete_devices(deviceList, device_ids):
                         # delete weight and delay
                         if device.get('weight'):
                             weight_list = device['weight'].split(',')
-                            weight_list = [str(item[1]) for item in enumerate(weight_list) if item[0] in value_array[:,0]]
+                            if len(weight_list) > 1 and len(value_array) > 1:
+                                weight_list = [str(item[1]) for item in enumerate(weight_list) if item[0] in value_array[:,0]]
                             if not weight_list == ['']:
                                 device['weight'] = ','.join(weight_list)
                             
                         if device.get('delay'):
                             delay_list = device['delay'].split(',')
-                            delay_list = [str(item[1]) for item in enumerate(delay_list) if item[0] in value_array[:,0]]
+                            if len(delay_list) > 1 and len(value_array) > 1:
+                                delay_list = [str(item[1]) for item in enumerate(delay_list) if item[0] in value_array[:,0]]
                             if not delay_list == ['']:
                                 device['delay'] = ','.join(delay_list)
                     

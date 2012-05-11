@@ -1,3 +1,7 @@
+body {
+    overflow: hidden;
+}
+
 
 /* default settings
 *************************/
@@ -14,13 +18,12 @@ td {
 }
 
 #container {
+    background-color: #FAFAF9;
+    border: 1px solid #A2A2A2;
+    margin: auto;
+    min-width: 958px;
     overflow-x: hidden;
     overflow-y: auto;
-    min-width: 958px;
-    border: 1px solid #A2A2A2;
-    background-color: #FAFAF9;
-    margin: auto;
-    
 }
 
 .twocolumns {
@@ -278,17 +281,13 @@ iframe {
     margin: 3px;
 }
 
-#SpikeDetectorThumbnail {
-    height: 280px;
-    width: 250px;
-}
-
 #VoltmeterThumbnail {
     height: 240px;
-    width: 250px;
+    width: 310px;
 }
 
 iframe.resultView {
     margin-top: 20px;
     width: 750px;
 }
+

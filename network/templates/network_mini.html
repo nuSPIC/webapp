@@ -1,3 +1,6 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">  
+
 {% load lib_filters %}
 {% load network_filters %}
 {% load network_tags %}
@@ -5,26 +8,38 @@
 
 <head>
 
-    <link href="{{ MEDIA_URL }}css/default.css" type="text/css" rel="stylesheet" />
-    <link href="{{ MEDIA_URL }}css/nuspic/jquery-ui-1.8.14.custom.css" type="text/css" rel="stylesheet" />
-    <link href="{{ MEDIA_URL }}css/jquery-ui.custom.css" type="text/css" rel="stylesheet" />
-    <link href="{{ MEDIA_URL }}css/layout-default.css" type="text/css" rel="stylesheet" />
-    <link href="{{ MEDIA_URL }}css/network.css" type="text/css" rel="stylesheet" />
-    <link href="{{ MEDIA_URL }}css/tipTip.css" type="text/css" rel="stylesheet" />
+    <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/nuspic/jquery-ui.custom.css?ver=1.8.14" />
+    <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/jquery-ui.custom.css" />
+    <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/default.css" />
 
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.7.1.min.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.8.14.custom.min.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/json2.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.layout.min-1.2.0.js"></script>
+    <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/layout-default.css" />
+    <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/tipTip.css" />
+    <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/network.css" />
+    <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/result.css" />
+
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.min.js?ver=1.7.1"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui.custom.min.js?ver=1.8.14"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.layout.min.js?ver=1.2.0."></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.layout.state.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cookie.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.tipTip.minified.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/quickpager.jquery.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/raphael-min.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.tipTip.min.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/json2.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/network.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/raphael-networkLayout.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/quickpager.jquery.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/raphael.min.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/raphael.networkLayout.js"></script>
+
+    {% if network_obj.has_spike_detector %}
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.spinedit.js"></script>
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3.v2.min.js"></script>
+    {% endif %}
 
     <style type="text/css">
+
+        .ui-layout-content {
+            display: none
+        }
+
         .field-wrapper {
             width:100%
         }
@@ -40,6 +55,12 @@
             border-left: 0;
             border-right: 0;
         }
+
+        #spikeDetectorThumbnail {
+            margin: 1px; 
+            padding: 5px; 
+            border: 1px solid #ccc; 
+        }
     </style>
 
     <script type="text/javascript">
@@ -53,6 +74,10 @@
         layoutSize = {{ network_obj.layout_size|safe }},
         last_device_id = {{ network_obj.last_device_id|safe }},
         params_order = {{ params_order|safe }};
+
+        {% if network_obj.has_spike_detector %}
+            var spike_detector_data = {{ spike_detector|safe }};
+        {% endif %}
 
         var selected_device_id,
         task_id;
@@ -95,8 +120,14 @@
             {% endif %}
         }
 
-        $(function() {
-            $( ".ui-layout-content" ).css('height', window.innerHeight-45)
+        $(document).ready(function() {
+
+            // CONTENT HEADER
+            $( "#banner" ).css("background", "url(/media/images/special/nuspic_banner_small.png) no-repeat")
+                    .css('height','85px')
+                    .css('width', '880px');
+
+            $( ".ui-layout-content" ).show().css('height', window.innerHeight-45)
 
             $( ".portlet" ).loadTheme({
                 "tipTip": true,
@@ -107,15 +138,6 @@
             // ADMIN
             $( "span#device_id" ).html(selected_device_id);
             $( "span#last_device_id" ).html(last_device_id);
-
-        });
-
-        $(document).ready(function() {
-
-            // CONTENT HEADER
-            $( "#banner" ).css("background", "url(/media/images/special/nuspic_banner_small.png) no-repeat")
-                    .css('height','85px')
-                    .css('width', '880px');
 
             // tipTip
             $( ".tipTip-top" ).tipTip({
@@ -273,7 +295,7 @@
                     {% include "connectivity_matrix.html" %}
         
         <!--             NETWORK LAYOUT   -->
-                    {% include "network_layout.html" %}
+                    {% include "raphael.network_layout.html" %}
 
                 {% endif %}
         
@@ -306,3 +328,5 @@
     </div>
 
 </body>
+
+</html>

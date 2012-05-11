@@ -87,40 +87,44 @@ class NeuronForm(BetterForm):
         return targets
 
     def clean_weight(self):
-        weight = self.cleaned_data.get('weight')
-        if weight:
-            weights = weight.split(',')
+        targets = self.cleaned_data.get('targets')
+        if targets:
+            weight = self.cleaned_data.get('weight')
+            if weight:
+                weights = weight.split(',')
 
-            try:
-                weights = np.array(weights, dtype=float)
-            except:
-                raise forms.ValidationError('Enter either positive or negative values.')
+                try:
+                    weights = np.array(weights, dtype=float)
+                except:
+                    raise forms.ValidationError('Enter either positive or negative values.')
 
-            # all weight values of that device are either positive or negative.
-            negative_weights, positive_weights = weights < 0, weights >= 0
-            if not negative_weights.all() and not positive_weights.all():
-                raise forms.ValidationError('Enter either positive or negative values.')
-            
-        return weight
+                # all weight values of that device are either positive or negative.
+                negative_weights, positive_weights = weights < 0, weights >= 0
+                if not negative_weights.all() and not positive_weights.all():
+                    raise forms.ValidationError('Enter either positive or negative values.')
+            return weight
+        return u''
         
     def clean_delay(self):
-        delay = self.cleaned_data.get('delay')
-        if delay:
-            delays = delay.split(',')
+        targets = self.cleaned_data.get('targets')
+        if targets:
+            delay = self.cleaned_data.get('delay')
+            if delay:
+                delays = delay.split(',')
 
-            try:
-                delays = np.array(delays, dtype=float)
+                try:
+                    delays = np.array(delays, dtype=float)
+                    
+                    # delay shouldn't be negative.
+                    assert min(delays) >= 0
                 
-                # delay shouldn't be negative.
-                assert min(delays) >= 0
-            
-                # delay shouldn't be more than 10s.
-                assert max(delays) <= 10.0
-            except:
-                raise forms.ValidationError('Enter positive values < 10ms.')
-            
-        return delay
-
+                    # delay shouldn't be more than 10s.
+                    assert max(delays) <= 10.0
+                except:
+                    raise forms.ValidationError('Enter positive values < 10ms.')
+                
+            return delay
+        return u''
 
 """ 
 Neurons as child forms of DeviceForm 
