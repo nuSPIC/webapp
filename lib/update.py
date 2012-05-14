@@ -224,7 +224,7 @@ def updateInitial():
             net.save()
 
 def forkDict(deviceDict):
-    items = deviceDict['visible'].items() +  deviceDict['hidden'].items()
+    items = deviceDict.items()
     items = sorted(items, key=lambda x: int(x[0]))
     
     visible, hidden = {}, {}
