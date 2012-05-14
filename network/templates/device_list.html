@@ -160,7 +160,7 @@
                 if ($( "table#device-table .delete" ).is(":visible") && $( "table#device-table .delete" ).find( "input" ).is(":checked")) {
                 $(".devices-form").submit();
             } else {
-                $( "table#device-table .delete" ).toggle();
+                $( "table#device-table tr:visible .delete" ).toggle();
             };
     });
 
