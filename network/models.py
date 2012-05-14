@@ -75,7 +75,7 @@ class Network(models.Model):
             
         return neuronList
         
-    def _get_param_list(self, term):
+    def _get_param_list(self, param):
         """
         Get a listed tuple of device ID and list of values 
         for connectivity matrix for weight or delay.
@@ -84,12 +84,12 @@ class Network(models.Model):
         valueList = []
         if deviceList:
             for device in deviceList:
-                if term in device:
+                if param in device:
                     values = []
                     try:
                         targets = device['targets'].split(',')
                         targets = [int(tgt) for tgt in targets]
-                        value = device[term].split(',')
+                        value = device[param].split(',')
                     except:
                         targets = []
                         
@@ -176,10 +176,6 @@ class Network(models.Model):
                 return connections
                 
     def csv(self):
-        lst = self.csv_list()
-        return "\r\n".join(lst)
-        
-    def csv_list(self):
         deviceList = self.device_list()
         
         lst = []
@@ -199,7 +195,7 @@ class Network(models.Model):
                             
                         
                 lst.append("; ".join(statusList))
-        return lst  
+        return "\r\n".join(lst)
                 
     def delay_list(self):
         """ Get a listed tuple of delay. """
@@ -247,9 +243,11 @@ class Network(models.Model):
             return json.decode(str(self.devices_json))
         return {}
 
-    def device_items(self, term='visible', modeltype=None, model=None, key=None):
+    def device_items(self, term='visible', modeltype=None, model=None):
         """
         Return a sorted items of devices.
+        Argument modeltype is for filtering devices by its type or by model,
+        Its argument default is None, possible choices are 'neuron', 'input' or 'output'.
         """
         deviceDict = self.device_dict()
         
@@ -259,7 +257,7 @@ class Network(models.Model):
             elif term == 'visible':
                 deviceItems = deviceDict['visible'].items()
             elif term == 'hidden':
-                deviceItems = deviceDict['hidden'].iteritems()
+                deviceItems = deviceDict['hidden'].items()
                 
             deviceItems = sorted(deviceItems, key=lambda x: int(x[0]))
             # Filter by argument
@@ -270,14 +268,12 @@ class Network(models.Model):
             return deviceItems
         return []
 
-    def device_list(self, term='visible', modeltype=None, model=None, key=None):
+    def device_list(self, term='visible', key=None, **kwargs):
         """
         Return a list of devices.
-        Argument modeltype is for filtering devices by its type,
-        Its argument default is None, possible choices are 'neuron', 'input' or 'output'.
         """
-        
-        deviceItems = self.device_items(term, modeltype, model)
+        kwargs['term'] = term
+        deviceItems = self.device_items(**kwargs)
        
         if deviceItems:
             deviceList = [dev[1] for dev in deviceItems]
@@ -349,13 +345,6 @@ class Network(models.Model):
         else:
             []
             
-    def has_device(self, model, modeltype=None, term='visible'):
-        """ Returns existence of device in the field device_json by label."""
-        device_list = self.device_list(term, modeltype=modeltype, model=model)
-        if device_list:
-            return True
-        return False
-        
     def id_filterbank(self):
         deviceItems = self.device_items('all')
 
@@ -367,16 +356,6 @@ class Network(models.Model):
                 idList.append((tid, -1))
                 
         return np.array(idList, dtype=int)
-        
-    def iframe_height(self):
-        return len(self.connect_to_spike_detector()) * 10 + 153
-        
-    def inputs(self):
-        """ Return a readable string of all inputs. """        
-        inputList = self.device_list(modeltype='input')
-        if inputList:
-            return ", ".join(["%s [%s]"%(ii['model'],ii['id']) for ii in inpuList])
-        return ""
         
     def is_recorded(self):
         """ Check if the network is recorded. """
@@ -422,23 +401,12 @@ class Network(models.Model):
             return [int(dev['id']) for dev in neuron_list]
         return neuron_list
         
-    def neurons(self):
-        """ Return a readable string of all meurons. """        
-        neuronList = self.device_list(modeltype='neuron')
-        if neuronList:
-            neuronList = [(nn['model'], nn['id']) for nn in neuronList]
-            if len(neuronList) < 20:
-                return ", ".join(["%s [%s]"% neuron for neuron in neuronList])
-            else:
-                return "%s neurons" % len(neuronList)
-        return ""
-        
-    def outputs(self):
+    def output_list(self):
         """ Return a readable string of all outputs. """        
         outputList = self.device_list(modeltype='output')
         if outputList:
-            return ", ".join(["%s [%s]"%(oo['model'],oo['id']) for oo in outputList])
-        return ""
+            return [oo['model'] for oo in outputList]
+        return []
         
     def root_status(self):
         """ Returns status data from the field status_json."""
@@ -446,6 +414,47 @@ class Network(models.Model):
             return json.decode(str(self.status_json))
         return {}
         
+    def save(self, *args, **kwargs):
+        # correct sequence in strict steps ordering
+        deviceDict = self.device_dict()
+        visible, hidden = deviceDict['visible'], deviceDict['hidden']
+        
+        seqList = hidden.keys() + visible.keys()
+        if seqList:
+            seqList = sorted(seqList, key=lambda x: int(x))
+            if len(seqList) != int(seqList[-1]):
+                seq_update = dict([(old_seq, str(new_seq+1)) for new_seq, old_seq in enumerate(seqList)])
+                
+                deviceItems = hidden.items() + visible.items()
+                deviceItems = sorted(deviceItems, key=lambda x: int(x[0]))
+                
+                visible, hidden, last_device_id = {}, {}, 0
+                for seq, statusDict in deviceItems:
+                    if 'targets' in statusDict or 'sources' in statusDict:
+                        if 'targets' in statusDict:
+                            term = 'targets'
+                        else:
+                            term = 'sources'
+                        
+                        if statusDict[term]:
+                            connList = statusDict[term].split(',')
+                            connList = [str(seq_update[str(conn)]) for conn in connList if conn in seq_update]
+                            statusDict[term] = ','.join(connList)
+                    
+                    if 'id' in statusDict:
+                        visible[seq_update[str(seq)]] = statusDict
+                        last_device_id = statusDict['id']
+                    else:
+                        hidden[seq_update[str(seq)]] = statusDict
+                    last_seq = seq_update[str(seq)]
+            
+                # update meta data
+                meta = {'last_seq':int(last_seq), 'last_device_id':int(last_device_id)}
+                self.devices_json = json.encode({'visible': visible, 'hidden': hidden, 'meta': meta})
+        else:
+            self.devices_json = u''
+        super(Network, self).save(*args, **kwargs)
+     
     def spike_detector_data(self):
         """ Decode spike detector data from json. """
         if self.has_spike_detector:
@@ -559,41 +568,9 @@ class Network(models.Model):
         else:
             hidden = {}
         
-        # correct sequence in strict steps ordering
-        seqList = hidden.keys() + visible.keys()
-        if seqList:
-            seqList = sorted(seqList, key=lambda x: int(x))
-            if len(seqList) != int(seqList[-1]):
-                seq_update = dict([(old_seq, str(new_seq+1)) for new_seq, old_seq in enumerate(seqList)])
-                
-                deviceItems = hidden.items() + visible.items()
-                deviceItems = sorted(deviceItems, key=lambda x: int(x[0]))
-                
-                visible, hidden, last_device_id = {}, {}, 0
-                for seq, statusDict in deviceItems:
-                    if 'targets' in statusDict or 'sources' in statusDict:
-                        if 'targets' in statusDict:
-                            term = 'targets'
-                        else:
-                            term = 'sources'
-                        
-                        if statusDict[term]:
-                            connList = statusDict[term].split(',')
-                            connList = [str(seq_update[str(conn)]) for conn in connList if conn in seq_update]
-                            statusDict[term] = ','.join(connList)
-                    
-                    if 'id' in statusDict:
-                        visible[seq_update[str(seq)]] = statusDict
-                        last_device_id = statusDict['id']
-                    else:
-                        hidden[seq_update[str(seq)]] = statusDict
-                    last_seq = seq_update[str(seq)]
-            
-            # update meta data
-            meta = {'last_seq':int(last_seq), 'last_device_id':int(last_device_id)}
-            devices_json = json.encode({'visible': visible, 'hidden': hidden, 'meta': meta})
-        else:
-            devices_json = u''
+        # update meta data
+        meta = {'last_seq':int(last_seq), 'last_device_id':int(last_device_id)}
+        devices_json = json.encode({'visible': visible, 'hidden': hidden, 'meta':meta})
         
         # create a new network if its corresponding result exists or if it is initial network.
         if (self.is_recorded() or self.local_id == 0) and not force_self:

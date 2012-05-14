@@ -22,8 +22,8 @@ function psth_calc(fac) {
 // uniform kernel
 function weightUniform() {
     var weight = [];
-    for (var i=-kw;i<kw;i++) {
-        weight.push(1);
+    for (var i=-kw;i<=kw;i++) {
+        weight.push(.5);
     }
     return weight
 }
@@ -31,7 +31,7 @@ function weightUniform() {
 // triangular kernel
 function weightTriangular() {
     var weight = [];
-    for (var i=-kw;i<kw;i++) {
+    for (var i=-kw;i<=kw;i++) {
         var u = i / kw;
         weight.push(1-Math.abs(u));
     }
@@ -41,7 +41,7 @@ function weightTriangular() {
 // cosine kernel
 function weightCosine() {
     var weight = [];
-    for (var i=-kw;i<kw;i++) {
+    for (var i=-kw;i<=kw;i++) {
         var u = i / kw;
         weight.push(Math.PI/4 * Math.cos(Math.PI/2 * u));
     }
@@ -51,7 +51,7 @@ function weightCosine() {
 // Epanechnikov kernel
 function weightEpanechnikov() {
     var weight = [];
-    for (var i=-kw;i<kw;i++) {
+    for (var i=-kw;i<=kw;i++) {
         var u = i / kw;
         weight.push(3/4*(1-Math.pow(u,2)));
     }
@@ -61,7 +61,7 @@ function weightEpanechnikov() {
 // Quartic kernel
 function weightQuartic() {
     var weight = [];
-    for (var i=-kw;i<kw;i++) {
+    for (var i=-kw;i<=kw;i++) {
         var u = i / kw;
         weight.push(15/16*Math.pow(1-Math.pow(u,2),2));
     }
@@ -71,7 +71,7 @@ function weightQuartic() {
 // Triweight kernel
 function weightTriweight() {
     var weight = [];
-    for (var i=-kw;i<kw;i++) {
+    for (var i=-kw;i<=kw;i++) {
         var u = i / kw;
         weight.push(35/32*Math.pow(1-Math.pow(u,2),3));
     }
@@ -81,7 +81,7 @@ function weightTriweight() {
 // Tricube kernel
 function weightTricube() {
     var weight = [];
-    for (var i=-kw;i<kw;i++) {
+    for (var i=-kw;i<=kw;i++) {
         var u = i / kw;
         weight.push(70/81*Math.pow(1-Math.pow(Math.abs(u),3),3));
     }
@@ -91,7 +91,7 @@ function weightTricube() {
 // Gauss kernel
 function weightGauss(win) {
     var weight = [];
-    for (var i=-win/2;i<win/2;i++) {
+    for (var i=-win/2;i<=win/2;i++) {
         var u = i / kw;
         weight.push(Math.exp(-Math.pow(u,2)/2) / Math.sqrt(2*Math.PI));
     }
@@ -122,14 +122,14 @@ function smooth(fac) {
     var weightSum = d3.sum(weight)
     
     var first_val = newFilledArray(win/2, 0)
-    var last_val = newFilledArray(win/2, 0)
+    var last_val = newFilledArray(win/2+1, 0)
     //first_val = list.slice(0, degree)
     //last_val = list.slice(list.length-degree-1, list.length)
     var psth_extented = first_val.concat(psth, last_val)
     
     var smoothed = newFilledArray(psth.length, 0.)
-    for (var i=0; i < smoothed.length; i++) {
-        var psth_slice = psth_extented.slice(i, i+win)                                                  // get a window of each time step
+    for (var i=0; i<smoothed.length; i++) {
+        var psth_slice = psth_extented.slice(i, i+win+1)                                                  // get a window of each time step
         var val = psth_slice.map(function(element,index,array){return element*weight[index]})           // overlay kernel weight on window
         smoothed[i] = fac * d3.sum(val) / weightSum                                                     // normalize values, the area has to be the same.
     }

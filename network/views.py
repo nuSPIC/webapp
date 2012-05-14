@@ -157,9 +157,9 @@ def network_mini(request, SPIC_group, SPIC_id, local_id):
         
     # Get a choice list for adding new device.
     device_choices = []
-    outputs = network_obj.outputs()
+    outputList = network_obj.output_list()
     for id_model, forms in FORMS.items():
-        if not id_model in outputs:
+        if not id_model in outputList:
             # get modeltype of device.
             if 'generator' in id_model:
                 device_choices.append({'id_model':id_model, 'forms':forms, 'model_type':'input'})
@@ -280,9 +280,9 @@ def network(request, SPIC_group, SPIC_id, local_id):
         
     # Get a choice list for adding new device.
     device_choices = []
-    outputs = network_obj.outputs()
+    outputList = network_obj.output_list()
     for id_model, forms in FORMS.items():
-        if not id_model in outputs:
+        if not id_model in outputList:
             # get modeltype of device.
             if 'generator' in id_model:
                 device_choices.append({'id_model':id_model, 'forms':forms, 'model_type':'input'})
