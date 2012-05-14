@@ -231,23 +231,12 @@ def forkDict(deviceDict):
     for k,v in items:
         if 'id' in v:
             visible[str(int(k))] = v
+            last_device_id = int(v['id'])
         else:
             hidden[str(int(k))] = v
-    
-    meta = {}
-    meta['last_seq'] = int(items[-1][0])
-    
-    last_vis_seq = meta['last_seq']
-    
-    while last_vis_seq > 0:
-        if str(last_vis_seq) in deviceDict['visible']:
-            break
-        else:
-            last_vis_seq -= 1
-            
-    if last_vis_seq > 0:
-        meta['last_device_id'] = int(deviceDict['visible'][str(last_vis_seq)]['id'])
+        last_seq = int(k)
         
+    meta = {'last_seq':last_seq, 'last_device_id':last_device_id}
     return {'visible': visible, 'hidden': hidden, 'meta': meta}
 
 
