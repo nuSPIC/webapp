@@ -8,7 +8,6 @@ from network.network_settings import SPIC_CHOICES, ALL_PARAMS_ORDER
 from network.helpers import values_extend, id_escape, id_identify
 
 import pdb
-#from result.models import Result
 
 class SPIC(models.Model):
     group = models.CharField(max_length=2, null=True, choices=SPIC_CHOICES)
