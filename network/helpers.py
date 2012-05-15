@@ -95,17 +95,15 @@ def delete_devices(deviceList, device_ids):
     del_ids = device_ids.copy()
     
     # check if inputs/outputs also should be deleted.
-    #id_updatebank = []
     for device in deviceList:
-        #id_updatebank.append((device['id'], device['id']))
         if device['type'] == 'input' or device['type'] == 'output':
             if 'sources' in device:        
-                term = 'sources'
+                key = 'sources'
             else:
-                term = 'targets'
+                key = 'targets'
                 
-            if device.get(term):
-                neuronList = np.array(device[term].split(','), dtype=int)
+            if device.get(key):
+                neuronList = np.array(device[key].split(','), dtype=int)
                 delete = True
                 for neuron in neuronList:
                     if not neuron in device_ids:
@@ -114,36 +112,23 @@ def delete_devices(deviceList, device_ids):
                 if delete:
                     del_ids = np.append(del_ids, device['id'])
     
-    # update targets/sources in not deleted devices
-    #id_updater = np.zeros(len(id_updatebank))
-    #id_updater[del_ids-1] = 1
-    #id_updater_cumsum = id_updater.cumsum()
-    #id_updatebank = np.array(id_updatebank)
-    #id_updatebank[:,1] -= id_updater_cumsum
-
     new_deviceList = []
     for device in deviceList:
         if not device['id'] in del_ids:
-          
-            # correct device IDs
-            #device['id'] = int(id_escape(id_updatebank, device['id']))
 
             # delete target/source
             new_conns = {}
             if 'targets' in device or 'sources' in device:
                 if 'targets' in device:
-                    term = 'targets'
+                    key = 'targets'
                 elif 'sources' in device:        
-                    term = 'sources'
+                    key = 'sources'
                     
-                if device.get(term):
-                    value_list = device[term].split(',')
+                if device.get(key):
+                    value_list = device[key].split(',')
                     value_array = np.array([item for item in enumerate(value_list) if int(item[1]) not in del_ids], dtype=int)
                     
                     if value_array.any():
-                        #value_list = [str(id_escape(id_updatebank, val)) for val in value_array[:,1]]
-                        #device[term] = ','.join(value_list)
-                    
                         # delete weight and delay
                         if device.get('weight'):
                             weight_list = device['weight'].split(',')

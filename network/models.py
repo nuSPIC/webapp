@@ -110,7 +110,7 @@ class Network(models.Model):
         """ List of connections of neurons are connected to output. """
         return self._connect_to(model='spike_detector')
         
-    def connections(self, term='visible', data=False, modeltype=None):
+    def connections(self, mode='visible', data=False, modeltype=None):
         """
         Get a listed tuple of source and target in each connection.
         If data is True, it also returns dictionary of weight and delay.
@@ -119,19 +119,19 @@ class Network(models.Model):
         """ 
         
         if modeltype == 'IO_device':
-            return self.connections(term, data, 'input') + self.connections(term, data, 'output')
+            return self.connections(mode, data, 'input') + self.connections(mode, data, 'output')
         else:
-            if term == 'visible':
+            if mode == 'visible':
                 deviceList = self.device_list(modeltype=modeltype)
                 deviceItems = [dev for dev in enumerate(deviceList)]
             else:
-                deviceItems = self.device_items(term, modeltype)
+                deviceItems = self.device_items(mode, modeltype)
 
             if deviceItems:
                 connections = []
                 for idx, device in deviceItems:
                     if device:
-                        if term == 'visible':
+                        if mode == 'visible':
                             device_id = device['id']
                         else:
                             device_id = int(idx)
@@ -237,7 +237,7 @@ class Network(models.Model):
             return json.decode(str(self.devices_json))
         return {}
 
-    def device_items(self, term='visible', modeltype=None, model=None):
+    def device_items(self, mode='visible', modeltype=None, model=None):
         """
         Return a sorted items of devices.
         Argument modeltype is for filtering devices by its type or by model,
@@ -246,11 +246,11 @@ class Network(models.Model):
         deviceDict = self.device_dict()
         
         if deviceDict:
-            if term == 'all':
+            if mode == 'all':
                 deviceItems = deviceDict['visible'].items() + deviceDict['hidden'].items()
-            elif term == 'visible':
+            elif mode == 'visible':
                 deviceItems = deviceDict['visible'].items()
-            elif term == 'hidden':
+            elif mode == 'hidden':
                 deviceItems = deviceDict['hidden'].items()
                 
             deviceItems = sorted(deviceItems, key=lambda x: int(x[0]))
@@ -262,17 +262,17 @@ class Network(models.Model):
             return deviceItems
         return []
 
-    def device_list(self, term='visible', key=None, **kwargs):
+    def device_list(self, mode='visible', key=None, **kwargs):
         """
         Return a list of devices.
         """
-        kwargs['term'] = term
+        kwargs['mode'] = mode
         deviceItems = self.device_items(**kwargs)
        
         if deviceItems:
             deviceList = [dev[1] for dev in deviceItems]
                 
-            if term == 'visible':
+            if mode == 'visible':
                 id_filterbank = self.id_filterbank()
                 
                 for idx, dev in enumerate(deviceList):
@@ -290,7 +290,7 @@ class Network(models.Model):
                         new_weights, new_delays = [], []
                         for idx_tgt, tgt in enumerate(targets):
                             if tgt:
-                                if term == 'visible':
+                                if mode == 'visible':
                                     tgt = id_escape(id_filterbank, tgt)
                             
                                 if int(tgt) > 0:
@@ -317,7 +317,7 @@ class Network(models.Model):
                         new_sources = []
                         for idx_src, src in enumerate(sources):
                             if src:
-                                if term == 'visible':
+                                if mode == 'visible':
                                     src = id_escape(id_filterbank, src)
 
                                 if int(src) > 0:
@@ -426,14 +426,14 @@ class Network(models.Model):
                 for seq, statusDict in deviceItems:
                     if 'targets' in statusDict or 'sources' in statusDict:
                         if 'targets' in statusDict:
-                            term = 'targets'
+                            key = 'targets'
                         else:
-                            term = 'sources'
+                            key = 'sources'
                         
-                        if statusDict[term]:
-                            connList = statusDict[term].split(',')
+                        if statusDict[key]:
+                            connList = statusDict[key].split(',')
                             connList = [str(seq_update[str(conn)]) for conn in connList if conn in seq_update]
-                            statusDict[term] = ','.join(connList)
+                            statusDict[key] = ','.join(connList)
                     
                     if 'id' in statusDict:
                         visible[seq_update[str(seq)]] = statusDict
@@ -542,15 +542,15 @@ class Network(models.Model):
             # get true targets/sources of inputs/outputs
             if 'targets' in statusDict or 'sources' in statusDict:
                 if 'targets' in statusDict:
-                    term = 'targets'
+                    key = 'targets'
                 else:
-                    term = 'sources'
+                    key = 'sources'
 
-                if statusDict[term]:
-                    extended_list = values_extend(statusDict[term], unique=True)
+                if statusDict[key]:
+                    extended_list = values_extend(statusDict[key], unique=True)
                     extended_converted_list = [str(id_identify(id_filterbank, idx)) for idx in extended_list if idx in id_filterbank[:,1]]
                     if extended_converted_list:
-                        statusDict[term] = ','.join(extended_converted_list)
+                        statusDict[key] = ','.join(extended_converted_list)
 
             # add new ids to filterbank
             seq = id_identify(id_filterbank, statusDict['id'])

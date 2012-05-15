@@ -121,15 +121,13 @@ function smooth(fac) {
     }
     var weightSum = d3.sum(weight)
     
-    var first_val = newFilledArray(win/2, 0)
-    var last_val = newFilledArray(win/2+1, 0)
-    //first_val = list.slice(0, degree)
-    //last_val = list.slice(list.length-degree-1, list.length)
-    var psth_extented = first_val.concat(psth, last_val)
+    var pre = newFilledArray(win/2, 0)
+    var post = newFilledArray(win/2+1, 0)
+    var psth_extented = pre.concat(psth, post)
     
     var smoothed = newFilledArray(psth.length, 0.)
     for (var i=0; i<smoothed.length; i++) {
-        var psth_slice = psth_extented.slice(i, i+win+1)                                                  // get a window of each time step
+        var psth_slice = psth_extented.slice(i, i+win+1)                                                // get a window of each time step
         var val = psth_slice.map(function(element,index,array){return element*weight[index]})           // overlay kernel weight on window
         smoothed[i] = fac * d3.sum(val) / weightSum                                                     // normalize values, the area has to be the same.
     }
