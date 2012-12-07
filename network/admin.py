@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.contrib import admin
-from reversion.admin import VersionAdmin
+#from reversion.admin import VersionAdmin
 
 from network.models import SPIC, Network
 
@@ -51,4 +51,4 @@ try:
     admin.site.register(Network, NetworkAdmin)
 except:
     admin.site.register(Network)
-    
+

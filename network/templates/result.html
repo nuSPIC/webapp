@@ -1,6 +1,42 @@
 {% if network_obj.is_recorded %}
+<style>
+
+.spikeDetector, #spikeDetectorView {
+  font: 10px sans-serif;
+}
+
+.dot {
+  fill: black;
+}
+
+.x line, .y line {
+  fill: none;
+  stroke: #eee;
+}
+
+.bar rect {
+  shape-rendering: crispEdges;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #ccc;
+  shape-rendering: crispEdges;
+}
+
+.bins:hover {
+    cursor: pointer;
+    color: #ccc;
+}
+
+</style>
+
     {% if network_obj.has_spike_detector %}
-        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3.spike_detector.js"></script>
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3.raster_plot.js"></script>
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3.histogram.js"></script>
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3.correlation.js"></script>
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3.spike_detector.js?ver=1.1"></script>
+
     {% endif %}
 
     <script type="text/javascript">
@@ -38,18 +74,70 @@
 
 
         {% if network_obj.has_spike_detector %}
+            var times = spike_detector_data['times'],
+                senders = spike_detector_data['senders'],
+                simTime = spike_detector_data['simTime'],
+                neurons = spike_detector_data['neurons'];
 
-            $( "button#spike_detector-link" ).live('click',function(e) {
-                $( ".resultView" ).attr('src', "{% url spike_detector network_obj.pk %}?view=large");
-                $( ".resultView" ).css('height', {{ network_obj.neuron_ids|length }} * 15 + 230);
+            var bins = 50;
+            var binwidth = simTime/bins;
+            var val1 = val2 = 1;
 
-                $( "#dialog-resultView" ).dialog({
-                        title: 'Spike Detector view of all connected neurons',
-                        height: {{ network_obj.neuron_ids|length }} * 15 + 320,
-                        width: 800,
-//                         modal: true,
+            var x = d3.scale.linear()
+                .domain([0, 1000.])
+                .range([0, 1.]);
+
+            var hist = d3.layout.histogram()
+                .bins(x.ticks(bins));
+
+            var spikes = {}, array = {};
+            for (var i=0; i<senders.length; i++) {
+                if ( senders[i] in spikes ) {
+                    spikes[senders[i]].push(times[i])
+                } else {
+                    spikes[senders[i]] = [times[i]]
+                }
+            }
+
+            for (var i in spikes) {
+                array[i] = hist(spikes[i]);
+            }
+            var b = calc_correlation(array[val1], array[val2], 'valid', binwidth)
+            var dataset = d3.range(times.length).map(function(i) {
+                    return {x: times[i], y: senders[i]};
                 });
+
+            $( ".bins" ).live('click', function(e) {
+                bins = $( this ).attr('id');
+                draw_histogram("div.histogram", times, simTime, bins);
+                draw_histogram("#spikeDetectorView div.histogram", times, simTime, bins);
+
+                var hist = d3.layout.histogram()
+                    .bins(x.ticks(bins));
+
+                array =  {};
+                for (var i in spikes) {
+                    array[i] = hist(spikes[i]);
+                }
+
+                binwidth = simTime/bins;
+                draw_correlation_plot("div.correlation_plot", calc_correlation(array[val1], array[val2], 'valid', binwidth));
+                draw_correlation_plot("#spikeDetectorView div.correlation_plot", calc_correlation(array[val1], array[val2], 'valid', binwidth));
+                
+
             });
+
+            $( "#neuron1" ).live('change', function(e) {
+                val1 = $(this).val();
+                draw_correlation_plot("div.correlation_plot", calc_correlation(array[val1], array[val2], 'valid', binwidth));
+                draw_correlation_plot("#spikeDetectorView div.correlation_plot", calc_correlation(array[val1], array[val2], 'valid', binwidth));
+            })
+
+            $( "#neuron2" ).live('change', function(e) {
+                val2 = $(this).val();
+                draw_correlation_plot("div.correlation_plot", calc_correlation(array[val1], array[val2], 'valid', binwidth));
+                draw_correlation_plot("#spikeDetectorView div.correlation_plot", calc_correlation(array[val1], array[val2], 'valid', binwidth));
+            })
 
         {% endif %}
 
@@ -62,19 +150,30 @@
 
 
             {% if network_obj.has_spike_detector %}
-                    loadSpikeDetector();
-                    figures["spikeDetectorThumbnail"] = drawSpikeDetector("spikeDetectorThumbnail");
+                    draw_raster_plot("div.raster_plot", dataset, simTime, neurons, bins);
+                    draw_histogram("div.histogram", times, simTime, bins);
 
-                    $( "#spikeDetectorThumbnail" ).find( ".fig" ).click(function() {
+                    for (var i=0; i<neurons.length; i++) {
+                        $( ".correlation" ).append("<option value="+ neurons[i] +">"+ neurons[i] +"</option>");
+                    }
+
+                    draw_correlation_plot("div.correlation_plot", calc_correlation(array[val1], array[val2], 'valid', binwidth));
+
+<!--                    loadSpikeDetector();-->
+<!--                    figures["spikeDetectorThumbnail"] = drawSpikeDetector("spikeDetectorThumbnail");-->
+
+                    $( "#large" ).click(function() {
 
                         $( "#spikeDetectorView" ).dialog({
                             title: 'Spike Detector view of all connected neurons',
-                            height: window.innerHeight - 200,
-                            width: window.innerWidth - 200,
-                            resizable: false,
+                            height: 600,
+                            width: 700,
+<!--                            resizable: false,-->
                             modal: true,
                         });
-                        figures["spikeDetectorView"] = drawSpikeDetector("spikeDetectorView")
+                        draw_raster_plot("#spikeDetectorView div.raster_plot", dataset, simTime, neurons, bins);
+                        draw_histogram("#spikeDetectorView div.histogram", times, simTime, bins);
+                        draw_correlation_plot("#spikeDetectorView div.correlation_plot", calc_correlation(array[val1], array[val2], 'valid', binwidth));
                     });
             {% endif %}
 
@@ -107,6 +206,7 @@
                     <div class="spikeDetector" id="spikeDetectorThumbnail">
                           {% if spike_detector.times %}
                               {% include "d3.spike_detector.html" %}
+                                <div id="large">large</div>
                           {% else %}
                               <div style="padding-top: 20px; text-align:center">No spikes detected. Check your input devices.</div>
                           {% endif %}

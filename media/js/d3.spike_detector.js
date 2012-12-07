@@ -116,9 +116,12 @@ function smooth(fac) {
         weight = weightCosine()
     } else if (kernel_function == 'triangular') {
         weight = weightTriangular()
-    } else {
+    } else if (kernel_function == 'uniform') {
         weight = weightUniform()
+    } else {
+        return psth;
     }
+
     var weightSum = d3.sum(weight)
     
     var pre = newFilledArray(win/2, 0)
@@ -129,7 +132,7 @@ function smooth(fac) {
     for (var i=0; i<smoothed.length; i++) {
         var psth_slice = psth_extented.slice(i, i+win+1)                                                // get a window of each time step
         var val = psth_slice.map(function(element,index,array){return element*weight[index]})           // overlay kernel weight on window
-        smoothed[i] = fac * d3.sum(val) / weightSum                                                     // normalize values, the area has to be the same.
+        smoothed[i] = fac * d3.sum(val) // weightSum                                                     // normalize values, the area has to be the same.
     }
     return smoothed;
 };
@@ -143,16 +146,17 @@ fig = spike_detector_data['fig'],
 figures = {};
 
 // Settings for PSTH
+var hist_binwidth = 10;     // Bin width of histogram. default: 10ms
 var nr_spikes = 1000,
-kw = 100,
+kw = 100,               // smoothing area 100 ms at both side > 200 ms
 sd_scale = true;
 
 // Calculate PSTH
-var psth = psth_calc(1)
+var psth = psth_calc(1);
 
 // Smooth PSTH
-var kernel_function = 'uniform';
-var psth_smooth = smooth(1000);
+var kernel_function = 'off';
+var psth_smooth = smooth(1);
 
 // Default settings for draw
 var defaults = {
@@ -176,7 +180,7 @@ function drawSpikeDetector(figID) {
     $( "#"+figID).find( "#psth" ).html("")
     
     $( "#"+figID).find( ".sd_scale").attr("checked", sd_scale);
-    $( "#"+figID).find( ".spinedit" ).val(kw);    
+    $( "#"+figID).find( ".kernel_width" ).find( ".spinedit" ).val(kw);
     $( "#"+figID).find( "."+ kernel_function ).attr("selected", true);
     
     var figure = d3.select("#"+figID);
@@ -277,7 +281,7 @@ function drawSpikeDetector(figID) {
 
 // Update plot
 function update() {
-    psth_smooth = smooth(1000);
+    psth_smooth = smooth(1);
     var psth_data = d3.range(psth_smooth.length).map(function(i) {
         return {x: i, y: psth_smooth[i]};
     });

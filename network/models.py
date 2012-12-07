@@ -15,29 +15,29 @@ class SPIC(models.Model):
 
     title = models.CharField(max_length=32)
     description = models.TextField(blank=True)
-    
+
     def __unicode__(self):
         return self.title
-    
+
 
 class Network(models.Model):
     user_id = models.IntegerField(null=True)
     SPIC = models.ForeignKey(SPIC, blank=True, null=True)
     local_id = models.IntegerField(null=True)
 
-    label = models.CharField(max_length=16, blank=True, null=True, verbose_name='Title')
+    label = models.CharField(max_length=16, blank=True, null=True)
     date_simulated = models.DateTimeField(blank=True, null=True)
     comment = models.TextField(blank=True)
-    
+
     duration = models.FloatField(null=True, default=1000.0)
     status_json = models.TextField(blank=True, verbose_name='Root status')
     devices_json = models.TextField(blank=True, verbose_name='Devices')
-    
+
     has_voltmeter = models.BooleanField()
     has_spike_detector = models.BooleanField()
     voltmeter_json = models.TextField(blank=True, verbose_name='Voltmeter')
     spike_detector_json = models.TextField(blank=True, verbose_name='Spike Detector')
-    
+
     favorite = models.BooleanField()
     deleted = models.BooleanField()
 
@@ -49,11 +49,11 @@ class Network(models.Model):
             return '%s_%s_%s' %(self.user_id, self.SPIC, self.local_id)
         except:
             return '%s' %self.pk
-            
+
     def _connect_to(self, modeltype=None, model=None):
         """ Get a list of devices of one type, which the neurons are connected to. """
         deviceList = self.device_list(modeltype=modeltype, model=model)
-        
+
         neuronList = []
         if deviceList:
             for device in deviceList:
@@ -61,14 +61,14 @@ class Network(models.Model):
                     neuronList.extend(device['targets'].split(','))
                 else:
                     neuronList.extend(device['sources'].split(','))
-                
+
         if neuronList:
             neuronList = [int(nn) for nn in neuronList if nn != '']
             neuronList = list(set(neuronList))
             neuronList = sorted(neuronList, key=lambda x: int(x))
-            
+
         return neuronList
-        
+
     def _get_param_list(self, param):
         """
         Get a listed tuple of device ID and list of values 
@@ -411,42 +411,43 @@ class Network(models.Model):
     def save(self, *args, **kwargs):
         # correct sequence in strict steps ordering
         deviceDict = self.device_dict()
-        visible, hidden = deviceDict['visible'], deviceDict['hidden']
-        
-        seqList = hidden.keys() + visible.keys()
-        if seqList:
-            seqList = sorted(seqList, key=lambda x: int(x))
-            if len(seqList) != int(seqList[-1]):
-                seq_update = dict([(old_seq, str(new_seq+1)) for new_seq, old_seq in enumerate(seqList)])
-                
-                deviceItems = hidden.items() + visible.items()
-                deviceItems = sorted(deviceItems, key=lambda x: int(x[0]))
-                
-                visible, hidden, last_device_id = {}, {}, 0
-                for seq, statusDict in deviceItems:
-                    if 'targets' in statusDict or 'sources' in statusDict:
-                        if 'targets' in statusDict:
-                            key = 'targets'
-                        else:
-                            key = 'sources'
-                        
-                        if statusDict[key]:
-                            connList = statusDict[key].split(',')
-                            connList = [str(seq_update[str(conn)]) for conn in connList if conn in seq_update]
-                            statusDict[key] = ','.join(connList)
-                    
-                    if 'id' in statusDict:
-                        visible[seq_update[str(seq)]] = statusDict
-                        last_device_id = statusDict['id']
-                    else:
-                        hidden[seq_update[str(seq)]] = statusDict
-                    last_seq = seq_update[str(seq)]
+        if 'visible' in deviceDict or 'hidden' in deviceDict:
+            visible, hidden = deviceDict['visible'], deviceDict['hidden']
             
-                # update meta data
-                meta = {'last_seq':int(last_seq), 'last_device_id':int(last_device_id)}
-                self.devices_json = json.encode({'visible': visible, 'hidden': hidden, 'meta': meta})
-        else:
-            self.devices_json = u''
+            seqList = hidden.keys() + visible.keys()
+            if seqList:
+                seqList = sorted(seqList, key=lambda x: int(x))
+                if len(seqList) != int(seqList[-1]):
+                    seq_update = dict([(old_seq, str(new_seq+1)) for new_seq, old_seq in enumerate(seqList)])
+                    
+                    deviceItems = hidden.items() + visible.items()
+                    deviceItems = sorted(deviceItems, key=lambda x: int(x[0]))
+                    
+                    visible, hidden, last_device_id = {}, {}, 0
+                    for seq, statusDict in deviceItems:
+                        if 'targets' in statusDict or 'sources' in statusDict:
+                            if 'targets' in statusDict:
+                                key = 'targets'
+                            else:
+                                key = 'sources'
+                            
+                            if statusDict[key]:
+                                connList = statusDict[key].split(',')
+                                connList = [str(seq_update[str(conn)]) for conn in connList if conn in seq_update]
+                                statusDict[key] = ','.join(connList)
+                        
+                        if 'id' in statusDict:
+                            visible[seq_update[str(seq)]] = statusDict
+                            last_device_id = statusDict['id']
+                        else:
+                            hidden[seq_update[str(seq)]] = statusDict
+                        last_seq = seq_update[str(seq)]
+                
+                    # update meta data
+                    meta = {'last_seq':int(last_seq), 'last_device_id':int(last_device_id)}
+                    self.devices_json = json.encode({'visible': visible, 'hidden': hidden, 'meta': meta})
+            else:
+                self.devices_json = u''
         super(Network, self).save(*args, **kwargs)
      
     def spike_detector_data(self):

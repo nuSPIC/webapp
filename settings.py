@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import sys
+nestpath = '/bcfgrid/data/deger/nest2_grid_bin/lib/python2.6/site-packages/'
+nestpath = '/home/spreizer/Envs/nest2_izhikevich/lib/python2.7/site-packages/'
+sys.path.reverse()
+sys.path.append(nestpath)
+sys.path.reverse()
+
 from datetime import timedelta
 
 
@@ -72,7 +79,7 @@ INSTALLED_APPS = (
     #'result',
 
     'djcelery',
-    'djkombu',
+    #'djkombu',
     'form_utils',
 )
 

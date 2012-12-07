@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from celery.contrib.abortable import AbortableTask
 
-from reversion import revision
-from reversion.models import Version
+#from reversion import revision
+#from reversion.models import Version
 
 import lib.json as json
 

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from reversion import revision
+#from reversion import revision
 
 import numpy as np
 from network.network_settings import PARAMS_ORDER

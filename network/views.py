@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 
 from celery.contrib.abortable import AbortableAsyncResult
-from reversion.models import Version
+#from reversion.models import Version
 
 from lib.decorators import render_to
 from lib.delivery import networkx
@@ -39,7 +39,7 @@ FORMS = {
     'poisson_generator': PoissonGeneratorForm,
     'noise_generator': NoiseGeneratorForm,
     #'smp_generator': SmpGeneratorForm,
-    'spike_generator': SpikeGeneratorForm,   
+    'spike_generator': SpikeGeneratorForm,
     
     'spike_detector': SpikeDetectorForm,
     'voltmeter': VoltmeterForm,
@@ -48,7 +48,7 @@ FORMS = {
 
 @render_to('network_list.html')
 def network_list(request):
-    """ Get a list of network from architect (unchanged networks). """    
+    """ Get a list of unchanged networks from architect."""
     flatpage = get_flatpage_or_none(request)
     network_list = Network.objects.filter(user_id=0)
 
@@ -59,10 +59,11 @@ def network_list(request):
 
 @login_required
 def network_latest(request, SPIC_group, SPIC_id):
+    """ Get the latest version of network."""
     SPIC_obj = get_object_or_404(SPIC, group=SPIC_group, local_id=SPIC_id)
     network_list = Network.objects.raw('SELECT id,local_id,label,date_simulated,has_voltmeter,has_spike_detector FROM network_network WHERE user_id = %s AND SPIC_id = %s AND deleted = 0 ORDER BY id DESC', [request.user.pk, SPIC_obj.pk])
 
-    if network_list:
+    if len(list(network_list)) > 0:
         network_obj = network_list[0]
         local_id = network_obj.local_id
 
@@ -72,6 +73,7 @@ def network_latest(request, SPIC_group, SPIC_id):
 
 @login_required
 def network_initial(request, SPIC_group, SPIC_id):
+    """ Get the first network or create a copied network from architect."""
     SPIC_obj = get_object_or_404(SPIC, group=SPIC_group, local_id=SPIC_id)
     network_obj, created = Network.objects.get_or_create(user_id=request.user.pk, SPIC=SPIC_obj, local_id=0, deleted=False)
     

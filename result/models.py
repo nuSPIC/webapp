@@ -2,15 +2,15 @@
 from django.contrib.auth.models import User
 from django.db import models
 
-from network.models import Network
-from reversion.models import Revision
+#from network.models import Network
+#from reversion.models import Revision
 
 import lib.json as json
 import numpy as np
 
 
 class Result(models.Model):
-    revision = models.OneToOneField(Revision)
+    #revision = models.OneToOneField(Revision)
     local_id = models.IntegerField(default=1)
     
     date_simulated = models.DateTimeField(null=True, blank=True)

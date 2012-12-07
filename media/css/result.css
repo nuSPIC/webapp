@@ -39,7 +39,6 @@ input.spinedit.upp {
 
 #spikeDetectorThumbnail {
     width: 320px; 
-    height: 260px; 
     background-color: #FAFAF9
 }
 
@@ -77,13 +76,13 @@ input.spinedit.upp {
 }
 
 
-#spikes circle {
-    stroke:black;
-    fill: black;
-}
+/*#spikes circle {*/
+/*    stroke:black;*/
+/*    fill: black;*/
+/*}*/
 
-#psth .line {
-  fill: none;
-  stroke: black;
-  stroke-width: 3px;
-}
+/*#psth .line {*/
+/*  fill: none;*/
+/*  stroke: black;*/
+/*  stroke-width: 3px;*/
+/*}*/
