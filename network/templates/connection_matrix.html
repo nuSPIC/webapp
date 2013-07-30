@@ -1,0 +1,32 @@
+<div class="portlet" id="connection_matrix">
+
+    <div class="portlet-header portlet-toggle">
+        <h3>
+            <span>Connection matrix</span>
+            <div class="pull-right">
+                <button type="button" class="btn bing"><i class="icon-chevron-up"></i></button>
+                <button type="button" class="btn bing hide fade"><i class="icon-chevron-down"></i></button>
+            </div>
+        </h3>
+    </div>
+
+    <div class="portlet-body" id="connection-tabs">
+
+        <ul class="nav nav-tabs tabs">
+            <li class="active"><a href="#weight-tab" data-toggle="tab">Weights (pA)</a></li>
+            <li><a href="#delay-tab" data-toggle="tab">Delays (ms)</a></li>
+        </ul>
+
+        <div class="tab-content">
+
+            <div class="tab-pane active" id="weight-tab" >
+                <table class="table table-striped table-bordered table-condensed" id="weights-table"></table>
+            </div>
+
+            <div class="tab-pane" id="delay-tab" >
+                <table class="table table-striped table-bordered table-condensed" id="delays-table"></table>
+            </div>
+
+        </div>
+    </div>
+</div>

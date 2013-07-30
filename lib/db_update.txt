@@ -1,0 +1,14 @@
+use nuspic_networks;
+
+--
+-- Add columns in table
+--
+
+ALTER TABLE network_network ADD COLUMN nodes_json longtext NOT NULL;
+ALTER TABLE network_network ADD COLUMN links_json longtext NOT NULL;
+
+--
+-- Modify columns
+--
+ALTER TABLE network_network MODIFY COLUMN title varchar(32) NULL;
+ALTER TABLE network_network MODIFY COLUMN description longtext NULL;

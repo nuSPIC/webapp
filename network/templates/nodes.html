@@ -1,0 +1,125 @@
+{% load lib_filters %}
+{% load network_filters %}
+
+<div id="nodes-list" class="portlet">
+
+    <div class="portlet-header" title="Hover a node to get more parameters or click a enabled device to modify it.">
+        <h3>
+            <span>Nodes</span>
+            <div class="pull-right">
+                <button type="button" class="btn bing"><i class="icon-chevron-up"></i></button>
+                <button type="button" class="btn bing hide fade"><i class="icon-chevron-down"></i></button>
+            </div>
+        </h3>
+    </div>
+
+    <div id="nodes-list-content" class="portlet-body">
+        <ul id="nodes-tabs" class="nav nav-tabs tabs">
+            <li class="active">
+                <a href="#nodes-table-tab" data-toggle="tab">Table</a>
+            </li>
+            <li>
+                <a href="#nodes-csv-tab" data-toggle="tab">CSV</a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div id="nodes-table-tab" class="tab-pane active">
+
+<!--                <form action="." method="POST" class="nodes-form">-->
+
+<!--                    {% csrf_token %}-->
+                    <table id="nodes-table" class="table table-striped table-hover table-bordered table-condensed"></table>
+
+<!--                </form>-->
+            </div>
+
+            <div id="nodes-csv-tab" class="csv-tab tab-pane">
+
+                <form id="nodes-csv-form" action="." method="POST" class="portlet-form">
+                    {% csrf_token %}
+
+                    <div id="nodes-csv-content" class="portlet-body">
+                        {{ nodes_csv_form.as_div }}
+                    </div>
+
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="portlet-footer">
+
+<!--            <div id="id_model" class="btn-group pull-right">-->
+<!--                <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" href="#">-->
+<!--                    Add a device-->
+<!--                    <span class="caret"></span>-->
+<!--                </a>-->
+
+<!--                <ul class="dropdown-menu">-->
+<!--                    {% for device in device_choices %}-->
+<!--                        <li value="{{ device.id_model }}"><a tabindex="-1" href="#">{{device.id_model|label_escape}}</a></li>-->
+<!--                    {% endfor %}-->
+<!--                </ul>-->
+<!--            </div>-->
+
+
+        <div id="tabs-container-2" class="tab-content">
+<!--            <div class="tab-pane active">-->
+<!--                <div class="btn-group">-->
+<!--<!--                    <button id="nodes-button-delete" type="button" class="btn btn-primary">Delete</button>-->
+<!--                    <button id="nodes-button-save" type="button" class="btn btn-primary">Save</button>-->
+<!--                </div>-->
+<!--            </div>-->
+
+            <div class="tab-pane">
+                <div class="btn-group">
+                    <button id="csv-button-save" type="submit" class="btn btn-primary">Save</button>
+                    <button id="csv-button-reset" type="reset" class="btn btn-primary">Reset</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+
+
+<div id="step-helper" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="myModalLabel">Seven steps to work with SPIC</h3>
+    </div>
+
+    <div class="modal-body">
+        <p>
+            <ol>
+                <li>Add <b>new nodes</b> and set their status.</li>
+                <li>Once done, save the <b>node table</b>.</li>
+                <li>Explore the <b>network layout</b>.</li>
+                <li>Explore the <b>connectivity matrix</b>.</li>
+                <li>Modify <b>the nodes</b> if necessary save the table.</li>
+                <li>Run the <b>simulation</b>.</li>
+                <li>View the <b>results</b>.</li>
+            </ol>
+
+            Each successful simulation appears in the history list. The same list can be used to retrieve past simulations together with the results.
+            The recorded events (spikes, membrane potential etc.) are plotted online. They can also be downloaded as text files.
+
+            <h4>Optional:</h4>
+            Add comments to each simulation describing what you did it, why you did it, what were the results etc. This will help also when retrieving old simulations.
+
+            <p> Give some feedback in the forum, if you want to share it.</p>
+        </p>
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    </div>
+
+</div>
+
