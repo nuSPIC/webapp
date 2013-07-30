@@ -10,25 +10,28 @@
 {% endblock %}
 
 {% block content %}
-    <h2 class="delimiter">Split topic</h2>
+    <h2>Split topic</h2>
+    <hr>
+
     <div class="breadcrumbs">&raquo; <a href="{% url forum %}">Discussions</a> &raquo; <a href="{{ forum.get_absolute_url }}">{{ forum.name }}</a> &raquo; <a href="{{ topic.get_absolute_url }}">{{ topic.name }}</a></div>
-	
-    <form action="." method="post" id="split_topic_form">
+
+    <form action="." method="post" class="form-horizontal" id="split_topic_form">
         {% csrf_token %}
         {{ topic_form.non_field_errors }}
-        
-        <div class="field-wrapper">
-            <label for="id_name">New topic name:</label>
-            {{ topic_form.name.errors }}
-            {{ topic_form.name }}
+
+        <div class="fieldWrapper control-group">
+            <label class="control-label" for="id_name">New topic name:</label>
+            <div class="controls">
+                {{ topic_form.name.errors }}
+                {{ topic_form.name }}
+            </div>
         </div>
-        
-        <div class="delimiter">
-            <strong>Check posts to move to the new topic:</strong>
-        </div>
-        
+
+        <strong>Check posts to move to the new topic:</strong>
+        <hr>
+
         {% for id, post in topic_form.fields.posts.choices %}
-            <div class="post{% if not forloop.last %} delimiter{% endif %}">
+            <div class="post">
                 <input type="checkbox" name="posts" value="{{ id }}" />
                 
                 <div class="date">
@@ -49,15 +52,16 @@
                         <a href="{{ post.profile.get_absolute_url }}" title="Go to profile">Profile</a>
                     </div>
                 </div>
-        
+
                 <div class="body">
                     {{ post.message_html|safe }}
                 </div>
             </div>
+            {% if not forloop.last %}<hr>{% endif %}
         {% endfor %}
         
         <div class="buttons">
-            <input type="submit" value="Split topic" />
+            <button type="submit" class="btn">Split topic</button>
         </div>
     </form>
 {% endblock %}

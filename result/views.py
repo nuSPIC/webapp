@@ -74,8 +74,7 @@ def spike_detector(request, result_id):
     
     result_obj = get_object_or_404(Result, pk=result_id)
     network_obj = Network.objects.get(result_id=result_obj.pk)
-    output_list = network_obj.device_list(modeltype='output')
-    
+
     spike_detector = result_obj.spike_detector_data()
     assert len(spike_detector['senders']) == len(spike_detector['times'])
 

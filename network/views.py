@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 
@@ -17,9 +17,9 @@ import lib.json as json
 from network.helpers import values_extend, id_escape, id_identify, dict_to_JSON, csv_to_dict, delete_devices
 from network.forms import *
 from network.models import SPIC, Network
-from network.network_settings import ALL_PARAMS_ORDER
+#from network.network_settings import ALL_PARAMS_ORDER
 
-from result.models import Result
+#from result.models import Result
 
 import numpy as np
 import os
@@ -46,16 +46,59 @@ FORMS = {
     }
 
 
+# Define models with its modeltype, label and form.
+DEVICES = [
+    #'hh_psc_alpha': HhPscAlphaForm,
+    {'type': 'neuron', 'model':'iaf_cond_alpha', 'label':'IAF Cond Alpha', 'form': IafCondAlphaForm},
+    {'type': 'neuron', 'model':'iaf_neuron', 'label':'IAF Neuron', 'form': IafNeuronForm},
+    {'type': 'neuron', 'model':'iaf_psc_alpha', 'label':'IAF PSC Alpha', 'form': IafPscAlphaForm},
+    #{'type': 'neuron', 'model':'parrot_neuron', 'label':'Parrot Neuron', 'form': ParrotForm},
+    
+    {'type': 'input', 'model':'ac_generator', 'label':'AC Generator', 'form': ACGeneratorForm},
+    {'type': 'input', 'model':'dc_generator', 'label':'DC Generator', 'form': DCGeneratorForm},
+    {'type': 'input', 'model':'poisson_generator', 'label':'Poisson Generator', 'form': PoissonGeneratorForm},
+    {'type': 'input', 'model':'noise_generator', 'label':'Noise Generator', 'form': NoiseGeneratorForm},
+    #{'type': 'input', 'model':'smp_generator', 'label':'SMP Generator', 'form': SmpGeneratorForm},
+    {'type': 'input', 'model':'spike_generator', 'label':'Spike Generator', 'form': SpikeGeneratorForm},
+    
+    {'type': 'output', 'model':'spike_detector', 'label':'Spike Detector', 'form': SpikeDetectorForm},
+    {'type': 'output', 'model':'voltmeter', 'label':'Voltmeter', 'form': VoltmeterForm},
+    ]
+
 @render_to('network_list.html')
 def network_list(request):
     """ Get a list of unchanged networks from architect."""
     flatpage = get_flatpage_or_none(request)
     network_list = Network.objects.filter(user_id=0)
 
+    if request.method == 'GET' and 'id' in request.GET:
+        network_id = request.GET.get('id')
+        networks = Network.objects.filter(user_id=request.user.pk, pk=network_id)
+
+        if len(networks) > 0:
+            network_obj = networks[0]
+            return HttpResponseRedirect('/network/%s/%s/%s' %(network_obj.SPIC.group, network_obj.SPIC.local_id,network_obj.local_id))
+
     return {
         'flatpage': flatpage,
         'network_list': network_list,
     }  
+
+
+@login_required
+def network_initial(request, SPIC_group, SPIC_id):
+    """ Get the first network or create a copied network from architect."""
+    SPIC_obj = get_object_or_404(SPIC, group=SPIC_group, local_id=SPIC_id)
+    network_obj, created = Network.objects.get_or_create(user_id=request.user.pk, SPIC=SPIC_obj, local_id=0, deleted=False)
+    
+    if created is True:
+        # Check if prototype exists
+        prototype = get_object_or_404(Network, user_id=0, SPIC=SPIC_obj)
+        network_obj.nodes_json = prototype.nodes_json
+        network_obj.links_json = prototype.links_json
+        network_obj.save()
+
+    return network(request, SPIC_group, SPIC_id, 0)
 
 @login_required
 def network_latest(request, SPIC_group, SPIC_id):
@@ -71,285 +114,41 @@ def network_latest(request, SPIC_group, SPIC_id):
     else:
         return network_initial(request, SPIC_group, SPIC_id)
 
-@login_required
-def network_initial(request, SPIC_group, SPIC_id):
-    """ Get the first network or create a copied network from architect."""
-    SPIC_obj = get_object_or_404(SPIC, group=SPIC_group, local_id=SPIC_id)
-    network_obj, created = Network.objects.get_or_create(user_id=request.user.pk, SPIC=SPIC_obj, local_id=0, deleted=False)
-    
-    if created:
-        # Check if prototype exists
-        prototype = get_object_or_404(Network, user_id=0, SPIC=SPIC_obj)
-        network_obj.devices_json = prototype.devices_json
-        network_obj.save()
 
-    return network(request, SPIC_group, SPIC_id, 0)
-
-@render_to('network_split.html')
+@render_to('network_base.html')
 @login_required
-def network_split(request, SPIC_group, SPIC_id):
-    SPIC_obj = get_object_or_404(SPIC, group=SPIC_group, local_id=SPIC_id)
-    
-    left_local_id = request.GET.get('left')
-    if not left_local_id:
-        left_local_id = 0
-        
-    right_local_id = request.GET.get('right')
-    if not right_local_id:
-        right_local_id = 0
-    
-    response = {
-        'SPIC_obj': SPIC_obj,
-        'left_local_id': left_local_id,
-        'right_local_id': right_local_id,
-    }
-    
-    return response   
-   
-@render_to('network_mini.html')
-@login_required
-def network_mini(request, SPIC_group, SPIC_id, local_id):
+def network(request, SPIC_group, SPIC_id, local_id):
 
     SPIC_obj = SPIC.objects.get(group=SPIC_group, local_id=SPIC_id)
     network_list = Network.objects.filter(user_id=request.user.pk, SPIC=SPIC_obj, deleted=False).values('id', 'local_id', 'label', 'comment', 'date_simulated', 'favorite').order_by('-id')
     network_obj = get_object_or_404(Network, user_id=request.user.pk, SPIC__group=SPIC_group, SPIC__local_id=SPIC_id, local_id=local_id, deleted=False)
 
-    # If request is POST, then it executes any deletions
-    if request.method == "POST":
-
-        # Delete selected devices from database.
-        if request.POST.get('network_ids'):
-            network_ids = request.POST.getlist('network_ids')
-            action = request.POST.get('action')
-            
-            for network_id in network_ids:
-                network = Network.objects.get(pk=int(network_id))
-                
-                if network.local_id > 0:
-                    if action == 'delete_network':
-                        network.deleted = True
-                    elif action == 'delete_results':
-                        network.has_spike_detector = False
-                        network.has_voltmeter = False
-                        network.date_simulated = None
-                    elif action == 'favorite':
-                        network.favorite = True
-                    elif action == 'unfavorite':
-                        network.favorite = False
-                    network.save()
-                    
-            network_obj = get_object_or_404(Network, user_id=request.user.pk, SPIC=SPIC_obj, local_id=local_id, deleted=False)
-        
-        # Delete selected device 
-        elif request.POST.get('device_ids'):
-            device_ids = np.array(request.POST.getlist('device_ids'), dtype=int)
-            deviceList = delete_devices(network_obj.device_list(), device_ids)
-            
-        elif request.POST.get('csv'):
-            csv = request.POST['csv']
-            deviceList = csv_to_dict(csv)
-            
-        # update device json in network object
-        network_obj = network_obj.update(deviceList)
-        network_obj.save()
-       
-    # Get label and CSV form for expert.
-    label_form = NetworkLabelForm(instance=network_obj)
-    device_csv_form = DeviceCSVForm({'csv':network_obj.csv()})    
-        
-    # Get a choice list for adding new device.
-    device_choices = []
-    outputList = network_obj.output_list()
-    for id_model, forms in FORMS.items():
-        if not id_model in outputList:
-            # get modeltype of device.
-            if 'generator' in id_model:
-                device_choices.append({'id_model':id_model, 'forms':forms, 'model_type':'input'})
-            elif 'meter' in id_model or 'detector' in id_model:
-                device_choices.append({'id_model':id_model, 'forms':forms, 'model_type':'output'})
-            else:
-                device_choices.append({'id_model':id_model, 'forms':forms, 'model_type':'neuron'})
-            device_choices.sort(key=lambda x:x['model_type'])
-    
-            
-    # If SPIC1, then pop out neurons from choice list
-    if network_obj.SPIC.group == "1":
-        device_choices = [device for device in device_choices if device['model_type'] != 'neuron']
-        
-    
-    # Get a list of forms for all devices.
-    device_formsets = []
-    for id_model, form in FORMS.items():
-        device_form = form(network_obj=network_obj)
-        formsHTML = render_to_string('device_form.html', {'id_model':id_model, 'form':device_form})
-        device_formsets.append({'id_model':id_model, 'formsHTML':formsHTML})
-        
     # Get root status
     root_status = network_obj.root_status()
+    same_seed = True
     if 'rng_seeds' in root_status or 'grng_seed' in root_status:
-        if root_status['rng_seeds'] == [1] or root_status['grng_seed'] == 1:
-            network_form = NetworkForm(instance=network_obj, initial={'same_seed': True})
-        else:
-            network_form = NetworkForm(instance=network_obj, initial={'same_seed': False})
-    else:
-        network_form = NetworkForm(instance=network_obj, initial={'same_seed': True})
-    
-       
-    # Prepare for template
-    response = {
-        'SPIC_obj': SPIC_obj,
-        'network_list': network_list,
-        'network_obj': network_obj,
-        'label_form': label_form,
-        'device_csv_form': device_csv_form,
-        'network_form': network_form,
-        'device_choices': device_choices,
-        'device_formsets': device_formsets,
-        'params_order': ALL_PARAMS_ORDER,
-        'term': 'mini/',
-    }
-    
-    if network_obj.has_spike_detector:
-        spike_detector = network_obj.spike_detector_data()
-        assert len(spike_detector['senders']) == len(spike_detector['times'])
-
-        spike_detector['neurons'] = network_obj._connect_to(model='spike_detector')
-
-        id_filterbank = network_obj.id_filterbank()
-        neuron_id_filterbank = network_obj.neuron_id_filterbank(model="spike_detector")
-        spike_detector['senders'] = [id_escape(id_filterbank, sender) for sender in spike_detector['senders']]
-        spike_detector['senders'] = [id_escape(neuron_id_filterbank, sender) for sender in spike_detector['senders']]
-        
-        spike_detector['simTime'] = network_obj.duration
-        
-        response['spike_detector'] = spike_detector
-        
-    return response
-
-@render_to('network_mainpage.html')
-@login_required
-def network(request, SPIC_group, SPIC_id, local_id):
-  
-    # get objects from database
-    SPIC_obj = SPIC.objects.get(group=SPIC_group, local_id=SPIC_id)
-    network_list = Network.objects.filter(user_id=request.user.pk, SPIC=SPIC_obj, deleted=False).values('id', 'local_id', 'label', 'date_simulated', 'favorite').order_by('-id')
-    network_obj = get_object_or_404(Network, user_id=request.user.pk, SPIC=SPIC_obj, local_id=local_id, deleted=False)
-
-    # if request is POST, then it executes any deletions
-    if request.method == "POST":
-              
-        # delete selected network and its result from database.
-        if request.POST.get('network_ids'):
-            network_ids = request.POST.getlist('network_ids')
-            action = request.POST.get('action')
-            for network_id in network_ids:
-                network = Network.objects.get(pk=int(network_id))
-                
-                if network.local_id > 0:
-                    if action == 'delete_network':
-                        network.deleted = True
-                    elif action == 'delete_results':
-                        network.has_spike_detector = False
-                        network.has_voltmeter = False
-                        network.date_simulated = None
-                    elif action == 'favorite':
-                        network.favorite = True
-                    elif action == 'unfavorite':
-                        network.favorite = False
-                    network.save()
-                    
-            network_obj = get_object_or_404(Network, user_id=request.user.pk, SPIC=SPIC_obj, local_id=local_id, deleted=False)
-        
-        # delete selected devices
-        elif request.POST.get('device_ids'):
-            device_ids = np.array(request.POST.getlist('device_ids'), dtype=int)
-            deviceList = network_obj.device_list()
-            deviceList = delete_devices(deviceList, device_ids)
-            print deviceList
-            
-            
-        elif request.POST.get('csv'):
-            csv = request.POST['csv']
-            deviceList = csv_to_dict(csv)
-
-        # update device json in network object
-        network_obj = network_obj.update(deviceList)
-        network_obj.save()
-            
-    # Get CSV for expert.
-    device_csv_form = DeviceCSVForm({'csv':network_obj.csv()})    
-        
-    # Get a choice list for adding new device.
-    device_choices = []
-    outputList = network_obj.output_list()
-    for id_model, forms in FORMS.items():
-        if not id_model in outputList:
-            # get modeltype of device.
-            if 'generator' in id_model:
-                device_choices.append({'id_model':id_model, 'forms':forms, 'model_type':'input'})
-            elif 'meter' in id_model or 'detector' in id_model:
-                device_choices.append({'id_model':id_model, 'forms':forms, 'model_type':'output'})
-            else:
-                device_choices.append({'id_model':id_model, 'forms':forms, 'model_type':'neuron'})
-            device_choices.sort(key=lambda x:x['model_type'])
-    
-            
-    # If SPIC1, then pop out neurons from choice list
-    if network_obj.SPIC.group == "1":
-        device_choices = [device for device in device_choices if device['model_type'] != 'neuron']
-        
-    
-    # Get a list of forms for all devices.
-    device_formsets = []
-    for id_model, form in FORMS.items():
-        device_form = form(network_obj=network_obj)
-        formsHTML = render_to_string('device_form.html', {'id_model':id_model, 'form':device_form})
-        device_formsets.append({'id_model':id_model, 'formsHTML':formsHTML})
-        
-    # Get root status
-    root_status = network_obj.root_status()
-    if 'rng_seeds' in root_status or 'grng_seed' in root_status:
-        if root_status['rng_seeds'] == [1] or root_status['grng_seed'] == 1:
-            network_form = NetworkForm(instance=network_obj, initial={'same_seed': True})
-        else:
-            network_form = NetworkForm(instance=network_obj, initial={'same_seed': False})
-    else:
-        network_form = NetworkForm(instance=network_obj, initial={'same_seed': True})
+        if root_status['rng_seeds'] != [1] and root_status['grng_seed'] != 1:
+            same_seed = False
 
     # Prepare for template
     response = {
         'SPIC_obj': SPIC_obj,
         'network_list': network_list,
         'network_obj': network_obj,
-        'device_csv_form': device_csv_form,
-        'network_form': network_form,
-        'device_choices': device_choices,
-        'device_formsets': device_formsets,
-        'params_order': ALL_PARAMS_ORDER,
-        'term': '',
+        'label_form': NetworkLabelForm(instance=network_obj),
+        'nodes_csv_form': NodesCSVForm({'csv':network_obj.nodes_csv()}),
+        'network_form': NetworkForm(instance=network_obj, initial={'same_seed': same_seed}),
+        'node_form': NodeForm(),
+        'link_form': LinkForm(),
     }
-    
-    if network_obj.has_spike_detector:
-        spike_detector = network_obj.spike_detector_data()
-        assert len(spike_detector['senders']) == len(spike_detector['times'])
 
-        spike_detector['neurons'] = network_obj._connect_to(model='spike_detector')
-
-        id_filterbank = network_obj.id_filterbank()
-        neuron_id_filterbank = network_obj.neuron_id_filterbank(model="spike_detector")
-        spike_detector['senders'] = [id_escape(id_filterbank, sender) for sender in spike_detector['senders']]
-        spike_detector['senders'] = [id_escape(neuron_id_filterbank, sender) for sender in spike_detector['senders']]
-        
-        spike_detector['simTime'] = network_obj.duration
-        
-        response['spike_detector'] = spike_detector
-    
     return response
+
 
 def device_csv(request, network_id):
     """ AJAX: Check POST request for validation without saving it in database. """
     network_obj = get_object_or_404(Network, pk=network_id)
-    layoutSize = network_obj.layout_size()
+    nodes = network_obj.nodes()
 
     if request.is_ajax():
         if request.method == 'POST':
@@ -361,7 +160,7 @@ def device_csv(request, network_id):
             for model_id, valJSON in request.POST.items():
                 if model_id not in ['csrfmiddlewaretoken','neuron_ids']:
                     valDict = json.decode(valJSON)
-                    valDict['neuron_ids'] = neuron_ids
+                    valDict['neuron_ids'] = [node['id'] for node in nodes if node['type'] == 'neuron']
                     
                     form = FORMS[valDict['model']](network_obj, valDict)
 
@@ -386,13 +185,13 @@ def device_csv(request, network_id):
 def device_preview(request, network_id):
     """ AJAX: Check POST request for validation without saving it in database. """
     network_obj = get_object_or_404(Network, pk=network_id)
-    
+
     if request.is_ajax():
         if request.method == 'POST':
 
             id_model = request.POST.get('model')
             form = FORMS[id_model](network_obj, request.POST)
-            
+
             # check if form is valid.
             if form.is_valid():
                 device_id = form.cleaned_data['id']
@@ -401,14 +200,13 @@ def device_preview(request, network_id):
                     idx = device_ids.index(device_id)
                 else:
                     idx = -1
-                
-                
+
                 response = {'valid': 1, 'idx': idx, 'status': form.cleaned_data, 'statusJSON': dict_to_JSON(form.cleaned_data)}
             else:
                 responseHTML = render_to_string('device_form.html', {'form':form})
                 response = {'valid': -1, 'responseHTML':responseHTML}
             return HttpResponse(json.encode(response), mimetype='application/json')
-                    
+
     return HttpResponse()
 
 
@@ -442,78 +240,74 @@ def simulate(request, network_id):
     network_obj = get_object_or_404(Network, pk=network_id)
 
     if request.is_ajax():
-        if request.method == 'POST':
+
+        # If request is POST, then it executes any deletions
+        if request.method == "POST":
             form = NetworkForm(request.POST, instance=network_obj)
 
             # check if network form is valid.
             if form.is_valid():
-                edgeList = network_obj.connections(modeltype='neuron')
-                
-                # update deviceList to deviceDict
-                deviceList = json.decode(str(request.POST['devices_json']))
-                network_obj = network_obj.update(deviceList)
-                
-                network_obj.duration = form.cleaned_data['duration']
+                print 'a'
+                if form.cleaned_data['overwrite'] is False:
+                    network_list = Network.objects.filter(user_id=request.user.pk, SPIC=network_obj.SPIC, deleted=False).values('id', 'local_id').order_by('-id')
+
+                    sim_obj = network_obj.copy()
+                    sim_obj.local_id = network_list.latest('local_id')['local_id'] + 1
+                    sim_obj.date_simulated = None
+                    sim_obj.comment = None
+                else:
+                    sim_obj = network_obj
+
+                print 'b'
+
+                nodes = json.decode(request.POST.get('nodes'))
+                links = json.decode(request.POST.get('links'))
+                sim_obj.update(nodes, links)
+                print 'c'
+                sim_obj.duration = form.cleaned_data['duration']
                 # if not same_seed, generate seeds for root_status
                 if form.cleaned_data['same_seed']:
                     root_status = {'rng_seeds': [1], 'grng_seed': 1}
                 else:
                     rng_seeds, grng_seed = np.random.random_integers(0,1000,2)
                     root_status = {'rng_seeds': [int(rng_seeds)], 'grng_seed': int(grng_seed)}
-                network_obj.status_json = json.encode(root_status)
-
-                network_obj.save()
+                sim_obj.status_json = json.encode(root_status)
+                print 'd'
+                sim_obj.save()
                 time.sleep(1)
-                
-                # if all neurons are new, create positions for them.
-                if edgeList != network_obj.connections(modeltype='neuron'):
-                    layout_default(request, network_obj.pk)
-                    
-                task = Simulation.delay(network_obj.pk)
-                    
+                task = Simulation.delay(sim_obj.pk)
+                print 'e'
                 response = {'task_id':task.task_id, 'local_id':network_obj.local_id}
                 return HttpResponse(json.encode(response), mimetype='application/json')
-                    
+
             else:
-              
                 responseHTML = render_to_string('network_form.html', {'form': form})
                 response = {'responseHTML':responseHTML, 'valid': -1}
                 return HttpResponse(json.encode(response), mimetype='application/json')
-                
+
     return HttpResponse()
 
 def abort(request, task_id):
 
     abortable_async_result = AbortableAsyncResult(task_id)
     abortable_async_result.abort()
-                    
+
     return HttpResponse()
 
 def label_save(request, network_id):
     """ AJAX: Save network layout."""
     network_obj = get_object_or_404(Network, pk=network_id)
-    
+
     if request.is_ajax():
         if request.method == 'POST':
             network_obj.label = request.POST['label']
             network_obj.save()
-            
+
             response = {'label':network_obj.label}
             return HttpResponse(json.encode(response), mimetype='application/json')
-            
-    return HttpResponse()       
-            
 
-@render_to('raphael.network_layout_popup.html')
-@login_required
-def network_layout(request, SPIC_group, SPIC_id, local_id):
-    network_obj = get_object_or_404(Network, user_id=request.user.pk, SPIC__group=SPIC_group, SPIC__local_id=SPIC_id, local_id=local_id, deleted=False)
-    
-    response = {
-        'network_obj': network_obj,
-    }
-    
-    return response
+    return HttpResponse()
+
 
 def layout_save(request, network_id):
     """ AJAX: Save network layout."""
@@ -522,41 +316,39 @@ def layout_save(request, network_id):
     if request.is_ajax():
         if request.method == 'POST':
             deviceList = json.decode(request.POST.get('devices_json'))
-            
-            network_obj = network_obj.update(deviceList, force_self=True)
-            network_obj.save()
-        
-        response = {'layoutSize':network_obj.layout_size()}
-        return HttpResponse(json.encode(response), mimetype='application/json')
+
+#            network_obj = network_obj.update(deviceList, force_self=True)
+#            network_obj.save()
+
+        return HttpResponse()
 
     return HttpResponse()
 
 def layout_default(request, network_id):
     """ AJAX: Set network layout to default."""
     network_obj = get_object_or_404(Network, pk=network_id)
-    
+
     if request.is_ajax():
-        edgelist = network_obj.connections(modeltype='neuron')
+        nodes = network_obj.nodes()
+        links = network_obj.links(out='object')
+
+        edgelist = [[l['source']['uid'], l['target']['uid']] for l in links if l['source']['type'] == 'neuron' and l['target']['type'] == 'neuron']
         pos = networkx(edgelist, layout='circo')
-        
-        deviceList = network_obj.device_list()
-        neuron_id_filterbank = network_obj.neuron_id_filterbank()
-        
-        for idx, device in enumerate(deviceList):
-            if device['type'] == 'neuron':
-                neuron_idx = id_escape(neuron_id_filterbank, device['id'])
-                if neuron_idx in pos:
-                    device['position'] = list(pos[neuron_idx])
-                    deviceList[idx] = device
-        
-        network_obj = network_obj.update(deviceList, force_self=True)
-        network_obj.save()
-       
-        response = {'device_list':network_obj.device_list(), 'layoutSize': network_obj.layout_size()}
-        return HttpResponse(json.encode(response), mimetype='application/json')
+
+        window = np.array([800.,600.])
+#        window = np.array(pos.values()).max(axis=0) + np.array(pos.values()).min(axis=0)
+        size = np.array(pos.values()).max(axis=0) + np.array(pos.values()).min(axis=0)
+        shift = (window-size)/2
+
+#        pos_norm = {}
+#        for j,i in pos.iteritems():
+#            pos_norm[j] = (float(i[0]+shift[0]) / window[0], float(i[1]+shift[1]) / window[1])
+
+        pos_norm2 = [(p[0], ((np.array(p[1])+shift)/window).tolist()) for p in pos.items()]
+
+        return HttpResponse(json.encode({'pos':pos_norm2}), mimetype='application/json')
 
     return HttpResponse()
-    
 
 def data(request, network_id):
     network_obj = get_object_or_404(Network, pk=network_id)
@@ -576,61 +368,3 @@ def data(request, network_id):
     response['Content-Disposition'] = 'attachment; filename=%s_%s_%s.json' %(network_obj.date_simulated.strftime('%y%m%d'), network_obj.SPIC, network_obj.local_id)
 
     return response
-
-
-@render_to('protovis.voltmeter.html')
-def voltmeter(request, network_id):
-    """
-    Large View of Voltmeter data for selected neuron (sender)
-    """
-    
-    network_obj = get_object_or_404(Network, pk=network_id)
-    neuron = int(request.GET.get('neuron'))
-    
-    voltmeter = network_obj.voltmeter_data(neuron)
-    V_m = voltmeter['V_m'][0]
-    assert (len(voltmeter['times']) == len(V_m['values']))
-    status = V_m['status']
-
-    response = {
-        'values': V_m['values'],
-        'times': voltmeter['times'],
-    }
-    
-    return {'voltmeter': json.encode(response)}
-    
-@render_to('protovis.voltmeter_thumbnail.html')
-def voltmeter_thumbnail(request, network_id):
-    """
-    Small View of Voltmeter data
-    """
-    
-    network_obj = get_object_or_404(Network, pk=network_id)
-    return {'network_obj': network_obj}
-
-@render_to('d3.spike_detector.html')
-def spike_detector(request, network_id):
-    """
-    View of Spike Detector data
-    """
-    
-    network_obj = get_object_or_404(Network, pk=network_id)
-    spike_detector = network_obj.spike_detector_data()
-    assert len(spike_detector['senders']) == len(spike_detector['times'])
-
-    spike_detector['neurons'] = network_obj._connect_to(model='spike_detector')
-    spike_detector['neuronScale'] = [ii+1 for ii,v in enumerate(spike_detector['neurons'])]
-
-    id_filterbank = network_obj.id_filterbank()
-    neuron_id_filterbank = network_obj.neuron_id_filterbank(model="spike_detector")
-    spike_detector['senders'] = [id_escape(id_filterbank, sender) for sender in spike_detector['senders']]
-    spike_detector['senders'] = [id_escape(neuron_id_filterbank, sender) for sender in spike_detector['senders']]
-    
-    spike_detector['simTime'] = network_obj.duration
-    
-    if request.GET.get('view') == 'small':
-        spike_detector['fig'] = {'width':300, 'height':300, 'w':300, 'h2':50, 'xticks':5, 'yticks':3}
-    else:
-        spike_detector['fig'] = {'width':750, 'height':500, 'w':1200, 'h2':500, 'xticks':20, 'yticks':6}
-    
-    return spike_detector

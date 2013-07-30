@@ -1,4 +1,13 @@
 # -*- coding: utf-8 -*-
+import sys
+
+nestpath = '/home/spreizer/local/nest-2.2.0/lib/python2.6/site-packages/'
+
+sys.path.reverse()
+sys.path.append(nestpath)
+sys.path.reverse()
+
+
 from datetime import timedelta
 
 
@@ -71,8 +80,8 @@ INSTALLED_APPS = (
     #'result',
 
     'djcelery',
-    #'djkombu',
-    'form_utils',
+    'djkombu',
+#    'form_utils',
 )
 
 
@@ -94,7 +103,7 @@ EMAIL_CHANGE_TIMEOUT_DAYS = 3
 EMAIL_REQUEST_DELAY = timedelta(minutes=30)
 
 # Community page
-ACCOUNTS_PER_PAGE = 21
+ACCOUNTS_PER_PAGE = 20
 
 
 #  Forum

@@ -1,22 +1,68 @@
-<div>
-    <h3> Raster plot</h3>
-    <div class="raster_plot"></div>
+{% if network_obj.has_spike_detector %}
+    <div id="spike_detector">
+        {% if network_obj.spike_detector_data.meta.neurons %}
 
-    <h3> PSTH </h3>
-    <div class="histogram" style="height: 100px;"></div>
-    <div>Number of bins: 
-        <span class="bins" id="10"> 10 </span>
-        <span class="bins" id="20"> 20 </span>
-        <span class="bins" id="50"> 50 </span>
-        <span class="bins" id="100"> 100 </span>
-    </div>
+            <div id="raster_plot"></div>
 
-    <h3>Cross-Correlation</h3>
-    <div class="correlation_plot" style="height: 100px;"></div>
-    <div>Correlate between 
-    <select id="neuron1" class="correlation"></select> and
-    <select id="neuron2" class="correlation"></select>
+            <hr>
+            <div id="histogram"></div>
+
+            <div id="binwidth">
+                <span style="font-size: 14px">Bin width: </span>
+                <span class="btn-group" data-toggle="buttons-radio">
+                    <button class="btn btn-small binwidth" value="10"> 10 ms </button>
+                    <button class="btn btn-small binwidth" value="20"> 20 ms </button>
+                    <button class="btn btn-small binwidth" value="50"> 50 ms </button>
+                    <button class="btn btn-small binwidth" value="100"> 100 ms </button>
+    <!--                    <button class="btn btn-small binwidth" value="200"> 200 ms </button>-->
+                </span>
+            </div>
+
+            <hr>
+            <div id="correlation_plot"></div>
+
+            <span style="font-size: 14px">Valid correlation of</span>
+
+            <span id="correlated_neurons">
+                <div class="btn-group dropup" id="neuronA">
+                    <a href="#" class="btn btn-small dropdown-toggle" data-toggle="dropdown">
+                        <span class="title">Neuron</span>
+                        <span class="caret"></span>
+                    </a>
+
+                    <ul class="dropdown-menu correlation">
+                        {% for neuron in network_obj.spike_detector_data_index.meta.neurons %}
+                            <li><a href="#" tabindex="-1" value="{{ neuron.idx }}">Neuron {{ neuron.id }}</a></li>
+                        {% endfor %}
+                    </ul>
+
+                </div>
+
+                and
+
+                <div class="btn-group dropup" id="neuronB">
+                    <a href="#" class="btn btn-small dropdown-toggle" data-toggle="dropdown">
+                        <span class="title">Neuron</span>
+                        <span class="caret"></span>
+                    </a>
+
+                    <ul class="dropdown-menu correlation">
+                        {% for neuron in network_obj.spike_detector_data_index.meta.neurons %}
+                            <li><a href="#" tabindex="-1" value="{{ neuron.idx }}">Neuron {{ neuron.id }}</a></li>
+                        {% endfor %}
+                    </ul>
+
+                </div>
+            </span>
+
+        {% else %}
+
+          <div style="padding-top: 20px; text-align:center; font-size: 14px">No spikes detected. Check your input devices.</div>
+
+        {% endif %}
     </div>
+{% endif %}
+
 
 <!--    <div class="fig">-->
 <!--        <div id="spikes"></div>-->
@@ -64,5 +110,3 @@
 <!--            <input type="radio" class="gauss" name="smooth_method" value="gauss"> Gauss-->
 <!--   -->
 <!--    </div>-->
-
-</div>

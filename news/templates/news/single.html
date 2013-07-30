@@ -9,8 +9,8 @@
 {% endblock %}
 
 {% block content %}
-
-    <h2 class="delimiter">{{ news.title }}</h2>
+    <h2>{{ news.title }}</h2>
+    <hr>
 
     <div class="news-date">
         <strong>{{ news.pub_date|date:"DATE_FORMAT" }}</strong>

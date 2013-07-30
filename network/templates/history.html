@@ -1,93 +1,78 @@
-<script type="text/javascript">
+<!--id="history_button"-->
+<div class="btn-group">
+    <a href="#" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+    History
+    <span class="caret"></span>
+    </a>
 
-    $(function() {
-        $( "ul#history-list" ).quickPager();
-    });
+    <ul class="dropdown-menu pull-right" id="history-list" style="max-height: 500px; overflow-y:auto">
+        {% for network in network_list %}
 
-    $(document).ready(function() {
+            <li title="{{ network.comment }}" id="history_{{ network.local_id }}">
 
-        $( "ul#history-list li" ).each(function(){
-            $( this ).addClass("ui-widget-content");
-        });
+<!--                    <div class="version-link">-->
+                <a tabindex="-1" href="{% url network SPIC_obj.group SPIC_obj.local_id network.local_id|default_if_none:0 %}" id="{{ network.local_id }}">
+                    {% if network %}
+                        <b>{{ network.local_id }}</b> | {{ network.label }} | 
+                        {{ network.date_simulated|timesince|default:"not simulated" }}{% if network.date_simulated %} ago {% endif %}
+                    {% else %}
+                        NaN - no network found
+                    {% endif %}
+                </a>
+<!--                    </div>-->
 
-        $( "#history-list li" ).hover(
-            function(){
-                $( this ).addClass("ui-state-hover");
-            },function(){
-                $( this ).removeClass("ui-state-hover");
-        });
+            </li>
+        {% endfor %}
 
-        $( "ul#history-list div.version-link" ).click(function (e) {
-                $( "#dialog-msg p" ).html("Loading... please wait.");
-                $( "#dialog-msg #loading_icon" ).show();
-                $( "#dialog-msg" ).dialog({
-                        height: 150,
-                        resizable: false,
-                        modal: true,
-                });
-                document.location.href = $( this ).find( "a" ).attr('href')
-        });
-
-        $( "button#go-versions" ).click(function(e) {
-                e.preventDefault();
-                if ($( "ul#history-list input" ).is(":checked")) {
-                    $( ".versions-form" ).submit();
-                };
-        });
-
-    })
-</script>
-
-<div class="portlet" id="history">
-
-    <div class="portlet-header portlet-toggle" title="Click a simulated network version to load it.">
-        History
-    </div>
-
-    <div class="portlet-content" id="history">
-        <form action="." method="POST" class="versions-form">
-            {% csrf_token %}
-
-            <ul class="pager" id="history-list">
-                {% for network in network_list %}
-                    <li class="tipTip-left {% ifequal network.id network_obj.id %}ui-state-highlight{% endifequal %}"
-                        title="{{ network.comment|default_if_none:'no comment' }}" id="history_{{ network.local_id }}">
-
-                        <input style="float:right" type="checkbox" name="network_ids" value="{{ network.id }}" {% ifequal network.local_id 0 %}disabled{% endifequal %}>
-
-                        {% if network.favorite %}
-                            <div class="ui-icon ui-icon-star" style="float:right"></div>
-                        {% endif %}
-
-                        <div class="version-link">
-                            <a href="{% url network SPIC_obj.group SPIC_obj.local_id network.local_id|default_if_none:0 %}" id="{{ network.local_id }}">
-                                {% if network %}
-                                    <b>{{ network.local_id }}</b> - {{ network.label }} -
-                                    {{ network.date_simulated|timesince|default:"not simulated" }}{% if network.date_simulated %} ago {% endif %}
-                                {% else %}
-                                    NaN - no network found
-                                {% endif %}
-                            </a>
-                        </div>
-
-                    </li>
-                {% endfor %}
-            </ul>
-
-            <div class="buttons field-wrapper" title="" >
-                <button class="go" id="go-versions" style="float:right">Go</button>
-                <form action="#">
-                    <select name="action" id="versions-select">
-                        <option>Select an action</option>
-                        <option value="delete_network">Delete network</option>
-                        <option value="delete_results">Delete results</option>
-                        <option value="favorite">Mark as favorite</option>
-                        <option value="unfavorite">Unmark as favorite</option>
-                    </select>
-                </form>
-            </div>
-
-        </form>
-    </div>
+    </ul>
 
 </div>
+
+<!--<div class="hide fade" id="history" style="position:absolute; background-color: #ffffff; margin: 5px; padding: 10px; width:320px; border: 1px solid #ccc">-->
+
+<!--    <form action="#" method="POST" class="versions-form portlet-form">-->
+<!--        {% csrf_token %}-->
+
+<!--        <div class="pagination" id="pagination" style="margin:0px"></div>-->
+
+
+<!--        <ul class="pager dropdown-menu"" id="history-list" style="margin:5px; text-align:left" class="dropdown-menu">-->
+<!--            {% for network in network_list %}-->
+<!--                <li  title="{{ network.comment }}" id="history_{{ network.local_id }}">-->
+
+<!--                    <input style="float:right" type="checkbox" name="network_ids" value="{{ network.id }}" {% ifequal network.local_id 0 %}disabled{% endifequal %}>-->
+
+<!--                    {% if network.favorite %}-->
+<!--                        <div class="pull-right"><i class="icon-star"></i></div>-->
+<!--                    {% endif %}-->
+
+<!--                    <div class="version-link">-->
+<!--                        <a href="{% url network SPIC_obj.group SPIC_obj.local_id network.local_id|default_if_none:0 %}" id="{{ network.local_id }}">-->
+<!--                            {% if network %}-->
+<!--                                <b>{{ network.local_id }}</b> - {{ network.label }} --->
+<!--                                {{ network.date_simulated|timesince|default:"not simulated" }}{% if network.date_simulated %} ago {% endif %}-->
+<!--                            {% else %}-->
+<!--                                NaN - no network found-->
+<!--                            {% endif %}-->
+<!--                        </a>-->
+<!--                    </div>-->
+
+<!--                </li>-->
+<!--            {% endfor %}-->
+<!--        </ul>-->
+
+<!--            <div class="btn-group pull-right">-->
+<!--                <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" href="#">-->
+<!--                    Action-->
+<!--                    <span class="caret"></span>-->
+<!--                </a>-->
+<!--                <ul class="dropdown-menu pull-right">-->
+<!--                    <li value="delete_network"><a tabindex="-1" href="#">Delete network</a></li>-->
+<!--                    <li value="delete_results"><a tabindex="-1" href="#">Delete results</a></li>-->
+<!--                    <li value="favorite"><a tabindex="-1" href="#">Mark as favorite</a></li>-->
+<!--                    <li value="unfavorite"><a tabindex="-1" href="#">Unmark as favorite</a></li>-->
+<!--                </ul>-->
+<!--            </div>-->
+
+<!--    </form>-->
+<!--</div>-->

@@ -15,10 +15,10 @@ def mainpage(request):
     
     Shows content from flatpage and latest news list
     """
-    
+
     flatpage = get_flatpage_or_none(request)
     news_list = News.objects.all()[:settings.LATEST_NEWS_COUNT]
-    
+
     return {
         'flatpage': flatpage,
         'news_list': news_list,
@@ -30,9 +30,9 @@ def single(request, news_id):
     """
     Single news page
     """
-    
+
     news = get_object_or_404(News, id=news_id)
-    
+
     return {
         'news': news,
     }
@@ -43,9 +43,9 @@ def archive(request):
     """
     News archive
     """
-    
+
     news_list = News.objects.all()
-    
+
     return {
         'news_list': news_list,
     }

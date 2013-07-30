@@ -43,16 +43,19 @@ class Simulation(AbortableTask):
             nest.SetStatus([0], root_status)
 
         # Create models in NEST and set its status
-        device_list = network_obj.device_list('all')
+        nodes = network_obj.nodes('all')
+        nodes_id = [node['id'] for node in nodes]
+
         outputs = []
-        for statusDict in device_list:
+        for node in nodes:
+            status = node['status']
 
             """ Create models """
-            if statusDict:
+            if status:
                 device_params = {}
-                statusDefaults = nest.GetDefaults(statusDict['model'])
+                statusDefaults = nest.GetDefaults(status['model'])
                 for statusKey in statusDefaults.keys():
-                    statusVal = statusDict.get(statusKey)
+                    statusVal = status.get(statusKey)
                     if statusVal and statusKey not in ['model']:
                         if isinstance(statusDefaults[statusKey],np.ndarray):
                             statusList = statusVal.split(',')
@@ -63,38 +66,31 @@ class Simulation(AbortableTask):
                         elif isinstance(statusDefaults[statusKey],float):
                             device_params[statusKey] = float(statusVal)
                         elif isinstance(statusDefaults[statusKey],int):
-                            device_params[statusKey] = int(statusVal)  
+                            device_params[statusKey] = int(statusVal)
                         else:
-                            device_params[statusKey] = statusVal  
-                gid = nest.Create(statusDict['model'], params=device_params)
+                            device_params[statusKey] = statusVal
+                gid = nest.Create(status['model'], params=device_params)
             else:
-                gid = nest.Create(statusDict['model'])
-                
-            if statusDict['type'] == 'output':
+                gid = nest.Create(status['model'])
+
+            assert(gid[0] == node['id'])
+            if node['type'] == 'output':
                 outputs.extend(gid)
 
         # Make connections in nest
-        connections = network_obj.connections('all', data=True)
-        for source, target, conn_params, conn_model in connections:
-            if conn_params:
-                if conn_model:
-                    nest.Connect([source],[target], params=conn_params, model=conn_model['model'])
-
-                    syn_params = {}
-                    for syn_params_key, syn_params_value in conn_model['syn_params'].iteritems():
-                        syn_params[syn_params_key] = float(syn_params_value)
-                    nest.SetStatus(nest.FindConnections([source], [target]), syn_params)
-                else:
-                    nest.Connect([source],[target], params=conn_params)
+        links = network_obj.links('all', out='object')
+        for link in links:
+            if 'synapse' in link:
+                nest.Connect([link['source']['id']], [link['target']['id']], {'weight': link['weight'], 'delay': link['delay']}, link['synapse']['model'])
+                nest.SetStatus(nest.FindConnections([link['source']['id']], [link['target']['id']]), link['synapse']['status'])
             else:
-                nest.Connect([source],[target])
-
+                nest.Connect([link['source']['id']], [link['target']['id']], {'weight': float(link['weight']), 'delay': float(link['delay'])})
 
         # In case duration is more than 5s, Start simulation for a partial time
         # and checks, if producer is aborted, else simulation goes on.
         duration = float(network_obj.duration)
         timestep = 5000.
-        
+
         while duration > timestep:
             if self.is_aborted(**kwargs):
                 # Respect the aborted status and terminate gracefully
@@ -117,14 +113,18 @@ class Simulation(AbortableTask):
                 for key,value in output_events.items():
                     events[key] = value.tolist()
                 data[output_status['model']] = events
-
+            if output_status['model'] == 'spike_detector':
+                neurons = [nodes[nodes_id.index(sender)] for sender in np.unique(events['senders'])]
+            if output_status['model'] == 'voltmeter':
+                neurons = [{'uid': link['target']['uid'], 'id': link['target']['id']} for link in links if link['source']['status']['model'] == 'voltmeter']
+            data[output_status['model']]['meta'] = {'neurons': neurons}
 
         # Write results and simulating date in database and reconfigure the existence of output devices
         for label, value in data.items():
             data_json = json.encode(value)
             network_obj.__setattr__("%s_json" %label, data_json)
             network_obj.__setattr__("has_%s" %label, True)
-        
+
         # Update network object
         network_obj.date_simulated = datetime.datetime.now()
         network_obj.save()

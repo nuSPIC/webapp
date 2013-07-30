@@ -1,587 +1,206 @@
 {% load lib_filters %}
 {% load network_filters %}
 
-<script type="text/javascript">
-
-    // autocomplete input fields with device models
-    var devices = new Array(),
-    errorsMsg;
-
-    {% for device in device_choices %}
-        devices.push("{{device.id_model}}")
-    {% endfor %}
-
-    function split( val ) {
-        return val.split( /,\s*/ );
-    }
-
-    function autocomplete(field) {
-        $(field).autocomplete({
-            source: devices,
-            select: function ( event, ui ) {
-                var terms = split(this.value);
-                terms.pop();
-
-                // add the selected item
-                terms.push( ui.item.value );
-
-                // add device id
-                terms.push( $(this).parent().attr('id').split("-")[1] );
-                this.value = terms.join('; ');
-
-                var params = params_order[ ui.item.value ]
-                params[0] = 'model';
-                var keyCSV = params.join('; ')
-
-                $(this).parent().find( "input.deviceCSV" ).attr("title", keyCSV)
-                $(this).parent().find( "input.deviceJSON" ).attr("value", CSVtoJSON(keyCSV, this.value)).attr("name", $(this).parent().attr('id'));
-                return false;
-            }
-        });
-    }
-
-    function DicttoCSV(valDict) {
-        var keyCSV = new Array(),
-        valCSV = new Array(),
-        model = valDict['model'];
-
-        for (var key in params_order[model]) {
-            if (key in valDict) {
-                keyCSV.push(key);
-                valCSV.push(valDict[key].toString());
-            }
-        }
-
-        return {'key': keyCSV, 'value':valCSV}
-    }
-
-    function JSONtoCSV(valJSON) {
-        var valDict = JSON.parse(valJSON);
-        return DicttoCSV(valDict);
-    }
-
-    function CSVtoJSON(keyCSV, valCSV) {
-        var valDict = {};
-
-        var keyList = keyCSV.split(/[\s;]+/);
-        var valList = valCSV.split(/;/);
-
-        for (var i=0; i<keyList.length; i++) {
-            if (i<valList.length) {
-                if (keyList[i] == 'id') {
-                    valDict[keyList[i]] = parseInt(valList[i])
-                } else {
-                    valDict[keyList[i]] = valList[i].replace(/ /g,"");
-                }
-            } else {
-                valDict[keyList[i]] = ""
-            }
-        }
-
-        return JSON.stringify(valDict);
-    }
-
-    function setForm(device) {
-
-        // clear all stati and hide all form
-        $( "#device-table td" ).removeClass( "ui-state-active" );
-
-        $( "#device_id" ).html("");
-        $( ".device-form" ).hide();
-        $( "#device-form" ).hide();
-
-        // get form and remove its error message
-        var form = $( "#"+ device.model );
-        $( form ).find( "ul.errorlist" ).remove();
-
-        if ( selected_device_id == device.id ) {
-
-            // clicking same device, do nothing
-            selected_device_id = "-1";
-
-        } else {
-            $(" #fields div.id_model-" + selected_device_id).find( ".buttonset" ).hide();
-
-            // highlights device row and edit button
-            selected_device_id = device.id;
-
-            $( ".id_model-" + selected_device_id).addClass( "ui-state-active" );
-            $( ".id_model-" + selected_device_id).find( ".device_edit" ).addClass( "ui-state-active" );
-            $( "#device_id" ).html(selected_device_id)
-
-            // get reset form and put values in fields
-            $( form ).reset();
-            var form_content = $( form ).children();
-
-            // write the header of form
-            $( "#selected_device_id" ).html(selected_device_id);
-            $( "#selected_device_model" ).html(device.model.replace(/_/g, ' '));
-
-            // add model to form
-            $( form_content ).find( "#id_model" ).val(device.model);
-
-            // add values to fields and check if this field is required.
-            for (var key in device) {
-                $( form_content ).find( "#id_"+ key ).val(device[key]).removeClass('ui-state-hover');
-            };
-
-            // show form
-            $( form ).show();
-            $( "#device-form" ).show();
-        }
-
-
-    }
-
-    $(function() {
-        $( "div#device-list-content" ).tabs({cookie: { expires: 7, name: "device-list_cookie"}, cache: false});
-
-        $( "div#step-helper" ).dialog({
-                                title: 'How to use it?',
-                                resizable: false,
-                                height: 450,
-                                width: 550,
-              }).parent().hide();
-    });
-
-
-    // SELECT DEVICE TO CHANGE PARAMETERS
-    $( "tr.enabled" ).find( "td.selectable" ).live('click', function(e) {
-            e.preventDefault();
-            $( "#id_model option:first" ).attr('selected', 'selected');
-            var device = device_list[$(this).parent( ".enabled" ).attr('id').split("_")[1]];
-            setForm(device);
-    });
-
-    // DELETE DEVICE
-    $( "button#delete_devices_button" ).live('click', function(e) {
-            e.preventDefault();
-            $( this ).toggleClass( "ui-state-highlight" )
-                if ($( "table#device-table .delete" ).is(":visible") && $( "table#device-table .delete" ).find( "input" ).is(":checked")) {
-                $(".devices-form").submit();
-            } else {
-                $( "table#device-table tr:visible .delete" ).toggle();
-            };
-    });
-
-    // SAVE DEVICE
-    $( "button#save_devices_button" ).live('click', function(e) {
-            e.preventDefault();
-            $( "#device-form" ).hide();
-            var devices_json = JSON.stringify(device_list);
-            $.post('{% url device_commit network_obj.id %}',
-                    {'csrfmiddlewaretoken':"{{ csrf_token }}", 'devices_json':devices_json},
-                    function(data) {
-                            $( "#dialog-msg p" ).html("Loading... please wait'.");
-                            $( "#dialog-msg #loading_icon" ).show();
-                            $( "#dialog-msg" ).dialog({
-                                    height: 150,
-                                    resizable: false,
-                                    modal: true,
-                            });
-                            window.setTimeout(function() {
-                                window.location.href = '/network/{{network_obj.SPIC.group}}/{{network_obj.SPIC.local_id}}/'+ data.local_id +'/{{term}}'}, 1000);
-            }, 'json');
-    });
-
-    // GET HELP
-    $( "button#help_button" ).live('click',function(e) {
-        e.preventDefault();
-        $( "#step-helper" ).parent().slideToggle();
-    });
-
-    // CSV SAVE
-    $( "form#device_csv_form" ).live('submit',  function(e) {
-        e.preventDefault();
-
-        var form_data = $( this ).serialize();
-        var post_data = form_data.concat('&neuron_ids='+ JSON.stringify(neuron_ids));
-        $.post('{% url device_csv network_obj.id %}',
-            post_data , function(data){
-                if (data['valid'] == 1) {
-                    var current_url =  window.location.href.split('?')[0].split('#');
-                    window.location.href = current_url[0]
-                } else {
-                    errorsMsg = data['errorsMsg'];
-                    for (model_id in errorsMsg) {
-                        msg = errorsMsg[model_id];
-                        for (err in msg) {
-                            $( "#id_model-"+ model_id ).find( ".errorlist" ).html("<li>"+err+": "+msg[err]+"</li>")
-                        }
-                    }
-                };
-            }, 'json');
-    });
-
-
-//     $( "#fields .field-wrapper" ).live({
-//         mouseenter: function() {
-//             $(this).find( ".buttonset" ).show() 
-//         },
-//         mouseleave: function() {
-//             if (!($(this).find( "input.deviceCSV" ).hasClass( "ui-state-active"))) {
-//                 $(this).find( ".buttonset" ).hide()
-//             }
-//         }
-//     });
-
-//     $( ".device_help" ).live('click', function() {
-//         fieldwrapper = $( this ).parents( ".field-wrapper" );
-// 
-//         if ($(this).hasClass( "ui-state-active" )) {
-//             $(this).removeClass( "ui-state-active" );
-// 
-//             var valJSON = $( fieldwrapper ).find( "input.deviceJSON" ).attr( "value" ).split(/[\s;]+/);
-//             var csv = JSONtoCSV(valJSON);
-// 
-//             $( fieldwrapper ).find( "input.deviceJSON" ).hide();
-//             $( fieldwrapper ).find( "input.deviceCSV" ).val(csv.value.join('; ')).show();
-// 
-//         } else {
-//             $(this).addClass( "ui-state-active" );
-// 
-//             var valCSV = $( fieldwrapper ).find( "input.deviceCSV" ).attr( "value" );
-//             var keyCSV = $( fieldwrapper ).find( "input.deviceCSV" ).attr( "title" );
-// 
-//             if (keyCSV) {
-//                 var valJSON = CSVtoJSON(keyCSV, valCSV)
-// 
-//                 $( fieldwrapper ).find( "input.deviceCSV" ).hide();
-//                 $( fieldwrapper ).find( "input.deviceJSON" ).val(valJSON).show();
-//             }
-//         }
-//     })
-
-    $( ".device_edit" ).live('click', function() {
-        var fieldwrapper = $( this ).parents( ".field-wrapper" );
-        var valJSON = $( this ).parents( ".field-wrapper" ).find( "input.deviceJSON" ).attr( "value" );
-
-        if (valJSON != '') {
-            var valDict = JSON.parse(valJSON);
-
-            setForm(valDict);
-        } else {
-            alert('this is empty')
-        }
-        
-    })
-/*
-    $( ".device_trash" ).live('click', function(e) {
-        $( this ).parent( ".buttonset" ).slideUp();
-        $( this ).parents( ".field-wrapper" ).slideUp('fast').find( "input" ).val("");
-        last_device_id--
-    })
-
-    $( "#add_device_button" ).live('click', function(e) {
-        e.preventDefault();
-        var lastField = $( "#device_csv_form" ).find( ".field-wrapper:first")
-        last_device_id++
-        var newField = $( lastField ).clone().attr('id', 'id_model-'+ last_device_id).addClass('id_model-'+ last_device_id);
-        $( "#device_csv_form #fields" ).append(newField);
-        autocomplete($(newField).find( "input.deviceCSV" ));
-        $( newField ).slideDown();
-    });
-*/
-
-    // SELECT A DEVICE TO ADD
-    $( "select#id_model" ).live('change', function(e) {
-            e.preventDefault()
-            $( ".device-form:visible" ).hide();
-            $( "#device-form" ).hide();
-            $( "ul.errorlist" ).remove();
-            selected_device_id = last_device_id+1
-            $( "span#device_id" ).html(selected_device_id);
-            $( "tr.enabled" ).each(function() {
-                        if ($(this).attr('id') != selected_device_id && $(this).children("td").hasClass("ui-state-active")) {
-                            $(this).children("td").toggleClass("ui-state-active");
-                        }
-                });
-
-            var form = $( "#"+ $(this).val() );
-            if ($(this).val() != "") {
-                $( form ).reset().find( "#selected_device_id" ).html(selected_device_id).end()
-                    .find( "#id_model" ).attr('value', $(this).val()).end()
-                    .find( "#id_label" ).attr('value', $(this).val().replace("_", " ")).end()
-                    .find( "#id_id" ).attr('value', selected_device_id).end()
-                    .show();
-
-                $( "#device-form" )
-                    .find( "#selected_device_id" ).html(selected_device_id).end()
-                    .find( "#selected_device_model" ).html($(this).val().toString().replace(/_/g, ' ')).end()
-                    .show();
-            }
-    });
-
-    $(document).ready(function() {
-
-        $( "table#device-table tr" ).each(function(){
-                $( this ).addClass("tipTip-right");
-        });
-        $( "table th" ).each(function(){
-                $( this ).addClass("ui-state-default");
-        });
-        $( "table td" ).each(function(){
-                $( this ).addClass("ui-widget-content");
-        });
-        $( "table tr.enabled" ).hover(
-                function(){
-                    $( this ).children("td").addClass("ui-state-hover");
-                },function(){
-                    $( this ).children("td").removeClass("ui-state-hover");
-        });
-        $( "table tr.enabled" ).click(function(){
-                $( this ).children( "td" ).toggleClass("ui-state-active");
-        });
-
-        
-//         $("input.deviceCSV").each(function() {autocomplete(this)})
-
-        if (neuron_ids.length == 0) {
-            $( "#device-list" ).find( "#device-list-content" ).hide();
-        };
-
-        $( ".tipTip-top" ).tipTip({
-                delay: 1000,
-                defaultPosition: 'top',
-        });
-
-        $( ".tipTip-right" ).tipTip({
-                defaultPosition: 'right',
-        });
-
-        $( ".portlet-content" ).removeClass("ui-corner-all")
-
-    });
-</script>
-
-
 <div class="portlet" id="device-list">
 
     <div class="portlet-header" title="Hover a device to get more parameters or click a enabled device to modify it.">
-        Devices
+        <h3>
+            <span>Devices</span>
+            <div class="pull-right">
+                <button type="button" class="btn bing"><i class="icon-chevron-up"></i></button>
+                <button type="button" class="btn bing hide fade"><i class="icon-chevron-down"></i></button>
+            </div>
+        </h3>
     </div>
 
-    <div class="portlet-content" id="device-list-content">
-
-        <ul>
-            <li><a href="#device-table-tab">Table</a></li>
-            <li><a href="#csv-tab">CSV</a></li>
-<!--             <li><a href="#csv-lines-tab">CSV Lines</a></li> -->
+    <div class="portlet-body" id="device-list-content">
+        <ul class="nav nav-tabs tabs" id="device-tabs">
+            <li class="active">
+                <a href="#device-table-tab" data-toggle="tab">Table</a>
+            </li>
+            <li>
+                <a href="#csv-tab" data-toggle="tab">CSV</a>
+            </li>
         </ul>
 
+        <div class="tab-content">
+            <div id="device-table-tab" class="tab-pane active">
 
-        <div id="device-table-tab">
-            <form action="." method="POST" class="devices-form">
+                <form action="." method="POST" class="devices-form portlet-form">
 
-                {% csrf_token %}
-                <table id="device-table">
+                    {% csrf_token %}
+                    <table id="device-table" class="table table-striped table-hover table-bordered table-condensed">
 
-                    <thead>
-                        <tr title="">
-                            <th class="delete collapse"></th>
-                            <th>Id</th>
-                            <th>Device</th>
-                            <th>Targets</th>
-                            <th>Weight (pA)</th>
-                            <th>Delay (ms)</th>
-                        </tr>
-                    </thead>
+                        <thead>
+                            <tr>
+                                <th class="delete hide"></th>
+                                <th>ID</th>
+                                <th>Label</th>
+                                <th>Targets</th>
+                                <th>Status</th>
+<!--                                <th>Weight (pA)</th>-->
+<!--                                <th>Delay (ms)</th>-->
+                            </tr>
+                        </thead>
 
-                    <tbody>
-                        {% if network_obj.device_list|length > 0 %}
-                            {% for device in network_obj.device_list %}
-                                <tr class="id_model-{{device.id}} {% if network_obj.SPIC.group != "1" or device.type != "neuron" %} enabled {% endif %}"
-                                    title="{{ device|itemize:device.model|default_if_none:'no status' }}" id="device_{{ forloop.counter0 }}">
+                        <tbody>
+                            {% if network_obj.device_list|length > 0 %}
+                                {% for node in network_obj.nodes %}
+                                    <tr class="{% if network_obj.SPIC.group != "1" or node.type != "neuron" %} enabled {% endif %}"id="node_{{ node.id }}">
 
-                                    <td class="id_model-{{device.id}} delete collapse">
-                                        <input type="checkbox" name="device_ids" value="{{ device.id }}" {% if network_obj.SPIC.group == "1" and device.type == "neuron" %} disabled {% endif %}>
-                                    </td>
+                                        <td class="node_{{ node.id }} delete hide">
+                                            <input type="checkbox" name="device_ids" value="{{ node.id }}" {% if network_obj.SPIC.group == "1" and node.type == "neuron" %} disabled {% endif %}>
+                                        </td>
 
-                                    <td class="id_model-{{device.id}} selectable id"><b>{{ device.id }}</b></td>
+                                        <td class="node_{{ node.id }}"><b>{{ node.id }}</b></td>
 
-                                    <td class="id_model-{{device.id}} selectable model {% if network_obj.SPIC.group == "1" and device.type == "neuron" %} disabled {% endif %}" style="width: 10em">
-                                        {% if network_obj.SPIC.group == "1" and device.type == 'neuron' %}
-                                            Neuron
-                                        {% else %}
-                                            {{ device.label|title }}
-                                        {% endif %}
-                                    </td>
+                                        <td class="node_{{ node.id }} {% if network_obj.SPIC.group == "1" and node.type == "neuron" %} disabled {% endif %}">
+                                            {% if network_obj.SPIC.group == "1" and node.type == 'neuron' %}
+                                                Neuron
+                                            {% else %}
+                                                {{ node.label }}
+                                            {% endif %}
+                                        </td>
 
-                                    <td class="id_model-{{device.id}} selectable targets">
-                                        {% if device.targets %}
-                                                {{ device.targets|truncate:"15"}}
-                                        {% else %}
-                                                {{ device.sources|truncate:"15"}}
-                                        {% endif %}
-                                    </td>
+                                        <td class="node_{{ node.id }} targets"></td>
 
-                                    <td class="id_model-{{device.id}} selectable weight">{{ device.weight|truncate:"9" }}</td>
-                                    <td class="id_model-{{device.id}} selectable delay">{{ device.delay|truncate:"9" }}</td>
+                                        <td>
+                                            {% for key, value in node.status.items %}
+                                                {% ifnotequal key 'model' %}
+                                                    {% if not forloop.first %}, <span class="{{ key }}">{% endif %}{{ key }}: {{ value|truncate_float:"2" }}<span>
+                                                {% endifnotequal %}
+                                            {% endfor %}
+                                        </td>
 
-                                </tr>
-                            {% endfor %}
-                        {% endif %}
+                                    </tr>
+                                {% endfor %}
+                            {% endif %}
 
-                        <tr class="collapse">
-                            <td class="delete collapse"></td>
-                            <td class="selectable id"></td>
-                            <td class="selectable model"></td>
-                            <td class="selectable targets"></td>
-                            <td class="selectable weight"></td>
-                            <td class="selectable delay"></td>
-                        </tr>
+                            <tr class="hide">
+                                <td class="delete hide"></td>
+                                <td class="selectable id"></td>
+                                <td class="selectable model"></td>
+                                <td class="selectable targets"></td>
+                                <td class="selectable weight"></td>
+                                <td class="selectable delay"></td>
+                            </tr>
 
-                    </tbody>
+                        </tbody>
 
-                </table>
+                    </table>
 
-                <div class="buttons" style="font-size:1em">
-                    <button class="delete" id="delete_devices_button">Delete</button>
-                    <button class="check" id="save_devices_button">Save</button>
-                    <button class="help" id="help_button">Help</button>
-                </div>
+                </form>
+            </div>
 
-            </form>
-        </div>
+            <div id="csv-tab" class="csv-tab tab-pane">
 
-        <div id="csv-tab">
-            <form action="." method="POST" id="uploadfile_form" enctype="multipart/form-data">
-                {% csrf_token %}
+                <form action="." method="POST" id="csv_form" class="portlet-form">
+                    {% csrf_token %}
 
-                <div id="device-csv-form-content">
-                    {{ uploadfile_form.as_div }}
-                </div>
+                    <div class="portlet-body">
 
-            </form>
-
-            <form action="." method="POST" id="csv_form">
-                {% csrf_token %}
-
-                <div id="device-csv-form-content">
-                    {{ device_csv_form.as_div }}
-                </div>
-
-                <div class="buttons">
-                    <button type="submit" id="save_csv_button">Save</button>
-                    <button type="reset" id="reset_button">Reset</button>
-                </div>
-
-            </form>
-        </div>
-<!--
-        <div id="csv-lines-tab">
-            <form action="." method="POST" id="device_csv_form">
-                {% csrf_token %}
-
-                <div id="fields" style="width:100%">
-
-                    <div class="field-wrapper" title="" style="display:none">
-
-                        <div class="buttonset">
-
-                            <div class="ui-widget-content ui-corner-right device_trash tipTip-bottom" title="remove this device">
-                                <span class="ui-icon ui-icon-trash" ></span>
-                            </div>
-
-                            <div class="ui-widget-content device_edit tipTip-bottom" title="toggle form view">
-                                <span class="ui-icon ui-icon-pencil"></span>
-                            </div>
-
-                            <div class="ui-widget-content device_help tipTip-bottom" title="toggle help view">
-                                <span class="ui-icon ui-icon-help"></span>
-                            </div>
-
+                        <div id="device-csv-form-content">
+                            {{ device_csv_form.as_div }}
                         </div>
-
-                        <ul class="errorlist"></ul>
-                        <input class="deviceCSV" value="" title=""></input>
-                        <input class="deviceJSON" value="" style="display:none"></input>
 
                     </div>
 
-                    {% for device in network_obj.device_csv_list %}
-
-                        <div class="field-wrapper blue id_model-{{ device.id }}" title="" id="id_model-{{ device.id }}">
-
-                            <div class="buttonset">
-
-                                <div class="ui-widget-content ui-corner-right device_trash tipTip-bottom" title="remove this device">
-                                    <span class="ui-icon ui-icon-trash" ></span>
-                                </div>
-
-                                <div class="ui-widget-content device_edit tipTip-bottom" title="toggle form view">
-                                    <span class="ui-icon ui-icon-pencil"></span>
-                                </div>
-
-                                <div class="ui-widget-content device_help tipTip-bottom" title="toggle help view">
-                                    <span class="ui-icon ui-icon-help"></span>
-                                </div>
-
-                            </div>
-
-                            <ul class="errorlist"></ul>
-                            <input class="deviceCSV" value="{{ device.valList|join:'; ' }}" title="{{ device.keyList|join:'; ' }}" style="width:96%; float:none"></input>
-                            <input class="deviceJSON" value="{{ device.valJSON }}" name="model_id-{{ device.id }}" style="display:none; width:96%; float:none"></input>
-
-                        </div>
-
-                    {% endfor %}
-
-                </div>
-
-                <div class="buttons">
-                    <button type="submit" id="save_device_csv_button">Save</button>
-                    <button type="reset" id="reset_button">Reset</button>
-                    <button type="submit" id="add_device_button" >Add device</button>
-                </div>
-
-            </form>
-        </div>-->
-
-        <ul class="messagelist" id="device-message"></ul>
-
-    </div>
-
-    <div class="portlet-content" id="device-form-content">
-        <div class="field-wrapper" title="">
-
-            <label for="id_model">Add a device:</label>
-            <select id="id_model">
-
-                <option value="">--- select a device ---</option>
-
-                {% for device in device_choices %}
-                    <option value="{{device.id_model}}" style="color:{% ifequal device.model_type 'neuron' %}#6B4226{% else %}#467ab3{% endifequal %}">{{device.id_model|label_escape}}</option>
-                {% endfor %}
-
-            </select>
+                </form>
+            </div>
 
         </div>
+
+        <ul class="messagelist" id="device-message"></ul>
+    </div>
+
+    <div class="portlet-footer">
+
+<!--            <div id="id_model" class="btn-group pull-right">-->
+<!--                <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" href="#">-->
+<!--                    Add a device-->
+<!--                    <span class="caret"></span>-->
+<!--                </a>-->
+
+<!--                <ul class="dropdown-menu">-->
+<!--                    {% for device in device_choices %}-->
+<!--                        <li value="{{ device.id_model }}"><a tabindex="-1" href="#">{{device.id_model|label_escape}}</a></li>-->
+<!--                    {% endfor %}-->
+<!--                </ul>-->
+<!--            </div>-->
+
+
+        <div id="tabs-container-2" class="tab-content">
+            <div class="tab-pane active">
+                <div class="btn-group">
+                    <button type="button" id="delete_devices_button" class="btn btn-primary">Delete</button>
+                    <button type="button" id="save_devices_button" class="btn btn-primary">Save</button>
+                    <button href="#step-helper" role="button" class="btn btn-primary" data-toggle="modal">Help</button>
+                </div>
+            </div>
+
+            <div class="tab-pane">
+                <div class="btn-group">
+                    <button type="submit" id="save_csv_button" class="btn btn-primary">Save</button>
+                    <button type="reset" id="reset_button" class="btn btn-primary">Reset</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
 </div>
 
 
-<div class="ui-dialog" id="step-helper">
-    <h2 class="delimiter">Seven steps to work with SPIC</h2>
 
-    <ol>
-        <li>Add <b>new devices</b> and set their status.</li>
-        <li>Once done, save the <b>device table</b>.</li>
-        <li>Explore the <b>network layout</b>.</li>
-        <li>Explore the <b>connectivity matrix</b>.</li>
-        <li>Modify <b>the devices</b> if necessary save the table.</li>
-        <li>Run the <b>simulation</b>.</li>
-        <li>View the <b>results</b>.</li>
-    </ol>
+<div class="portlet">
+    <div class="portlet-body" id="device-form-content">
+        <select id="id_model" style="float:right">
 
-    Each successful simulation appears in the history list. The same list can be used to retrieve past simulations together with the results.
-    The recorded events (spikes, membrane potential etc.) are plotted online. They can also be downloaded as text files.
+            <option value="" >--- select a device ---</option>
 
-    <h4>Optional:</h4>
-    Add comments to each simulation describing what you did it, why you did it, what were the results etc. This will help also when retrieving old simulations.
+            {% for device in device_choices %}
+                <option value="{{device.id_model}}" style="color:{% ifequal device.model_type 'neuron' %}#6B4226{% else %}#467ab3{% endifequal %}">{{device.id_model|label_escape}}</option>
+            {% endfor %}
 
-    <p>Give some feedback in the forum.</p>
+        </select>
+
+        <label for="id_model" style="margin: 5px">Add a device:</label>
+    </div>
+
+</div>
+
+<div id="step-helper" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="myModalLabel">Seven steps to work with SPIC</h3>
+    </div>
+
+    <div class="modal-body">
+        <p>
+            <ol>
+                <li>Add <b>new devices</b> and set their status.</li>
+                <li>Once done, save the <b>device table</b>.</li>
+                <li>Explore the <b>network layout</b>.</li>
+                <li>Explore the <b>connectivity matrix</b>.</li>
+                <li>Modify <b>the devices</b> if necessary save the table.</li>
+                <li>Run the <b>simulation</b>.</li>
+                <li>View the <b>results</b>.</li>
+            </ol>
+
+            Each successful simulation appears in the history list. The same list can be used to retrieve past simulations together with the results.
+            The recorded events (spikes, membrane potential etc.) are plotted online. They can also be downloaded as text files.
+
+            <h4>Optional:</h4>
+            Add comments to each simulation describing what you did it, why you did it, what were the results etc. This will help also when retrieving old simulations.
+
+            <p>Give some feedback in the forum.</p>
+        </p>
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    </div>
 
 </div>
 

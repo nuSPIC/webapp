@@ -10,21 +10,18 @@
                 {% if field.is_hidden %}
                     {{ field }}
                 {% else %}
-                    <div class="field-wrapper" title="{{ field.help_text }}" >
-
-                        {{ field.label_tag }}
+                <div class="fieldWrapper control-group hide fade {% if field.help_text %}input-append{% endif %} ">
+                    <label class="control-label" for="{{ field.auto_id }}">{{ field.label }}</label>
+                    <div class="controls">
                         {{ field.errors }}
-
-                        <div class="field-input" style="height:23px">
+                        <ul class="errorlist hide fade"></ul>
+                        <div>
                             {{ field }}
-                        {% if field.help_text %}
-                            <div class="ui-widget-content device_help tipTip-bottom" title="{{ field.help_text }}" style="display:inline-block; vertical-align: middle">
-                                <span class="ui-icon ui-icon-help" style="vertical-align: middle" ></span>
-                            </div>
-                        {% endif %}
+                            {% if field.help_text %}<span class="add-on" value="{{ field.help_text }}">?</span>{% endif %}
                         </div>
-
+                        <span class="help_text">{{ field.help_text }}</span>
                     </div>
+                </div>
                 {% endif %}
             {% endfor %}
 

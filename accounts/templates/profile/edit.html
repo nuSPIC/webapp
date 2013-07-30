@@ -2,114 +2,109 @@
 
 {% block title %}{{ profile.user.get_full_name }} &raquo; Edit profile{% endblock %}
 
-{% block extrahead %}
-    <style type="text/css">
-        .field-box {
-            width: 95%;
-        }
-    </style>
-{% endblock %}
-
 {% block content %}
-    <h2>Edit profile</h2>
-    
-    <form action="." method="post" id="profile-edit-form">
-        {% csrf_token %}
-        
-        <fieldset>
-            <legend>Required fields</legend>
-            {% csrf_token %}
+    <form action="." method="post" class="form-horizontal" id="profile-edit-form">
+    {% csrf_token %}
+
+        <h2>Edit profile</h2>
+        <hr>
+
+        <div>
+            <h4>Required fields</h4>
+
             {{ user_form.non_field_errors }}
-            
+            {{ user_form.id }}
+
             {% for field in user_form %}
-                <div class="field-wrapper">
-                        <div class="label_tag">
-                            {{ field.label_tag }}:
+                <div class="fieldWrapper control-group">
+                    <label class="control-label" for="{{ field.auto_id }}">{{ field.label }}</label>
+                    <div class="controls">
+                        <div class="{% if field.help_text %}input-append{% endif %}">
+                            {{ field }}
+                            {% if field.help_text %}<span class="add-on">?</span>{% endif %}
                         </div>
-
+                        <span class="help_text">{{ field.help_text }}</span>
                         {{ field.errors }}
-                    <div class="field-box">
-                        {{ field }}
                     </div>
-
-                    <button class="help_text" {% if field.help_text %} title="{{ field.help_text }}" {% else %} disabled {% endif %}>?</button>
                 </div>
             {% endfor %}
-        </fieldset>
-    
-        <fieldset>
-            <legend>Optional fields</legend>
-            
+
+        </div>
+
+        <hr>
+
+        <div>
+            <h4>Optional fields</h4>
+
             {{ profile_form.non_field_errors }}
             {{ profile_form.id }}
 
-            <div class="field-wrapper">
-                <div class="label_tag">
-                    {{ profile_form.present_occupation.label_tag }}:
+            <div class="fieldWrapper control-group">
+                <label class="control-label" for="{{ profile_form.present_occupation.auto_id }}">{{ profile_form.present_occupation.label }}</label>
+                <div class="controls">
+                    {{ profile_form.present_occupation }}
+                    {{ profile_form.present_occupation.errors }}
                 </div>
-                {{ profile_form.present_occupation.errors }}
-                {{ profile_form.present_occupation }}
-                <span class="help_text">{{ profile_form.present_occupation.help_text }}</span>
             </div>
 
-            <div class="field-wrapper">
-                <div class="label_tag">
-                    {{ profile_form.academic_affiliation.label_tag }}:
+            <div class="fieldWrapper control-group">
+                <label class="control-label" for="{{ profile_form.academic_affiliation.auto_id }}">{{ profile_form.academic_affiliation.label }}</label>
+                <div class="controls">
+                    <div class="{% if profile_form.academic_affiliation.help_text %}input_append{% endif %}">
+                        {{ profile_form.academic_affiliation }}
+                        {% if profile_form.academic_affiliation.help_text %}<span class="add-on">?</span>{% endif %}
+                    </div>
+                    <span class="help_text">{{ user_form.academic_affiliation.help_text }}</span>
+                    {{ profile_form.academic_affiliation.errors }}
                 </div>
-
-                {{ profile_form.academic_affiliation.errors }}
-                <div class="field-box">
-                    {{ profile_form.academic_affiliation }}
-                </div>
-
-                <button class="help_text" {% if profile_form.academic_affiliation.help_text %} title="{{ profile_form.academic_affiliation.help_text }}" {% else %} disabled {% endif %}>?</button>
             </div>
 
-            <div class="field-wrapper">
-                <div class="label_tag">
-                    {{ profile_form.public_email.label_tag }}:
+            <div class="fieldWrapper control-group">
+                <label class="control-label" for="{{ profile_form.public_email.auto_id }}">{{ profile_form.public_email.label }}</label>
+                <div class="controls">
+                    <div class="{% if profile_form.public_email.help_text %}input-append{% endif %}">
+                        {{ profile_form.public_email }}
+                        {% if profile_form.public_email.help_text %}<span class="add-on">?</span>{% endif %}
+                    </div>
+                    <span class="help_text">{{ user_form.public_email.help_text }}</span>
+                    {{ profile_form.public_email.errors }}
                 </div>
-
-                {{ profile_form.public_email.errors }}
-                <div class="field-box">
-                    {{ profile_form.public_email }}
-                </div>
-
-                <button class="help_text" {% if profile_form.public_email.help_text %} title="{{ profile_form.public_email.help_text }}" {% else %} disabled {% endif %}>?</button>
             </div>
 
-            <div class="field-wrapper">
-                <div class="label_tag">
-                    {{ profile_form.web_page.label_tag }}:
+            <div class="fieldWrapper control-group">
+                <label class="control-label" for="{{ profile_form.web_page.auto_id }}">{{ profile_form.web_page.label }}</label>
+                <div class="controls">
+                    <div class="{% if profile_form.web_page.help_text %}input-append{% endif %}">
+                        {{ profile_form.web_page }}
+                        {% if profile_form.web_page.help_text %}<span class="add-on">?</span>{% endif %}
+                    </div>
+                    <span class="help_text">{{ user_form.web_page.help_text }}</span>
+                    {{ profile_form.web_page.errors }}
                 </div>
-
-                {{ profile_form.web_page.errors }}
-                <div class="field-box">
-                    {{ profile_form.web_page }}
-                </div>
-
-                <button class="help_text" {% if profile_form.web_page.help_text %} title="{{ profile_form.web_page.help_text }}" {% else %} disabled {% endif %}>?</button>
             </div>
 
-
-            <div class="field-wrapper">
-                <div class="label_tag">
-                    {{ profile_form.notes.label_tag }}:
+            <div class="fieldWrapper control-group">
+                <label class="control-label" for="{{ profile_form.notes.auto_id }}">{{ profile_form.notes.label }}</label>
+                <div class="controls">
+                    {{ profile_form.notes }}
                 </div>
                 {{ profile_form.notes.errors }}
-                {{ profile_form.notes }}
-                <span class="help_text">{{ profile_form.notes.help_text }}</span>
             </div>
 
-            <div class="field-wrapper">
-                <span class="label_tag">
-                    {{ profile_form.forum_email_notification.label_tag }}:
-                </span>
-                {{ profile_form.forum_email_notification }}
-                <span class="help_text">{{ profile_form.forum_email_notification.help_text }}</span>
+            <div class="fieldWrapper control-group">
+                <div class="controls">
+                    <label class="checkbox">
+                        {{ profile_form.forum_email_notification }}{{ profile_form.forum_email_notification.label }}
+                    </label>
+                </div>
             </div>
-        </fieldset>
-        
-        <input type="submit" value="Save" />
+
+        </div>
+
+        <div class="fieldWrapper control-group">
+            <div class="controls">
+                <button type="submit" class="btn"/>Save</button>
+            </div>
+        </div>
     </form>
 {% endblock %}

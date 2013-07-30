@@ -7,45 +7,13 @@
 {% block title %}Discussions &raquo; {{ forum.name }} &raquo; {{ topic.name }} &raquo; Post edit{% endblock %}
 
 {% block extrahead %}
-<link href="{{ MEDIA_URL }}css/forum.css" type="text/css" rel="stylesheet" />
-
-<script type="text/javascript" src="{{ MEDIA_URL }}js/effects.core.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}js/effects.highlight.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.scrollto.js"></script>
-
-<script type="text/javascript" language="javascript">
-//<![CDATA[
-	$(document).ready(function(){
-        // Hidden text collapse toggle
-        $('.hidden-header').live('click', function(e){
-            $(this).next('.hidden-text').toggle();
-        });
-        
-        // Preview
-        $('#preview_button').click(function(e){
-            e.preventDefault();
-            $(this).addClass('disabled');
-            $(this).text('Wait...');
-            
-            $.post(
-                '{% url post_preview %}',
-                $('#edit_post_form').serialize(),
-                function(data){
-                    $('#preview').html(data).scrollTo(500);
-                    $('#preview_button').removeClass('disabled');
-                    $('#preview_button').text('Preview');
-                    $('#preview_button').data('executing', false);
-                },
-                'html'
-            );
-        });
-	});
-//]]>
-</script>
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/forum.css?n" />
 {% endblock %}
 
 {% block content %}
-    <h2 class="delimiter">Edit post</h2>
+    <h2>Edit post</h2>
+    <hr>
+
     <div class="breadcrumbs">&raquo; <a href="{% url forum %}">Discussions</a> &raquo; <a href="{{ forum.get_absolute_url }}">{{ forum.name }}</a> &raquo; <a href="{{ topic.get_absolute_url }}">{{ topic.name }}</a></div>
     
     <div id="preview"></div>
@@ -65,13 +33,49 @@
         <div class="body">
             <form action="." method="post" id="edit_post_form">
                 {% csrf_token %}
-                {% post_editor post_form %}
+<!--                {% post_editor post_form %_}-->
+                {{ post_form }}
                 
-                <div class="buttons">
-                    <input type="submit" value="Save post" />
-                    <input type="submit" value="Preview" id="preview_button" />
+                <div class="btn-group">
+                    <button type="submit" class="btn">Save post</button>
+                    <button type="submit" class="btn" id="preview_button">Preview</button>
                 </div>
             </form>
         </div>
     </div>
+{% endblock %}
+
+{% block extrascript %}
+<script src="{{ MEDIA_URL }}/js/plugins/jquery.sceditor.bbcode.min.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/plugins/jquery.scrollto.js"></script>
+
+<script type="text/javascript" language="javascript">
+//<![CDATA[
+	$(document).ready(function(){
+        // Hidden text collapse toggle
+        $('.hidden-header').on('click', function(e){
+            $(this).next('.hidden-text').toggle();
+        });
+
+        // Preview
+        $('#preview_button').click(function(e){
+            e.preventDefault();
+            $(this).addClass('disabled');
+            $(this).text('Wait...');
+
+            $.post(
+                '{% url post_preview %}',
+                $('#edit_post_form').serialize(),
+                function(data){
+                    $('#preview').html(data).scrollTo(500);
+                    $('#preview_button').removeClass('disabled');
+                    $('#preview_button').text('Preview');
+                    $('#preview_button').data('executing', false);
+                },
+                'html'
+            );
+        });
+	});
+//]]>
+</script>
 {% endblock %}

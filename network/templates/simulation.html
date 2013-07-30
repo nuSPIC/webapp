@@ -1,223 +1,73 @@
-<script type="text/javascript">
-    // LOOPING REQUEST FOR SIMULATION PROGRESS
-    var get_task_status = function() {
-        $.getJSON('/status/'+task_id+'/?', function(data) {
-                var task = data['task'];
-                var status = task['status'];
-                $( "#task_status" ).html(status);
-                if (status == 'PENDING') {
-                    window.setTimeout(function() {get_task_status()}, 2000);
-                } else {
-                    $( "#submit-network-form" ).attr("disabled", false);
-                    if (status == 'ABORTED') {
-                        $( "#task_status" ).html('ABORT');
-                        $( "#dialog-msg p" ).html("Simulation was aborted.");
-                        $( "#dialog-msp" ).dialog({
-                                buttons: {
-                                    ok: function() {
-                                        $( this ).dialog( "close" );
-                                        $( "#dialog-loading" ).dialog({
-                                                title: 'Loading... please wait.',
-                                                resizable: false,
-                                                modal: true,
-                                        });
-                                        window.location.reload();
-                                    }
-                                },
-                        });
-                    } else if (status == 'FAILURE') {
-                        $( "#task_status" ).html('Simulation failure.').effect("highlight", {}, 1000);
-                        var result = task['result'];
-                        $( "#dialog-msg p" ).html("Simulation failed.");
-                        $( "#dialog-msg" ).dialog({
-                                buttons: {
-                                    ok: function() {
-                                        $( this ).dialog( "close" );
-                                        $( "#dialog-loading" ).dialog({
-                                                title: 'Loading... please wait.',
-                                                resizable: false,
-                                                modal: true,
-                                        });
-                                        window.location.reload();
-                                    }
-                                },
-                        });
-                    } else if (status == 'SUCCESS') {
-                        $( "#dialog-msg p" ).html("Simulation was finished successfully.");
-                        $( "#dialog-msg" ).dialog( {
-                                buttons: {},
-                        });
-                        var result = task['result'];
-                        window.setTimeout(function() {
-                            window.location.href = '/network/{{SPIC_obj.group}}/{{SPIC_obj.local_id}}/' + local_id +'/{{term}}'
-                        }, 1000);
-                    };
-                }
-        });
-    };
-
-    var save_and_simulate = function () {
-        $( "#submit-network-form" ).attr("disabled", true);
-        var form = $( "#network-form" ).serialize();
-        var devices_json = JSON.stringify(device_list);
-        var post_data = form.concat('&devices_json='+ devices_json);
-        $.post('/network/ajax/'+ {{ network_obj.id }} +'/simulate/',
-            post_data, function(data){
-                if (data.valid == -1) {
-                    $( ".network-form-content" ).html(data.responseHTML);
-                    $( "#submit-network-form" ).removeClass("disabled");
-                } else if (data.recorded == 1) {
-                    $( "#dialog-msg p" ).html("This network is already simulated.");
-                    $( "#dialog-msg #loading_icon" ).hide();
-                    $( "#dialog-msg" ).dialog({
-                            resizable: false,
-                            width: 400,
-                            modal: true,
-                            buttons: {
-                                ok: function() {
-                                    $( this ).dialog( "close" );
-                                    $( "#submit-network-form" ).attr("disabled", false);
-                                }
-                            }
-                    });
-                } else {
-                    $( "#dialog-msg p" ).html("This network has started.");
-                    $( "#dialog-msg #loading_icon" ).show();
-                    $( "#dialog-msg" ).dialog({
-                            resizable: false,
-                            height: 200,
-                            width: 400,
-                            modal: true,
-                            buttons: {
-                                'Abort': function() {
-                                    $.get('/network/ajax/'+ task_id +'/abort/',
-                                        function() {
-                                            $( this ).dialog( "close" );
-                                            get_task_status();
-                                    });
-                                }
-                            }
-                    });
-                    task_id = data.task_id;
-                    $( "#task_id" ).html(task_id);
-                    local_id = data.local_id;
-                    get_task_status();
-                };
-        }, 'json');
-    };
-
-
-    $( "form#network-form" ).live('submit',  function(e) {
-            e.preventDefault();
-            $( "#dialog-msg #loading_icon" ).hide();
-            if (connect_to_output.length <1) {
-                $( "#dialog-msg p" ).html('No <b>recording device</b> connected. <h4>Do you want to continue?</h>');
-                $( "#dialog-msg" ).dialog({
-                        resizable: false,
-                        height: 190,
-                        width: 350,
-                        modal: true,
-                        buttons: {
-                            "Yeah": function() {
-                                $( this ).dialog( "close" );
-                                save_and_simulate();
-                            },
-                            "Abort": function() {
-                                $( this ).dialog( "close" );
-                            },
-                        },
-                });
-            } else if (connect_to_input.length <1) {
-                $( "#dialog-msg p" ).html('No <b>input device</b> connected. Network may be silent. <h4>Do you want to continue?</h>');
-                $( "#dialog-msg" ).dialog({
-                        resizable: false,
-                        height: 190,
-                        width: 350,
-                        modal: true,
-                        buttons: {
-                            "Yeah": function() {
-                                $( this ).dialog( "close" );
-                                save_and_simulate();
-                            },
-                            "Abort": function() {
-                                $( this ).dialog( "close" );
-                            },
-                        },
-                });
-            } else if ($( "#id_duration" ).val() > 5000.0) {
-                $( "#dialog-msg p" ).html('<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>The simulation lasts more than 5 seconds and it could have a speed effect on page loading time.<h4>Are you sure?</h4>')
-                $( "#dialog-msg" ).dialog({
-                        resizable: false,
-                        height: 210,
-                        width: 380,
-                        modal: true,
-                        buttons: {
-                            "Yeah": function() {
-                                $( this ).dialog( "close" );
-                                save_and_simulate();
-                            },
-                            "Abort": function() {
-                                    $( this ).dialog( "close" );
-                            },
-                        },
-                });
-            } else {
-                save_and_simulate()
-            }
-    });
-</script>
-
-<form action="." method="POST" class="portlet" id="network-form">
-    <div class="portlet-header" title="Before you start it, be sure that you have saved devices.">
-        Simulation
-    </div>
-
-    <div class="portlet-content">
+<div class="portlet">
+    <form action="." method="POST" class="form-horizontal" id="network-form">
         {% csrf_token %}
 
-        <div class="network-form-content">
-            {% if network_form.fieldsets %}
-                {% for fieldset in network_form.fieldsets %}
-                    {% if forloop.first %}
-                        <div class="{{ fieldset.classes }}">
+        <div class="portlet-header" title="Before you start it, be sure that you have saved devices.">
+            <h3>
+                <span>Simulation</span>
+                <div class="pull-right">
+                    <button type="button" class="btn bing"><i class="icon-chevron-up"></i></button>
+                    <button type="button" class="btn bing hide fade"><i class="icon-chevron-down"></i></button>
+                </div>
+            </h3>
+        </div>
 
-                            {% if fieldset.description %}
-                                <p class="description">{{ fieldset.description }}</p>
-                            {% endif %}
+        <div class="portlet-body">
 
-                            <div class="field-wrapper">
-                                <div class="label_tag">
-                                    {{ fieldset.form.duration.label_tag }}:
-                                </div>
+            {% for hidden in network_form.hidden_fields %}
+                {{ hidden }}
+            {% endfor %}
 
-                                {{ fieldset.form.duration.errors }}
-                                <div class="field-box">
-                                    {{ fieldset.form.duration }}
-                                </div>
-
-                                <button class="help_text" {% if fieldset.form.help_text %} title="{{ fieldset.form.help_text }}" {% else %} disabled {% endif %}>?</button>
-                            </div>
-
-                            <div class="field-wrapper">
-                                <span class="label_tag">
-                                    {{ fieldset.form.same_seed.label_tag }}:
-                                </span>
-
-                                {{ fieldset.form.same_seed }}
-                                <span class="help_text">{{ fieldset.form.same_seed.help_text }}</span>
-                            </div>
-
-                        </div>
+            <div class="control-group fieldWrapper {% if network_form.duration.help_text %}input-append{% endif %}">
+                <label class="control-label" for="{{ network_form.duration.auto_id }}">{{ network_form.duration.label }}</label>
+                <div class="controls">
+                    {{ network_form.duration }}
+                    {% if network_form.duration.help_text %}
+                        <span class="add-on">?</span>
                     {% endif %}
-                {% endfor %}
-            {% else %}
-                {{ network_form.as_div }}
-            {% endif %}
+                </div>
+                <ul class="errorlist hide fade"></ul>
+                <div class="help-text hide fade">{{ network_form.duration.help_text }}</div>
+            </div>
+
+            <div class="control-group fieldWrapper">
+                <label class="control-label" for="{{ network_form.same_seed.auto_id }}">{{ network_form.same_seed.label }}</label>
+                <div class="controls">
+                    {{ network_form.same_seed }}
+                </div>
+            </div>
+
         </div>
 
-        <div class="buttons">
-            <button type="submit" class="play" id="submit-network-form">Save & simulate</button>
-            <div style="float:right" id="task_status"></div>
+        <div class="portlet-footer">
+            <div class="buttons">
+                <button type="submit" class="btn btn-primary" data-loading-text="Loading..." id="submit-network-form" >Save & simulate</button>
+                <span>
+                    {{ network_form.overwrite }}
+                    <label for="{{ network_form.overwrite.auto_id }}" style="display:inline; vertical-align: middle">{{ network_form.overwrite.label }}</label>
+                </span>
+            </div>
         </div>
+
+    </form>
+
+</div>
+
+<div id="dialog-msg" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="dialog-msg-label" aria-hidden="true">
+
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 id="dialog-msg-title">Network messenger</h3>
     </div>
-</form>
+
+    <div class="modal-body">
+        <div class="logo-animation"><img src="/media/images/icons/bcf_logo-animation.gif" ></div>
+        <div class="msg-content"></div>
+    </div>
+
+    <div class="modal-footer">
+        <a href="#" class="btn btn-primary" onclick="simulate()">Yeah!</a>
+        <a href="#" class="btn" data-dismiss="modal" >No</a>
+        <span id="task_status" class="label label-info"></span>
+    </div>
+</div>

@@ -25,7 +25,7 @@ STATUS_FIELDS = {
 }
 
 def networkx(edgelist, layout='neato'):
-    ''' Return position of neurons in network. '''      
+    ''' Return position of neurons in network. '''
     G = nx.DiGraph()
     G.add_edges_from(edgelist)
     return nx.graphviz_layout(G, layout)

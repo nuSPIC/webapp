@@ -1,280 +1,52 @@
 {% if network_obj.is_recorded %}
-<style>
-
-.spikeDetector, #spikeDetectorView {
-  font: 10px sans-serif;
-}
-
-.dot {
-  fill: black;
-}
-
-.x line, .y line {
-  fill: none;
-  stroke: #eee;
-}
-
-.bar rect {
-  shape-rendering: crispEdges;
-}
-
-.axis path, .axis line {
-  fill: none;
-  stroke: #ccc;
-  shape-rendering: crispEdges;
-}
-
-.bins:hover {
-    cursor: pointer;
-    color: #ccc;
-}
-
-</style>
-
-    {% if network_obj.has_spike_detector %}
-        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3.raster_plot.js"></script>
-        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3.histogram.js"></script>
-        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3.correlation.js"></script>
-        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3.spike_detector.js?ver=1.1"></script>
-
-    {% endif %}
-
-    <script type="text/javascript">
-
-        $(function() {
-
-                $( "div#results-tabs" ).tabs({cookie: { expires: 7, name: "results-cookie"}, cache: false});
-
-        });
-
-        {% if network_obj.has_voltmeter %}
-
-            function voltmeter_enlarge(target_id) {
-                $( ".resultView" ).attr('src', '/network/ajax/{{ network_obj.pk }}/voltmeter/?neuron='+ target_id);
-                $( ".resultView" ).css('height', 400);
-
-                $( "#dialog-resultView" ).dialog({
-                        title: 'Voltmeter view of Neuron ['+ target_id +']',
-                        height: 470,
-                        width: 800,
-//                         modal: true,
-                });
-            };
-
-            $( "button#reload" ).live('click', function(e) {
-                    $( "div#VoltmeterThumbnail" ).html('<iframe src="{% url voltmeter_thumbnail network_obj.pk %}"> </iframe>');
-            });
-
-            $( "select#voltmeter-select" ).live('change',function(e) {
-                    voltmeter_enlarge($(this).val())
-                    $( "#voltmeter-select option:first" ).attr('selected', 'selected');
-            });
-
-        {% endif %}
-
-
-        {% if network_obj.has_spike_detector %}
-            var times = spike_detector_data['times'],
-                senders = spike_detector_data['senders'],
-                simTime = spike_detector_data['simTime'],
-                neurons = spike_detector_data['neurons'];
-
-            var bins = 50;
-            var binwidth = simTime/bins;
-            var val1 = val2 = 1;
-
-            var x = d3.scale.linear()
-                .domain([0, 1000.])
-                .range([0, 1.]);
-
-            var hist = d3.layout.histogram()
-                .bins(x.ticks(bins));
-
-            var spikes = {}, array = {};
-            for (var i=0; i<senders.length; i++) {
-                if ( senders[i] in spikes ) {
-                    spikes[senders[i]].push(times[i])
-                } else {
-                    spikes[senders[i]] = [times[i]]
-                }
-            }
-
-            for (var i in spikes) {
-                array[i] = hist(spikes[i]);
-            }
-            var b = calc_correlation(array[val1], array[val2], 'valid', binwidth)
-            var dataset = d3.range(times.length).map(function(i) {
-                    return {x: times[i], y: senders[i]};
-                });
-
-            $( ".bins" ).live('click', function(e) {
-                bins = $( this ).attr('id');
-                draw_histogram("div.histogram", times, simTime, bins);
-                draw_histogram("#spikeDetectorView div.histogram", times, simTime, bins);
-
-                var hist = d3.layout.histogram()
-                    .bins(x.ticks(bins));
-
-                array =  {};
-                for (var i in spikes) {
-                    array[i] = hist(spikes[i]);
-                }
-
-                binwidth = simTime/bins;
-                draw_correlation_plot("div.correlation_plot", calc_correlation(array[val1], array[val2], 'valid', binwidth));
-                draw_correlation_plot("#spikeDetectorView div.correlation_plot", calc_correlation(array[val1], array[val2], 'valid', binwidth));
-                
-
-            });
-
-            $( "#neuron1" ).live('change', function(e) {
-                val1 = $(this).val();
-                draw_correlation_plot("div.correlation_plot", calc_correlation(array[val1], array[val2], 'valid', binwidth));
-                draw_correlation_plot("#spikeDetectorView div.correlation_plot", calc_correlation(array[val1], array[val2], 'valid', binwidth));
-            })
-
-            $( "#neuron2" ).live('change', function(e) {
-                val2 = $(this).val();
-                draw_correlation_plot("div.correlation_plot", calc_correlation(array[val1], array[val2], 'valid', binwidth));
-                draw_correlation_plot("#spikeDetectorView div.correlation_plot", calc_correlation(array[val1], array[val2], 'valid', binwidth));
-            })
-
-        {% endif %}
-
-
-        $(document).ready(function() {
-
-            {% if network_obj.has_voltmeter %}
-                setTimeout('$( "#VoltmeterThumbnail" ).contents().find("span").each(function() {$(this).click(function() {voltmeter_enlarge(this.id)})})', 2500.)
-            {% endif %}
-
-
-            {% if network_obj.has_spike_detector %}
-                    draw_raster_plot("div.raster_plot", dataset, simTime, neurons, bins);
-                    draw_histogram("div.histogram", times, simTime, bins);
-
-                    for (var i=0; i<neurons.length; i++) {
-                        $( ".correlation" ).append("<option value="+ neurons[i] +">"+ neurons[i] +"</option>");
-                    }
-
-                    draw_correlation_plot("div.correlation_plot", calc_correlation(array[val1], array[val2], 'valid', binwidth));
-
-<!--                    loadSpikeDetector();-->
-<!--                    figures["spikeDetectorThumbnail"] = drawSpikeDetector("spikeDetectorThumbnail");-->
-
-                    $( "#large" ).click(function() {
-
-                        $( "#spikeDetectorView" ).dialog({
-                            title: 'Spike Detector view of all connected neurons',
-                            height: 600,
-                            width: 700,
-<!--                            resizable: false,-->
-                            modal: true,
-                        });
-                        draw_raster_plot("#spikeDetectorView div.raster_plot", dataset, simTime, neurons, bins);
-                        draw_histogram("#spikeDetectorView div.histogram", times, simTime, bins);
-                        draw_correlation_plot("#spikeDetectorView div.correlation_plot", calc_correlation(array[val1], array[val2], 'valid', binwidth));
-                    });
-            {% endif %}
-
-            $( ".portlet-content" ).removeClass("ui-corner-all")
-            
-        })
-    </script>
-
 
     <div class="portlet" id="result">
 
         <div class="portlet-header portlet-toggle" title="Simulation was succeed. So you can explore the view of results.">
-            Results
+            <h3>
+                <span>Results</span>
+                <div class="pull-right">
+                    <button type="button" class="btn bing"><i class="icon-chevron-up"></i></button>
+                    <button type="button" class="btn bing hide fade"><i class="icon-chevron-down"></i></button>
+                </div>
+            </h3>
+
         </div>
 
-        <div class="portlet-content" id="results-tabs">
+        <div class="portlet-body" id="results-tabs">
 
-            <ul>
+            <ul class="nav nav-tabs tabs">
                 {% if network_obj.has_spike_detector %}
-                    <li><a href="#spike_detector-tab" class="spike_detector-tab">Spike Detector</a></li>
+                    <li class="active"><a href="#spike_detector-tab" class="spike_detector-tab" data-toggle="tab">Spike Detector</a></li>
                 {% endif %}
                 {% if network_obj.has_voltmeter %}
-                    <li><a href="#voltmeter-tab" class="voltmeter-tab-header">Voltmeter</a></li>
+                    <li><a href="#voltmeter-tab" class="voltmeter-tab-header" data-toggle="tab">Voltmeter</a></li>
                 {% endif %}
             </ul>
 
+            <div class="tab-content" style="padding:1px">
 <!--             SPIKE DETECTOR TAB -->
-            <div id="spike_detector-tab">
-                {% if network_obj.has_spike_detector %}
-                    <div class="spikeDetector" id="spikeDetectorThumbnail">
-                          {% if spike_detector.times %}
-                              {% include "d3.spike_detector.html" %}
-                                <div id="large">large</div>
-                          {% else %}
-                              <div style="padding-top: 20px; text-align:center">No spikes detected. Check your input devices.</div>
-                          {% endif %}
-                    </div>
-                {% endif %}
-            </div>
+                <div id="spike_detector-tab" class="tab-pane active">
+                    {% include "d3.spike_detector.html" %}
+                </div>
 
-<!--             VOLTMETER TAB -->
-            <div id="voltmeter-tab">
-                {% if network_obj.has_voltmeter %}
-                    <div>
-                        {% if network_obj.voltmeter_points < 15000 %}
+    <!--             VOLTMETER TAB -->
+                <div id="voltmeter-tab" class="tab-pane">
+                    {% if network_obj.has_voltmeter %}
+                        <div>
+                            <div id="voltmeter_holder"><div style="margin: 100px 0">The number of points is too big.</div></div>
+                        </div>
 
-                            <iframe src="{% url voltmeter_thumbnail network_obj.pk %}" id="VoltmeterThumbnail"></iframe>
-
-                        {% else %}
-
-                            The number of points is too big.
-
-                            <div class="field-wrapper" title="">
-
-                                <label for="voltmeter-select">View larger screen</label>
-
-                                <select id="voltmeter-select">
-                                    <option>--- Select a neuron ---</option>
-
-                                    {% for targets in network_obj.voltmeter_targets %}
-                                        <option value="{{targets}}">
-                                            Neuron [{{targets}}]
-                                        </option>
-                                    {% endfor %}
-
-                                </select>
-
-                            </div>
-
-                        {% endif %}
-                    </div>
-
-                    <div class="buttons" style="font-size:1em">
-
-                        <button id="reload">Reload</button>
-
-                    </div>
-
-                {% endif %}
-            </div>
-
-            <div class="buttons" style="font-size:1em">
-
-                <a class="document" href="{% url data network_obj.pk %}">Download Results</a>
+                    {% endif %}
+                </div>
 
             </div>
+        </div>
 
+        <div class="portlet-footer">
+            <button class="document btn btn-primary" href="{% url data network_obj.pk %}">Download Results</button>
         </div>
 
     </div>
-
-
-<div class="ui-dialog spikeDetector" id="spikeDetectorView" style="display:none">
-    {% include "d3.spike_detector.html" %}
-</div>
-
-<div class="ui-dialog" title="result view" id="dialog-resultView" style="width:0">
-
-    <iframe class="resultView" scrolling="no"></iframe>
-
-</div>
-
 
 {% endif %}

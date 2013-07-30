@@ -26,7 +26,7 @@ class TopicMoveForm(forms.ModelForm):
         fields = ('forum',)
     
     def as_div(self):
-        return self._html_output(u'<div class="field-wrapper">%(errors)s %(field)s%(help_text)s</div>', u'%s', '</div>', u'<span class="help_text">%s</span>', False)
+        return self._html_output(u'<div class="fieldWrapper">%(errors)s %(field)s%(help_text)s</div>', u'%s', '</div>', u'<span class="help_text">%s</span>', False)
     
     def save(self, commit=True):
         """
@@ -146,14 +146,14 @@ class PostMoveForm(forms.Form):
 
 
 class PostForm(forms.ModelForm):
-    message = forms.CharField(label=u'', widget=forms.Textarea(attrs={'class': 'resizable bbcode', 'rows': 15}))
+    message = forms.CharField(label=u'', widget=forms.Textarea(attrs={'class': 'bbcode fade'}))
     
     class Meta:
         model = Post
         fields = ('message',)
     
     def as_div(self):
-        return self._html_output(u'<div class="field-wrapper">%(label)s %(errors)s %(field)s%(help_text)s</div>', u'%s', '</div>', u'<span class="help_text">%s</span>', False)
+        return self._html_output(u'<div class="fieldWrapper">%(label)s %(errors)s %(field)s%(help_text)s</div>', u'%s', '</div>', u'<span class="help_text">%s</span>', False)
 
 
 class PollChoiceForm(forms.ModelForm):
@@ -186,12 +186,12 @@ class PollForm(forms.ModelForm):
             if form.cleaned_data:
                 empty = False
                 break
-        
+
         if empty:
             raise forms.ValidationError(u'You must select at least one choice')
-        
+
         return cleaned_data
-    
+
     def is_valid(self):
         form_valid = super(PollForm, self).is_valid()
         choices_valid = self.choice_formset.is_valid()
@@ -222,4 +222,4 @@ class ForumSearchForm(forms.Form):
     Forum search form
     """
     
-    term = forms.CharField(label='', min_length=1, required=True, widget=forms.TextInput(attrs={'class': 'search_term'}))
+    term = forms.CharField(label='', min_length=1, required=True, widget=forms.TextInput(attrs={'class': 'search_term search-query', 'placeholder': 'Search'}))

@@ -8,19 +8,15 @@
             {% if field.is_hidden %}
                 {{ field }}
             {% else %}
-
-                <div class="field-wrapper" title="">
-
-                    <div>
-                        {{ field.label_tag }}
-                    </div>
+                <div class="field-wrapper control-group {% if field.help_text %}input-append{% endif %} {{ fieldset.classes }}">
                     {{ field.errors }}
-
-                    <div class="field-box {{ fieldset.classes }}">
+                    <label class="control-label" for="{{ field.auto_id }}">{{ field.label }}</label>
+                    <div class="controls">
                         {{ field }}
+                        {% if field.help_text %}
+                            <span class="add-on" title="{{ field.help_text }}">?</span>
+                        {% endif %}
                     </div>
-
-                    <button class="help_text" {% if field.help_text %} title="{{ field.help_text }}" {% else %} disabled {% endif %}>?</button>
                 </div>
             {% endif %}
         {% endfor %}

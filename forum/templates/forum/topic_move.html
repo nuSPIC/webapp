@@ -9,14 +9,16 @@
 {% endblock %}
 
 {% block content %}
-    <h2 class="delimiter">Move topic</h2>
+    <h2>Move topic</h2>
+    <hr>
+
     <div class="breadcrumbs">&raquo; <a href="{% url forum %}">Discussions</a> &raquo; <a href="{{ forum.get_absolute_url }}">{{ forum.name }}</a> &raquo; <a href="{{ topic.get_absolute_url }}">{{ topic.name }}</a></div>
-	
+
     <form action="." method="post" id="move_topic_form">
         {% csrf_token %}
-        
+
         {{ topic_form.as_div }}
-        
-        <input type="submit" value="Move topic" />
+
+        <button type="submit" class="btn">Move topic</button>
     </form>
 {% endblock %}

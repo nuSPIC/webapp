@@ -1,42 +1,5 @@
-@font-face {
-    font-family: 'Biolinum';
-    src: url('/media/files/fonts/Libertine/LinBiolinum_R.woff') format('woff');
-}
-
-@font-face {
-    font-family: 'Daniel';
-    src: url('/media/files/fonts/Daniel/danielbd-webfont.woff') format('woff');
-}
-
-
-@font-face {
-    font-family: 'Quicksand';
-    src: url('/media/files/fonts/Quicksand/Quicksand_Book-webfont.woff') format('woff');
-}
-@font-face {
-    font-family: 'Quicksand-bold';
-    src: url('/media/files/fonts/Quicksand/Quicksand_Bold-webfont.woff') format('woff');
-}
-
-
-@font-face {
-    font-family: 'Sansation';
-    src: url('/media/files/fonts/Sansation/sansation_regular-webfont.eot');
-    src: url('/media/files/fonts/Sansation/sansation_regular-webFont.eot?#iefix') format('embedded-opentype'),
-        url('/media/files/fonts/Sansation/sansation_regular-webFont.woff') format('woff'),
-        url('/media/files/fonts/Sansation/sansation_regular-webFont.ttf') format('truetype'),
-        url('/media/files/fonts/Sansation/sansation_regular-webFont.svg#webfont') format('svg');
-}
-
-
 body {
-/*     overflow: hidden; */
-    font-family: Helvetica, Arial, sans-serif;
-    font-size: 12px;
-    color: #2B2924;
-    background-color: #FAFAF9 ;
-    padding: 0px;
-    margin: 0px;
+    background-color: white;
 }
 
 div.centered-404 {
@@ -62,16 +25,21 @@ iframe {
     border: none;
 }
 
-/* Layout
-***********************/
-
-#wrapper {
-    margin: auto;
-    width : 960px;
+#wrap {
+    height: auto !important;
+    margin: 0 auto -60px;
+    min-height: 100%;
 }
 
+#wrap > .container {
+padding-top: 60px;
+}
+
+/* HEADER
+***********************/
+
 #header {
-    color: #2B2924;
+/*    color: #2B2924;*/
     font-family: sans-serif;
     padding: 0;
 }
@@ -81,6 +49,10 @@ iframe {
 /*     background: url(/media/images/icons/header-bg.png); */
     padding-bottom: 2px;
 }
+
+
+
+
 
 #banner {
 /*     background-color: #FAFAF9 ; */
@@ -92,6 +64,16 @@ iframe {
     height: 171px;
     width : 396px;
     margin: auto;
+}
+
+.watermark {
+ -khtml-opacity:.80; 
+ -moz-opacity:.80; 
+ -ms-filter:"alpha(opacity=80)";
+  filter:alpha(opacity=80);
+  filter: progid:DXImageTransform.Microsoft.Alpha(opacity=0.8);
+  opacity:.80;
+
 }
 
 .logo_small {
@@ -163,28 +145,22 @@ iframe {
     }
 
 
-#content {
-    border: 1px solid #A2A2A2;
-    background-color: #FAFAF9;
-    min-height: 640px;
-    padding: 5px 10px;
+/* CONTENT
+***********************/
+
+#content .container form {
+    max-width: 600px;
+    margin: auto;
 }
 
-#footer {
-    margin-top: 2px;
-    background: url(/media/images/icons/footer-bg.png);
-    background-color: #29496A;
-    padding: 8px 10px 6px 10px;
-    text-align: center;
+
+/* FOOTER
+***********************/
+
+#push, #footer {
+    min-height: 60px;
 }
 
-    #footer a {
-        color:  #CCCCCC;
-    }
-
-    #footer a:hover {
-        color:  #FAFAF9;
-    }
 
 /* Flatpages
 *********************/
@@ -259,6 +235,7 @@ iframe {
     #profile .row {
         overflow: hidden;
         padding: 5px 0px;
+        margin-left: 20px;
     }
 
         #profile .row .title {
@@ -271,23 +248,14 @@ iframe {
 /* Forms and fields
 *************************/
 
-#login-form, #password-change-form,
-#password-reset-form {
-    width: 500px;
+.form-horizontal li {
+    list-style:none
 }
 
-.forgot-password {
-    padding-top: 10px;
-    padding-bottom: 10px;
+.control-group .add-on {
+    cursor: pointer;
 }
 
-.login-form-submit {
-    margin-top: 5px;
-}
-
-#registration-form, #profile-edit-form {
-    width: 800px;
-}
 
 ul.errorlist {
     padding: 0;
@@ -308,104 +276,6 @@ ul.errorlist {
 input, textarea, keygen, select, button, isindex {
     margin: 0em;
 }
-
-.field-wrapper {
-    margin-bottom: 5px;
-
-}
-
-    .field-wrapper label {
-        font-weight: bold;
-    }
-
-    .field-wrapper .field-box {
-        border : 1px solid #BBBBBB;
-        height: 26px;
-        vertical-align: middle;
-        display:inline-block;
-        overflow: hidden;
-    }
-
-    .field-wrapper .label_tag {
-        font-weight: bold;
-    }
-
-    .field-wrapper .field-input {
-        border : 1px solid #BBBBBB;
-        height: 26px;
-        vertical-align: middle;
-        overflow: hidden;
-        position: relative;
-    }
-
-    .field-wrapper input {
-        width: 260px;
-        width: 95%;
-        color: #333333;
-        background-color: transparent;
-        border : none;
-        padding: 5px 6px;
-    }
-
-    .field-wrapper button {
-        cursor: pointer;
-        color: #333333;
-        background-color: #F1F1F1;
-        outline: none;
-        border: 1px solid #BBBBBB;
-        display: inline-block;
-        height: 28px;
-        vertical-align: middle;
-        overflow: hidden;
-        margin-left: -5px;
-    }
-
-    .field-wrapper button:disabled {
-        cursor: default;
-        color: #BBBBBB;
-    }
-
-    .field-wrapper button:not([disabled]):hover {
-        color: #2B2924;
-        background-color: #FAFAF9;
-        border: 1px solid #A2A2A2;
-    }
-    
-    .field-wrapper ul {
-        padding: 0;
-        margin: 0;
-        list-style: none;
-    }
-
-    .field-wrapper .radio-select, .field-wrapper input[type='radio'] {
-        width: auto;
-        margin-left: 30px;
-        float: left;
-    }
-
-    .field-wrapper .checkbox, .field-wrapper input[type='checkbox'] {
-        width: auto;
-        float: right;
-    }
-
-    .field-wrapper select {
-        font-weight : bold;
-        background-color: #EEEEEE;
-        display : block;
-        border : 1px solid #BBBBBB;
-        padding : 2px;
-    }
-
-        .field-wrapper select option {
-            padding : 1px 5px;
-        }
-
-    .field-wrapper textarea {
-        width : 97%;
-        background-color: #EEEEEE;
-        border : 1px solid #BBBBBB;
-        padding : 4px;
-    }
 
 
 /* Pagination
@@ -478,42 +348,3 @@ h2.delimiter {
         height        : 75px;
         vertical-align: bottom;
     }
-
-.ui-shadow {
-    box-shadow        : 2px 2px 2px #444;
-    -o-box-shadow     : 2px 2px 2px #444;
-    -webkit-box-shadow: 2px 2px 2px #444;
-    -moz-box-shadow   : 2px 2px 2px #444;
-}
-
-.ui-inner-shadow {
-    box-shadow        : inset 0 0 10px #000;
-    -o-box-shadow     : inset 0 0 10px #000;
-    -webkit-box-shadow: inset 0 0 10px #000;
-    -moz-box-shadow   : inset 0 0 10px #000;
-}
-
-
-/* Colored Underline
-************************/
-
-.blue {
-    border-bottom: 2px solid #467AB3;
-}
-
-.red {
-    border-color: #B4464F !important;
-    background-color: #ecd1d3 !important;
-}
-
-.green {
-    border-bottom: 2px solid #46B469;
-}
-
-.orange {
-    border-bottom: 2px solid #FFCE2E;
-}
-
-.limette {
-    border-bottom: 2px solid #A7B446;
-}

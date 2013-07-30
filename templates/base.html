@@ -1,23 +1,30 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">  
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 
     <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         <title>{% block title %}{% endblock %}</title>
-        
-        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-        <meta name="keywords" content="nuSPIC, NEST, g-node, BCF" />
         <meta name="description" content="Neural System Prediction and Identification Challenge" />
+        <meta name="keywords" content="nuSPIC, NEST, g-node, BCF" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
         <link type="image/x-icon" rel="icon" href="{{ MEDIA_URL }}nuSPIC_blue.ico" />
         <link type="image/x-icon" rel="shortcut icon" href="{{ MEDIA_URL }}nuSPIC_blue.ico" />
 
-        <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/nuspic/jquery-ui.custom.css?ver=1.8.14" />
-        <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/jquery-ui.custom.css" />
-        <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/default.css" />
+        <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/normalize.css" />
+        <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/bootstrap.min.css" media="screen">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}css/bootstrap-responsive.css">
+        <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/docs.css" />
+        <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/custom.css" />
+        <link type="text/css" rel="stylesheet" rel="stylesheet" href="{{ MEDIA_URL }}css/main.css?m">
 
-        <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.min.js?ver=1.7.1"></script>
-        <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui.custom.min.js?ver=1.8.14"></script>
-        
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/vendor/modernizr-2.6.2.min.js"></script>
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/vendor/jquery-1.9.1.min.js"></script>
         <script type="text/javascript">
             if (typeof String.prototype.startsWith != 'function') {
               String.prototype.startsWith = function (str){
@@ -26,94 +33,55 @@
             }
 
             $(document).ready(function() {
-                $( ".navigation li" ).each(function() {
-                    if (window.location.pathname.startsWith($(this).find( "a" ).attr("href"))) {
-                        $(this).addClass("currentpage")
-                    };
-                }).click(function() {
-                    window.location.href = $(this).find("a").attr("href");
-                });
+                $(".add-on").on('click', function() {
+                    $(this).parents(".fieldWrapper").find(".help_text").toggle();
+<!--                    $(this).parents(".fieldWrapper").find(".help_text").fadeToggle();-->
+                })
+            })
 
-                if (window.location.pathname.length > 1) {
-                    $( ".navigation li:first" ).removeClass("currentpage")
-                };
-
-                $( "button.help_text" ).addClass('ui-corner-right').click(function(e) {
-                    e.preventDefault();
-                });
-
-            });
         </script>
 
         {% block feeds %}{% endblock %}
         {% block extrahead %}{% endblock %}
     </head>
-    
-    <body style="background-color: #F1F1F1">
-        <div id="wrapper">
 
-            <div id="header">
+    <body>
+        <!--[if lt IE 7]>
+            <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
+        <![endif]-->
 
-                <div class="ui-corner-br" id="header_top">
-                    <div class="logo_small" id="banner"></div>
-                </div>
-
-                <div class="navigation">
-
-                    <div class="top_links">
-                        {% if user.is_authenticated %}
-                            Welcome,
-                            <a href="{% url profile user.profile.id %}">{{ user.get_full_name }}</a> |
-                            {% if user.is_staff %}
-                                <a href="/admin/">admin</a> |
-                            {% endif %}
-                            <a href="{% url logout %}">Logout</a>
-                        {% else %}
-                            <a href="{% url login %}">Login</a>
-                            <span>or</span>
-                            <a href="{% url registration %}">register</a>
-                        {% endif %}
-                    </div>
-
-                    <div id="main_menu">
-                        <ul >
-                            <li class="ui-corner-tl"><a href="{% url mainpage %}">Home</a></li>
-                            <li><a href="{% url news_archive %}">News</a></li>
-                            <li id="competition"><a href="{% url network_list %}">Competition</a></li>
-                            <li><a href="/about/">About</a></li>
-                            <li><a href="/faq/">FAQ</a></li>
-                            <li><a href="{% url accounts %}">Community</a></li>
-                            <li><a href="{% url forum %}">Discussions</a></li>
-                            <li class="ui-corner-tr"><a href="/contact/">Contact</a></li>
-                        <ul>
-                    </div>
-
-                </div>
-
-            </div>
-            
-            <div class="ui-corner-tr" id="content">
-                {% block content %}{% endblock %}
-            </div>
-
-            <div id="footer">
-
-                <div class="navigation">
-                    <a href="{% url mainpage %}">Home</a> |
-                    <a href="{% url news_archive %}">News</a> |
-                    <a href="{% url network_list %}">Competition</a> |
-                    <a href="/about/">About</a> |
-                    <a href="/faq/">FAQ</a> |
-                    <a href="{% url accounts %}">Community</a> |
-                    <a href="{% url forum %}">Discussions</a> |
-                    <a href="/contact/">Contact</a>
-                </div>
-                
-                <div class="feeds">
-                    {% block footer_feeds %}{% endblock %}
+        <!-- Add your site or application content here -->
+        <div class="navbar navbar-inverse navbar-fixed-top" style="line-height: 1">
+            <div class="navbar-inner">
+                <div class="container">
+                    {% include "navbar.html" %}
                 </div>
             </div>
-
         </div>
+
+    <div class="jumbotron masthead">
+        <div class="container">
+            {% block masthead %}{% endblock %}
+        </div>
+    </div>
+
+    <div id="content" class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer>
+        <div class="footer">
+            <div class="container">
+            {% block footer_feeds %}{% endblock %}
+            </div>
+        </div>
+    </footer>
+
+
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/vendor/jquery-ui-1.10.3.custom.min.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/vendor/bootstrap.min.js"></script>
+
+    {% block extrascript %}{% endblock %}
     </body>
+
 </html>

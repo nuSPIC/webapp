@@ -7,15 +7,112 @@
 {% block extrahead %}
 {{ block.super }}
 <link href="{{ MEDIA_URL }}css/forum.css" type="text/css" rel="stylesheet" />
+{% endblock %}
 
-<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.min.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.scrollto.js"></script>
+{% block content %}
+    <h2>Edit topic</h2>
+    <hr>
+    <div class="breadcrumbs">&raquo; <a href="{% url forum %}">Discussions</a> &raquo; <a href="{{ forum.get_absolute_url }}">{{ forum.name }}</a> &raquo; <a href="{{ topic.get_absolute_url }}">{{ topic.name }}</a></div>
+
+    <div id="preview"></div>
+
+    <form action="." method="post" class="form-horizontal" id="edit_topic_form">
+        {% csrf_token %}
+
+        {{ topic_form.as_div }}
+
+        {% post_editor post_form %}
+        
+        {{ poll_formset.management_form }}
+        {{ poll_formset.non_form_errors }}
+        
+        {% for poll_form in poll_formset.forms %}
+            <div class="poll_edit{% if poll_form.instance.total_votes %} poll_disabled{% endif %}">
+                {% if poll_form.instance.total_votes %}
+                    <div class="information" style="margin-bottom:7px">
+                        Poll edit disabled because it has one or more answers
+                    </div>
+                {% endif %}
+                
+                {{ poll_form.non_field_errors }}
+                {{ poll_form.id }}
+                {{ poll_form.topic }}
+                {{ poll_form.DELETE }}
+
+                <div class="fieldWrapper control-group {% if poll_form.title.help_text %}input-append{% endif %} {{ fieldset.classes }}">
+                    <label class="control-label" for="{{ poll_form.title.auto_id }}">{{ poll_form.title.label }}</label>
+                    <div class="controls">
+                        {{ poll_form.title.errors }}
+                        <div>
+                            {{ poll_form.title }}
+                            {% if poll_form.title.help_text %}<span class="add-on">?</span>{% endif %}
+                        </div>
+                        <span class="help_text">{{ poll_form.title.help_text }}</span>
+                    </div>
+                </div>
+
+                <div class="fieldWrapper control-group {% if poll_form.expires.help_text %}input-append{% endif %} {{ fieldset.classes }}">
+                    <label class="control-label" for="{{ poll_form.expires.auto_id }}">{{ poll_form.expires.label }}</label>
+                    <div class="controls">
+                        {{ poll_form.expires.errors }}
+                        <div>
+                            {{ poll_form.expires }}
+                            {% if poll_form.expires.help_text %}<span class="add-on">?</span>{% endif %}
+                        </div>
+                        <span class="help_text">{{ poll_form.expires.help_text }}</span>
+                    </div>
+                </div>
+
+                <div class="choices">
+                    <div class="choices_title">
+                        Poll choices
+                    </div>
+                
+                    {{ poll_form.choice_formset.management_form }}
+                    {{ poll_form.choice_formset.non_form_errors }}
+                    
+                    {% for choice_form in poll_form.choice_formset.forms %}
+                        <div class="choice">
+                            {{ choice_form.non_field_errors }}
+                            {{ choice_form.id }}
+                            {{ choice_form.poll }}
+
+                            <div class="fieldWrapper control-group">
+                                {{ field.errors }}
+                                <label class="control-label" for="{{ field.auto_id }}">{{ forloop.counter }}.</label>
+                                <div class="controls">
+                                    {{ choice_form.title }}
+                                </div>
+                            </div>
+
+                        </div>
+                    {% endfor %}
+                </div>
+            
+                <div class="btn-group">
+                    <button type="submit" class="btn add_choice">Add poll choice</button>
+                    <button type="submit" class="btn delete_poll">Delete poll</button>
+                </div>
+            </div>
+        {% endfor %}
+        
+        <div class="btn-group">
+            <button type="submit" class="btn">Save topic</button>
+            <button type="submit" class="btn" id="add_poll_button">Add poll</button>
+            <button type="submit" class="btn" id="preview_button">Preview</button>
+        </div>
+    </form>
+{% endblock %}
+
+
+{% block extrascript %}
+<script type="text/javascript" src="{{ MEDIA_URL }}js/plugins/jquery.scrollto.js"></script>
 
 <script type="text/javascript" language="javascript">
 //<![CDATA[
-	$(document).ready(function(){
+    $(document).ready(function(){
         // Hidden text collapse toggle
-        $('.hidden-header').live('click', function(e){
+        $('.hidden-header').on('click', function(e){
             $(this).next('.hidden-text').toggle();
         });
         
@@ -109,85 +206,4 @@
 	});
 //]]>
 </script>
-{% endblock %}
-
-{% block content %}
-    <h2 class="delimiter">Edit topic</h2>
-    <div class="breadcrumbs">&raquo; <a href="{% url forum %}">Discussions</a> &raquo; <a href="{{ forum.get_absolute_url }}">{{ forum.name }}</a> &raquo; <a href="{{ topic.get_absolute_url }}">{{ topic.name }}</a></div>
-
-    <div id="preview"></div>
-
-    <form action="." method="post" id="edit_topic_form">
-        {% csrf_token %}
-
-        {{ topic_form.as_div }}
-        
-        {% post_editor post_form %}
-        
-        {{ poll_formset.management_form }}
-        {{ poll_formset.non_form_errors }}
-        
-        {% for poll_form in poll_formset.forms %}
-            <div class="poll_edit{% if poll_form.instance.total_votes %} poll_disabled{% endif %}">
-                {% if poll_form.instance.total_votes %}
-                    <div class="information" style="margin-bottom:7px">
-                        Poll edit disabled because it has one or more answers
-                    </div>
-                {% endif %}
-                
-                {{ poll_form.non_field_errors }}
-                {{ poll_form.id }}
-                {{ poll_form.topic }}
-                {{ poll_form.DELETE }}
-                
-                <div class="field-wrapper">
-                    {{ poll_form.title.label_tag }}
-                    {{ poll_form.title.errors }}
-                    {{ poll_form.title }}
-                    {% if poll_form.title.help_text %}<span class="help_text">{{ poll_form.title.help_text }}</span>{% endif %}
-                </div>
-                
-                <div class="field-wrapper">
-                    {{ poll_form.expires.label_tag }}
-                    {{ poll_form.expires.errors }}
-                    {{ poll_form.expires }}
-                    {% if poll_form.expires.help_text %}<span class="help_text">{{ poll_form.expires.help_text }}</span>{% endif %}
-                </div>
-                
-                <div class="choices">
-                    <div class="choices_title">
-                        Poll choices
-                    </div>
-                
-                    {{ poll_form.choice_formset.management_form }}
-                    {{ poll_form.choice_formset.non_form_errors }}
-                    
-                    {% for choice_form in poll_form.choice_formset.forms %}
-                        <div class="choice">
-                            {{ choice_form.non_field_errors }}
-                            {{ choice_form.id }}
-                            {{ choice_form.poll }}
-
-                            <div class="field-wrapper">
-                                <div class="counter">{{ forloop.counter }}.</div>
-                                {{ choice_form.title.errors }}
-                                {{ choice_form.title }}
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-            
-                <div class="buttons">
-                    <input type="submit" value="Add poll choice" class="add_choice" />
-                    <input type="submit" value="Delete poll" class="delete_poll" />
-                </div>
-            </div>
-        {% endfor %}
-        
-        <div class="buttons">
-            <input type="submit" value="Save topic" />
-            <input type="submit" value="Add poll" id="add_poll_button" />
-            <input type="submit" value="Preview" id="preview_button" />
-        </div>
-    </form>
 {% endblock %}

@@ -71,5 +71,11 @@ def modeltype(model):
         return 'output'
     else:
         return 'neuron'
-        
-    
+
+@register.filter()
+def truncate_float(s, max_len):
+    try:
+        f = float(s)
+        return str(int(f)) + str(abs(f%1.))[1:int(max_len)+1]
+    except:
+        return s

@@ -11,139 +11,13 @@
 {% block title %}Discussions &raquo; {{ forum.name }} &raquo; {{ topic.name }}{% endblock %}
 
 {% block extrahead %}
-<link href="{{ MEDIA_URL }}css/forum.css" type="text/css" rel="stylesheet" />
-
-<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.min.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}js/effects.core.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}js/effects.highlight.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.scrollto.js"></script>
-
-<script type="text/javascript" language="javascript">
-//<![CDATA[
-	$(document).ready(function(){
-        // Hidden text collapse toggle
-        $('.hidden-header').live('click', function(e){
-            $(this).next('.hidden-text').toggle();
-        });
-        
-        // Quote selected text
-        function getSelectedText() { 
-            if(window.getSelection){ 
-                return window.getSelection().toString(); 
-            } 
-            else if(document.getSelection){ 
-                return document.getSelection(); 
-            } 
-            else if(document.selection){ 
-                return document.selection.createRange().text; 
-            } 
-        }
-        
-        $('.post .body').mouseup(function(e) {
-            if (getSelectedText().length > 0) {
-                $(this).find('.quote_selected').show();
-            }
-        });
-        
-        $('body').mouseup(function() {
-            if (getSelectedText().length == 0) {
-                $('.quote_selected').hide();
-            }
-        });
-        
-        $('.quote_selected a').click(function(e){
-            e.preventDefault();
-            var selectedText = getSelectedText();
-            var textarea = $('#add_post_form textarea');
-            var username = $(this).parents('.post').find('.username a').text();
-            
-            if (selectedText.length > 0) {
-                textarea.val(textarea.val() + '[quote=' + username + ']' + selectedText + '[/quote]\n').focus();
-                $('.quote_selected').hide();
-            }
-        });
-        
-        // Scroll to and post highlight
-		var hash = location.hash.substr(1); 
-		var postHash = /post\d+/;
-		
-		if (postHash.test(hash)) {
-			$("#"+hash).parent().effect("highlight", {}, 3000).scrollTo(500);
-		};
-        
-        // Insert username in new post form on click on his name
-        $('.insert_username').click(function(e){
-            e.preventDefault();
-            var username = $(this).text();
-            var message = $('#add_post_form textarea').val();
-            
-            $('#add_post_form textarea').val(message+'[b]'+username+'[/b], ').focus();
-        });
-        
-        // Preview
-        $('#preview_button').click(function(e){
-            e.preventDefault();
-            $(this).addClass('disabled');
-            $(this).text('Wait...');
-            
-            $.post(
-                '{% url post_preview %}',
-                $('#add_post_form').serialize(),
-                function(data){
-                    $('#preview').html(data).scrollTo(500);
-                    $('#preview_button').removeClass('disabled');
-                    $('#preview_button').text('Preview');
-                    $('#preview_button').data('executing', false);
-                },
-                'html'
-            );
-        });
-        
-        // Show / hide poll results
-        $('a.show_poll_voting, a.show_poll_results').click(function(e){
-            e.preventDefault();
-            var poll_id = $(this).attr('rel');
-            var poll = $('div.poll_'+poll_id);
-            
-            poll.find('div.poll_voting').toggle();
-            poll.find('div.poll_results').toggle();
-        });
-        
-        // On poll choice click enable poll vote button
-        $('input[name^=poll_]').click(function(e){
-            $(this).parents('div.poll_voting').find('a.poll_vote').removeClass('disabled');
-        });
-        
-        // Poll voting
-        $('a.poll_vote').click(function(e){
-            e.preventDefault();
-            var poll_id = $(this).attr('rel');
-            var choice = $('input[name=poll_'+poll_id+']:checked');
-            
-            if (!choice) return;
-            var choice_id = choice.val();
-            
-            $(this).addClass('disabled');
-            $(this).text('Wait...');
-            
-            $.getJSON(
-                '/forum/poll/vote/' + choice_id + '/',
-                function(data) {
-                    var poll = $('div.poll_'+data.poll_id);
-                    poll.find('div.poll_results').html(data.responseHTML);
-                    poll.find('div.poll_voting').remove();
-                    poll.find('div.poll_results').show();
-                }
-            );
-        });
-	});
-//]]>
-</script>
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/forum.css?n" />
 {% endblock %}
 
 {% block content %}
     <div id="post_list">
-        <h2 class="delimiter">{{ topic.name }}</h2>
+        <h2>{{ topic.name }}</h2>
+        <hr>
 
         <div class="breadcrumbs">&raquo; <a href="{% url forum %}">Discussions</a> &raquo; <a href="{{ forum.get_absolute_url }}">{{ forum.name }}</a></div>
 
@@ -167,28 +41,28 @@
 
         <div class="posts">
             {% for post in post_list.object_list %}
-                <div class="post{% if not forloop.last or not user.is_anonymous %} delimiter{% endif %}">
+                <div class="post">
                     <div id="post{{ post.id }}" class="anchor">&nbsp;</div>
-                    
+
                     <div class="date">
                         {{ post.date|timesince }} ago
                     </div>
-    
+
                     <div class="profile">
                         <div class="username">
                             <a href="#" class="insert_username" title="Insert username in the new post form">{{ post.profile.user.username }}</a>
                         </div>
-                        
+
                         <div class="status">
                             <span class="member_{{ post.profile.forum_group.slug }}">{{ post.profile.forum_group.member_title }}</span><br />
                             Posts count: {{ post.profile.post_count|intcomma }}
                         </div>
-                        
+
                         <div class="links">
                             <a href="{{ post.profile.get_absolute_url }}" title="Go to profile">Profile</a>
                         </div>
                     </div>
-                    
+
                     <div class="body">
                         {{ post.message_html|safe }}
                         
@@ -244,6 +118,7 @@
                         </div>
                     </div>
                 </div>
+                {% if not forloop.last or not user.is_anonymous %}<hr>{% endif %}
             {% endfor %}
         </div>
         
@@ -256,22 +131,22 @@
                         <div class="username">
                             <a href="{{ profile.get_absolute_url }}">{{ profile.user.username }}</a>
                         </div>
-            
+
                         <div class="status">
                             <span class="member_{{ profile.forum_group.slug }}">{{ profile.forum_group.member_title }}</span><br />
                             Posts count: {{ profile.post_count|intcomma }}
                         </div>
                     {% endwith %}
                 </div>
-                
+
                 <div class="body">
                     <form action="." method="post" id="add_post_form">
                         {% csrf_token %}
                         {% post_editor post_form %}
                         
-                        <div class="buttons">
-                            <input type="submit" value="Submit" />
-                            <input type="submit" value="Preview" id="preview_button" />
+                        <div class="btn-group">
+                            <button type="submit" class="btn">Save post</button>
+                            <button type="submit" class="btn" id="preview_button">Preview</button>
                         </div>
                     </form>
                 </div>
@@ -284,4 +159,132 @@
 
 {% block footer_feeds %}
     <div class="rss-link"><a href="{% url topic_posts_feed topic.id %}">New posts</a></div>
+{% endblock %}
+
+{% block extrascript %}
+<script src="{{ MEDIA_URL }}/js/plugins/jquery.sceditor.bbcode.min.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/plugins/jquery.scrollto.js"></script>
+
+<script type="text/javascript" language="javascript">
+//<![CDATA[
+    $(document).ready(function(){
+        // Hidden text collapse toggle
+        $('.hidden-header').on('click', function(e){
+            $(this).next('.hidden-text').toggle();
+        });
+
+        // Quote selected text
+        function getSelectedText() { 
+            if(window.getSelection){ 
+                return window.getSelection().toString(); 
+            } 
+            else if(document.getSelection){ 
+                return document.getSelection(); 
+            } 
+            else if(document.selection){ 
+                return document.selection.createRange().text; 
+            } 
+        }
+
+        $('.post .body').mouseup(function(e) {
+            if (getSelectedText().length > 0) {
+                $(this).find('.quote_selected').show();
+            }
+        });
+
+        $('body').mouseup(function() {
+            if (getSelectedText().length == 0) {
+                $('.quote_selected').hide();
+            }
+        });
+
+        $('.quote_selected a').click(function(e){
+            e.preventDefault();
+            var selectedText = getSelectedText();
+            var textarea = $('#add_post_form textarea');
+            var username = $(this).parents('.post').find('.username a').text();
+
+            if (selectedText.length > 0) {
+                $('textarea').sceditor('instance').insert(textarea.val() + '[quote=' + username + ']' + selectedText + '[/quote]\n').focus();
+                $('.quote_selected').hide();
+            }
+        });
+
+        // Scroll to and post highlight
+        var hash = location.hash.substr(1); 
+        var postHash = /post\d+/;
+
+        if (postHash.test(hash)) {
+            $("#"+hash).parent().effect("highlight", {}, 3000).scrollTo(500);
+        };
+
+        // Insert username in new post form on click on his name
+        $('.insert_username').click(function(e){
+            e.preventDefault();
+            var username = $(this).text();
+            var message = $('#add_post_form textarea').val();
+
+            $('textarea').sceditor('instance').val(message+'[b]'+username+'[/b], ').focus();
+        });
+
+
+        // Preview
+        $('#preview_button').click(function(e){
+            e.preventDefault();
+            $(this).addClass('disabled');
+            $(this).text('Wait...');
+
+            $.post(
+                '{% url post_preview %}',
+                $('#add_post_form').serialize(),
+                function(data){
+                    $('#preview').html(data).scrollTo(500);
+                    $('#preview_button').removeClass('disabled');
+                    $('#preview_button').text('Preview');
+                    $('#preview_button').data('executing', false);
+                },
+                'html'
+            );
+        });
+        
+        // Show / hide poll results
+        $('a.show_poll_voting, a.show_poll_results').click(function(e){
+            e.preventDefault();
+            var poll_id = $(this).attr('rel');
+            var poll = $('div.poll_'+poll_id);
+
+            poll.find('div.poll_voting').toggle();
+            poll.find('div.poll_results').toggle();
+        });
+
+        // On poll choice click enable poll vote button
+        $('input[name^=poll_]').click(function(e){
+            $(this).parents('div.poll_voting').find('a.poll_vote').removeClass('disabled');
+        });
+
+        // Poll voting
+        $('a.poll_vote').click(function(e){
+            e.preventDefault();
+            var poll_id = $(this).attr('rel');
+            var choice = $('input[name=poll_'+poll_id+']:checked');
+
+            if (!choice) return;
+            var choice_id = choice.val();
+
+            $(this).addClass('disabled');
+            $(this).text('Wait...');
+
+            $.getJSON(
+                '/forum/poll/vote/' + choice_id + '/',
+                function(data) {
+                    var poll = $('div.poll_'+data.poll_id);
+                    poll.find('div.poll_results').html(data.responseHTML);
+                    poll.find('div.poll_voting').remove();
+                    poll.find('div.poll_results').show();
+                }
+            );
+        });
+    });
+//]]>
+</script>
 {% endblock %}

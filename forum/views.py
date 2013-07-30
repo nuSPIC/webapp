@@ -571,7 +571,7 @@ def post_preview(request):
             message_html = bbcode(post_form.cleaned_data['message'])
             response = render_to_string('forum/post_preview.html', {'profile': profile, 'message_html': message_html})
             return HttpResponse(response, mimetype='text/html')
-    
+
     return HttpResponse()
 
 @login_required

@@ -4,24 +4,15 @@
 
 {% block title %}{{ flatpage.title }}{% endblock %}
 
-{% block extrahead %}
-    <script type="text/javascript" >
-        $(document).ready(function() {
-            $( "#tutorial_vid" ).dialog({
-                                   title: 'Tutorial',
-                                   resizable: false,
-                                   height: 420,
-                                   width: 660,
-                 }).parent().hide();
+{% block masthead %}
+    <div style="padding: 20px; text-align:left">
 
-            $( "#tutorial" ).click(function(e) {
-                e.preventDefault();
-                $( "#tutorial_vid" ).parents( ".ui-widget" ).toggle();
-            })
+    <h2>
+        Competition
+    </h2>
+<!--        <p style="padding-top:200px">Neural System Prediction and Identification Challenge</p>-->
 
-
-        });
-    </script>
+    </div>
 {% endblock %}
 
 {% block content %}
@@ -33,20 +24,21 @@
             {{ flatpage.content|index:forloop.counter0 }}
 
             {% if item.grouper != '0' %}
-                <ul style="margin-top:0;">
+                <ul class="breadcrumb">
 
                     {% for network in item.list %}
                         <li id="{{ network.title }}">
 
                             <a href="{% url network_latest network.SPIC.group network.SPIC.local_id %}">
-                                {{ network.SPIC.title|default_if_none:"Network" }}:
+                                <h3>{{ network.SPIC.title|default_if_none:"Network" }}</h3>
                             </a>
 
-                            <span style="font-size:0.8em">
-                                <span>{{ network.SPIC.description|default:"no description" }}</span>
-                            </span>
+                            <div>
+                                <small>{{ network.SPIC.description|default:"no description" }}</small>
+                            </div>
 
                         </li>
+                        {% if not forloop.last %}<hr>{% endif %}
                     {% endfor %}
 
                 </ul>
