@@ -137,7 +137,7 @@ for network_obj in network_list:
         data = json.decode(str(network_obj.spike_detector_json))
 
         data['senders'] = [int(id_escape(id_filterbank, sender)) for sender in data['senders']]
-        assert np.in1d(np.unique(data['senders']).tolist(), nodes_sd_id).all()
+#        assert np.in1d(np.unique(data['senders']).tolist(), nodes_sd_id).all()
 
         neurons = [{'id': s, 'uid': u'%s' %(nodes_sd[nodes_sd_id.index(s)]['uid'])} for s in np.unique(data['senders']).tolist()]
         data['meta'] = {'neurons': neurons}
