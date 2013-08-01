@@ -15,7 +15,7 @@ class NetworkForm(forms.ModelForm):
             'placeholder': 'duration',
             'class': 'required limit min 1000 max 10000'}))
     same_seed = forms.BooleanField(required=False, initial=True)
-    overwrite = forms.BooleanField(required=False, label = 'Overwrite version')
+    overwrite = forms.BooleanField(required=False, label = 'Overwrite results')
     nodes = forms.CharField(max_length=10000, widget=forms.HiddenInput())
     links = forms.CharField(max_length=10000, widget=forms.HiddenInput())
 

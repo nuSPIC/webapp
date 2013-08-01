@@ -15,12 +15,12 @@
 
     <div id="nodes-list-content" class="portlet-body">
         <ul id="nodes-tabs" class="nav nav-tabs tabs">
-            <li class="active">
-                <a href="#nodes-table-tab" data-toggle="tab">Table</a>
-            </li>
-            <li>
-                <a href="#nodes-csv-tab" data-toggle="tab">CSV</a>
-            </li>
+<!--            <li class="active">-->
+<!--                <a href="#nodes-table-tab" data-toggle="tab">Table</a>-->
+<!--            </li>-->
+<!--            <li>-->
+<!--                <a href="#nodes-csv-tab" data-toggle="tab">CSV</a>-->
+<!--            </li>-->
         </ul>
 
         <div class="tab-content">
@@ -34,17 +34,17 @@
 <!--                </form>-->
             </div>
 
-            <div id="nodes-csv-tab" class="csv-tab tab-pane">
+<!--            <div id="nodes-csv-tab" class="csv-tab tab-pane">-->
 
-                <form id="nodes-csv-form" action="." method="POST" class="portlet-form">
-                    {% csrf_token %}
+<!--                <form id="nodes-csv-form" action="." method="POST" class="portlet-form">-->
+<!--                    {% csrf_token %}-->
 
-                    <div id="nodes-csv-content" class="portlet-body">
-                        {{ nodes_csv_form.as_div }}
-                    </div>
+<!--                    <div id="nodes-csv-content" class="portlet-body">-->
+<!--                        {{ nodes_csv_form.as_div }}-->
+<!--                    </div>-->
 
-                </form>
-            </div>
+<!--                </form>-->
+<!--            </div>-->
 
         </div>
     </div>

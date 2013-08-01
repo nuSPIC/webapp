@@ -23,9 +23,11 @@ function active_buttons() {
     $("#layout-option-content #links-weight-display").find((options.layout.links.display.weight ? "#true" : "#false")).addClass("active");
     $("#layout-option-content #links-curve").find("#" + options.layout.links.curve).addClass("active");
 
-    $("#spike_detector #binwidth").find("button[value=" + options.histogram.binwidth + "]").addClass("active");
-    $("#correlated_neurons #neuronA").find(".title").html("Neuron " + data.spike_detector.meta.neurons[options.correlation.neuronA].id);
-    $("#correlated_neurons #neuronB").find(".title").html("Neuron " + data.spike_detector.meta.neurons[options.correlation.neuronB].id);
+    if (data.spike_detector.meta.neurons.length > 0) {
+        $("#spike_detector #binwidth").find("button[value=" + options.histogram.binwidth + "]").addClass("active");
+        $("#correlated_neurons #neuronA").find(".title").html("Neuron " + data.spike_detector.meta.neurons[options.correlation.neuronA].id);
+        $("#correlated_neurons #neuronB").find(".title").html("Neuron " + data.spike_detector.meta.neurons[options.correlation.neuronB].id);
+    }
 }
 
 function tabulate(reference, data, columns, prefixes) {

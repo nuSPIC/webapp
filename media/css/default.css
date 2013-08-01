@@ -343,7 +343,7 @@ h2.delimiter {
     overflow  :  hidden;
 }
 
-    #logo img {
+    #logo a {
         padding       : 15px;
         height        : 75px;
         vertical-align: bottom;

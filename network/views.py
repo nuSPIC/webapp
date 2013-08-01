@@ -247,8 +247,7 @@ def simulate(request, network_id):
 
             # check if network form is valid.
             if form.is_valid():
-                print 'a'
-                if form.cleaned_data['overwrite'] is False:
+                if form.cleaned_data['overwrite'] is False or network_obj.local_id == 0:
                     network_list = Network.objects.filter(user_id=request.user.pk, SPIC=network_obj.SPIC, deleted=False).values('id', 'local_id').order_by('-id')
 
                     sim_obj = network_obj.copy()
@@ -258,12 +257,10 @@ def simulate(request, network_id):
                 else:
                     sim_obj = network_obj
 
-                print 'b'
-
                 nodes = json.decode(request.POST.get('nodes'))
                 links = json.decode(request.POST.get('links'))
                 sim_obj.update(nodes, links)
-                print 'c'
+
                 sim_obj.duration = form.cleaned_data['duration']
                 # if not same_seed, generate seeds for root_status
                 if form.cleaned_data['same_seed']:
@@ -272,11 +269,11 @@ def simulate(request, network_id):
                     rng_seeds, grng_seed = np.random.random_integers(0,1000,2)
                     root_status = {'rng_seeds': [int(rng_seeds)], 'grng_seed': int(grng_seed)}
                 sim_obj.status_json = json.encode(root_status)
-                print 'd'
+
                 sim_obj.save()
                 time.sleep(1)
                 task = Simulation.delay(sim_obj.pk)
-                print 'e'
+
                 response = {'task_id':task.task_id, 'local_id':network_obj.local_id}
                 return HttpResponse(json.encode(response), mimetype='application/json')
 
