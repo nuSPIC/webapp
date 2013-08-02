@@ -457,14 +457,15 @@ function keydown() {
                 // toggle node reflexivity
                 focused_node.fixed = !focused_node.fixed;
             }
-            update_layout_after_select();
+            update_after_select();
             break;
         case 82: // R
             if(focused_node) {
+                if (focused_node.type != 'neuron') return;
                 // toggle node reflexivity
                 focused_node.synapse = (focused_node.synapse== 'excitatory' ? 'inhibitory' : 'excitatory');
             }
-            update_layout_after_select();
+            update_after_select();
             break;
     }
 }
