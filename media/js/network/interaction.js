@@ -25,8 +25,12 @@ function active_buttons() {
 
     if (data.spike_detector.meta.neurons.length > 0) {
         $("#spike_detector #binwidth").find("button[value=" + options.histogram.binwidth + "]").addClass("active");
-        $("#correlated_neurons #neuronA").find(".title").html("Neuron " + data.spike_detector.meta.neurons[options.correlation.neuronA].id);
-        $("#correlated_neurons #neuronB").find(".title").html("Neuron " + data.spike_detector.meta.neurons[options.correlation.neuronB].id);
+        if (options.correlation.neuronA < data.spike_detector.meta.neurons.length) {
+            $("#correlated_neurons #neuronA").find(".title").html("Neuron " + data.spike_detector.meta.neurons[options.correlation.neuronA].id);
+        } 
+        if (options.correlation.neuronB < data.spike_detector.meta.neurons.length) {
+            $("#correlated_neurons #neuronB").find(".title").html("Neuron " + data.spike_detector.meta.neurons[options.correlation.neuronB].id);
+        }
     }
 }
 
