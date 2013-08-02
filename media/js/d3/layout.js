@@ -430,10 +430,12 @@ function keydown() {
     }
 
 //    if(!selected_node && !selected_link) return;
-    if(!focused_node && !focused_link) return;
+    if (!focused_node && !focused_link) return;
 
-    if (focused_node.type == 'neuron' && SPIC_group == 1) return;
-    if (focused_node.type == 'output') return;
+    if (focused_node) {
+        if (focused_node.type == 'neuron' && SPIC_group == 1) return;
+        if (focused_node.type == 'output' && SPIC_group == 1) return;
+    }
 
 
     switch(d3.event.keyCode) {
