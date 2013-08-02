@@ -10,10 +10,10 @@ class NetworkForm(forms.ModelForm):
     """ Form for network object """
     duration = forms.FloatField(required=True,
         label = 'Duration (ms)',
-        help_text = "The length of simulation time",
+        help_text = "The length of simulation",
         widget = forms.TextInput(attrs = {
             'placeholder': 'duration',
-            'class': 'required limit min 1000 max 10000'}))
+            'class': 'required limit min 1000 max 5000'}))
     same_seed = forms.BooleanField(required=False, initial=True)
     overwrite = forms.BooleanField(required=False, label = 'Overwrite results')
     nodes = forms.CharField(max_length=10000, widget=forms.HiddenInput())
@@ -43,17 +43,17 @@ class NodeForm(forms.Form):
     model = forms.ChoiceField(required = True,
         label = 'Model',
         choices=[
-            ('voltmeter', 'Voltmeter'),
-            ('spike_detector', 'Spike Detector'),
-            ('hh_psc_alpha', 'HH PSC Alpha'),
-            ('iaf_cond_alpha', 'IAF Cond Alpha'),
-            ('iaf_neuron', 'IAF Neuron'),
-            ('iaf_psc_alpha', 'IAF PSC Alpha'),
-            ('ac_generator', 'AC Generator'),
-            ('dc_generator', 'DC Generator'),
-            ('noise_generator', 'Noise Generator'),
-            ('poisson_generator', 'Poisson Generator'),
-            ('spike_generator', 'Spike Generator')])
+            ('voltmeter', 'Voltmeter', 'output'),
+            ('spike_detector', 'Spike Detector', 'output'),
+            ('hh_psc_alpha', 'HH PSC Alpha', 'neuron'),
+            ('iaf_cond_alpha', 'IAF Cond Alpha', 'neuron'),
+            ('iaf_neuron', 'IAF Neuron', 'neuron'),
+            ('iaf_psc_alpha', 'IAF PSC Alpha', 'neuron'),
+            ('ac_generator', 'AC Generator', 'input'),
+            ('dc_generator', 'DC Generator', 'input'),
+            ('noise_generator', 'Noise Generator', 'input'),
+            ('poisson_generator', 'Poisson Generator', 'input'),
+            ('spike_generator', 'Spike Generator', 'input')])
 
     V_m = forms.FloatField(required = False,
 #        initial = -70.,

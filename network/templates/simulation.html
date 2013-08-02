@@ -21,13 +21,15 @@
             <div class="control-group fieldWrapper {% if network_form.duration.help_text %}input-append{% endif %}">
                 <label class="control-label" for="{{ network_form.duration.auto_id }}">{{ network_form.duration.label }}</label>
                 <div class="controls">
-                    {{ network_form.duration }}
-                    {% if network_form.duration.help_text %}
-                        <span class="add-on">?</span>
-                    {% endif %}
+                    <div class="{% if field.help_text%}input-append{% endif %}">
+                        {{ network_form.duration }}
+                        {% if network_form.duration.help_text %}
+                            <span class="add-on">?</span>
+                        {% endif %}
+                    </div>
+                    <div class="help_text">{{ network_form.duration.help_text }}</div>
+                    {{ network_form.duration.errors }}
                 </div>
-                <ul class="errorlist hide fade"></ul>
-                <div class="help-text hide fade">{{ network_form.duration.help_text }}</div>
             </div>
 
             <div class="control-group fieldWrapper">

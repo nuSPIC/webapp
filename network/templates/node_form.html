@@ -17,8 +17,8 @@
                 <label class="control-label" for="id_model">{{ node_form.fields.model.label }}</label>
                 <div class="controls">
                     <select id="id_model">
-                    {% for id,label in node_form.fields.model.choices %}
-                        <option class="{% if 'generator' in id %}input{%elif 'meter' in id or 'detector' in id %}output{% else %}neuron{% endif %}" id="{{ id }}" value="{{ id }}" >{{ label }}</option>
+                    {% for id,label,type in node_form.fields.model.choices %}
+                        <option class="{{ type }}" id="{{ id }}" value="{{ id }}" >{{ label }}</option>
                     {% endfor %}
                     </select>
                 </div>
@@ -33,7 +33,7 @@
                             {{ field }}
                             {% if field.help_text %}<span class="add-on" value="{{ field.help_text }}">?</span>{% endif %}
                         </div>
-                        <span class="help_text">{{ field.help_text }}</span>
+                        <div class="help_text">{{ field.help_text }}</div>
                         {{ field.errors }}
                     </div>
                 </div>
