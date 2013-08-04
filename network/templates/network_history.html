@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Network history{% endblock %}
+
+{% block extrahead %}
+
+    <style type="text/css">
+        .icon-green {
+            background-image: url("/media/img/glyphicons-halflings-green.png");
+        }
+
+        .icon-red {
+            background-image: url("/media/img/glyphicons-halflings-red.png");
+        }
+
+    </style>
+{% endblock %}
+
+{% block masthead %}
+    <div style="padding: 20px; text-align:left">
+        <h2>Network history</h2>
+    </div>
+{% endblock %}
+
+{% block content %}
+
+    <h3> {{SPIC_obj.local_id}} - {{ SPIC_obj.title }} </h3>
+
+    <table class="table table-striped table-hover">
+
+        <tr>
+            <th>ID</th>
+            <th>Label</th>
+            <th>Simulated</th>
+            <th>SD</th>
+            <th>Vm</th>
+            <th>Deleted</th>
+            <th>Comment</th>
+        </tr>
+
+
+    {% for network in network_list %}
+        <tr>
+            <td><a href="{% url network network.SPIC.group network.SPIC.local_id network.local_id %}">{{ network.local_id }}</a></td>
+            <td>{{ network.label }}</td>
+            <td>{{ network.date_simulated|timesince|default:"not simulated" }}{% if network.date_simulated %} ago {% endif %}</td>
+            <td><i class="{% if network.has_spike_detector %}icon-ok icon-green{% else %}icon-remove icon-red{% endif %}"></i></td>
+            <td><i class="{% if network.has_voltmeter %}icon-ok icon-green{% else %}icon-remove icon-red{% endif %}"></i></td>
+            <td><i class="{% if network.deleted %}icon-ok icon-green{% else %}icon-remove icon-red{% endif %}"></i></td>
+<!--            <td><input type="checkbox" {% if network.deleted %}checked{% endif %} value="{{ network_obj.id }}"></td>-->
+            <td>{{ network.comment }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+
+    <hr>
+
+    <a href="{% url network_list %}"> Back </a>
+{% endblock %}
+
