@@ -47,7 +47,7 @@ class Network(models.Model):
     deleted = models.BooleanField()
 
     class Meta:
-        ordering = ('SPIC','id')
+        ordering = ('user_id', 'SPIC', 'local_id')
 
     def __unicode__(self):
         try:
@@ -242,11 +242,15 @@ class Network(models.Model):
             def prep_to_vis(values):
                 return {'values': values.tolist(), 'values_reduced': values[::5].tolist()}
 
-            vm_E = json.decode(str(self.voltmeter_json))
+            if len(self.voltmeter_json) > 0:
+                vm_E = json.decode(str(self.voltmeter_json))
+            else:
+                vm_E = {'meta':{'neurons': []}, 'V_m': ''}
             meta['neurons'] = vm_E['meta']['neurons']
 
             V_m = vm_E['V_m']
-            V_m = np.reshape(np.array(V_m), [-1, len(meta['neurons'])]).T
+            if len(V_m) > 0:
+                V_m = np.reshape(np.array(V_m), [-1, len(meta['neurons'])]).T
             times = np.arange(1., self.duration, 1.)
 
             data = {'V_m': map(prep_to_vis, V_m), 'times':times.tolist(), 'times_reduced':times[::5].tolist()}

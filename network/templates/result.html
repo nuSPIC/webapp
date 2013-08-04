@@ -17,28 +17,29 @@
 
             <ul class="nav nav-tabs tabs">
                 {% if network_obj.has_spike_detector %}
-                    <li class="active"><a href="#spike_detector-tab" class="spike_detector-tab" data-toggle="tab">Spike Detector</a></li>
+                    <li><a href="#spike_detector-tab" class="tab" data-toggle="tab">Spike Detector</a></li>
                 {% endif %}
                 {% if network_obj.has_voltmeter %}
-                    <li><a href="#voltmeter-tab" class="voltmeter-tab-header" data-toggle="tab">Voltmeter</a></li>
+                    <li><a href="#voltmeter-tab" class="tab" data-toggle="tab">Voltmeter</a></li>
                 {% endif %}
             </ul>
 
             <div class="tab-content" style="padding:1px">
 <!--             SPIKE DETECTOR TAB -->
-                <div id="spike_detector-tab" class="tab-pane active">
-                    {% include "d3.spike_detector.html" %}
-                </div>
+                {% if network_obj.has_spike_detector %}
+                    <div id="spike_detector-tab" class="tab-pane">
+                        {% include "d3.spike_detector.html" %}
+                    </div>
+                {% endif %}
 
     <!--             VOLTMETER TAB -->
-                <div id="voltmeter-tab" class="tab-pane">
-                    {% if network_obj.has_voltmeter %}
-                        <div>
-                            <div id="voltmeter_holder"><div style="margin: 20px 0">The number of points is too big.</div></div>
+                {% if network_obj.has_voltmeter %}
+                    <div id="voltmeter-tab" class="tab-pane">
+                        <div id="voltmeter_holder">
+                            <div style="margin: 20px 0">The number of points is too big.</div>
                         </div>
-
-                    {% endif %}
-                </div>
+                    </div>
+                {% endif %}
 
             </div>
         </div>

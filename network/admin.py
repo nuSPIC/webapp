@@ -33,6 +33,7 @@ class NetworkAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'user',
+        'user_id',
         'SPIC',
         'local_id',
         'label',

@@ -114,6 +114,40 @@ def network_latest(request, SPIC_group, SPIC_id):
     else:
         return network_initial(request, SPIC_group, SPIC_id)
 
+@render_to('network_history.html')
+@login_required
+def network_history(request, SPIC_group, SPIC_id):
+    """ Get the latest version of network."""
+    SPIC_obj = get_object_or_404(SPIC, group=SPIC_group, local_id=SPIC_id)
+    network_list = Network.objects.filter(user_id=request.user.pk, SPIC=SPIC_obj).order_by("-local_id")
+
+    return {'SPIC_obj': SPIC_obj, 'network_list': network_list}
+
+
+
+def network_delete(request, network_id):
+    """ Get the latest version of network."""
+    network_obj = get_object_or_404(Network, user_id=request.user.pk, pk=network_id)
+    if network_obj.local_id > 0:
+        network_obj.deleted = True
+        network_obj.save()
+
+    network_list = Network.objects.filter(user_id=request.user.pk, SPIC=network_obj.SPIC, deleted=False).values('local_id')
+    network_local_ids = np.array([nn['local_id'] for nn in network_list])
+    network_local_ids_filter = network_local_ids[network_local_ids <= network_obj.local_id]
+    print network_local_ids_filter[-1]
+
+    return HttpResponse(network_local_ids_filter[-1])
+
+
+def network_revert(request, network_id):
+    """ Get the latest version of network."""
+    network_obj = get_object_or_404(Network, user_id=request.user.pk, pk=network_id)
+    if network_obj.local_id > 0:
+        network_obj.deleted = False
+        network_obj.save()
+
+    return HttpResponse(network_obj.local_id)
 
 @render_to('network_base.html')
 @login_required
@@ -121,7 +155,7 @@ def network(request, SPIC_group, SPIC_id, local_id):
 
     SPIC_obj = SPIC.objects.get(group=SPIC_group, local_id=SPIC_id)
     network_list = Network.objects.filter(user_id=request.user.pk, SPIC=SPIC_obj, deleted=False).values('id', 'local_id', 'label', 'comment', 'date_simulated', 'favorite').order_by('-id')
-    network_obj = get_object_or_404(Network, user_id=request.user.pk, SPIC__group=SPIC_group, SPIC__local_id=SPIC_id, local_id=local_id, deleted=False)
+    network_obj = get_object_or_404(Network, user_id=request.user.pk, SPIC__group=SPIC_group, SPIC__local_id=SPIC_id, local_id=local_id)
 
     # Get root status
     root_status = network_obj.root_status()
@@ -248,7 +282,7 @@ def simulate(request, network_id):
             # check if network form is valid.
             if form.is_valid():
                 if form.cleaned_data['overwrite'] is False or network_obj.local_id == 0:
-                    network_list = Network.objects.filter(user_id=request.user.pk, SPIC=network_obj.SPIC, deleted=False).values('id', 'local_id').order_by('-id')
+                    network_list = Network.objects.filter(user_id=request.user.pk, SPIC=network_obj.SPIC).values('id', 'local_id').order_by('-id')
 
                     sim_obj = network_obj.copy()
                     sim_obj.local_id = network_list.latest('local_id')['local_id'] + 1
@@ -274,13 +308,7 @@ def simulate(request, network_id):
                 time.sleep(1)
                 task = Simulation.delay(sim_obj.pk)
 
-                response = {'task_id':task.task_id, 'local_id':network_obj.local_id}
-                return HttpResponse(json.encode(response), mimetype='application/json')
-
-            else:
-                responseHTML = render_to_string('network_form.html', {'form': form})
-                response = {'responseHTML':responseHTML, 'valid': -1}
-                return HttpResponse(json.encode(response), mimetype='application/json')
+                return HttpResponse(task.task_id)
 
     return HttpResponse()
 

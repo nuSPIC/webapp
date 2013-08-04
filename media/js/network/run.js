@@ -198,6 +198,24 @@ $('#node-form #reset-node-form-button').on('click', function(e) {
     $("#node-form #id_model #" + selected_model).prop('selected', true);
 })
 
+$( '#network-delete' ).on('click', function (e) {
+    e.preventDefault();
+    $.post('/network/ajax/'+ network_id +'/delete/',
+        {csrfmiddlewaretoken: csrf_token },
+        function(local_id){
+            window.location.href = '/network/'+ SPIC_group + '/' + SPIC_local_id + '/' + local_id;
+    });
+});
+
+$( '#network-revert' ).on('click', function (e) {
+    e.preventDefault();
+    $.post('/network/ajax/'+ network_id +'/revert/',
+        {csrfmiddlewaretoken: csrf_token },
+        function(local_id){
+            window.location.href = '/network/'+ SPIC_group + '/' + SPIC_local_id + '/' + local_id;
+    });
+});
+
 $(document).ready(function() {
     active_buttons();
 
@@ -219,6 +237,9 @@ $(document).ready(function() {
 
     $('#node-form').ajaxForm( { beforeSubmit: node_validate } );
     $('#link-form').ajaxForm( { beforeSubmit: link_validate } );
+
+    $( "#results-tabs .tabs").find(".tab").first().parent().addClass('active');
+    $( "#results-tabs .tab-content").find(".tab-pane").first().addClass('active');
 
 //    $(".add-on").popover({trigger: 'click', content: function() {return $(this).attr('value')}})
 });

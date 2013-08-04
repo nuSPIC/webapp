@@ -6,12 +6,7 @@
 
 {% block masthead %}
     <div style="padding: 20px; text-align:left">
-
-    <h2>
-        Competition
-    </h2>
-<!--        <p style="padding-top:200px">Neural System Prediction and Identification Challenge</p>-->
-
+        <h2>Competition</h2>
     </div>
 {% endblock %}
 
@@ -27,11 +22,17 @@
                 <ul class="breadcrumb">
 
                     {% for network in item.list %}
-                        <li id="{{ network.title }}">
+                        <li id="{{ network.title }}" style="width:100%">
 
                             <a href="{% url network_latest network.SPIC.group network.SPIC.local_id %}">
                                 <h3>{{ network.SPIC.title|default_if_none:"Network" }}</h3>
                             </a>
+
+                            <div style="float:right">
+                                <a href="{% url network_history network.SPIC.group network.SPIC.local_id %}">
+                                    History
+                                </a>
+                            </div>
 
                             <div>
                                 <small>{{ network.SPIC.description|default:"no description" }}</small>
