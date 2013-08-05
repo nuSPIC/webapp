@@ -44,8 +44,8 @@
             {% include "history.html" %}
 
             <span>
-                <button class="btn {% if not network_obj.favorite %}hide fade{% endif %}" id="network-like"><i class="icon-thumbs-up"></i> Like it</button>
-                <button class="btn {% if network_obj.favorite %}hide fade{% endif %}" id="network-dislike"><i class="icon-thumbs-down"></i> Dislike it</button>
+                <button class="btn {% if network_obj.favorite %}hide fade{% endif %}" id="network-like"><i class="icon-thumbs-up"></i> Like it</button>
+                <button class="btn {% if not network_obj.favorite %}hide fade{% endif %}" id="network-dislike"><i class="icon-thumbs-down"></i> Dislike it</button>
             </span>
         </div>
 
@@ -147,6 +147,6 @@
 
     <script type="text/javascript" src="{{ MEDIA_URL }}js/network/interaction.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/network/simulation.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/network/run.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/network/run.js?m"></script>
 
 {% endblock %}

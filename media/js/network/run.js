@@ -198,24 +198,24 @@ $('#node-form #reset-node-form-button').on('click', function(e) {
     $("#node-form #id_model #" + selected_model).prop('selected', true);
 })
 
-$( '#network-dislike' ).on('click', function (e) {
+$( '#network-like' ).on('click', function (e) {
     e.preventDefault();
     $.post('/network/ajax/'+ network_id +'/like/',
         {csrfmiddlewaretoken: csrf_token },
         function(){
-            $( "#network-like" ).removeClass('hide fade');
-            $( "#network-dislike" ).addClass('hide fade');
+            $( "#network-like" ).addClass('hide fade');
+            $( "#network-dislike" ).removeClass('hide fade');
             $( "#history_"+ local_id ).find( ".favorite" ).addClass('icon-thumbs-up').removeClass('icon-thumbs-down');
     });
 });
 
-$( '#network-like' ).on('click', function (e) {
+$( '#network-dislike' ).on('click', function (e) {
     e.preventDefault();
     $.post('/network/ajax/'+ network_id +'/dislike/',
         {csrfmiddlewaretoken: csrf_token },
         function(){
-            $( "#network-like" ).addClass('hide fade');
-            $( "#network-dislike" ).removeClass('hide fade');
+            $( "#network-like" ).removeClass('hide fade');
+            $( "#network-dislike" ).addClass('hide fade');
             $( "#history_"+ local_id ).find( ".favorite" ).addClass('icon-thumbs-down').removeClass('icon-thumbs-up');
     });
 });

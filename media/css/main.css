@@ -18,8 +18,27 @@ textarea {
     color: #222;
 }
 
-body {
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#container {
+    min-height: 100%;
+    position: relative;
     line-height: 1.4;
+}
+
+
+#content {
+    padding-bottom: 150px;
+}
+
+footer {
+    position:absolute;
+    bottom: 0;
+    width: 100%;
 }
 
 /*

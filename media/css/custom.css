@@ -1,5 +1,5 @@
 .jumbotron {
-  padding: 0;
+  padding-bottom: 0;
   background: #1c3047 ; /* Old browsers */
   background: -moz-linear-gradient(45deg,  #1c3047  0%, #467ab3 100%); /* FF3.6+ */
   background: -webkit-gradient(linear, left bottom, right top, color-stop(0%,#1c3047 ), color-stop(100%,#467ab3)); /* Chrome,Safari4+ */
