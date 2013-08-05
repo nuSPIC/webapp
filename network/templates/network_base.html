@@ -5,7 +5,11 @@
 {% load network_tags %}
 {% load humanize %}
 
-{% block title %}{{ SPIC_obj.title }} - {{ network_obj.local_id }} - {{ network_obj.label|default_if_none:'' }}{% endblock %}
+{% block title %}
+    {{ SPIC_obj.title }}
+     - {{ network_obj.local_id }}
+{% endblock %}
+<!--     - {{ network_obj.label|default_if_none:'' }}-->
 
 {% block extrahead %}
 
@@ -58,7 +62,9 @@
         </li>
         <span class="divider">/</span>
         <li id="network_title">
-            {{ network_obj.local_id }} - {{ network_obj.label|default_if_none:'' }} ( {{ network_obj.date_simulated|timesince|default:"not simulated" }}{% if network_obj.date_simulated %} ago{% endif %} )
+            {{ network_obj.local_id }}
+<!--             - {{ network_obj.label|default_if_none:'' }}-->
+             ( {{ network_obj.date_simulated|timesince|default:"not simulated" }}{% if network_obj.date_simulated %} ago{% endif %} )
         </li>
 
         <br>
