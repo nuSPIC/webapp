@@ -6,33 +6,37 @@
 
 {% block title %}{{ flatpage.title }}{% endblock %}
 
-{% block masthead %}
-    <div style="padding: 40px 0">
+{% block jumbotron %}
+    <div class="jumbotron masthead">
+        <div class="container">
+            <div style="padding: 40px 0">
 
-    <p>
-        <img src="/media/images/special/nuspic_logo_inverse.png" class="watermark"></img>
-    </p>
-<!--        <p style="padding-top:200px">Neural System Prediction and Identification Challenge</p>-->
+            <p>
+                <img src="/media/images/special/nuspic_logo_inverse.png" class="watermark"></img>
+            </p>
+        <!--        <p style="padding-top:200px">Neural System Prediction and Identification Challenge</p>-->
 
-    <p>
-      <a class="btn btn-primary btn-large" href="/network/">Take the challenge</a>
-    </p>
+            <p>
+              <a class="btn btn-primary btn-large" href="/network/">Take the challenge</a>
+            </p>
 
-    <ul class="masthead-links">
-      <li>
-        <a href="https://github.com/nuSPIC/webapp">GitHub project</a>
-      </li>
-<!--      <li>-->
-<!--        <a href="http://www.youtube.com/watch?v=qH83Pyh4sZs">Tutorial</a>-->
-<!--      </li>-->
-      <li>
-        <a href="/faq">FAQ</a>
-      </li>
-      <li>
-        Version 1.4
-      </li>
-    </ul>
+            <ul class="masthead-links">
+              <li>
+                <a href="https://github.com/nuSPIC/webapp">GitHub project</a>
+              </li>
+        <!--      <li>-->
+        <!--        <a href="http://www.youtube.com/watch?v=qH83Pyh4sZs">Tutorial</a>-->
+        <!--      </li>-->
+              <li>
+                <a href="/faq">FAQ</a>
+              </li>
+              <li>
+                Version 1.4
+              </li>
+            </ul>
 
+            </div>
+        </div>
     </div>
 {% endblock %}
 
