@@ -205,7 +205,7 @@ $( '#network-like' ).on('click', function (e) {
         function(){
             $( "#network-like" ).addClass('hide fade');
             $( "#network-dislike" ).removeClass('hide fade');
-            $( "#history_"+ local_id ).find( ".favorite" ).addClass('icon-thumbs-up').removeClass('icon-thumbs-down');
+            $( "#history_"+ local_id ).find( ".favorite" ).addClass('icon-thumbs-up');
     });
 });
 
@@ -216,7 +216,7 @@ $( '#network-dislike' ).on('click', function (e) {
         function(){
             $( "#network-like" ).removeClass('hide fade');
             $( "#network-dislike" ).addClass('hide fade');
-            $( "#history_"+ local_id ).find( ".favorite" ).addClass('icon-thumbs-down').removeClass('icon-thumbs-up');
+            $( "#history_"+ local_id ).find( ".favorite" ).removeClass('icon-thumbs-up');
     });
 });
 
