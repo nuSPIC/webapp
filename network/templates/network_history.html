@@ -32,9 +32,9 @@
             <th>ID</th>
             <th>Label</th>
             <th>Simulated</th>
-            <th>SD</th>
-            <th>Vm</th>
-            <th>Deleted</th>
+            <th style="text-align:center">SD data</th>
+            <th style="text-align:center">Vm data</th>
+            <th style="text-align:center">I like it</th>
             <th>Comment</th>
         </tr>
 
@@ -42,13 +42,13 @@
     {% for network in network_list %}
         <tr>
             <td><a href="{% url network network.SPIC.group network.SPIC.local_id network.local_id %}">{{ network.local_id }}</a></td>
-            <td>{{ network.label }}</td>
+            <td>{{ network.label|default_if_none:'' }}</td>
             <td>{{ network.date_simulated|timesince|default:"not simulated" }}{% if network.date_simulated %} ago {% endif %}</td>
-            <td><i class="{% if network.has_spike_detector %}icon-ok icon-green{% else %}icon-remove icon-red{% endif %}"></i></td>
-            <td><i class="{% if network.has_voltmeter %}icon-ok icon-green{% else %}icon-remove icon-red{% endif %}"></i></td>
-            <td><i class="{% if network.deleted %}icon-ok icon-green{% else %}icon-remove icon-red{% endif %}"></i></td>
+            <td style="text-align:center"><i class="{% if network.has_spike_detector %}icon-ok icon-green{% else %}icon-remove icon-red{% endif %}"></i></td>
+            <td style="text-align:center"><i class="{% if network.has_voltmeter %}icon-ok icon-green{% else %}icon-remove icon-red{% endif %}"></i></td>
+            <td style="text-align:center"><i class="{% if network.favorite %}icon-thumbs-up icon-green{% else %}icon-thumbs-down icon-red{% endif %}"></i></td>
 <!--            <td><input type="checkbox" {% if network.deleted %}checked{% endif %} value="{{ network_obj.id }}"></td>-->
-            <td>{{ network.comment }}</td>
+            <td>{{ network.comment|default_if_none:'' }}</td>
         </tr>
     {% endfor %}
     </table>

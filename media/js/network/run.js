@@ -107,57 +107,57 @@ $( "button.links-curve" ).on('click', function() {
 });
 
 
-$( "button.node-force" ).on('click', function() {
-    var node_id = $(this).val();
-    nodes[node_id].fixed = !nodes[node_id].fixed;
-    update_after_select();
-});
+//$( "button.node-force" ).on('click', function() {
+//    var node_id = $(this).val();
+//    nodes[node_id].fixed = !nodes[node_id].fixed;
+//    update_after_select();
+//});
 
-$( "button#node-force-all" ).on('click', function() {
-    if ($(this).hasClass('active')) {
-        $( "button.node-force" ).removeClass('active');
-    } else {
-        $( "button.node-force" ).addClass('active');
-    }
+//$( "button#node-force-all" ).on('click', function() {
+//    if ($(this).hasClass('active')) {
+//        $( "button.node-force" ).removeClass('active');
+//    } else {
+//        $( "button.node-force" ).addClass('active');
+//    }
 
-    for (var i = 0; i < nodes.length; i++) {
-        if (nodes[i].type == 'neuron') {
-            nodes[i].fixed = $(this).hasClass('active');
-        }
-    }
-    update_after_select();
-});
+//    for (var i = 0; i < nodes.length; i++) {
+//        if (nodes[i].type == 'neuron') {
+//            nodes[i].fixed = $(this).hasClass('active');
+//        }
+//    }
+//    update_after_select();
+//});
 
-$( "button#save-layout" ).on('click', function(e) {
-        e.preventDefault();
+//$( "button#save-layout" ).on('click', function(e) {
+//        e.preventDefault();
 
-//        $.cookie('options', options, { expires: 7});
+////        $.cookie('options', options, { expires: 7});
 
-//        var devices_json = JSON.stringify(device_list);
-//        $.post('/network/ajax/'+ network_id  +'/save_layout/',
-//                {'csrfmiddlewaretoken': csrf_token, 'devices_json':devices_json, 'nodes': JSON.stringify(nodes)},
-//                function(data) {
-//                
-//        }, 'json');
-});
+////        var devices_json = JSON.stringify(device_list);
+////        $.post('/network/ajax/'+ network_id  +'/save_layout/',
+////                {'csrfmiddlewaretoken': csrf_token, 'devices_json':devices_json, 'nodes': JSON.stringify(nodes)},
+////                function(data) {
+////                
+////        }, 'json');
+//});
 
-$( "button#default-layout" ).on('click', function(e) {
-        e.preventDefault();
+//$( "button#default-layout" ).on('click', function(e) {
+//        e.preventDefault();
 
-        $.getJSON('/network/ajax/'+ network_id  +'/default_layout/',
-            function(data) {
-                pos = data["pos"];
-                pos.map(function(p) {
-                    nodes[nodes_uid.indexOf(p[0])]['x'] = p[1][0] * options.layout.width;
-                    nodes[nodes_uid.indexOf(p[0])]['y'] = p[1][1] * options.layout.height;
-                })
+//        $.getJSON('/network/ajax/'+ network_id  +'/default_layout/',
+//            function(data) {
+//                pos = data["pos"];
+//                pos.map(function(p) {
+//                    nodes[nodes_uid.indexOf(p[0])]['x'] = p[1][0] * options.layout.width;
+//                    nodes[nodes_uid.indexOf(p[0])]['y'] = p[1][1] * options.layout.height;
+//                })
 
-                initiate_layout("#layout-holder");
-                update_after_change();
-        });
-});
+//                initiate_layout("#layout-holder");
+//                update_after_change();
+//        });
+//});
 
-$( "#node-add" ).on('change', show_form())
+//$( "#node-add" ).on('change', show_form())
 
 //$( "#node-form" ).on('submit', function(e) {e.preventDefault();})
 
@@ -198,21 +198,25 @@ $('#node-form #reset-node-form-button').on('click', function(e) {
     $("#node-form #id_model #" + selected_model).prop('selected', true);
 })
 
-$( '#network-delete' ).on('click', function (e) {
+$( '#network-dislike' ).on('click', function (e) {
     e.preventDefault();
-    $.post('/network/ajax/'+ network_id +'/delete/',
+    $.post('/network/ajax/'+ network_id +'/like/',
         {csrfmiddlewaretoken: csrf_token },
-        function(local_id){
-            window.location.href = '/network/'+ SPIC_group + '/' + SPIC_local_id + '/' + local_id;
+        function(){
+            $( "#network-like" ).removeClass('hide fade');
+            $( "#network-dislike" ).addClass('hide fade');
+            $( "#history_"+ local_id ).find( ".favorite" ).addClass('icon-thumbs-up').removeClass('icon-thumbs-down');
     });
 });
 
-$( '#network-revert' ).on('click', function (e) {
+$( '#network-like' ).on('click', function (e) {
     e.preventDefault();
-    $.post('/network/ajax/'+ network_id +'/revert/',
+    $.post('/network/ajax/'+ network_id +'/dislike/',
         {csrfmiddlewaretoken: csrf_token },
-        function(local_id){
-            window.location.href = '/network/'+ SPIC_group + '/' + SPIC_local_id + '/' + local_id;
+        function(){
+            $( "#network-like" ).addClass('hide fade');
+            $( "#network-dislike" ).removeClass('hide fade');
+            $( "#history_"+ local_id ).find( ".favorite" ).addClass('icon-thumbs-down').removeClass('icon-thumbs-up');
     });
 });
 

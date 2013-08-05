@@ -57,6 +57,10 @@ class Network(models.Model):
 
     def copy(self):
         new_kwargs = dict([(fld.name, getattr(self, fld.name)) for fld in self._meta.fields if fld.name != 'id']);
+        new_kwargs['deleted'] = False
+        new_kwargs['favorite'] = False
+        new_kwargs['label'] = ''
+        new_kwargs['comment'] = ''
         return self.__class__.objects.create(**new_kwargs)
 
     def user(self):

@@ -42,11 +42,11 @@
         </span>
 
         {% include "history.html" %}
-        {% if network_obj.deleted %}
-            <button class="btn" id="network-revert">Revert</button>
-        {% else %}
-            <button class="btn" id="network-delete">Delete</button>
-        {% endif %}
+
+        <span>
+            <button class="btn {% if not network_obj.favorite %}hide fade{% endif %}" id="network-like"><i class="icon-thumbs-up"></i> Like it</button>
+            <button class="btn {% if network_obj.favorite %}hide fade{% endif %}" id="network-dislike"><i class="icon-thumbs-down"></i> Dislike it</button>
+        </span>
     </div>
 
     <li>
@@ -58,7 +58,7 @@
     </li>
     <span class="divider">/</span>
     <li id="network_title">
-        {{ network_obj.local_id }} - {{ network_obj.label }} ( {{ network_obj.date_simulated|timesince|default:"not simulated" }}{% if network_obj.date_simulated %} ago{% endif %} )
+        {{ network_obj.local_id }} - {{ network_obj.label|default_if_none:'' }} ( {{ network_obj.date_simulated|timesince|default:"not simulated" }}{% if network_obj.date_simulated %} ago{% endif %} )
     </li>
 
     <br>
@@ -112,6 +112,7 @@
         SPIC_local_id = {{ SPIC_obj.local_id }};
 
     var network_id = {{ network_obj.id }},
+        local_id = {{ network_obj.local_id }},
         csrf_token = "{{ csrf_token }}",
         simulation_stop = {{ network_obj.duration|safe }};
 

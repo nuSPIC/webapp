@@ -5,7 +5,7 @@
     <span class="caret"></span>
     </a>
 
-    <ul class="dropdown-menu pull-right" id="history-list" style="max-height: 500px; overflow-y:auto; min-width:300px">
+    <ul class="dropdown-menu pull-right" id="history-list" style="max-height: 500px; overflow-y:auto; min-width:350px">
         <li>
             <a tabindex="-1" href="{% url network_history SPIC_obj.group SPIC_obj.local_id %}">
                 Overview
@@ -15,12 +15,14 @@
 
         {% for network in network_list %}
 
-            <li title="{{ network.comment }}" id="history_{{ network.local_id }}">
+            <li title="{{ network.comment }}" id="history_{{ network.local_id }}" class="{% if network.deleted %}hide fade{% endif %}">
 
                 <a tabindex="-1" href="{% url network SPIC_obj.group SPIC_obj.local_id network.local_id|default_if_none:0 %}" id="{{ network.local_id }}">
                     {% if network %}
-                        <b>{{ network.local_id }}</b> | {{ network.label }} | 
-                        {{ network.date_simulated|timesince|default:"not simulated" }}{% if network.date_simulated %} ago {% endif %}
+                        <span style="float:right"><i class="favorite {% if network.favorite %}icon-thumbs-up{% else %}icon-thumbs-down{% endif %}"></i></span>
+<span style="float:right; min-width:200px">{{ network.date_simulated|timesince|default:"not simulated" }}{% if network.date_simulated %} ago {% endif %}</span>
+                        <span style="display: inline-block; min-width:10px"><b>{{ network.local_id }}</b></span>
+                        <span style="display: inline-block; min-width:50px">{{ network.label|default_if_none:'' }}</span>
                     {% else %}
                         NaN - no network found
                     {% endif %}

@@ -71,14 +71,6 @@ def network_list(request):
     flatpage = get_flatpage_or_none(request)
     network_list = Network.objects.filter(user_id=0)
 
-    if request.method == 'GET' and 'id' in request.GET:
-        network_id = request.GET.get('id')
-        networks = Network.objects.filter(user_id=request.user.pk, pk=network_id)
-
-        if len(networks) > 0:
-            network_obj = networks[0]
-            return HttpResponseRedirect('/network/%s/%s/%s' %(network_obj.SPIC.group, network_obj.SPIC.local_id,network_obj.local_id))
-
     return {
         'flatpage': flatpage,
         'network_list': network_list,
@@ -104,7 +96,7 @@ def network_initial(request, SPIC_group, SPIC_id):
 def network_latest(request, SPIC_group, SPIC_id):
     """ Get the latest version of network."""
     SPIC_obj = get_object_or_404(SPIC, group=SPIC_group, local_id=SPIC_id)
-    network_list = Network.objects.raw('SELECT id,local_id,label,date_simulated,has_voltmeter,has_spike_detector FROM network_network WHERE user_id = %s AND SPIC_id = %s AND deleted = 0 ORDER BY id DESC', [request.user.pk, SPIC_obj.pk])
+    network_list = Network.objects.filter(user_id=request.user.pk, SPIC=SPIC_obj).values('id','local_id','label','comment','date_simulated','deleted','favorite').order_by('-id')
 
     if len(list(network_list)) > 0:
         network_obj = network_list[0]
@@ -125,36 +117,32 @@ def network_history(request, SPIC_group, SPIC_id):
 
 
 
-def network_delete(request, network_id):
-    """ Get the latest version of network."""
+def network_like(request, network_id):
     network_obj = get_object_or_404(Network, user_id=request.user.pk, pk=network_id)
-    if network_obj.local_id > 0:
-        network_obj.deleted = True
-        network_obj.save()
+    if request.is_ajax():
+        if network_obj.local_id > 0:
+            network_obj.favorite = True
+            network_obj.save()
 
-    network_list = Network.objects.filter(user_id=request.user.pk, SPIC=network_obj.SPIC, deleted=False).values('local_id')
-    network_local_ids = np.array([nn['local_id'] for nn in network_list])
-    network_local_ids_filter = network_local_ids[network_local_ids <= network_obj.local_id]
-    print network_local_ids_filter[-1]
-
-    return HttpResponse(network_local_ids_filter[-1])
+    return HttpResponse()
 
 
-def network_revert(request, network_id):
-    """ Get the latest version of network."""
+def network_dislike(request, network_id):
     network_obj = get_object_or_404(Network, user_id=request.user.pk, pk=network_id)
-    if network_obj.local_id > 0:
-        network_obj.deleted = False
-        network_obj.save()
 
-    return HttpResponse(network_obj.local_id)
+    if request.is_ajax():
+        if network_obj.local_id > 0:
+            network_obj.favorite = False
+            network_obj.save()
+
+    return HttpResponse()
 
 @render_to('network_base.html')
 @login_required
 def network(request, SPIC_group, SPIC_id, local_id):
 
     SPIC_obj = SPIC.objects.get(group=SPIC_group, local_id=SPIC_id)
-    network_list = Network.objects.filter(user_id=request.user.pk, SPIC=SPIC_obj, deleted=False).values('id', 'local_id', 'label', 'comment', 'date_simulated', 'favorite').order_by('-id')
+    network_list = Network.objects.filter(user_id=request.user.pk, SPIC=SPIC_obj).values('id','local_id','label','comment','date_simulated','deleted','favorite').order_by('-id')
     network_obj = get_object_or_404(Network, user_id=request.user.pk, SPIC__group=SPIC_group, SPIC__local_id=SPIC_id, local_id=local_id)
 
     # Get root status
@@ -379,15 +367,16 @@ def data(request, network_id):
     network_obj = get_object_or_404(Network, pk=network_id)
     
     response = {
-        'network': network_obj.device_list(),
+        'nodes': network_obj.nodes(),
+        'links': network_obj.links(),
         'result' : {}
     }
     
     if network_obj.has_voltmeter:
-        response['result']['voltmeter'] = json.decode(network_obj.voltmeter_json)
+        response['result']['voltmeter'] = network_obj.voltmeter_data()
         
     if network_obj.has_spike_detector:
-        response['result']['spike_detector'] = json.decode(network_obj.spike_detector_json)
+        response['result']['spike_detector'] = network_obj.spike_detector_data()
     
     response = HttpResponse(json.encode(response), mimetype='application/force-download')
     response['Content-Disposition'] = 'attachment; filename=%s_%s_%s.json' %(network_obj.date_simulated.strftime('%y%m%d'), network_obj.SPIC, network_obj.local_id)
