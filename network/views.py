@@ -113,7 +113,6 @@ def network_history(request, SPIC_group, SPIC_id):
     return {'SPIC_obj': SPIC_obj, 'network_list': network_list}
 
 
-
 def network_like(request, network_id):
     network_obj = get_object_or_404(Network, user_id=request.user.pk, pk=network_id)
     if request.is_ajax():
