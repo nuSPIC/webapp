@@ -15,7 +15,7 @@
 
         {% for network in network_list %}
 
-            <li title="{{ network.comment }}" id="history_{{ network.local_id }}" class="{% if network.deleted %}hide fade{% endif %}">
+            <li title="{{ network.comment }}" id="history_{{ network.local_id }}">
 
                 <a tabindex="-1" href="{% url network SPIC_obj.group SPIC_obj.local_id network.local_id|default_if_none:0 %}" id="{{ network.local_id }}">
                     {% if network %}
