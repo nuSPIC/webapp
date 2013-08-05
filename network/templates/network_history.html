@@ -46,7 +46,7 @@
             <td>{{ network.date_simulated|timesince|default:"not simulated" }}{% if network.date_simulated %} ago {% endif %}</td>
             <td style="text-align:center"><i class="{% if network.has_spike_detector %}icon-ok icon-green{% else %}icon-remove icon-red{% endif %}"></i></td>
             <td style="text-align:center"><i class="{% if network.has_voltmeter %}icon-ok icon-green{% else %}icon-remove icon-red{% endif %}"></i></td>
-            <td style="text-align:center"><i class="{% if network.favorite %}icon-thumbs-up icon-green{% else %}icon-thumbs-down icon-red{% endif %}"></i></td>
+            <td style="text-align:center"><i class="{% if network.favorite %}icon-thumbs-up{% endif %}"></i></td>
 <!--            <td><input type="checkbox" {% if network.deleted %}checked{% endif %} value="{{ network_obj.id }}"></td>-->
             <td>{{ network.comment|default_if_none:'' }}</td>
         </tr>
