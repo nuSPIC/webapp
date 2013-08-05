@@ -99,10 +99,7 @@ def network_latest(request, SPIC_group, SPIC_id):
     network_list = Network.objects.filter(user_id=request.user.pk, SPIC=SPIC_obj).values('id','local_id','label','comment','date_simulated','deleted','favorite').order_by('-id')
 
     if len(list(network_list)) > 0:
-        network_obj = network_list[0]
-        local_id = network_obj.local_id
-
-        return network(request, SPIC_group, SPIC_id, local_id)
+        return network(request, SPIC_group, SPIC_id, network_list[0]['local_id'])
     else:
         return network_initial(request, SPIC_group, SPIC_id)
 

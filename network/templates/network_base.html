@@ -5,7 +5,7 @@
 {% load network_tags %}
 {% load humanize %}
 
-{% block title %}{{ SPIC_obj.title }} - {{ local_id }}{% endblock %}
+{% block title %}{{ SPIC_obj.title }} - {{ network_obj.local_id }} - {{ network_obj.label|default_if_none:'' }}{% endblock %}
 
 {% block extrahead %}
 
