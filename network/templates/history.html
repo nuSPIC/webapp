@@ -19,7 +19,7 @@
 
                 <a tabindex="-1" href="{% url network SPIC_obj.group SPIC_obj.local_id network.local_id|default_if_none:0 %}" id="{{ network.local_id }}">
                     {% if network %}
-                        <span style="float:right"><i class="favorite {% if network.favorite %}icon-thumbs-up{% else %}icon-thumbs-down{% endif %}"></i></span>
+                        <span style="float:right"><i class="favorite {% if network.favorite %}icon-thumbs-up{% endif %}"></i></span>
                         <span style="display: inline-block; width: 15px"><b>{{ network.local_id }}</b></span>
                         <span style="margin: 0 10px">{{ network.date_simulated|timesince|default:"not simulated" }}{% if network.date_simulated %} ago {% endif %}</span>
 <!--                        <span style="display: inline-block; min-width:50px">{{ network.label|default_if_none:'' }}</span>-->
