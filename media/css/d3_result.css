@@ -1,0 +1,122 @@
+/*
+ * Default
+ */
+
+.y.axis line, .x.axis line {
+  fill: none;
+  stroke: #dedede;
+}
+
+.x.axis path, .y.axis path {
+  display: none;
+}
+
+.axis {
+  shape-rendering: crispEdges;
+}
+
+
+/*
+ * Spike detector
+ */
+
+#result #spike_detector {
+    padding: 10px 0;
+}
+
+svg.spike_detector {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+svg.spike_detector .title {
+    font-weight: bold;
+    font-size: 20px;
+    color: #333333;
+}
+
+svg.spike_detector .bar {
+    fill: #000000;
+    shape-rendering: crispEdges;
+}
+
+svg.spike_detector .bar:hover {
+    cursor: pointer;
+    fill: #666666;
+}
+
+svg.raster_plot line {
+    stroke: #eeeeee;
+}
+
+svg.raster_plot .dot {
+    fill: #000000;
+}
+
+svg.smoothed_histogram .title {
+    font-weight: bold;
+    font-size: 20px;
+    color: #333333;
+}
+
+svg.smoothed_histogram path {
+    fill: none;
+    stroke: #333333;
+    stroke-width: 3px;
+}
+
+svg.smoothed_histogram path.active {
+    opacity: 0.2;
+}
+
+svg.smoothed_histogram path.selected {
+    opacity: 1.0;
+    stroke: steelblue;
+}
+
+svg.smoothed_histogram path.selected2 {
+    opacity: 1.0;
+    stroke: orange;
+}
+
+
+
+/*
+ * Voltmeter
+ */
+
+svg.voltmeter {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+svg.voltmeter.active {
+    color: green
+}
+
+svg.voltmeter .title {
+    font-size: 24px;
+    color: #333333;
+}
+
+svg.voltmeter path {
+    fill: none;
+    stroke: #333333;
+    stroke-width: 2px;
+}
+
+svg.voltmeter path.active {
+    opacity: 0.2;
+}
+
+svg.voltmeter path.selected {
+    opacity: 1.0;
+    stroke: steelblue;
+}
+
+svg.voltmeter path.selected2 {
+    opacity: 1.0;
+    stroke: orange;
+}

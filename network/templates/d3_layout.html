@@ -1,0 +1,137 @@
+<div class="portlet" id="network_layout" data-placement="{{ SPIC_obj.tooltip.layout.placement }}" data-toggle="popover" data-title="{{ SPIC_obj.tooltip.layout.title }}" data-content="{{ SPIC_obj.tooltip.layout.content }}">
+    <div class="portlet-header">
+        <h3>
+            <span>Network layout</span>
+            <div class="pull-right">
+                <button type="button" class="btn bing"><i class="icon-chevron-up"></i></button>
+                <button type="button" class="btn bing hide fade"><i class="icon-chevron-down"></i></button>
+            </div>
+        </h3>
+    </div>
+
+    <div class="portlet-body">
+
+        <div id="layout-holder"></div>
+
+    </div>
+
+    <div class="portlet-footer">
+        <div class="btn-group" id="toggle-button">
+            <button href="#network-steps-content" class="btn" id="network-steps">Steps</button>
+            <button href="#network-help-content" class="btn" id="network-help">Help</button>
+            <button href="#layout-option-content" class="btn" id="layout-option">Options</button>
+        </div>
+
+
+        <div class="toggle-content hide fade" id="network-steps-content">
+            <hr>
+            <ol>
+                <li>Add <b>new nodes</b> or <b>new links</b> and set their status.</li>
+                <li>Explore the <b>network layout</b>.</li>
+                <li>Explore the <b>connectivion matrix</b>.</li>
+                <li>Modify <b>nodes</b> and <b>links</b>.</li>
+                <li>Run the <b>simulation</b>.</li>
+                <li>View the <b>results</b>.</li>
+            </ol>
+
+            {% ifequal SPIC_obj.group '1'%}
+            <p>In this nuSPIC class all neurons and interneuronal connections aren't able to be edited or deleted.</p>
+            {% endifequal %}
+
+            <p>
+                <strong>Attention:</strong> Whenever some parameters are changed, these won't be saved on the server until you press the button 'Save & simulate'.
+            </p>
+
+            <p>
+                Each successful simulation appears in the history list. The same list can be used to retrieve past simulations together with the results.
+                The recorded events (spikes, membrane potential etc.) are plotted online. They can also be downloaded as text files.
+            </p>
+
+            <p>
+                <strong>Optional:</strong> Add comments to each simulation describing what you did it, why you did it, what were the results etc. 
+                This will help also when retrieving old simulations.
+            </p>
+
+            <p>
+                Give some feedback in the forum, if you want to share it.
+            </p>
+            <hr>
+        </div>
+
+        <div class="toggle-content hide fade" id="network-help-content">
+            <hr>
+            <ul>
+                <li><b>Create a new node:</b> Doubleclick any space in layout.</li>
+                <li><b>Create a new link:</b> Hold clicking a node and move the mouse to the next node.</li>
+                <li><b>Delete node:</b> Focus a node with the mouse and press the key 'Delete'.</li>
+                <li><b>Delete link:</b> If it'able to change links, doubleclick a cell in connection matrix to create or delete a link.</li>
+                <li><b>HINT:</b> All nodes can be dragged around. (with Ctrl-Pressing)</li>
+                <hr>
+                <li><b>Blue links with black arrow</b> - excitatory connection</li>
+                <li><b>Red links with black dot</b> - inhibitory connection</li>
+                <li><b>Additional options:</b> Modify the options for your sake and click button 'Options' again to save the changes.</li>
+            </ul>
+            <hr>
+        </div>
+
+        <div class="toggle-content hide fade form-horizontal" id="layout-option-content">
+            <hr>
+<!--            <div class="control-group">-->
+<!--                <label class="control-label" for="#node-force">Force:</label>-->
+<!--                <div id="node-force" class="btn-group controls" data-toggle="buttons-checklist">-->
+<!--                    {% for neuron in network_obj.nodes %}-->
+<!--                        <button class="btn btn-small btn-primary node-force" value="{{ forloop.counter0 }}">{{ neuron.id }}</button>-->
+<!--                    {% endfor %}-->
+<!--                    <button id="node-force-all" class="btn btn-small btn-primary">All</button>-->
+<!--                </div>-->
+<!--            </div>-->
+
+            <div class="control-group">
+                <label class="control-label" for="#nodes-display">Display nodes</label>
+                <div class="btn-group controls" data-toggle="buttons-checklist" id="nodes-display">
+                    <button class="btn btn-small nodes-display" value="input" id="input">Input</button>
+                    <button class="btn btn-small nodes-display" value="neuron" id="neuron">Neuron</button>
+                    <button class="btn btn-small nodes-display" value="output" id="output">Output</button>
+                </div>
+            </div>
+
+<!--            <div class="control-group">-->
+<!--                <label class="control-label" for="#nodes-position-display">Display position of nodes</label>-->
+<!--                <div class="btn-group controls" data-toggle="buttons-radio" id="nodes-position-display">-->
+<!--                    <button class="btn btn-small btn-primary nodes-position-display" value="1">True</button>-->
+<!--                    <button class="btn btn-small btn-primary nodes-position-display active" value="0">False</button>-->
+<!--                </div>-->
+<!--            </div>-->
+
+            <div class="control-group">
+                <label class="control-label" for="#links-display">Display links of selected node or link</label>
+                <div class="btn-group controls" data-toggle="buttons-checklist" id="links-display">
+                    <button class="btn btn-small links-display" value="pre" id="pre">Pre</button>
+                    <button class="btn btn-small links-display" value="post" id="post">Post</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="#links-weight-display">Display weight of links</label>
+                <div class="btn-group controls" data-toggle="buttons-radio" id="links-weight-display">
+                    <button class="btn btn-small links-weight-display" value="true" id="true">True</button>
+                    <button class="btn btn-small links-weight-display" value="false" id="false">False</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="#links-curve">Link Curve</label>
+                <div class="btn-group controls" data-toggle="buttons-radio" id="links-curve">
+                    <button class="btn btn-small links-curve" value="left" id="left">Left</button>
+                    <button class="btn btn-small links-curve" value="right" id="right">Right</button>
+                </div>
+            </div>
+            <hr>
+        </div>
+
+<!--        <div class="btn-group">-->
+<!--            <button class="btn btn-primary" id="save-layout">Save</button>-->
+<!--            <button class="btn btn-primary" id="default-layout">Default</button>-->
+<!--        </div>-->
+    </div>
+</div>

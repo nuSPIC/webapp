@@ -1,0 +1,117 @@
+{% if network_obj.spike_detector_data.meta.connect_to %}
+    <div id="spike_detector">
+        {% if network_obj.spike_detector_data.meta.neurons %}
+
+            <div id="raster_plot"></div>
+
+            <hr>
+            <div id="histogram"></div>
+
+            <div id="binwidth">
+                <span style="font-size: 14px">Bin width: </span>
+                <span class="btn-group" data-toggle="buttons-radio">
+                    <button class="btn btn-small binwidth" value="10"> 10 ms </button>
+                    <button class="btn btn-small binwidth" value="20"> 20 ms </button>
+                    <button class="btn btn-small binwidth" value="50"> 50 ms </button>
+                    <button class="btn btn-small binwidth" value="100"> 100 ms </button>
+    <!--                    <button class="btn btn-small binwidth" value="200"> 200 ms </button>-->
+                </span>
+
+            </div>
+
+            <hr>
+            <div id="smoothed_histogram"></div>
+
+            <hr>
+            <div id="correlation_plot"></div>
+
+<!--            <span style="font-size: 14px">Valid correlation of</span>-->
+
+<!--            <span id="correlated_neurons">-->
+<!--                <div class="btn-group dropup" id="neuronA">-->
+<!--                    <a href="#" class="btn btn-small dropdown-toggle" data-toggle="dropdown">-->
+<!--                        <span class="title">Neuron</span>-->
+<!--                        <span class="caret"></span>-->
+<!--                    </a>-->
+
+<!--                    <ul class="dropdown-menu correlation">-->
+<!--                        {% for neuron in network_obj.spike_detector_data_index.meta.neurons %}-->
+<!--                            <li><a href="#" tabindex="-1" value="{{ neuron.idx }}">Neuron {{ neuron.id }}</a></li>-->
+<!--                        {% endfor %}-->
+<!--                    </ul>-->
+
+<!--                </div>-->
+
+<!--                and-->
+
+<!--                <div class="btn-group dropup" id="neuronB">-->
+<!--                    <a href="#" class="btn btn-small dropdown-toggle" data-toggle="dropdown">-->
+<!--                        <span class="title">Neuron</span>-->
+<!--                        <span class="caret"></span>-->
+<!--                    </a>-->
+
+<!--                    <ul class="dropdown-menu correlation">-->
+<!--                        {% for neuron in network_obj.spike_detector_data_index.meta.neurons %}-->
+<!--                            <li><a href="#" tabindex="-1" value="{{ neuron.idx }}">Neuron {{ neuron.id }}</a></li>-->
+<!--                        {% endfor %}-->
+<!--                    </ul>-->
+
+<!--                </div>-->
+<!--            </span>-->
+
+        {% else %}
+
+        <div style="padding-top: 20px; text-align:center; font-size: 14px">No spikes detected. Check your input devices.</div>
+
+        {% endif %}
+    </div>
+
+{% endif %}
+
+
+<!--    <div class="fig">-->
+<!--        <div id="spikes"></div>-->
+
+<!--        <div class="scale_to_fit">-->
+<!--            Scale to Fit <input type="checkbox" class="sd_scale" value="sd_scale"></input>-->
+<!--        </div>-->
+
+<!--        <div id="psth"></div>-->
+
+<!--    </div>-->
+
+<!--    <div class="adjust">-->
+
+<!--        <div class="kernel">-->
+
+<!--            <div class="kernel_function" style="float:left; margin: 0 10px">-->
+<!--                <div>Kernel function:</div>-->
+<!--                <select>-->
+<!--                    <option class="off" value="off"> Off </option>-->
+<!--                    <option class="uniform" value="uniform"> Uniform </option>-->
+<!--                    <option class="triangular" value="triangular"> Triangular </option>-->
+<!--                    <option class="cosine" value="cosine"> Cosine </option>-->
+<!--                    <option class="epanechnikov" value="epanechnikov"> Epanechnikov </option>-->
+<!--                    <option class="quartic" value="quartic"> Quartic </option>-->
+<!--                    <option class="triweight" value="triweight"> Triweight </option>-->
+<!--                    <option class="tricube" value="tricube"> Tricube </option>-->
+<!--                    <option class="gauss" value="gauss"> Gauss </option>-->
+<!--                </select>-->
+<!--            </div>-->
+
+<!--            <div class="kernel_width">-->
+<!--                <div>Kernel width:</div>-->
+<!--                <input type="text" class="spinedit"/> ms-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--            <input type="radio" class="uniform" name="smooth_method" value="uniform"> Uniform-->
+<!--            <input type="radio" class="triangular" name="smooth_method" value="triangular"> Triangular-->
+<!--            <input type="radio" class="cosine" name="smooth_method" value="cosine"> Cosine-->
+<!--            <input type="radio" class="epanechnikov" name="smooth_method" value="epanechnikov"> Epanechnikov-->
+<!--            <input type="radio" class="quartic" name="smooth_method" value="quartic"> Quartic-->
+<!--            <input type="radio" class="triweight" name="smooth_method" value="triweight"> Triweight-->
+<!--            <input type="radio" class="tricube" name="smooth_method" value="tricube"> Tricube-->
+<!--            <input type="radio" class="gauss" name="smooth_method" value="gauss"> Gauss-->
+<!--   -->
+<!--    </div>-->
