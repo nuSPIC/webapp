@@ -1,13 +1,3 @@
-# -*- coding: utf-8 -*-
-import sys
-
-nestpath = '/home/spreizer/local/nest-2.2.0/lib/python2.6/site-packages/'
-
-sys.path.reverse()
-sys.path.append(nestpath)
-sys.path.reverse()
-
-
 from datetime import timedelta
 
 
@@ -76,12 +66,9 @@ INSTALLED_APPS = (
     'news',
 
     'network',
-    #'reversion',
-    #'result',
 
     'djcelery',
     'djkombu',
-#    'form_utils',
 )
 
 

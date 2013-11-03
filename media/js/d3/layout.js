@@ -3,7 +3,10 @@ var svg = {};
 
 // mouse event vars
 var selected_node = null,
+    selected_node2 = null,
     selected_link = null;
+
+var last_selected_node = null;
 
 var mousedown_link = null,
     mousedown_node = null,
@@ -120,7 +123,7 @@ function update_layout() {
         .classed('output', function(d) { return (d.source.type == 'output') || (d.target.type == 'output'); })
         .style('marker-end', function(d) { return d.weight > 0 ? 'url(#arrow-marker)' : 'url(#circle-marker)'; })
         .on('mouseover', function(d) { focused_link = d; })
-//        .on('mouseout', function(d) { focused_link = null; })
+        .on('mouseout', function(d) { focused_link = null; })
         .on('mousedown', function(d) {
             if(d3.event.ctrlKey) return;
 
@@ -130,6 +133,7 @@ function update_layout() {
             focused_link = d;
 
             selected_node = null;
+            selected_node2 = null;
             update_after_select();
         });
 
@@ -156,6 +160,8 @@ function update_layout() {
         .classed('output', function(d) { return (d.source.type == 'output') || (d.target.type == 'output'); })
         .attr('rx', function(d) {return (Math.abs(log10(Math.abs(d.weight)))*4+7)})
         .attr('ry', 8)
+        .on('mouseover', function(d) { focused_link = d; })
+        .on('mouseout', function(d) { focused_link = null; })
         .on('mousedown', function(d) {
             if(d3.event.ctrlKey) return;
 
@@ -164,6 +170,8 @@ function update_layout() {
             if(mousedown_link === selected_link) selected_link = null;
             else selected_link = mousedown_link;
             selected_node = null;
+            selected_node2 = null;
+            last_selected_node = 'A';
             update_after_select();
         });
 
@@ -208,7 +216,8 @@ function update_layout() {
     // update existing nodes (selected visual states)
     svg.nodes.selectAll('circle')
         .classed('selected', function(d) { return (d === selected_node); })
-        .classed('active', function(d) { return selected_link ? ((d === selected_link.source) || (d === selected_link.target)) : (d === selected_node) ;});
+        .classed('selected2', function(d) { return (d === selected_node2); })
+        .classed('active', function(d) { return selected_link ? ((d === selected_link.source) || (d === selected_link.target)) : (d === selected_node || d === selected_node2) ;});
 
     // add new nodes
     var g = svg.nodes.enter().append('svg:g');
@@ -222,6 +231,7 @@ function update_layout() {
         .attr('class', 'node')
         .classed('selected', function(d) { return (d === selected_node); })
         .attr('r', 12)
+
         .on('mouseover', function(d) {
 
             focused_node = d;
@@ -232,21 +242,19 @@ function update_layout() {
 
             if (mousedown_node) {
                 if (mousedown_node.type == 'neuron') {
-                    d3.select(this).classed('conflict', d.type == 'neuron' && SPIC_group == 1 || d.type == 'input' || d.status.model == 'voltmeter')
+                    d3.select(this).classed('conflict', (d.type == 'neuron' && SPIC_group == 1) || d.type == 'input' || d.status.model == 'voltmeter')
                 }
-
-                if (mousedown_node.type == 'input' || mousedown_node.type == 'output') {
-                    d3.select(this).classed('conflict', d.type == 'input' || d.type == 'output')
+                else {
+                    if (d.type != 'neuron') {
+                        d3.select(this).classed('conflict', true)
+                    }
                 }
-            }
-
-            if (d.status.model == 'spike_detector') {
+            } else if (d.status.model == 'spike_detector') {
                 d3.select(this).classed('conflict', true)
             }
 
-
-
         })
+
         .on('mouseout', function(d) {
             focused_node = null;
 
@@ -255,12 +263,27 @@ function update_layout() {
             d3.select(this).attr('transform', '')
                 .classed('conflict', false);
         })
+
         .on('mousedown', function(d) {
-            if(d3.event.ctrlKey) return;
+//            if (d3.event.ctrlKey) return;
+            mousedown_node = d;
 
             // select node
-            mousedown_node = d;
-            selected_node = mousedown_node;
+//            if (d3.event.shiftKey && selected_node) {
+//                selected_node2 = mousedown_node;
+//            } else {
+//                selected_node = mousedown_node;
+//                selected_node2 = null;
+//            }
+
+            if (last_selected_node == 'A') {
+                selected_node2 = mousedown_node;
+                last_selected_node = 'B';
+            } else {
+                selected_node = mousedown_node;
+                last_selected_node = 'A';
+            }
+
             selected_link = null;
 
             // reposition drag line
@@ -273,8 +296,9 @@ function update_layout() {
 
             update_after_select();
         })
+
         .on('mouseup', function(d) {
-            if(!mousedown_node) return;
+            if (!mousedown_node) return;
 
             // needed by FF
             drag_line
@@ -283,7 +307,7 @@ function update_layout() {
 
             // check for drag-to-self
             mouseup_node = d;
-            if(mouseup_node === mousedown_node) { resetMouseVars(); return; }
+            if (mouseup_node === mousedown_node) { resetMouseVars(); return; }
 
             // unenlarge target node
             d3.select(this).attr('transform', '').classed('conflict', false);
@@ -311,7 +335,8 @@ function update_layout() {
             // select new link
             selected_link = link;
             selected_node = null;
-
+            selected_node2 = null;
+            last_selected_node = null;
             update_after_change();
         });
 
@@ -320,7 +345,7 @@ function update_layout() {
         .attr('x', 0)
         .attr('y', 4)
         .attr('class', 'id')
-        .text(function(d) { return d.id; });
+        .text(function(d) { return d.type != 'output' ? d.id : (d.status.model == 'voltmeter' ? 'Vm' : 'SD'); });
 
     // remove old nodes
     svg.nodes.exit().remove();
@@ -366,16 +391,18 @@ function mousedown() {
     // because :active only works in WebKit?
     svg.layout.classed('active', true);
 
-    if(d3.event.ctrlKey || mousedown_node || mousedown_link) return;
+    if (d3.event.shiftKey || d3.event.ctrlKey || mousedown_node || mousedown_link) return;
 
     selected_node = null;
+    selected_node2 = null;
+    last_selected_node = null;
     selected_link = null;
 
     update_after_select();
 }
 
 function mousemove() {
-    if(!mousedown_node) return;
+    if (!mousedown_node) return;
     selected_node = mousedown_node;
 
     // update drag line
@@ -395,7 +422,7 @@ function mousemove() {
 }
 
 function mouseup() {
-    if(mousedown_node) {
+    if (mousedown_node) {
         // hide drag line
         drag_line
             .classed('hidden', true)
@@ -420,31 +447,34 @@ function spliceLinksForNode(node) {
 
 function keydown() {
 
-    if(lastKeyDown !== -1) return;
+    if (lastKeyDown !== -1) return;
     lastKeyDown = d3.event.keyCode;
 
     // ctrl
-    if(d3.event.keyCode === 17) {
+    if (d3.event.keyCode === 17) {
         svg.nodes.call(layout_force.drag);
         svg.layout.classed('ctrl', true);
     }
 
-//    if(!selected_node && !selected_link) return;
     if (!focused_node && !focused_link) return;
 
-    if (focused_node) {
-        if (focused_node.type == 'neuron' && SPIC_group == 1) return;
-        if (focused_node.type == 'output' && SPIC_group == 1) return;
-    }
+    if (SPIC_group == 1) {
+        if (focused_node) {
+            if (focused_node.type == 'neuron' || focused_node.type == 'output') return;
+        }
 
+        if (focused_link) {
+            if (focused_link.source.type == 'neuron' && focused_link.target.type == 'neuron') return;
+        }
+    }
 
     switch(d3.event.keyCode) {
         case 8: // backspace
         case 46: // delete
-            if(focused_node) {
+            if (focused_node) {
                 nodes.splice(nodes.indexOf(focused_node), 1);
                 spliceLinksForNode(focused_node);
-            } else if(focused_link) {
+            } else if (focused_link) {
                 links.splice(links.indexOf(focused_link), 1);
             }
             focused_link = null;
@@ -453,14 +483,14 @@ function keydown() {
             update_after_change();
             break;
         case 70: // F
-            if(focused_node) {
+            if (focused_node) {
                 // toggle node reflexivity
                 focused_node.fixed = !focused_node.fixed;
             }
             update_after_select();
             break;
         case 82: // R
-            if(focused_node) {
+            if (focused_node) {
                 if (focused_node.type != 'neuron') return;
                 // toggle node reflexivity
                 focused_node.synapse = (focused_node.synapse== 'excitatory' ? 'inhibitory' : 'excitatory');

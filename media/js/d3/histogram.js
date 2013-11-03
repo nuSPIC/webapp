@@ -1,35 +1,23 @@
-function draw_histogram(reference){
+function draw_histogram(reference) {
     $(reference).empty()
 
     // A formatter for counts.
     var formatCount = d3.format(",.0f");
 
-    var margin = {top: 30, right: 20, bottom: 35, left: 45},
+    var margin = {top: 30, right: 20, bottom: 35, left: 50},
         width = options.histogram.width - margin.left - margin.right,
         height = options.histogram.height - margin.top - margin.bottom;
 
-    var x = d3.scale.linear()
-        .domain([0, data.spike_detector.meta.simTime])
-        .range([0, width]);
+    var xScale = d3.scale.linear().range([0, width]).domain([0, simulation_stop]);
 
     var hist = d3.layout.histogram()
-        .bins(x.ticks(parseInt(data.spike_detector.meta.simTime / options.histogram.binwidth)))
+        .bins(xScale.ticks(parseInt(simulation_stop / options.histogram.binwidth)))
         (data.spike_detector.times);
 
-    var y = d3.scale.linear()
-        .domain([0, d3.max(hist, function(d) { return d.y; })])
-        .range([height, 0]);
+    yScale = d3.scale.linear().range([height, 0]).domain([0, Math.ceil(d3.max(hist, function(d) { return d.y*1000.0/d.dx/data.spike_detector.meta.neurons.length; }))]);
 
-    var xAxis = d3.svg.axis()
-        .scale(x)
-        .orient("bottom")
-        .ticks(5);
-
-    var yAxis = d3.svg.axis()
-        .scale(y)
-        .orient("left")
-        .tickSize(-width)
-        .ticks(4);
+    var xAxis = d3.svg.axis().scale(xScale).orient("bottom").ticks(5);
+    var yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(-width).ticks(2);
 
     var svg = d3.select(reference).append("svg:svg")
         .attr("width", "100%")
@@ -41,7 +29,7 @@ function draw_histogram(reference){
         .attr("class", "title")
         .attr("x", margin.right)
         .attr("y", (margin.top/2+5))
-        .text("Histogram");
+        .text("Histogram of population activity");
 
     var g = svg.append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -70,16 +58,16 @@ function draw_histogram(reference){
         .attr("y", -(margin.left-5))
         .attr("dy", ".75em")
         .attr("transform", "rotate(-90)")
-        .text("Spike count");
+        .text("Rate (Hz)");
 
     var bar = g.selectAll(".bar")
         .data(hist)
       .enter().append("g")
         .attr("class", "bar")
-        .attr("transform", function(d) { return "translate(" + x(d.x) + "," + y(d.y) + ")"; });
+        .attr("transform", function(d) { return "translate(" + xScale(d.x) + "," + yScale(d.y*1000.0/d.dx/data.spike_detector.meta.neurons.length) + ")"; });
 
     bar.append("svg:rect")
         .attr("x", 1)
-        .attr("width", function(d) { return x(d.dx) - 2 })
-        .attr("height", function(d) { return height - y(d.y); });
+        .attr("width", function(d) { return xScale(d.dx) - 2 })
+        .attr("height", function(d) { return height - yScale(d.y*1000.0/d.dx/data.spike_detector.meta.neurons.length); });
 };

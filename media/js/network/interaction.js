@@ -199,6 +199,10 @@ function update_after_select() {
     update_layout();
     highlight_selected();
     show_form(null);
+    update_raster_plot("#raster_plot");
+    update_smoothed_histogram("g.smoothed_histogram");
+    update_correlation("#correlation_plot");
+    update_voltmeter("g.voltmeter");
 }
 
 function node_interaction() {

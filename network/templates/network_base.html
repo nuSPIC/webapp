@@ -2,7 +2,6 @@
 
 {% load lib_filters %}
 {% load network_filters %}
-{% load network_tags %}
 {% load humanize %}
 
 {% block title %}
@@ -13,9 +12,9 @@
 
 {% block extrahead %}
 
-    <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/network-custom.css" />
-    <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/d3.layout.css" />
-    <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/d3.result.css" />
+    <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/network_main.css" />
+    <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/d3_layout.css" />
+    <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/d3_result.css" />
 
     <style type="text/css">
         .container {
@@ -47,8 +46,8 @@
             </span>
 
             {% include "history.html" %}
-
             <span>
+                <button class="btn" id="network-comment" data-toggle="button"><i class="icon-pencil"></i> Comment</button>
                 <button class="btn {% if network_obj.favorite %}hide fade{% endif %}" id="network-like"><i class="icon-thumbs-up"></i> Like it</button>
                 <button class="btn {% if not network_obj.favorite %}hide fade{% endif %}" id="network-dislike"><i class="icon-thumbs-down"></i> Dislike it</button>
             </span>
@@ -64,14 +63,20 @@
         <span class="divider">/</span>
         <li id="network_title">
             {{ network_obj.local_id }}
-<!--             - {{ network_obj.label|default_if_none:'' }}-->
+             - <span id="network_label">{{ network_obj.label|default_if_none:'' }}</span>
              ( {{ network_obj.date_simulated|timesince|default:"not simulated" }}{% if network_obj.date_simulated %} ago{% endif %} )
         </li>
 
         <br>
-        <li id="network_description" >
-            {{ SPIC_obj.description|default:"no description" }}
-        </li>
+        <div id="network_description" class="{% if network_obj.comment %}hide fade{% endif %}">
+                {{ SPIC_obj.description|default:"no description" }}
+        </div>
+
+        <div id="network_comment">{{ network_obj.comment|default_if_none:"" }}</div>
+
+        <div id="network-comment-form" class="hide fade">
+            {% include "comment_form.html" %}
+        </div>
 
     </ul>
 
@@ -91,7 +96,7 @@
 
                         <div class="span4" id="network">
 
-                            {% include "d3.layout.html" %}
+                            {% include "d3_layout.html" %}
                             {% include "connection_matrix.html" %}
 
                         </div>
@@ -141,11 +146,14 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}js/plugins/jquery.cookie.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/plugins/jquery.form.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/layout.js"></script>
+
     {% if network_obj.has_spike_detector %}
         <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/raster_plot.js"></script>
         <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/histogram.js"></script>
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/smooth_histogram.js"></script>
         <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/correlation.js"></script>
         <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/spike_detector.js"></script>
+
     {% endif %}
 
     {% if network_obj.has_voltmeter %}
@@ -154,6 +162,6 @@
 
     <script type="text/javascript" src="{{ MEDIA_URL }}js/network/interaction.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/network/simulation.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/network/run.js?m"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/network/run.js"></script>
 
 {% endblock %}

@@ -1,7 +1,7 @@
 {% load lib_filters %}
 {% load network_filters %}
 
-<div id="nodes-list" class="portlet">
+<div id="nodes-list" class="portlet" data-placement="{{ SPIC_obj.tooltip.node.placement }}" data-toggle="popover" data-title="{{ SPIC_obj.tooltip.node.title }}" data-content="{{ SPIC_obj.tooltip.node.content }}">
 
     <div class="portlet-header" title="Hover a node to get more parameters or click a enabled device to modify it.">
         <h3>

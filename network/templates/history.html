@@ -5,7 +5,7 @@
     <span class="caret"></span>
     </a>
 
-    <ul class="dropdown-menu pull-right" id="history-list" style="max-height: 500px; overflow-y:auto; min-width:300px">
+    <ul class="dropdown-menu pull-right" id="history-list" style="min-width:300px">
         <li>
             <a tabindex="-1" href="{% url network_history SPIC_obj.group SPIC_obj.local_id %}">
                 Overview
@@ -15,7 +15,7 @@
 
         {% for network in network_list %}
 
-            <li title="{{ network.comment }}" id="history_{{ network.local_id }}">
+            <li id="history_{{ network.local_id }}" data-content="{{ network.comment|default_if_none:'no comment' }}" data-placement="left" data-toggle="popover" data-title="{{ network.label|default_if_none:'' }}">
 
                 <a tabindex="-1" href="{% url network SPIC_obj.group SPIC_obj.local_id network.local_id|default_if_none:0 %}" id="{{ network.local_id }}">
                     {% if network %}

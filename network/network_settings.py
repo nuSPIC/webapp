@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-
-SPIC_CHOICES = (('0','Sandbox'),
-                ('1','SPIC1'),
-                ('2','SPIC2'),
-                ('3','SPIC3'),
-                ('4','SPIC4'))
 
 PARAMS_ORDER = {
     "hh_psc_alpha": (

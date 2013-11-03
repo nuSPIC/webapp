@@ -45,3 +45,4 @@ class ProfileMiddleware(object):
                 response.content = "<pre>" + stats_str + "</pre>"
 
         return response
+

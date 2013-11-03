@@ -1,13 +1,8 @@
-# -*- coding: utf-8 -*-
 from celery.contrib.abortable import AbortableTask
 
-#from reversion import revision
-#from reversion.models import Version
+from network.models import Network
 
 import lib.json as json
-
-from network.forms import NetworkForm
-from network.models import Network
 
 import datetime
 import numpy as np

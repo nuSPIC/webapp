@@ -1,8 +1,8 @@
-<div class="portlet">
+<div class="portlet" data-placement="{{ SPIC_obj.tooltip.simulation.placement }}" data-toggle="popover" data-title="{{ SPIC_obj.tooltip.simulation.title }}" data-content="{{ SPIC_obj.tooltip.simulation.content }}">
     <form action="." method="POST" class="form-horizontal" id="network-form">
         {% csrf_token %}
 
-        <div class="portlet-header" title="Before you start it, be sure that you have saved devices.">
+        <div class="portlet-header">
             <h3>
                 <span>Simulation</span>
                 <div class="pull-right">
@@ -63,7 +63,7 @@
     </div>
 
     <div class="modal-body">
-        <div class="logo-animation"><img src="/media/images/icons/bcf_logo-animation.gif" ></div>
+        <div class="logo-animation"><img src="/media/img/icons/bcf_logo-animation.gif" ></div>
         <div class="msg-content"></div>
     </div>
 

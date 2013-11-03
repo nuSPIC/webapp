@@ -32,6 +32,13 @@ var options = ($.cookie('options') ? $.cookie('options') :{
         height: 140.0,
         binwidth: 50.0,
     },
+    smoothed_histogram: {
+        width: 640.0,
+        height: 140.0,
+        kernel_function: 'gauss',
+        kw: 10.0,
+        fac: 1.0,
+    },
     correlation: {
         width: 640.0,
         height: 140.0,
@@ -198,6 +205,28 @@ $('#node-form #reset-node-form-button').on('click', function(e) {
     $("#node-form #id_model #" + selected_model).prop('selected', true);
 })
 
+
+$( '#network-comment' ).on('click', function (e) {
+    e.preventDefault();
+    $("#network-comment-form").toggleClass("hide").toggleClass("fade");
+
+});
+
+$( "form#comment-form" ).on('submit',  function(e) {
+        e.preventDefault();
+        $.post('/network/ajax/'+ network_id +'/comment/',
+            $( this ).serialize(), function(data){
+                $('#network_label').html(data.label);
+                $('#network_comment').html(data.comment);
+                if (data.comment[0].length > 0) {
+                    $("#network_description").addClass("hide fade");
+                } else {
+                    $("#network_description").removeClass("hide fade");
+                }
+                $('#history_'+local_id).attr("data-content", data.comment).attr("data-original-title", data.label).popover('destroy').popover({trigger:'hover', html:true})
+        }, 'json');
+});
+
 $( '#network-like' ).on('click', function (e) {
     e.preventDefault();
     $.post('/network/ajax/'+ network_id +'/like/',
@@ -220,6 +249,8 @@ $( '#network-dislike' ).on('click', function (e) {
     });
 });
 
+var test = null;
+
 $(document).ready(function() {
     active_buttons();
 
@@ -228,9 +259,7 @@ $(document).ready(function() {
 
     $("#voltmeter_holder").empty();
     if (data.voltmeter.meta.neurons.length > 0) {
-        for (var i = 0; i < data.voltmeter.V_m.length; i++) {
-            draw_voltmeter("#voltmeter_holder", data.voltmeter.times_reduced, data.voltmeter.V_m[i].values_reduced, data.voltmeter.meta.neurons[i].id.toString());
-        }
+        draw_voltmeter("#voltmeter_holder");
     }
 
     $( "#voltmeter-holder .voltmeter").addClass('active')
@@ -244,6 +273,9 @@ $(document).ready(function() {
 
     $( "#results-tabs .tabs").find(".tab").first().parent().addClass('active');
     $( "#results-tabs .tab-content").find(".tab-pane").first().addClass('active');
+
+    $('[data-toggle=popover]').popover({trigger:'hover', html: true})
+
 
 //    $(".add-on").popover({trigger: 'click', content: function() {return $(this).attr('value')}})
 });

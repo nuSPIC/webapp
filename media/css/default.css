@@ -2,7 +2,8 @@ body {
     background-color: white;
 }
 
-div.centered-404 {
+div.centered-error {
+    background: url(/media/img/special/error_carlos.png) no-repeat center center;
     position: absolute;
     left: 50%;
     top: 50%;

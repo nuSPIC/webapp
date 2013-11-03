@@ -430,7 +430,7 @@
     display: block;
     width: 32px;
     height: 32px;
-    background: transparent url(/media/images/icons/forum.gif) no-repeat;
+    background: transparent url(/media/img/icons/forum.gif) no-repeat;
 }
 
 .forum_read  {
@@ -606,7 +606,7 @@
 }
 
 .bb-btn {
-	background: transparent url(/media/images/icons/bbcode.gif) no-repeat scroll 0 0;
+	background: transparent url(/media/img/icons/bbcode.gif) no-repeat scroll 0 0;
 	width:20px;
 	height:20px;
 	margin-right:5px;

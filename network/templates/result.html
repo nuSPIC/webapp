@@ -16,7 +16,7 @@
         <div class="portlet-body" id="results-tabs">
 
             <ul class="nav nav-tabs tabs">
-                {% if network_obj.has_spike_detector %}
+                {% if network_obj.spike_detector_data.meta.connect_to %}
                     <li><a href="#spike_detector-tab" class="tab" data-toggle="tab">Spike Detector</a></li>
                 {% endif %}
                 {% if network_obj.has_voltmeter %}
@@ -25,14 +25,14 @@
             </ul>
 
             <div class="tab-content" style="padding:1px">
-<!--             SPIKE DETECTOR TAB -->
-                {% if network_obj.has_spike_detector %}
+<!--             SPIKE DETECTOR TAB CONTENT -->
+                {% if network_obj.spike_detector_data.meta.connect_to %}
                     <div id="spike_detector-tab" class="tab-pane">
-                        {% include "d3.spike_detector.html" %}
+                        {% include "d3_spike_detector.html" %}
                     </div>
                 {% endif %}
 
-    <!--             VOLTMETER TAB -->
+    <!--             VOLTMETER TAB CONTENT -->
                 {% if network_obj.has_voltmeter %}
                     <div id="voltmeter-tab" class="tab-pane">
                         <div id="voltmeter_holder">
@@ -45,9 +45,7 @@
         </div>
 
         <div class="portlet-footer">
-<!--            <button class="document btn btn-primary">-->
                 <a href="{% url data network_obj.pk %}" class="btn">Download Results</a>
-<!--            </button>-->
         </div>
 
     </div>

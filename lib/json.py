@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import cjson
 #import ujson
 
@@ -13,3 +12,4 @@ def encode(*args, **kwargs):
         return ujson.encode(*args, **kwargs)
     except:
         return cjson.encode(*args, **kwargs)
+

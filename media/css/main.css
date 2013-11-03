@@ -23,6 +23,18 @@ html, body {
     margin: 0;
     padding-top: 0;
     padding-bottom: 0;
+    font-size: 16px;
+}
+
+div.centered-error {
+    background: url(/media/img/special/error_carlos.png) no-repeat center center;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 760px;
+    height: 500px;
+    margin-left: -380px;
+    margin-top: -250px;
 }
 
 #container {
@@ -227,7 +239,7 @@ form .alert, form .alert-error {
 
 .fieldWrapper textarea {
     width : 98%;
-    background-color: transparent;
+/*    background-color: transparent;*/
     border : 1px solid #BBBBBB;
     padding : 4px;
 }
@@ -266,7 +278,7 @@ form .alert, form .alert-error {
     }
 
 div.rss-link {
-    background: url(/media/images/icons/rss-16x16.png) no-repeat 16px center;
+    background: url(/media/img/icons/rss-16x16.png) no-repeat 16px center;
     padding-right: 16px;
     padding-left: 40px;
     display: inline;
@@ -466,4 +478,36 @@ div.rss-link {
     h3 {
         page-break-after: avoid;
     }
+}
+
+/*==========================================================================
+   Custom styles
+   ========================================================================== */
+
+.jumbotron {
+  padding-bottom: 0;
+  background: #1c3047 ; /* Old browsers */
+  background: -moz-linear-gradient(45deg,  #1c3047  0%, #467ab3 100%); /* FF3.6+ */
+  background: -webkit-gradient(linear, left bottom, right top, color-stop(0%,#1c3047 ), color-stop(100%,#467ab3)); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(45deg,  #1c3047  0%,#467ab3 100%); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(45deg,  #1c3047  0%,#467ab3 100%); /* Opera 11.10+ */
+  background: -ms-linear-gradient(45deg,  #1c3047  0%,#467ab3 100%); /* IE10+ */
+  background: linear-gradient(45deg,  #1c3047  0%,#467ab3 100%); /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1c3047 ', endColorstr='#467ab3',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+}
+
+.jumbotron:after {
+  background: url(/media/img/bg_rasterplot.png) repeat center center;
+  opacity: .1;
+}
+
+.form-search {
+    padding-right: 90px;
+}
+
+
+#logo a {
+    padding       : 15px;
+    height        : 75px;
+    vertical-align: bottom;
 }

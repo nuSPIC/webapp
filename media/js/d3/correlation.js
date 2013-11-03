@@ -103,7 +103,7 @@ function draw_correlation_plot(reference, data) {
         .scale(y)
         .orient("left")
         .tickSize(-width)
-        .ticks(4);
+        .ticks(2);
 
     var svg = d3.select(reference).append("svg:svg")
         .attr("width", "100%")
@@ -157,6 +157,24 @@ function draw_correlation_plot(reference, data) {
         .attr("width", width/data.length-2)
         .attr("height", function(d) { return d.y>=0? height/2 - y(d.y): y(d.y)- y(0); });
 
+}
+
+function update_correlation(reference) {
+    $(reference).empty();
+    if (selected_node2 && selected_node) {
+        if (selected_node.id in data.spike_detector.hist[options.histogram.binwidth] && selected_node2.id in data.spike_detector.hist[options.histogram.binwidth]) {
+            var array1 = data.spike_detector.hist[options.histogram.binwidth][selected_node.id]['hist'],
+                array2 = data.spike_detector.hist[options.histogram.binwidth][selected_node2.id]['hist'];
+            draw_correlation_plot(reference, calc_correlation(array1, array2, 'valid'))
+        };
+    } else if (selected_node) { 
+        if (selected_node.id in data.spike_detector.hist[options.histogram.binwidth]) {
+            var array1 = data.spike_detector.hist[options.histogram.binwidth][selected_node.id]['hist'];
+            draw_correlation_plot(reference, calc_correlation(array1, array1, 'valid'))
+        };
+    };
+}
+
     //    var dataset = d3.range(delay.length).map(function(i) {
     //        return {x: delay[i], y: corr[i]};
     //    });
@@ -184,4 +202,4 @@ function draw_correlation_plot(reference, data) {
     //    svg.append("path")
     //        .attr("class", "line")
     //        .attr("d", line);
-}
+

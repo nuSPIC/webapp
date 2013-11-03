@@ -1,7 +1,17 @@
+function update_raster_plot(reference) {
+    d3.select(reference).selectAll("circle").classed('active', false)
+    d3.select(reference).selectAll("circle").classed('selected', false)
+    d3.select(reference).selectAll("circle").classed('selected2', false)
+    if (selected_node) {
+        d3.select(reference).select(".neuron_"+selected_node.id.toString()).classed('selected', true)
+        if (selected_node2) { d3.select(reference).select(".neuron_"+selected_node2.id.toString()).classed('selected2', true)};
+    }
+}
+
 function draw_raster_plot(reference) {
     $(reference).empty()
 
-    var margin = {top: 30, right: 20, bottom: 10, left: 45},
+    var margin = {top: 30, right: 20, bottom: 10, left: 50},
         width = options.raster_plot.width - margin.left - margin.right,
         height = options.raster_plot.height_per_neuron * data.spike_detector.meta.neurons.length;
 
@@ -65,8 +75,9 @@ function draw_raster_plot(reference) {
     g.selectAll("circle")
         .data(data.spike_detector.senders)
       .enter().append("svg:circle")
-        .attr("class", "dot")
+        .attr("class", function(d) { return "dot neuron_" + data.spike_detector.meta.neurons[d].id})
         .attr("cx", function(d, i) { return x(data.spike_detector.times[i]); })
         .attr("cy", function(d) { return y(d); })
+
         .attr("r", 1.5);
 }
