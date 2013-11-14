@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
 from django import forms
-
-import lib.json as json
 from network.models import Network
 
 

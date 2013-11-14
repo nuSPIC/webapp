@@ -1,10 +1,8 @@
-# coding: utf-8
+from accounts.forms import CustomPasswordResetForm
 
 from django.conf import settings
 from django.conf.urls.defaults import *
 from django.views.generic.simple import direct_to_template
-
-from accounts.forms import CustomPasswordResetForm
 
 
 # Django built-in user actions with custom templates

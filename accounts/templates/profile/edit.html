@@ -3,108 +3,117 @@
 {% block title %}{{ profile.user.get_full_name }} &raquo; Edit profile{% endblock %}
 
 {% block content %}
-    <form action="." method="post" class="form-horizontal" id="profile-edit-form">
+<form action="." method="post" class="form-horizontal" id="profile-edit-form">
     {% csrf_token %}
 
-        <h2>Edit profile</h2>
-        <hr>
+    <div class="modal">
+        <div class="modal-header">
+            <h3>Edit profile</h3>
+        </div>
 
-        <div>
-            <h4>Required fields</h4>
+        <div class="modal-body">
+            <div>
+                <h4>Required fields</h4>
 
-            {{ user_form.non_field_errors }}
-            {{ user_form.id }}
+                {{ user_form.non_field_errors }}
+                {{ user_form.id }}
 
-            {% for field in user_form %}
-                <div class="fieldWrapper control-group">
-                    <label class="control-label" for="{{ field.auto_id }}">{{ field.label }}</label>
-                    <div class="controls">
-                        <div class="{% if field.help_text %}input-append{% endif %}">
-                            {{ field }}
-                            {% if field.help_text %}<span class="add-on">?</span>{% endif %}
+                {% for field in user_form %}
+                    <div class="fieldWrapper control-group">
+                        <label class="control-label" for="{{ field.auto_id }}">{{ field.label }}</label>
+                        <div class="controls">
+                            <div class="{% if field.help_text %}input-append{% endif %}">
+                                {{ field }}
+                                {% if field.help_text %}<span class="add-on">?</span>{% endif %}
+                            </div>
+                            <span class="help_text">{{ field.help_text }}</span>
+                            {{ field.errors }}
                         </div>
-                        <span class="help_text">{{ field.help_text }}</span>
-                        {{ field.errors }}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+            <hr>
+
+            <div>
+                <h4>Optional fields</h4>
+
+                {{ profile_form.non_field_errors }}
+                {{ profile_form.id }}
+
+                <div class="fieldWrapper control-group">
+                    <label class="control-label" for="{{ profile_form.present_occupation.auto_id }}">{{ profile_form.present_occupation.label }}</label>
+                    <div class="controls">
+                        {{ profile_form.present_occupation }}
+                        {{ profile_form.present_occupation.errors }}
                     </div>
                 </div>
-            {% endfor %}
+
+                <div class="fieldWrapper control-group">
+                    <label class="control-label" for="{{ profile_form.academic_affiliation.auto_id }}">{{ profile_form.academic_affiliation.label }}</label>
+                    <div class="controls">
+                        <div class="{% if profile_form.academic_affiliation.help_text %}input_append{% endif %}">
+                            {{ profile_form.academic_affiliation }}
+                            {% if profile_form.academic_affiliation.help_text %}<span class="add-on">?</span>{% endif %}
+                        </div>
+                        <span class="help_text">{{ user_form.academic_affiliation.help_text }}</span>
+                        {{ profile_form.academic_affiliation.errors }}
+                    </div>
+                </div>
+
+                <div class="fieldWrapper control-group">
+                    <label class="control-label" for="{{ profile_form.public_email.auto_id }}">{{ profile_form.public_email.label }}</label>
+                    <div class="controls">
+                        <div class="{% if profile_form.public_email.help_text %}input-append{% endif %}">
+                            {{ profile_form.public_email }}
+                            {% if profile_form.public_email.help_text %}<span class="add-on">?</span>{% endif %}
+                        </div>
+                        <span class="help_text">{{ user_form.public_email.help_text }}</span>
+                        {{ profile_form.public_email.errors }}
+                    </div>
+                </div>
+
+                <div class="fieldWrapper control-group">
+                    <label class="control-label" for="{{ profile_form.web_page.auto_id }}">{{ profile_form.web_page.label }}</label>
+                    <div class="controls">
+                        <div class="{% if profile_form.web_page.help_text %}input-append{% endif %}">
+                            {{ profile_form.web_page }}
+                            {% if profile_form.web_page.help_text %}<span class="add-on">?</span>{% endif %}
+                        </div>
+                        <span class="help_text">{{ user_form.web_page.help_text }}</span>
+                        {{ profile_form.web_page.errors }}
+                    </div>
+                </div>
+
+                <div class="fieldWrapper control-group">
+                    <label class="control-label" for="{{ profile_form.notes.auto_id }}">{{ profile_form.notes.label }}</label>
+                    <div class="controls">
+                        {{ profile_form.notes }}
+                    </div>
+                    {{ profile_form.notes.errors }}
+                </div>
+
+                <div class="fieldWrapper control-group">
+                    <div class="controls">
+                        <label class="checkbox">
+                            {{ profile_form.forum_email_notification }}{{ profile_form.forum_email_notification.label }}
+                        </label>
+                    </div>
+                </div>
+
+            </div>
 
         </div>
 
-        <hr>
-
-        <div>
-            <h4>Optional fields</h4>
-
-            {{ profile_form.non_field_errors }}
-            {{ profile_form.id }}
-
-            <div class="fieldWrapper control-group">
-                <label class="control-label" for="{{ profile_form.present_occupation.auto_id }}">{{ profile_form.present_occupation.label }}</label>
-                <div class="controls">
-                    {{ profile_form.present_occupation }}
-                    {{ profile_form.present_occupation.errors }}
-                </div>
-            </div>
-
-            <div class="fieldWrapper control-group">
-                <label class="control-label" for="{{ profile_form.academic_affiliation.auto_id }}">{{ profile_form.academic_affiliation.label }}</label>
-                <div class="controls">
-                    <div class="{% if profile_form.academic_affiliation.help_text %}input_append{% endif %}">
-                        {{ profile_form.academic_affiliation }}
-                        {% if profile_form.academic_affiliation.help_text %}<span class="add-on">?</span>{% endif %}
-                    </div>
-                    <span class="help_text">{{ user_form.academic_affiliation.help_text }}</span>
-                    {{ profile_form.academic_affiliation.errors }}
-                </div>
-            </div>
-
-            <div class="fieldWrapper control-group">
-                <label class="control-label" for="{{ profile_form.public_email.auto_id }}">{{ profile_form.public_email.label }}</label>
-                <div class="controls">
-                    <div class="{% if profile_form.public_email.help_text %}input-append{% endif %}">
-                        {{ profile_form.public_email }}
-                        {% if profile_form.public_email.help_text %}<span class="add-on">?</span>{% endif %}
-                    </div>
-                    <span class="help_text">{{ user_form.public_email.help_text }}</span>
-                    {{ profile_form.public_email.errors }}
-                </div>
-            </div>
-
-            <div class="fieldWrapper control-group">
-                <label class="control-label" for="{{ profile_form.web_page.auto_id }}">{{ profile_form.web_page.label }}</label>
-                <div class="controls">
-                    <div class="{% if profile_form.web_page.help_text %}input-append{% endif %}">
-                        {{ profile_form.web_page }}
-                        {% if profile_form.web_page.help_text %}<span class="add-on">?</span>{% endif %}
-                    </div>
-                    <span class="help_text">{{ user_form.web_page.help_text }}</span>
-                    {{ profile_form.web_page.errors }}
-                </div>
-            </div>
-
-            <div class="fieldWrapper control-group">
-                <label class="control-label" for="{{ profile_form.notes.auto_id }}">{{ profile_form.notes.label }}</label>
-                <div class="controls">
-                    {{ profile_form.notes }}
-                </div>
-                {{ profile_form.notes.errors }}
-            </div>
+        <div class="modal-footer">
 
             <div class="fieldWrapper control-group">
                 <div class="controls">
-                    <label class="checkbox">
-                        {{ profile_form.forum_email_notification }}{{ profile_form.forum_email_notification.label }}
-                    </label>
+                    <button type="submit" class="btn"/>Save</button>
                 </div>
-            </div>
-
-        </div>
-
-        <div class="fieldWrapper control-group">
-            <div class="controls">
-                <button type="submit" class="btn"/>Save</button>
             </div>
         </div>
+    </div>
     </form>
 {% endblock %}

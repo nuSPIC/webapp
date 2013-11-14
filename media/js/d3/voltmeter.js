@@ -19,10 +19,12 @@ function draw_voltmeter(reference) {
         height = 300 - margin.top - margin.bottom;
 
     var xScale = d3.scale.linear().range([0, width]).domain([0, simulation_stop]),
-        yScale = d3.scale.linear().range([height, 0]).domain([Math.floor(data.voltmeter.meta.Vm_min), Math.ceil(data.voltmeter.meta.Vm_max)]);
+        yScale = d3.scale.linear().range([height, 0]).domain([
+            Math.floor(data.voltmeter.meta.Vm_min-2.0), 
+            Math.ceil(data.voltmeter.meta.Vm_max+2.0)]);
 
     var xAxis = d3.svg.axis().scale(xScale).orient("bottom"),
-        yAxis = d3.svg.axis().scale(yScale).orient("left").ticks(3);
+        yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(-width).ticks(3);
 
     var line = d3.svg.line()
         .interpolate("monotone")
@@ -45,6 +47,15 @@ function draw_voltmeter(reference) {
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
         .attr("class", "voltmeter");
 
+    g.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
+
+    g.append("g")
+      .attr("class", "y axis")
+      .call(yAxis);
+
     for (var i = 0; i < data.voltmeter.V_m.length; i++) {
 
         g.append("svg:path")
@@ -53,12 +64,8 @@ function draw_voltmeter(reference) {
             .attr("clip-path", "url(#clip)")
             .attr("d", line)
             .attr("id", "neuron_" + data.voltmeter.meta.neurons[i].id.toString());
-    }
 
-    g.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")")
-      .call(xAxis);
+    }
 
     g.append("svg:text")
         .attr("class", "x label")
@@ -66,10 +73,6 @@ function draw_voltmeter(reference) {
         .attr("x", width/2)
         .attr("y", height+margin.bottom-5)
         .text("Time (ms)");
-
-    g.append("g")
-      .attr("class", "y axis")
-      .call(yAxis);
 
     g.append("svg:text")
         .attr("class", "y label")

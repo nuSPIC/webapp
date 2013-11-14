@@ -199,10 +199,12 @@ function update_after_select() {
     update_layout();
     highlight_selected();
     show_form(null);
-    update_raster_plot("#raster_plot");
-    update_smoothed_histogram("g.smoothed_histogram");
-    update_correlation("#correlation_plot");
-    update_voltmeter("g.voltmeter");
+    if (data.spike_detector.meta.neurons.length > 0) {
+        update_raster_plot("#raster_plot");
+        update_smoothed_histogram("g.smoothed_histogram");
+        update_correlation("#correlation_plot");
+    }
+    if (data.voltmeter.meta.neurons.length > 0) { update_voltmeter("g.voltmeter"); }
 }
 
 function node_interaction() {
@@ -357,6 +359,7 @@ function node_validate(formData, jqForm, options) {
             selected_node.synapse = 'excitatory';
         }
 
+        link_connection_validation();
         hasChanged = true;
         update_after_change();
     } else {
@@ -419,5 +422,19 @@ function link_validate(formData, jqForm, options) {
     }
 
     return false;
+}
+
+function link_connection_validation() {
+    var links_copy = links.slice();
+    for (var link_idx in links) {
+        if ((links_copy[link_idx].source.status.model == 'spike_detector')
+        || (links_copy[link_idx].target.status.model == 'voltmeter')
+        || (links_copy[link_idx].target.type == 'input')) {
+            links.splice(links.indexOf(links_copy[link_idx]), 1)
+            $( "#dialog-msg #dialog-msg-title" ).html('Links validation detected');
+            $( "#dialog-msg .msg-content" ).html("Attention: All invalid links have to been deleted.")
+            $( "#dialog-msg" ).modal();
+        }
+    }
 }
 

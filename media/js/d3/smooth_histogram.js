@@ -165,8 +165,9 @@ function draw_smoothed_histogram(reference) {
 
     var svg = d3.select(reference).append("svg:svg")
         .attr("width", "100%")
+        .attr("height", "100%")
         .attr("viewBox", "0 0 " + (width+margin.left+margin.right) + " " + (height+margin.top+margin.bottom))
-        .attr("class", "smoothed_histogram")
+        .attr("class", "spike_detector smoothed_histogram")
         .call(d3.behavior.zoom().x(xScale).y(yScale).on("zoom", zoomed));
 
     svg.append("svg:text")

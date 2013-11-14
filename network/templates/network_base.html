@@ -150,18 +150,18 @@
     {% if network_obj.has_spike_detector %}
         <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/raster_plot.js"></script>
         <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/histogram.js"></script>
-        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/smooth_histogram.js"></script>
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/smooth_histogram.js?n"></script>
         <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/correlation.js"></script>
         <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/spike_detector.js"></script>
 
     {% endif %}
 
     {% if network_obj.has_voltmeter %}
-        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/voltmeter.js"></script>
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/voltmeter.js?n"></script>
     {% endif %}
 
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/network/interaction.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/network/interaction.js?n"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/network/simulation.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/network/run.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/network/run.js?n"></script>
 
 {% endblock %}

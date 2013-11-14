@@ -59,7 +59,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
-    
+
     'accounts',
     'forum',
     'lib',
@@ -68,9 +68,12 @@ INSTALLED_APPS = (
     'network',
 
     'djcelery',
-    'djkombu',
 )
 
+try:
+    INSTALLED_APPS += ('djkombu')
+except:
+    pass
 
 # =================================
 #   Application settings section

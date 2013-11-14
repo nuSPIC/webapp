@@ -42,8 +42,6 @@ var options = ($.cookie('options') ? $.cookie('options') :{
     correlation: {
         width: 640.0,
         height: 140.0,
-        neuronA: data.spike_detector.meta.neurons.length > 0 ? data.spike_detector.meta.neurons[0]['id'] : null,
-        neuronB: data.spike_detector.meta.neurons.length > 0 ? data.spike_detector.meta.neurons[0]['id'] : null,
     },
     voltmeter: {
         width: 640.0,
@@ -249,6 +247,11 @@ $( '#network-dislike' ).on('click', function (e) {
     });
 });
 
+$( '#network-instructions' ).on('click', function(e) {
+    e.preventDefault();
+    $('[data-toggle=popover]').popover({trigger:'hover', html: true})
+});
+
 var test = null;
 
 $(document).ready(function() {
@@ -257,7 +260,6 @@ $(document).ready(function() {
     initiate_layout("#layout-holder");
     update_after_change();
 
-    $("#voltmeter_holder").empty();
     if (data.voltmeter.meta.neurons.length > 0) {
         draw_voltmeter("#voltmeter_holder");
     }
@@ -274,23 +276,6 @@ $(document).ready(function() {
     $( "#results-tabs .tabs").find(".tab").first().parent().addClass('active');
     $( "#results-tabs .tab-content").find(".tab-pane").first().addClass('active');
 
-    $('[data-toggle=popover]').popover({trigger:'hover', html: true})
-
 
 //    $(".add-on").popover({trigger: 'click', content: function() {return $(this).attr('value')}})
 });
-
-//window.onbeforeunload = function (e) {
-//    if (hasChanged) {
-//        var message = "Your confirmation message goes here.",
-//        var e = e || window.event;
-
-//        // For IE and Firefox prior to version 4
-//        if (e) {
-//            e.returnValue = message;
-//        }
-
-//        // For Safari
-//        return message;
-//    }
-//};

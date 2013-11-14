@@ -1,26 +1,25 @@
-# -*- coding: utf-8 -*-
+import anyjson as json
+import numpy as np
+import os
+import re
+import time
+
+from celery.contrib.abortable import AbortableAsyncResult
+
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 
-from celery.contrib.abortable import AbortableAsyncResult
-
 from lib.decorators import render_to
 from lib.delivery import networkx
 from lib.helpers import get_flatpage_or_none
 from lib.tasks import Simulation
-import lib.json as json
 
-#from network.helpers import dict_to_JSON, csv_to_dict
 from network.forms import NetworkForm, NetworkCommentForm, LinkForm, NodesCSVForm, NodeForm
 from network.models import SPIC, Network
 
-import numpy as np
-import os
-import re
-import time
 
 @render_to('network_list.html')
 def network_list(request):
@@ -91,7 +90,7 @@ def network(request, SPIC_group, SPIC_id, local_id):
         'network_list': network_list,
         'network_obj': network_obj,
         'comment_form': NetworkCommentForm(instance=network_obj),
-        'nodes_csv_form': NodesCSVForm({'csv':network_obj.nodes_csv()}),
+#        'nodes_csv_form': NodesCSVForm({'csv':network_obj.nodes_csv()}),
         'network_form': NetworkForm(instance=network_obj, initial={'same_seed': same_seed}),
         'node_form': NodeForm(),
         'link_form': LinkForm(),
@@ -103,26 +102,6 @@ def network(request, SPIC_group, SPIC_id, local_id):
 AJAX request
 """
 
-def device_commit(request, network_id):
-    """ AJAX: Extend targets/sources and write devices in database. """
-    network_obj = get_object_or_404(Network, pk=network_id)
-
-    if request.is_ajax():
-        if request.method == 'POST':
-
-            edgeList = network_obj.connections(modeltype='neuron')
-            deviceList = json.decode(str(request.POST['devices_json']))
-            
-            network_obj = network_obj.update(deviceList)
-            network_obj.save()
-            
-            # if all neurons are new, create positions for them.
-            if edgeList != network_obj.connections(modeltype='neuron'):
-                layout_default(request, network_obj.pk)
-            return HttpResponse(json.encode({'saved':1, 'local_id':network_obj.local_id}), mimetype='application/json')
-            
-    return HttpResponse()
-
 def network_comment(request, network_id):
     network_obj = get_object_or_404(Network, user_id=request.user.pk, pk=network_id)
 
@@ -133,7 +112,7 @@ def network_comment(request, network_id):
                 network_obj.label = request.POST['label']
                 network_obj.comment = request.POST['comment']
                 network_obj.save()
-                return HttpResponse(json.encode(request.POST), mimetype='application/json')
+                return HttpResponse(json.dumps(request.POST), mimetype='application/json')
 
     return HttpResponse()
 
@@ -168,7 +147,7 @@ def label_save(request, network_id):
             network_obj.save()
 
             response = {'label':network_obj.label}
-            return HttpResponse(json.encode(response), mimetype='application/json')
+            return HttpResponse(json.dumps(response), mimetype='application/json')
 
     return HttpResponse()
 
@@ -179,7 +158,7 @@ def layout_save(request, network_id):
 
     if request.is_ajax():
         if request.method == 'POST':
-            deviceList = json.decode(request.POST.get('devices_json'))
+            deviceList = json.loads(str(request.POST.get('devices_json')))
 
 #            network_obj = network_obj.update(deviceList, force_self=True)
 #            network_obj.save()
@@ -210,7 +189,7 @@ def layout_default(request, network_id):
 
         pos_norm2 = [(p[0], ((np.array(p[1])+shift)/window).tolist()) for p in pos.items()]
 
-        return HttpResponse(json.encode({'pos':pos_norm2}), mimetype='application/json')
+        return HttpResponse(json.dumps({'pos':pos_norm2}), mimetype='application/json')
 
     return HttpResponse()
 
@@ -231,17 +210,13 @@ def simulate(request, network_id):
             # check if network form is valid.
             if form.is_valid():
                 if form.cleaned_data['overwrite'] is False or network_obj.local_id == 0:
-                    network_list = Network.objects.filter(user_id=request.user.pk, SPIC=network_obj.SPIC).values('id', 'local_id').order_by('-id')
-
-                    sim_obj = network_obj.copy()
-                    sim_obj.local_id = network_list.latest('local_id')['local_id'] + 1
-                    sim_obj.date_simulated = None
-                    sim_obj.comment = None
+                    sim_obj = network_obj.create_latest()
+                    print sim_obj
                 else:
                     sim_obj = network_obj
 
-                nodes = json.decode(request.POST.get('nodes'))
-                links = json.decode(request.POST.get('links'))
+                nodes = json.loads(str(request.POST.get('nodes')))
+                links = json.loads(str(request.POST.get('links')))
                 sim_obj.update(nodes, links)
 
                 sim_obj.duration = form.cleaned_data['duration']
@@ -251,8 +226,7 @@ def simulate(request, network_id):
                 else:
                     rng_seeds, grng_seed = np.random.random_integers(0,1000,2)
                     root_status = {'rng_seeds': [int(rng_seeds)], 'grng_seed': int(grng_seed)}
-                sim_obj.status_json = json.encode(root_status)
-
+                sim_obj.status_json = json.dumps(root_status)
                 sim_obj.save()
                 time.sleep(1)
                 task = Simulation.delay(sim_obj.pk)
@@ -283,7 +257,7 @@ def data(request, network_id):
     if network_obj.has_spike_detector:
         response['result']['spike_detector'] = network_obj.spike_detector_data()
     
-    response = HttpResponse(json.encode(response), mimetype='application/force-download')
+    response = HttpResponse(json.dumps(response), mimetype='application/force-download')
     response['Content-Disposition'] = 'attachment; filename=%s_%s_%s.json' %(network_obj.date_simulated.strftime('%y%m%d'), network_obj.SPIC, network_obj.local_id)
 
     return response
