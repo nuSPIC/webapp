@@ -70,4 +70,5 @@ function draw_histogram(reference) {
         .attr("x", 1)
         .attr("width", function(d) { return xScale(d.dx) - 2 })
         .attr("height", function(d) { return height - yScale(d.y*1000.0/d.dx/data.spike_detector.meta.neurons.length); });
-};
+}
+

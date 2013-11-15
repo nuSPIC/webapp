@@ -3,10 +3,10 @@ var svg = {};
 
 // mouse event vars
 var selected_node = null,
-    selected_node2 = null,
+    compared_node = null,
     selected_link = null;
 
-var last_selected_node = null;
+//var last_selected_node = null;
 
 var mousedown_link = null,
     mousedown_node = null,
@@ -133,7 +133,7 @@ function update_layout() {
             focused_link = d;
 
             selected_node = null;
-            selected_node2 = null;
+            compared_node = null;
             update_after_select();
         });
 
@@ -170,7 +170,7 @@ function update_layout() {
             if(mousedown_link === selected_link) selected_link = null;
             else selected_link = mousedown_link;
             selected_node = null;
-            selected_node2 = null;
+            compared_node = null;
             last_selected_node = 'A';
             update_after_select();
         });
@@ -216,8 +216,8 @@ function update_layout() {
     // update existing nodes (selected visual states)
     svg.nodes.selectAll('circle')
         .classed('selected', function(d) { return (d === selected_node); })
-        .classed('selected2', function(d) { return (d === selected_node2); })
-        .classed('active', function(d) { return selected_link ? ((d === selected_link.source) || (d === selected_link.target)) : (d === selected_node || d === selected_node2) ;});
+        .classed('selected2', function(d) { return (d === compared_node); })
+        .classed('active', function(d) { return selected_link ? ((d === selected_link.source) || (d === selected_link.target)) : (d === selected_node || d === compared_node) ;});
 
     // add new nodes
     var g = svg.nodes.enter().append('svg:g');
@@ -269,20 +269,20 @@ function update_layout() {
             mousedown_node = d;
 
             // select node
-//            if (d3.event.shiftKey && selected_node) {
-//                selected_node2 = mousedown_node;
-//            } else {
-//                selected_node = mousedown_node;
-//                selected_node2 = null;
-//            }
-
-            if (last_selected_node == 'A') {
-                selected_node2 = mousedown_node;
-                last_selected_node = 'B';
+            if (d3.event.shiftKey && selected_node) {
+                compared_node = mousedown_node;
             } else {
                 selected_node = mousedown_node;
-                last_selected_node = 'A';
+                compared_node = null;
             }
+
+//            if (last_selected_node == 'A') {
+//                compared_node = mousedown_node;
+//                last_selected_node = 'B';
+//            } else {
+//                selected_node = mousedown_node;
+//                last_selected_node = 'A';
+//            }
 
             selected_link = null;
 
@@ -335,7 +335,7 @@ function update_layout() {
             // select new link
             selected_link = link;
             selected_node = null;
-            selected_node2 = null;
+            compared_node = null;
             last_selected_node = null;
             update_after_change();
         });
@@ -394,7 +394,7 @@ function mousedown() {
     if (d3.event.shiftKey || d3.event.ctrlKey || mousedown_node || mousedown_link) return;
 
     selected_node = null;
-    selected_node2 = null;
+    compared_node = null;
     last_selected_node = null;
     selected_link = null;
 

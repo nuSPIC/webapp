@@ -1,14 +1,3 @@
-function update_voltmeter(reference) {
-    d3.select(reference).selectAll("path").classed('active', selected_node != null)
-    d3.select(reference).selectAll("path").classed('selected', false)
-    d3.select(reference).selectAll("path").classed('selected2', false)
-
-    if (selected_node) {
-        d3.select(reference).select("#neuron_"+selected_node.id.toString()).classed('selected', true)
-        if (selected_node2) { d3.select(reference).select("#neuron_"+selected_node2.id.toString()).classed('selected2', true)};
-    }
-}
-
 function draw_voltmeter(reference) {
     $(reference).empty();
 
@@ -57,14 +46,12 @@ function draw_voltmeter(reference) {
       .call(yAxis);
 
     for (var i = 0; i < data.voltmeter.V_m.length; i++) {
-
         g.append("svg:path")
             .datum(data.voltmeter.V_m[i].values_reduced)
             .attr("class", "line")
             .attr("clip-path", "url(#clip)")
             .attr("d", line)
             .attr("id", "neuron_" + data.voltmeter.meta.neurons[i].id.toString());
-
     }
 
     g.append("svg:text")
@@ -88,5 +75,5 @@ function draw_voltmeter(reference) {
         svg.select(".y.axis").call(yAxis);
         svg.selectAll(".line").attr("d", line)
     }
-
 }
+

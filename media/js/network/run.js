@@ -63,7 +63,6 @@ links.forEach(function(link) {
 });
 
 var selected_model = null,
-    hasChanged = false,
     lastNodeId = nodes.length > 1 ? nodes[nodes.length-1].id : 0;
 
 
@@ -252,8 +251,6 @@ $( '#network-instructions' ).on('click', function(e) {
     $('[data-toggle=popover]').popover({trigger:'hover', html: true})
 });
 
-var test = null;
-
 $(document).ready(function() {
     active_buttons();
 
@@ -270,8 +267,8 @@ $(document).ready(function() {
         draw_spike_detector("#spike_detector");
     }
 
-    $('#node-form').ajaxForm( { beforeSubmit: node_validate } );
-    $('#link-form').ajaxForm( { beforeSubmit: link_validate } );
+    $('#node-form').ajaxForm( { beforeSubmit: node_form_validation } );
+    $('#link-form').ajaxForm( { beforeSubmit: link_form_validation } );
 
     $( "#results-tabs .tabs").find(".tab").first().parent().addClass('active');
     $( "#results-tabs .tab-content").find(".tab-pane").first().addClass('active');

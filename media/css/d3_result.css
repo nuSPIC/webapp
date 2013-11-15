@@ -46,13 +46,14 @@ svg.spike_detector .bar:hover {
     fill: #666666;
 }
 
-svg.raster_plot line {
-    stroke: #eeeeee;
+svg#raster_plot line {
+    stroke: #efefef;
 }
 
-svg.raster_plot .dot {
+svg#raster_plot .dot {
     fill: #000000;
 }
+
 
 svg.smoothed_histogram .title {
     font-weight: bold;
@@ -75,7 +76,7 @@ svg.smoothed_histogram path.selected {
     stroke: steelblue;
 }
 
-svg.smoothed_histogram path.selected2 {
+svg.smoothed_histogram path.compared {
     opacity: 1.0;
     stroke: orange;
 }
@@ -116,7 +117,7 @@ svg.voltmeter path.selected {
     stroke: steelblue;
 }
 
-svg.voltmeter path.selected2 {
+svg.voltmeter path.compared {
     opacity: 1.0;
     stroke: orange;
 }

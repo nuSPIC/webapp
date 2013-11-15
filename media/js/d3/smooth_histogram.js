@@ -197,14 +197,12 @@ function draw_smoothed_histogram(reference) {
       .call(yAxis);
 
     for (var i in data.spike_detector.meta.neurons) {
-
         g.append("svg:path")
             .datum(data.spike_detector.hist[options.histogram.binwidth][data.spike_detector.meta.neurons[i].id]['smooth'])
             .attr("class", "line")
             .attr("clip-path", "url(#clip)")
             .attr("d", line)
             .attr("id", "neuron_" +data.spike_detector.meta.neurons[i].id.toString());
-
     }
 
     g.append("svg:text")
@@ -221,17 +219,5 @@ function draw_smoothed_histogram(reference) {
         svg.select(".y.axis").call(yAxis);
         svg.selectAll(".line").attr("d", line);
     }
-
-}
-
-
-
-function update_smoothed_histogram(reference) {
-    d3.select(reference).selectAll("path").classed('active', selected_node != null)
-    d3.select(reference).selectAll("path").classed('selected', false)
-    d3.select(reference).selectAll("path").classed('selected2', false)
-
-    if (selected_node) { d3.select(reference).select("#neuron_"+selected_node.id.toString()).classed('selected', true)};
-    if (selected_node2) { d3.select(reference).select("#neuron_"+selected_node2.id.toString()).classed('selected2', true)};
 }
 

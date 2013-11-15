@@ -195,16 +195,29 @@ function show_form(model) {
     }
 }
 
+function update_selected_node(reference, object) {
+    var ref_obj = d3.select(reference);
+    ref_obj.selectAll(object).classed('active', selected_node != null)
+    ref_obj.selectAll(object).classed('selected', false)
+    ref_obj.selectAll(object).classed('compared', false)
+
+    if (selected_node) {
+        ref_obj.select("#neuron_"+selected_node.id.toString()).classed('selected', true)
+        if (compared_node) { ref_obj.select("#neuron_"+compared_node.id.toString()).classed('compared', true)};
+    }
+}
+
+
 function update_after_select() {
     update_layout();
     highlight_selected();
     show_form(null);
+
     if (data.spike_detector.meta.neurons.length > 0) {
-        update_raster_plot("#raster_plot");
-        update_smoothed_histogram("g.smoothed_histogram");
+        update_selected_node("g.smoothed_histogram", "path");
         update_correlation("#correlation_plot");
     }
-    if (data.voltmeter.meta.neurons.length > 0) { update_voltmeter("g.voltmeter"); }
+    if (data.voltmeter.meta.neurons.length > 0) { update_selected_node("g.voltmeter", "path"); }
 }
 
 function node_interaction() {
@@ -265,12 +278,9 @@ function link_interaction_dblclick() {
 
 function update_after_change() {
 
-//   alert(JSON.stringify(selected_node));
    update_layout();
 
    tabulate('#nodes-table', nodes, ['id', 'label', 'targets', 'status'], ['node_', 'node_'])
-//   tabulate('#nodes-table', nodes, ['id', 'label', 'targets', 'weights', 'delays'], ['node_', 'node_'])
-
    tabulate('#weights-table', nodes.map(function(node) {return {id: node.id} }), ['id'].concat(nodes.map(function(node) {return node.id })), ['source_', 'target_'])
    tabulate('#delays-table', nodes.map(function(node) {return {id: node.id} }), ['id'].concat(nodes.map(function(node) {return node.id })), ['source_', 'target_'])
 
@@ -284,7 +294,7 @@ function update_after_change() {
     $('#connection_matrix td:not(.target_id)').dblclick(link_interaction_dblclick)
 }
 
-function node_validate(formData, jqForm, options) { 
+function node_form_validation(formData, jqForm, options) { 
     // jqForm is a jQuery object which wraps the form DOM element 
     // 
     // To validate, we can access the DOM elements directly and return true 
@@ -359,8 +369,7 @@ function node_validate(formData, jqForm, options) {
             selected_node.synapse = 'excitatory';
         }
 
-        link_connection_validation();
-        hasChanged = true;
+        link_validation();
         update_after_change();
     } else {
         $('#node-form .portlet-body').prepend('<h4 class="text-warning" style="margin:10px">Oh snap! You got an error!</h4>')
@@ -369,7 +378,7 @@ function node_validate(formData, jqForm, options) {
     return false;
 }
 
-function link_validate(formData, jqForm, options) { 
+function link_form_validation(formData, jqForm, options) { 
     // jqForm is a jQuery object which wraps the form DOM element 
     // 
     // To validate, we can access the DOM elements directly and return true 
@@ -415,7 +424,6 @@ function link_validate(formData, jqForm, options) {
     if (weight_error_msg == null && delay_error_msg == null) {
         selected_link.weight = parseFloat(weight_val);
         selected_link.delay = parseFloat(delay_val);
-        hasChanged = true;
         update_after_change();
     } else {
         $('#link-form .portlet-body').prepend('<h4 class="text-warning" style="margin:10px">Oh snap! You got an error!</h4>')
@@ -424,17 +432,26 @@ function link_validate(formData, jqForm, options) {
     return false;
 }
 
-function link_connection_validation() {
+
+function link_validation() {
     var links_copy = links.slice();
-    for (var link_idx in links) {
+    var invalid_links = new Array();
+    var warning = false;
+
+    for (var link_idx in links_copy) {
         if ((links_copy[link_idx].source.status.model == 'spike_detector')
         || (links_copy[link_idx].target.status.model == 'voltmeter')
         || (links_copy[link_idx].target.type == 'input')) {
-            links.splice(links.indexOf(links_copy[link_idx]), 1)
-            $( "#dialog-msg #dialog-msg-title" ).html('Links validation detected');
-            $( "#dialog-msg .msg-content" ).html("Attention: All invalid links have to been deleted.")
-            $( "#dialog-msg" ).modal();
+            invalid_links.push(links.splice(links.indexOf(links_copy[link_idx]), 1)[0]);
+            warning = true;
         }
+    }
+    if (warning) {
+        $( "#global_warning .alert-content").html('<b>Attention!</b> All invalid links had to been deleted.<ul class="invalid_links"></ul>');
+        for (var link_idx in invalid_links) {
+            $( "#global_warning .invalid_links").append('<li>Link from ' + invalid_links[link_idx].source.id + ' to ' + invalid_links[link_idx].target.id + '</li>');
+        }
+        $( "#global_warning").removeClass("hide fade");
     }
 }
 
