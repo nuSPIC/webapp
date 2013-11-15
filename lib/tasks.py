@@ -109,9 +109,10 @@ class Simulation(AbortableTask):
                 data[output_status['model']] = events
             if output_status['model'] == 'spike_detector':
                 neurons = [nodes[nodes_id.index(sender)] for sender in np.unique(events['senders'])]
+                neurons = [{'uid': neuron['uid'], 'id': neuron['id']} for neuron in neurons]
                 if len(neurons) > 0:
                     network_obj.has_spike_detector = True
-            if output_status['model'] == 'voltmeter':
+            elif output_status['model'] == 'voltmeter':
                 neurons = [{'uid': link['target']['uid'], 'id': link['target']['id']} for link in links if link['source']['status']['model'] == 'voltmeter']
                 if len(neurons) > 0:
                     network_obj.has_voltmeter = True

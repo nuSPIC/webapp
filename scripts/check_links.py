@@ -27,7 +27,7 @@ def run():
         for link in links:
             if check_link_validation(link, nodes, nodes_uid):
                 error_list.append(network_obj.id)
-    print error_list
+    print 'List of networks contain invalid links:', error_list
 
 if __name__ == '__main__':
     run()

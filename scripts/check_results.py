@@ -86,7 +86,7 @@ def run(detailed=True):
             print network_obj.id,'\t',
             print color[default_json[0]]%default_json[0],color[default_json[1]]%default_json[1],'\t',
             print color[empty_data[0]]%empty_data[0],color[empty_data[1]]%empty_data[1],'\t',
-            print color[meta_neurons[0]]%meta_neurons[0],color[meta_neurons[0]]%meta_neurons[0],'\t',
+            print color[meta_neurons[0]]%meta_neurons[0],color[meta_neurons[1]]%meta_neurons[1],'\t',
             print color[has_data[0]]%has_data[0],color[has_data[1]]%has_data[1],'\t',
             print color[date_simulated]%date_simulated, '\t\t',
             print "|", color[error_all]%error_all

@@ -19,7 +19,9 @@ def check_link_validation(link, nodes, nodes_uid):
 def run():
     network_list = Network.objects.all().order_by('id')
     error = []
-    for network_obj in network_list:
+    count = len(network_list)
+    for idx, network_obj in enumerate(network_list):
+        print network_obj.id,
         nodes = network_obj.nodes()
         nodes_uid = [node['uid'] for node in nodes]
         links = network_obj.links()
@@ -35,6 +37,7 @@ def run():
         if error:
             network_obj.update(nodes, links_cleaned)
             network_obj.save()
+        print "cleaned \t (%.1f" %((1.0 - float(idx+1)/count)*100.0), "% remain)"
 
 if __name__ == '__main__':
     run()
