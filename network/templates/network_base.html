@@ -67,6 +67,13 @@
              ( {{ network_obj.date_simulated|timesince|default:"not simulated" }}{% if network_obj.date_simulated %} ago{% endif %} )
         </li>
 
+        {% if network_obj.SPIC.solution %}
+            <li><a href="/network/{{network_obj.SPIC.group}}/{{network_obj.SPIC.local_id}}/solution/">
+                Solution
+            </a></li>
+        {% endif %}
+
+
         <br>
         <div id="network_description" class="{% if network_obj.comment %}hide fade{% endif %}">
                 {{ SPIC_obj.description|default:"no description" }}

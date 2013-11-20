@@ -20,6 +20,8 @@ class SPIC(models.Model):
     description = models.TextField(blank=True)
     tooltip_json = models.TextField(blank=True)
 
+    solution = models.BooleanField()
+
     def __unicode__(self):
         return self.title
 

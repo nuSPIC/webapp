@@ -60,14 +60,16 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
 
-    'accounts',
+    'accounts',     # default database
     'forum',
     'lib',
     'news',
 
-    'network',
+    'network',      # network database
 
-    'djcelery',
+    'djcelery',     # simulation database
+
+    'upload',       # no database
 )
 
 try:

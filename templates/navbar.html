@@ -40,8 +40,11 @@
                     <ul class="dropdown-menu">
                         <li><a href="{% url profile user.profile.id %}">Profile</a><li>
                             {% if user.is_staff %}
+                                <li class="divider"></li>
                                 <li><a href="/admin/" target="_blank">Admin</a></li>
+                                <li><a href="/upload/">Upload file</a></li>
                             {% endif %}
+                        <li class="divider"></li>
                         <li><a href="{% url logout %}">Logout</a></li>
                     </ul>
                 </li>

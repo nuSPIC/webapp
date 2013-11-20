@@ -29,9 +29,16 @@
                         <li id="{{ network.title }}" style="width:100%">
 
                             <div style="float:right">
-                                <a href="{% url network_history network.SPIC.group network.SPIC.local_id %}">
+                                <div><a href="{% url network_history network.SPIC.group network.SPIC.local_id %}">
                                     History
-                                </a>
+                                </a></div>
+
+                                {% if network.SPIC.solution %}
+                                    <div><a href="/network/{{network.SPIC.group}}/{{network.SPIC.local_id}}/solution/">
+                                        Solution
+                                    </a></div>
+                                {% endif %}
+
                             </div>
 
                             <a href="{% url network_latest network.SPIC.group network.SPIC.local_id %}">
