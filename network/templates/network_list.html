@@ -33,17 +33,13 @@
                                     History
                                 </a></div>
 
-                                {% if network.SPIC.solution %}
-                                    <div><a href="/network/{{network.SPIC.group}}/{{network.SPIC.local_id}}/solution/">
-                                        Solution
-                                    </a></div>
-                                {% endif %}
-
                             </div>
 
-                            <a href="{% url network_latest network.SPIC.group network.SPIC.local_id %}">
-                                <h3>{{ network.SPIC.title|default_if_none:"Network" }}</h3>
-                            </a>
+                            <a href="{% url network_latest network.SPIC.group network.SPIC.local_id %}"><h3 style="display:inline">{{ network.SPIC.title|default_if_none:"Network" }}</h3></a>
+
+                            {% if network.SPIC.solution %}
+                                ( <a href="/network/{{network.SPIC.group}}/{{network.SPIC.local_id}}/solution/">Solution</a> )
+                            {% endif %}
 
                             <div>
                                 <small>{{ network.SPIC.description|default:"no description" }}</small>
