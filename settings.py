@@ -69,7 +69,7 @@ INSTALLED_APPS = (
 
     'djcelery',     # simulation database
 
-    'upload',       # no database
+#    'upload',       # no database
 )
 
 try:
