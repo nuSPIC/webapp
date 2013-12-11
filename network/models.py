@@ -19,6 +19,7 @@ class SPIC(models.Model):
     title = models.CharField(max_length=32, default='')
     description = models.TextField(blank=True)
     tooltip_json = models.TextField(blank=True)
+    msg_json = models.TextField(blank=True)
 
     solution = models.BooleanField()
 
@@ -28,6 +29,11 @@ class SPIC(models.Model):
     def tooltip(self):
         if self.tooltip_json:
             return json.loads(str(self.tooltip_json))
+        return {}
+
+    def msg(self):
+        if self.msg_json:
+            return json.loads(str(self.msg_json))
         return {}
 
 

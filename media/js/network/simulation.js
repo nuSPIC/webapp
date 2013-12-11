@@ -12,12 +12,8 @@ function check_task_status(task_id) {
             var task = data['task'];
             var status = task['status'];
 
-            $( "#dialog-msg #dialog-msg-title" ).html('Simulation info');
-            $( "#dialog-msg a" ).addClass("hide fade");
-            $( "#dialog-msg .msg-content" ).html('Simulation is running.<p>Loading... please wait.</p>')
+            show_msg('Simulation info', 'Simulation is running.<p>Loading... please wait.</p>', 'pending')
             $( "#dialog-msg #task_status" ).html(status);
-
-            $( "#dialog-msg" ).modal();
 
             if (status == 'PENDING') {
                 window.setTimeout(function() {check_task_status(task_id)}, 2000);
@@ -37,7 +33,6 @@ function check_task_status(task_id) {
 };
 
 function simulate() {
-    $("#dialog-msg").addClass('hide fade');
     var clean_nodes = nodes.map(function (n) {
         return {
             uid: n.uid, id: n.id,
@@ -71,23 +66,14 @@ function simulate() {
 
 $( "form#network-form" ).on('submit',  function(e) {
     e.preventDefault();
-    $( "#dialog-msg" ).find( ".warning" ).addClass("hide fade");
-    $( "#dialog-msg" ).find( ".corfirm" ).addClass("hide fade");
 
-    $( "#dialog-msg #dialog-msg-title" ).html('Warning')
     if (links.filter(connect_to_output).length <1) {
-        $( "#dialog-msg .msg-content" ).html('No <b>recording device</b> connected. <p>Check your output connections.</p>');
-        $( "#dialog-msg" ).find( ".warning" ).removeClass("hide fade");
-        $( "#dialog-msg" ).modal();
+        show_msg('Warning', 'No <b>recording device</b> connected. <p>Check your output connections.</p>', 'warning');
     } else if (links.filter(connect_to_input).length <1) {
-        $( "#dialog-msg .msg-content" ).html('No <b>input device</b> connected. Network may be silent. <p>Do you want to continue?</p>');
-        $( "#dialog-msg" ).find( ".confirm" ).removeClass("hide fade");
-        $( "#dialog-msg" ).modal();
+        show_msg('Warning', 'No <b>input device</b> connected. Network may be silent. <p>Do you want to continue?</p>', 'simulation_confirm');
     } else if ($( "#id_duration" ).val() > 5000.0) {
-        $( "#dialog-msg .msg-content" ).html('The simulation lasts more than 5 seconds and it could have a speed effect on page loading time. <p>Are you sure?</p>');
-        $( "#dialog-msg" ).find( ".confirm" ).removeClass("hide fade");
-        $( "#dialog-msg" ).modal();
+        show_msg('Warning', 'The simulation lasts more than 5 seconds and it could have a speed effect on page loading time. <p>Are you sure?</p>', 'simulation_confirm');
     } else {
-        simulate()
+        simulate();
     }
 });

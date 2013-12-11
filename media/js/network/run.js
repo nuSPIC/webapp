@@ -273,6 +273,9 @@ $(document).ready(function() {
     $( "#results-tabs .tabs").find(".tab").first().parent().addClass('active');
     $( "#results-tabs .tab-content").find(".tab-pane").first().addClass('active');
 
+    if ('content' in msg) {
+        show_msg(msg.title, msg.content, 'warning');
+    }
 
 //    $(".add-on").popover({trigger: 'click', content: function() {return $(this).attr('value')}})
 });

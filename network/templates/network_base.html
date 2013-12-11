@@ -122,8 +122,33 @@
             </div>
         </div>
 
+
+<div id="dialog-msg" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="dialog-msg-label" aria-hidden="true" style="margin-top: 100px">
+
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 id="dialog-msg-title">Network messenger</h3>
     </div>
 
+    <div class="modal-body">
+        <div class="logo-animation"><img src="/media/img/icons/bcf_logo-animation.gif" ></div>
+        <div id="dialog-msg-content"></div>
+    </div>
+
+    <div class="modal-footer">
+        <div id="dialog-msg-simulation_confirm" class="button">
+            <a href="#" class="btn btn-primary" onclick="simulate()">Yeah!</a>
+            <a href="#" class="btn" data-dismiss="modal" >No</a>
+        </div>
+        <div id="dialog-msg-warning" class="button">
+            <a href="#" class="btn ok" data-dismiss="modal" >Ok</a>
+        </div>
+        <span id="task_status" class="label label-info"></span>
+    </div>
+</div>
+
+
+    </div>
 {% endblock %}
 
 
@@ -151,6 +176,8 @@
         var data = {};
         data['voltmeter'] = {{ network_obj.voltmeter_data|safe }};
         data['spike_detector'] = {{ network_obj.spike_detector_data_index|safe }};
+
+        var msg = {{ SPIC_obj.msg|safe }};
     </script>
 
     <script type="text/javascript" src="{{ MEDIA_URL }}js/json2.js"></script>
@@ -171,8 +198,8 @@
         <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/voltmeter.js"></script>
     {% endif %}
 
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/network/interaction.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/network/simulation.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/network/run.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/network/interaction.js?n"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/network/simulation.js?n"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/network/run.js?n"></script>
 
 {% endblock %}

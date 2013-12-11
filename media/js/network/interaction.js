@@ -13,6 +13,15 @@ function stringify(value) {
     return n.join(', ');
 }
 
+function show_msg(title, content, mode) {
+
+    $( "#dialog-msg #dialog-msg-title" ).html(title);
+    $( "#dialog-msg #dialog-msg-content" ).html(content);
+    $( "#dialog-msg .button").addClass('hide fade');
+    $( "#dialog-msg").find("#dialog-msg-"+ mode).removeClass('hide fade');
+    $( "#dialog-msg" ).modal();
+}
+
 function active_buttons() {
     $("#layout-option-content #nodes-display").find("#input").addClass( (options.layout.nodes.display.input ? "active" : ""));
     $("#layout-option-content #nodes-display").find("#neuron").addClass((options.layout.nodes.display.neuron ? "active" : ""));
