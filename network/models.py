@@ -90,7 +90,6 @@ class Network(models.Model):
         new_kwargs['favorite'] = False
         new_kwargs['deleted'] = False
         new = self.__class__.objects.create(**new_kwargs)
-        print new
         return new
 
     def user(self):
@@ -289,6 +288,7 @@ class Network(models.Model):
                 if 'V_m' in vm_E:
                     V_m = vm_E['V_m']
                     if len(V_m) > 0:
+
                         V_m = np.reshape(np.array(V_m), [-1, len(meta['neurons'])]).T
                         meta['Vm_max'] = np.max(V_m)
                         meta['Vm_min'] = np.min(V_m)

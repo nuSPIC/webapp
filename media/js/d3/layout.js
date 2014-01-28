@@ -76,12 +76,10 @@ function tick() {
 }
 
 function active_link(d) {
-
     return selected_node || selected_link ? 
                 selected_node ? (options.layout.links.display.pre ? d.target === selected_node : false) || (options.layout.links.display.post ? d.source === selected_node : false) 
                 : (options.layout.links.display.pre ? d.target === selected_link.source : false) || (options.layout.links.display.post ? d.source === selected_link.target : false) || (d === selected_link)
               : (d.source.type == 'neuron') && (d.target.type == 'neuron');
-
 }
 
 function active_weight(d) {
@@ -90,8 +88,7 @@ function active_weight(d) {
             selected_node ? (options.layout.links.display.pre ? d.target === selected_node : false) || (options.layout.links.display.post ? d.source === selected_node : false) 
                 : (options.layout.links.display.pre ? d.target === selected_link.source : false) || (options.layout.links.display.post ? d.source === selected_link.target : false) || (d === selected_link)
             : (d.source.type == 'neuron') && (d.target.type == 'neuron'))
-         : false
-
+         : false;
 }
 
 // update graph (called when needed)
@@ -171,7 +168,6 @@ function update_layout() {
             else selected_link = mousedown_link;
             selected_node = null;
             compared_node = null;
-            last_selected_node = 'A';
             update_after_select();
         });
 
@@ -230,7 +226,8 @@ function update_layout() {
     g.append('svg:circle')
         .attr('class', 'node')
         .classed('selected', function(d) { return (d === selected_node); })
-        .attr('r', 12)
+        .attr('r', function(d) { return d.type == 'output' ? 15 : 12; })
+        .attr('transform', 'scale(1.0)')
 
         .on('mouseover', function(d) {
 
@@ -238,7 +235,8 @@ function update_layout() {
 //            if(!mousedown_node || d === mousedown_node) return;
 
             // enlarge target node
-            d3.select(this).attr('transform', 'scale(1.1)');
+            d3.select(this)
+                .transition().attr('transform', 'scale(1.2)');
 
             if (mousedown_node) {
                 if (mousedown_node.type == 'neuron') {
@@ -260,8 +258,9 @@ function update_layout() {
 
 //            if(!mousedown_node || d === mousedown_node) return;
             // unenlarge target node
-            d3.select(this).attr('transform', '')
-                .classed('conflict', false);
+            d3.select(this)
+                .classed('conflict', false)
+                .transition().attr('transform', 'scale(1.0)');
         })
 
         .on('mousedown', function(d) {
@@ -310,7 +309,9 @@ function update_layout() {
             if (mouseup_node === mousedown_node) { resetMouseVars(); return; }
 
             // unenlarge target node
-            d3.select(this).attr('transform', '').classed('conflict', false);
+            d3.select(this)
+                .classed('conflict', false)
+                .transition().attr('transform', 'scale(1.0)');
 
             if (mouseup_node.type == 'input' || mouseup_node.status.model == 'voltmeter' || mousedown_node.status.model == 'spike_detector') { resetMouseVars(); return; }
             if (!(mousedown_node.type == 'neuron' || mouseup_node.type == 'neuron')) { resetMouseVars(); return; }

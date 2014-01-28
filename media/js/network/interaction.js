@@ -164,7 +164,7 @@ function show_form(model) {
     $("#node-form input").val('');
 
     if (selected_node) {
-        if (selected_node.type == 'output' && SPIC_group == 1) return;
+        if (selected_node.type == 'output') return;
 
         var status = selected_node.status;
         selected_model = (model == null ? status.model : model)
@@ -179,6 +179,14 @@ function show_form(model) {
         } else {
             $("#node-form #id_model option").removeClass('hide fade');
         }
+
+        // hide output models if existed in nodes
+        nodes.forEach(function(node) {
+            if (node.type == 'output') {
+                $("#id_model #"+ node.status.model).addClass('hide fade');
+            }
+        })
+
 
         $("#node-form").find("."+ selected_model).parents(".fieldWrapper").removeClass('hide fade');
         $("#node-form .btn-group").removeClass('hide fade');

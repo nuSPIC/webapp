@@ -211,7 +211,6 @@ def simulate(request, network_id):
             if form.is_valid():
                 if form.cleaned_data['overwrite'] is False or network_obj.local_id == 0:
                     sim_obj = network_obj.create_latest()
-                    print sim_obj
                 else:
                     sim_obj = network_obj
 
