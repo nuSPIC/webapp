@@ -171,13 +171,18 @@ function show_form(model) {
 
         for (var key in status) {
             key != 'model' ? $("#node-form").find("#id_"+key).val(status[key]) : '';
-        }
+        };
 
         $("#node-form #id_model #" + selected_model).prop('selected', true).parents(".fieldWrapper").removeClass('hide fade');
         if (SPIC_group == 1) {
             $("#node-form #id_model option."+selected_node.type).removeClass('hide fade');
         } else {
             $("#node-form #id_model option").removeClass('hide fade');
+        };
+
+        if (SPIC_group != 1 && selected_node.type == 'neuron') {
+            $("#id_synapse").find("#" + selected_node.synapse).prop('selected', true);
+            $("#id_synapse").parents(".fieldWrapper").removeClass('hide fade');
         }
 
         // hide output models if existed in nodes
@@ -223,7 +228,6 @@ function update_selected_node(reference, object) {
         if (compared_node) { ref_obj.select("#neuron_"+compared_node.id.toString()).classed('compared', true)};
     }
 }
-
 
 function update_after_select() {
     update_layout();
@@ -383,7 +387,7 @@ function node_form_validation(formData, jqForm, options) {
             if ('synapse' in selected_node) {delete selected_node["synapse"];}
         } else {
             selected_node.type = 'neuron';
-            selected_node.synapse = 'excitatory';
+            selected_node.synapse = $("#node-form #id_synapse :selected").text();
         }
 
         link_validation();

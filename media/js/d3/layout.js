@@ -230,9 +230,7 @@ function update_layout() {
         .attr('transform', 'scale(1.0)')
 
         .on('mouseover', function(d) {
-
             focused_node = d;
-//            if(!mousedown_node || d === mousedown_node) return;
 
             // enlarge target node
             d3.select(this)
@@ -250,13 +248,11 @@ function update_layout() {
             } else if (d.status.model == 'spike_detector') {
                 d3.select(this).classed('conflict', true)
             }
-
         })
 
         .on('mouseout', function(d) {
             focused_node = null;
 
-//            if(!mousedown_node || d === mousedown_node) return;
             // unenlarge target node
             d3.select(this)
                 .classed('conflict', false)
@@ -264,7 +260,6 @@ function update_layout() {
         })
 
         .on('mousedown', function(d) {
-//            if (d3.event.ctrlKey) return;
             mousedown_node = d;
 
             // select node
@@ -274,15 +269,6 @@ function update_layout() {
                 selected_node = mousedown_node;
                 compared_node = null;
             }
-
-//            if (last_selected_node == 'A') {
-//                compared_node = mousedown_node;
-//                last_selected_node = 'B';
-//            } else {
-//                selected_node = mousedown_node;
-//                last_selected_node = 'A';
-//            }
-
             selected_link = null;
 
             // reposition drag line
@@ -365,7 +351,7 @@ function dblclick() {
     if(d3.event.ctrlKey || mousedown_node || mousedown_link) return;
 
     var uid = Math.random().toString(36).substring(2,7);
-//     insert new node at point
+    // insert new node at point
     var point = d3.mouse(this);
 
     if (SPIC_group == 1) {
@@ -416,7 +402,6 @@ function mousemove() {
         dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
     drag_line.classed('active', true)
-//        .attr('d', 'M' + sourceX + ',' + sourceY + "A" + dist + "," + dist + " 0 0," + (options.layout.links.curve == 'left' ? "1 " : "0 ") + targetX + ',' + targetY);
         .attr('d', 'M' + sourceX + ',' + sourceY + "," + targetX + ',' + targetY);
 
     update_layout();
