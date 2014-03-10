@@ -22,11 +22,27 @@ function resetMouseVars() {
     mousedown_node = null;
     mouseup_node = null;
     mousedown_link = null;
+    tooltip.style("visibility", "hidden");
 }
 
 function log10(val) {
   return Math.log(val) / Math.LN10;
 }
+
+var tooltip = d3.select("body")
+    .append("div").style("width", "250px")
+    .style("position", "absolute")
+    .style("z-index", "10")
+    .style("background-color", "white")
+    .style("visibility", "hidden");
+
+function show_conflict(obj, text) {
+    d3.select(obj).classed('conflict', true)
+    tooltip.text(text)
+        .style("top",(d3.event.pageY)+"px")
+        .style("left",(d3.event.pageX+28)+"px")
+        .style("visibility", "visible")
+    }
 
 // update force layout (called automatically each iteration)
 function tick() {
@@ -238,20 +254,29 @@ function update_layout() {
 
             if (mousedown_node) {
                 if (mousedown_node.type == 'neuron') {
-                    d3.select(this).classed('conflict', (d.type == 'neuron' && SPIC_group == 1) || d.type == 'input' || d.status.model == 'voltmeter')
+                    if (d.type == 'neuron' && SPIC_group == 1) {
+                        show_conflict(this, 'In this class nuSPIC-I you cannot reconnect within neurons.')
+                    } else if (d.type == 'input') {
+                        show_confluct(this, 'Inputs cannot be outputs.')
+                    } else if (d.status.model == 'voltmeter') {
+                        show_conflict(this, 'You can only connect voltmeter to neurons.')
+                    }
                 }
                 else {
                     if (d.type != 'neuron') {
-                        d3.select(this).classed('conflict', true)
+                        show_conflict(this, 'Inputs and outputs cannot be connected themselves.');
+                    } else if (d.status.model == 'parrot_neuron') {
+                        show_conflict(this, 'This neuron simply emits one spike for every incoming spike. There is no membrane potential variable defined, thus you cannot use a voltmeter for this neuron');
                     }
                 }
             } else if (d.status.model == 'spike_detector') {
-                d3.select(this).classed('conflict', true)
+                show_conflict(this, 'You can only connect neurons to spike detector.')
             }
         })
 
         .on('mouseout', function(d) {
             focused_node = null;
+            tooltip.style("visibility", "hidden");
 
             // unenlarge target node
             d3.select(this)
@@ -302,6 +327,9 @@ function update_layout() {
             if (mouseup_node.type == 'input' || mouseup_node.status.model == 'voltmeter' || mousedown_node.status.model == 'spike_detector') { resetMouseVars(); return; }
             if (!(mousedown_node.type == 'neuron' || mouseup_node.type == 'neuron')) { resetMouseVars(); return; }
             if (mousedown_node.disabled == 1 && mouseup_node.disabled == 1) { resetMouseVars(); return; }
+            if ((mousedown_node.status.model != 'neuron') && (mouseup_node.status.model == 'parrot_neuron')) { 
+                resetMouseVars();
+                return; }
 
             source = mousedown_node;
             target = mouseup_node;
