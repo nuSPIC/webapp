@@ -21,8 +21,9 @@ function binwidth_changed() {
 
     draw_histogram("#spike_detector #histogram");
     draw_smoothed_histogram("#spike_detector #smoothed_histogram");
-    update_smoothed_histogram("g.smoothed_histogram");
+    update_selected_node("g.smoothed_histogram", "path");
     update_correlation("#correlation_plot");
+
 //    draw_correlation_plot("#spike_detector #correlation_plot", calc_correlation(data.spike_detector.hist[options.histogram.binwidth][options.correlation.neuronA], data.spike_detector.hist[options.histogram.binwidth][options.correlation.neuronB], 'valid'));
 }
 

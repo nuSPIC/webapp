@@ -3,10 +3,10 @@ var svg = {};
 
 // mouse event vars
 var selected_node = null,
-    selected_node2 = null,
+    compared_node = null,
     selected_link = null;
 
-var last_selected_node = null;
+//var last_selected_node = null;
 
 var mousedown_link = null,
     mousedown_node = null,
@@ -22,11 +22,27 @@ function resetMouseVars() {
     mousedown_node = null;
     mouseup_node = null;
     mousedown_link = null;
+    tooltip.style("visibility", "hidden");
 }
 
 function log10(val) {
   return Math.log(val) / Math.LN10;
 }
+
+var tooltip = d3.select("body")
+    .append("div").style("width", "250px")
+    .style("position", "absolute")
+    .style("z-index", "10")
+    .style("background-color", "white")
+    .style("visibility", "hidden");
+
+function show_conflict(obj, text) {
+    d3.select(obj).classed('conflict', true)
+    tooltip.text(text)
+        .style("top",(d3.event.pageY)+"px")
+        .style("left",(d3.event.pageX+28)+"px")
+        .style("visibility", "visible")
+    }
 
 // update force layout (called automatically each iteration)
 function tick() {
@@ -76,12 +92,10 @@ function tick() {
 }
 
 function active_link(d) {
-
     return selected_node || selected_link ? 
                 selected_node ? (options.layout.links.display.pre ? d.target === selected_node : false) || (options.layout.links.display.post ? d.source === selected_node : false) 
                 : (options.layout.links.display.pre ? d.target === selected_link.source : false) || (options.layout.links.display.post ? d.source === selected_link.target : false) || (d === selected_link)
               : (d.source.type == 'neuron') && (d.target.type == 'neuron');
-
 }
 
 function active_weight(d) {
@@ -90,8 +104,7 @@ function active_weight(d) {
             selected_node ? (options.layout.links.display.pre ? d.target === selected_node : false) || (options.layout.links.display.post ? d.source === selected_node : false) 
                 : (options.layout.links.display.pre ? d.target === selected_link.source : false) || (options.layout.links.display.post ? d.source === selected_link.target : false) || (d === selected_link)
             : (d.source.type == 'neuron') && (d.target.type == 'neuron'))
-         : false
-
+         : false;
 }
 
 // update graph (called when needed)
@@ -133,7 +146,7 @@ function update_layout() {
             focused_link = d;
 
             selected_node = null;
-            selected_node2 = null;
+            compared_node = null;
             update_after_select();
         });
 
@@ -170,8 +183,7 @@ function update_layout() {
             if(mousedown_link === selected_link) selected_link = null;
             else selected_link = mousedown_link;
             selected_node = null;
-            selected_node2 = null;
-            last_selected_node = 'A';
+            compared_node = null;
             update_after_select();
         });
 
@@ -216,8 +228,8 @@ function update_layout() {
     // update existing nodes (selected visual states)
     svg.nodes.selectAll('circle')
         .classed('selected', function(d) { return (d === selected_node); })
-        .classed('selected2', function(d) { return (d === selected_node2); })
-        .classed('active', function(d) { return selected_link ? ((d === selected_link.source) || (d === selected_link.target)) : (d === selected_node || d === selected_node2) ;});
+        .classed('selected2', function(d) { return (d === compared_node); })
+        .classed('active', function(d) { return selected_link ? ((d === selected_link.source) || (d === selected_link.target)) : (d === selected_node || d === compared_node) ;});
 
     // add new nodes
     var g = svg.nodes.enter().append('svg:g');
@@ -230,60 +242,58 @@ function update_layout() {
     g.append('svg:circle')
         .attr('class', 'node')
         .classed('selected', function(d) { return (d === selected_node); })
-        .attr('r', 12)
+        .attr('r', function(d) { return d.type == 'output' ? 15 : 12; })
+        .attr('transform', 'scale(1.0)')
 
         .on('mouseover', function(d) {
-
             focused_node = d;
-//            if(!mousedown_node || d === mousedown_node) return;
 
             // enlarge target node
-            d3.select(this).attr('transform', 'scale(1.1)');
+            d3.select(this)
+                .transition().attr('transform', 'scale(1.2)');
 
             if (mousedown_node) {
                 if (mousedown_node.type == 'neuron') {
-                    d3.select(this).classed('conflict', (d.type == 'neuron' && SPIC_group == 1) || d.type == 'input' || d.status.model == 'voltmeter')
+                    if (d.type == 'neuron' && SPIC_group == 1) {
+                        show_conflict(this, 'In this class nuSPIC-I you cannot reconnect within neurons.')
+                    } else if (d.type == 'input') {
+                        show_confluct(this, 'Inputs cannot be outputs.')
+                    } else if (d.status.model == 'voltmeter') {
+                        show_conflict(this, 'You can only connect voltmeter to neurons.')
+                    }
                 }
                 else {
                     if (d.type != 'neuron') {
-                        d3.select(this).classed('conflict', true)
+                        show_conflict(this, 'Inputs and outputs cannot be connected themselves.');
+                    } else if (d.status.model == 'parrot_neuron') {
+                        show_conflict(this, 'This neuron simply emits one spike for every incoming spike. There is no membrane potential variable defined, thus you cannot use a voltmeter for this neuron');
                     }
                 }
             } else if (d.status.model == 'spike_detector') {
-                d3.select(this).classed('conflict', true)
+                show_conflict(this, 'You can only connect neurons to spike detector.')
             }
-
         })
 
         .on('mouseout', function(d) {
             focused_node = null;
+            tooltip.style("visibility", "hidden");
 
-//            if(!mousedown_node || d === mousedown_node) return;
             // unenlarge target node
-            d3.select(this).attr('transform', '')
-                .classed('conflict', false);
+            d3.select(this)
+                .classed('conflict', false)
+                .transition().attr('transform', 'scale(1.0)');
         })
 
         .on('mousedown', function(d) {
-//            if (d3.event.ctrlKey) return;
             mousedown_node = d;
 
             // select node
-//            if (d3.event.shiftKey && selected_node) {
-//                selected_node2 = mousedown_node;
-//            } else {
-//                selected_node = mousedown_node;
-//                selected_node2 = null;
-//            }
-
-            if (last_selected_node == 'A') {
-                selected_node2 = mousedown_node;
-                last_selected_node = 'B';
+            if (d3.event.shiftKey && selected_node) {
+                compared_node = mousedown_node;
             } else {
                 selected_node = mousedown_node;
-                last_selected_node = 'A';
+                compared_node = null;
             }
-
             selected_link = null;
 
             // reposition drag line
@@ -310,11 +320,16 @@ function update_layout() {
             if (mouseup_node === mousedown_node) { resetMouseVars(); return; }
 
             // unenlarge target node
-            d3.select(this).attr('transform', '').classed('conflict', false);
+            d3.select(this)
+                .classed('conflict', false)
+                .transition().attr('transform', 'scale(1.0)');
 
             if (mouseup_node.type == 'input' || mouseup_node.status.model == 'voltmeter' || mousedown_node.status.model == 'spike_detector') { resetMouseVars(); return; }
             if (!(mousedown_node.type == 'neuron' || mouseup_node.type == 'neuron')) { resetMouseVars(); return; }
             if (mousedown_node.disabled == 1 && mouseup_node.disabled == 1) { resetMouseVars(); return; }
+            if ((mousedown_node.status.model != 'neuron') && (mouseup_node.status.model == 'parrot_neuron')) { 
+                resetMouseVars();
+                return; }
 
             source = mousedown_node;
             target = mouseup_node;
@@ -335,7 +350,7 @@ function update_layout() {
             // select new link
             selected_link = link;
             selected_node = null;
-            selected_node2 = null;
+            compared_node = null;
             last_selected_node = null;
             update_after_change();
         });
@@ -364,7 +379,7 @@ function dblclick() {
     if(d3.event.ctrlKey || mousedown_node || mousedown_link) return;
 
     var uid = Math.random().toString(36).substring(2,7);
-//     insert new node at point
+    // insert new node at point
     var point = d3.mouse(this);
 
     if (SPIC_group == 1) {
@@ -394,7 +409,7 @@ function mousedown() {
     if (d3.event.shiftKey || d3.event.ctrlKey || mousedown_node || mousedown_link) return;
 
     selected_node = null;
-    selected_node2 = null;
+    compared_node = null;
     last_selected_node = null;
     selected_link = null;
 
@@ -415,7 +430,6 @@ function mousemove() {
         dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
     drag_line.classed('active', true)
-//        .attr('d', 'M' + sourceX + ',' + sourceY + "A" + dist + "," + dist + " 0 0," + (options.layout.links.curve == 'left' ? "1 " : "0 ") + targetX + ',' + targetY);
         .attr('d', 'M' + sourceX + ',' + sourceY + "," + targetX + ',' + targetY);
 
     update_layout();

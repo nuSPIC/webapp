@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
 from django import forms
-
-import lib.json as json
 from network.models import Network
 
 
@@ -47,7 +44,7 @@ class NodesCSVForm(forms.Form):
 class NodeForm(forms.Form):
     model = forms.ChoiceField(required = True,
         label = 'Model',
-        choices=[
+        choices = [
             ('voltmeter', 'Voltmeter', 'output'), \
             ('spike_detector', 'Spike Detector', 'output'), \
             ('hh_psc_alpha', 'HH PSC Alpha', 'neuron'), \
@@ -59,6 +56,14 @@ class NodeForm(forms.Form):
             ('noise_generator', 'Noise Generator', 'input'), \
             ('poisson_generator', 'Poisson Generator', 'input'), \
             ('spike_generator', 'Spike Generator', 'input'), \
+        ])
+
+    synapse = forms.ChoiceField(required = True,
+        label = 'Synaptic signal',
+        choices = [
+            ('custom', 'custom'), \
+            ('excitatory', 'excitatory'), \
+            ('inhibitory', 'inhibitory')
         ])
 
     V_m = forms.FloatField(required = False,
@@ -271,7 +276,7 @@ class NodeForm(forms.Form):
         widget = forms.TextInput(attrs = {
 #            'placeholder': 'start',
             'placeholder': '0.0',
-            'class': 'positive input poisson_generator spike_generator'}))
+            'class': 'positive input ac_generator dc_generator poisson_generator spike_generator'}))
     stop = forms.FloatField(required = False,
 #        initial = np.inf,
         label = 'End time (ms)',
@@ -279,7 +284,7 @@ class NodeForm(forms.Form):
         widget = forms.TextInput(attrs = {
 #            'placeholder': 'stop',
             'placeholder': 'inf',
-            'class': 'positive nonzero input poisson_generator spike_generator'}))
+            'class': 'positive nonzero input ac_generator dc_generator poisson_generator spike_generator'}))
     step = forms.FloatField(required = False,
         label = 'Step size (ms)',
         help_text = 'Enter only positive values.',

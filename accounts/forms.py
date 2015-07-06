@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-# coding: utf-8
-
 from django import forms
 from django.conf import settings
 from django.contrib.auth.forms import PasswordResetForm
@@ -27,6 +24,7 @@ class UserEditForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ('first_name', 'last_name', 'email',)
+
 
 class UserRegistrationForm(forms.ModelForm):
     """
@@ -83,7 +81,7 @@ class ProfileEditForm(forms.ModelForm):
     
     Used on the "Edit profile" page
     """
-    
+
     class Meta:
         model = UserProfile
         fields = ('present_occupation', 'academic_affiliation', 'public_email', 'web_page', 'notes', 'forum_email_notification')
@@ -94,7 +92,7 @@ class ProfileEditForm(forms.ModelForm):
 
     def as_div(self):
         return self._html_output(u'<div class="fieldWrapper">%(label)s %(errors)s %(field)s%(help_text)s</div>', u'%s', '</div>', u'<span class="help_text">%s</span>', False)
-        
+
 
 class ProfileRegistrationForm(forms.ModelForm):
     """
@@ -102,7 +100,7 @@ class ProfileRegistrationForm(forms.ModelForm):
     
     Used on the registration page
     """
-    
+
     class Meta:
         model = UserProfile
         fields = ('present_occupation', 'academic_affiliation', 'public_email', 'web_page', 'notes', 'forum_email_notification')
@@ -110,10 +108,10 @@ class ProfileRegistrationForm(forms.ModelForm):
             'present_occupation': forms.RadioSelect(attrs={'class': 'radio-select'}),
             'forum_email_notification': forms.CheckboxInput(attrs={'class': 'checkbox'}),
         }
-    
+
     def as_div(self):
         return self._html_output(u'<div class="fieldWrapper">%(label)s %(errors)s %(field)s%(help_text)s</div>', u'%s', '</div>', u'<span class="help_text">%s</span>', False)
-        
+
 
 class CustomPasswordResetForm(PasswordResetForm):
     """

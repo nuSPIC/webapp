@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
-from django.contrib.auth.models import User
-from django.db import models
+import anyjson as json
 import numpy as np
 
-import lib.json as json
+from django.contrib.auth.models import User
+from django.db import models
 
 from network.network_settings import ALL_PARAMS_ORDER
 
@@ -20,13 +19,21 @@ class SPIC(models.Model):
     title = models.CharField(max_length=32, default='')
     description = models.TextField(blank=True)
     tooltip_json = models.TextField(blank=True)
+    msg_json = models.TextField(blank=True)
+
+    solution = models.BooleanField()
 
     def __unicode__(self):
         return self.title
 
     def tooltip(self):
         if self.tooltip_json:
-            return json.decode(str(self.tooltip_json))
+            return json.loads(str(self.tooltip_json))
+        return {}
+
+    def msg(self):
+        if self.msg_json:
+            return json.loads(str(self.msg_json))
         return {}
 
 
@@ -63,13 +70,27 @@ class Network(models.Model):
         except:
             return '%s' %self.pk
 
-    def copy(self):
-        new_kwargs = dict([(fld.name, getattr(self, fld.name)) for fld in self._meta.fields if fld.name != 'id']);
-        new_kwargs['deleted'] = False
+    def get_latest_local_id(self):
+        return Network.objects.filter(user_id=self.user_id, SPIC=self.SPIC).values('local_id').latest('local_id')['local_id']
+
+    def create_latest(self):
+        new_kwargs = dict([(fld.name, getattr(self, fld.name)) for fld in self._meta.fields if fld.name != 'id'])
+
+        new_kwargs['local_id'] = self.get_latest_local_id() + 1
+
+        new_kwargs['label'] = None
+        new_kwargs['comment'] = None
+        new_kwargs['date_simulated'] = None
+
+        new_kwargs['has_voltmeter'] = False
+        new_kwargs['has_spike_detector'] = False
+        new_kwargs['voltmeter_json'] = '{"meta":{"neurons":[]}}'
+        new_kwargs['spike_detector_json'] = '{"meta":{"neurons":[]}}'
+
         new_kwargs['favorite'] = False
-        new_kwargs['label'] = ''
-        new_kwargs['comment'] = ''
-        return self.__class__.objects.create(**new_kwargs)
+        new_kwargs['deleted'] = False
+        new = self.__class__.objects.create(**new_kwargs)
+        return new
 
     def user(self):
         """
@@ -84,13 +105,13 @@ class Network(models.Model):
     def root_status(self):
         """ Returns status data from the field status_json."""
         if self.status_json:
-            return json.decode(str(self.status_json))
+            return json.loads(str(self.status_json))
         return {}
 
     def nodes(self, term='visible', meta=False, key=None):
         if len(self.nodes_json) == 0: return []
 
-        nodes = json.decode(self.nodes_json)
+        nodes = json.loads(str(self.nodes_json))
 
         # Get visible, hidden or all nodes
         if term == 'visible':
@@ -151,7 +172,7 @@ class Network(models.Model):
     def links(self, term='visible', key=None, out='uid'):
         if len(self.links_json) == 0: return []
 
-        links = json.decode(self.links_json)
+        links = json.loads(str(self.links_json))
 
         # Get nodes
         nodes = self.nodes(term)
@@ -183,6 +204,9 @@ class Network(models.Model):
         return links
 
     def update(self, nodes, links=None):
+        """
+        Update json data of nodes and links.
+        """
 
         # Add meta to visible nodes
         for index in range(len(nodes)):
@@ -197,7 +221,7 @@ class Network(models.Model):
         for index in range(len(nodes)):
             nodes[index]['id'] = index+1
 
-        self.nodes_json = json.encode(nodes)
+        self.nodes_json = json.dumps(nodes)
 
         if links:
             # Add hidden links
@@ -212,7 +236,7 @@ class Network(models.Model):
                 links[idx]['weight'] = float(val['weight'])
                 links[idx]['delay'] = float(val['delay'])
 
-            self.links_json = json.encode(links)
+            self.links_json = json.dumps(links)
 
     def is_recorded(self):
         """ Check if the network is recorded. """
@@ -222,22 +246,25 @@ class Network(models.Model):
         """ Decode spike detector data from json. """
 
         connect_to = [link['source']['id'] for link in self.links(out='object') if link['target']['status']['model'] == 'spike_detector']
+        connect_to.sort()
         meta = {'neurons': [], 'simTime': self.duration, 'connect_to': connect_to}
 
-        if self.has_spike_detector:
-            data = json.decode(str(self.spike_detector_json))
-            assert len(data['senders']) == len(data['times'])
+        if self.has_spike_detector or len(connect_to) > 0:
+            if self.spike_detector_json:
+                data = json.loads(str(self.spike_detector_json))
+                if "senders" in data.keys():
+                    assert len(data['senders']) == len(data['times'])
 
-            meta['neurons'] = data['meta']['neurons']
-            data['meta'] = meta
+                    meta['neurons'] = data['meta']['neurons']
+                    data['meta'] = meta
 
-            if return_index:
-                senders = np.array(data['senders'])
-                for idx, val in enumerate(meta['neurons']):
-                    senders[senders==val['id']] = idx
-                    data['meta']['neurons'][idx]['idx'] = idx
-                data['senders'] = senders.tolist()
-            return data
+                    if return_index:
+                        senders = np.array(data['senders'])
+                        for idx, val in enumerate(meta['neurons']):
+                            senders[senders==val['id']] = idx
+                            data['meta']['neurons'][idx]['idx'] = idx
+                        data['senders'] = senders.tolist()
+                    return data
 
         return {'meta': meta}
 
@@ -254,23 +281,21 @@ class Network(models.Model):
             def prep_to_vis(values):
                 return {'values': values.tolist(), 'values_reduced': values[::5].tolist()}
 
-            if len(self.voltmeter_json) > 0:
-                vm_E = json.decode(str(self.voltmeter_json))
-            else:
-                vm_E = {'meta':{'neurons': []}, 'V_m': ''}
-            meta['neurons'] = vm_E['meta']['neurons']
+            if self.voltmeter_json:
+                vm_E = json.loads(str(self.voltmeter_json))
+                meta['neurons'] = vm_E['meta']['neurons']
 
-            V_m = vm_E['V_m']
-            if len(V_m) > 0:
-                V_m = np.reshape(np.array(V_m), [-1, len(meta['neurons'])]).T
-                meta['Vm_max'] = np.max(V_m)
-                meta['Vm_min'] = np.min(V_m)
+                if 'V_m' in vm_E:
+                    V_m = vm_E['V_m']
+                    if len(V_m) > 0:
 
-            times = np.arange(1., self.duration, 1.)
+                        V_m = np.reshape(np.array(V_m), [-1, len(meta['neurons'])]).T
+                        meta['Vm_max'] = np.max(V_m)
+                        meta['Vm_min'] = np.min(V_m)
 
-            data = {'V_m': map(prep_to_vis, V_m), 'times':times.tolist(), 'times_reduced':times[::5].tolist()}
-            data['meta'] = meta
-            return data
+                    times = np.arange(1., self.duration, 1.)
+
+                    return {'V_m': map(prep_to_vis, V_m), 'times':times.tolist(), 'times_reduced':times[::5].tolist(), 'meta':meta}
 
         return {'meta': meta}
 

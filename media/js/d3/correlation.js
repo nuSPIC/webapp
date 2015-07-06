@@ -156,15 +156,14 @@ function draw_correlation_plot(reference, data) {
         .attr("x", 1)
         .attr("width", width/data.length-2)
         .attr("height", function(d) { return d.y>=0? height/2 - y(d.y): y(d.y)- y(0); });
-
 }
 
 function update_correlation(reference) {
     $(reference).empty();
-    if (selected_node2 && selected_node) {
-        if (selected_node.id in data.spike_detector.hist[options.histogram.binwidth] && selected_node2.id in data.spike_detector.hist[options.histogram.binwidth]) {
+    if (compared_node && selected_node) {
+        if (selected_node.id in data.spike_detector.hist[options.histogram.binwidth] && compared_node.id in data.spike_detector.hist[options.histogram.binwidth]) {
             var array1 = data.spike_detector.hist[options.histogram.binwidth][selected_node.id]['hist'],
-                array2 = data.spike_detector.hist[options.histogram.binwidth][selected_node2.id]['hist'];
+                array2 = data.spike_detector.hist[options.histogram.binwidth][compared_node.id]['hist'];
             draw_correlation_plot(reference, calc_correlation(array1, array2, 'valid'))
         };
     } else if (selected_node) { 
@@ -174,32 +173,4 @@ function update_correlation(reference) {
         };
     };
 }
-
-    //    var dataset = d3.range(delay.length).map(function(i) {
-    //        return {x: delay[i], y: corr[i]};
-    //    });
-
-    //    var line = d3.svg.line()
-    //        .x(function(d) { return x(d.x); })
-    //        .y(function(d) { return y(d.y); });
-
-    //    var svg = d3.select(reference).append("svg")
-    //        .datum(dataset)
-    //        .attr("width", width + margin.left + margin.right)
-    //        .attr("height", height + margin.top + margin.bottom)
-    //      .append("g")
-    //        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-    //    svg.append("g")
-    //        .attr("class", "x axis")
-    //        .attr("transform", "translate(0," + height + ")")
-    //        .call(xAxis);
-
-    //    svg.append("g")
-    //        .attr("class", "y axis")
-    //        .call(yAxis);
-
-    //    svg.append("path")
-    //        .attr("class", "line")
-    //        .attr("d", line);
 

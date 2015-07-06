@@ -59,18 +59,23 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
-    
-    'accounts',
+
+    'accounts',     # default database
     'forum',
     'lib',
     'news',
 
-    'network',
+    'network',      # network database
 
-    'djcelery',
-    'djkombu',
+    'djcelery',     # simulation database
+
+#    'upload',       # no database
 )
 
+try:
+    INSTALLED_APPS += ('djkombu')
+except:
+    pass
 
 # =================================
 #   Application settings section

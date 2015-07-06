@@ -1,16 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}Log in{% endblock %}
-
 {% block content %}
-<form method="post" action="{% url login %}" class="form-horizontal" id="login-form">
+<form enctype="multipart/form-data" method="post" action="/upload/" class="form-horizontal" >
     <div class="modal">
-        <div class="modal-header">
-        <h3>Log in</h3>
-        </div>
-
-         <div class="modal-body">
-            {% csrf_token %}
+        <div class="modal-header"><h3>Upload File</h3></div>
+        <div class="modal-body">
+           {% csrf_token %}
             {{ form.non_field_errors }}
 
             {% for field in form %}
@@ -26,22 +21,16 @@
                     </div>
                 </div>
             {% endfor %}
-<!--            <label class="checkbox">-->
-<!--                <input type="checkbox"> Remember me-->
-<!--            </label>-->
+
+            {% if url_to_file %}
+            The file is successfully uploaded.
+
+            <p>Uploaded file is stored in <a href='{{url_to_file}}'>{{url_to_file}}</a>.</p>
+            {% endif %}
         </div>
 
         <div class="modal-footer">
-            <div class="control-group">
-                <div class="controls">
-                    <button type="submit" class="login-form-submit btn">Sign in</button>
-                    <input type="hidden" name="next" value="{{ next }}" />
-
-                    <div class="forgot-password">
-                        <a href="{% url password_reset %}">Forgot your password?</a>
-                    </div>
-                </div>
-            </div>
+            <button type="submit" class="btn">Save</button>
         </div>
     </div>
 </form>

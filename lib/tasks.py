@@ -1,11 +1,10 @@
-from celery.contrib.abortable import AbortableTask
-
-from network.models import Network
-
-import lib.json as json
-
+import anyjson as json
 import datetime
 import numpy as np
+
+from celery.contrib.abortable import AbortableTask
+from network.models import Network
+
 
 class Simulation(AbortableTask):
     """
@@ -110,9 +109,10 @@ class Simulation(AbortableTask):
                 data[output_status['model']] = events
             if output_status['model'] == 'spike_detector':
                 neurons = [nodes[nodes_id.index(sender)] for sender in np.unique(events['senders'])]
+                neurons = [{'uid': neuron['uid'], 'id': neuron['id']} for neuron in neurons]
                 if len(neurons) > 0:
                     network_obj.has_spike_detector = True
-            if output_status['model'] == 'voltmeter':
+            elif output_status['model'] == 'voltmeter':
                 neurons = [{'uid': link['target']['uid'], 'id': link['target']['id']} for link in links if link['source']['status']['model'] == 'voltmeter']
                 if len(neurons) > 0:
                     network_obj.has_voltmeter = True
@@ -120,11 +120,12 @@ class Simulation(AbortableTask):
 
         # Write results and simulating date in database and reconfigure the existence of output devices
         for label, value in data.items():
-            data_json = json.encode(value)
+            data_json = json.dumps(value)
             network_obj.__setattr__("%s_json" %label, data_json)
 
         # Update network object
         network_obj.date_simulated = datetime.datetime.now()
         network_obj.save()
-        
+
+        nest.ResetKernel()
         return {'local_id': network_obj.local_id}

@@ -1,29 +1,28 @@
-{% if network_obj.spike_detector_data.meta.connect_to %}
-    <div id="spike_detector">
-        {% if network_obj.spike_detector_data.meta.neurons %}
+<div id="spike_detector">
+    {% if network_obj.spike_detector_data.meta.neurons %}
 
-            <div id="raster_plot"></div>
+        <div id="raster_plot"></div>
 
-            <hr>
-            <div id="histogram"></div>
+        <hr>
+        <div id="histogram"></div>
 
-            <div id="binwidth">
-                <span style="font-size: 14px">Bin width: </span>
-                <span class="btn-group" data-toggle="buttons-radio">
-                    <button class="btn btn-small binwidth" value="10"> 10 ms </button>
-                    <button class="btn btn-small binwidth" value="20"> 20 ms </button>
-                    <button class="btn btn-small binwidth" value="50"> 50 ms </button>
-                    <button class="btn btn-small binwidth" value="100"> 100 ms </button>
-    <!--                    <button class="btn btn-small binwidth" value="200"> 200 ms </button>-->
-                </span>
+        <div id="binwidth">
+            <span style="font-size: 14px">Bin width: </span>
+            <span class="btn-group" data-toggle="buttons-radio">
+                <button class="btn btn-small binwidth" value="10"> 10 ms </button>
+                <button class="btn btn-small binwidth" value="20"> 20 ms </button>
+                <button class="btn btn-small binwidth" value="50"> 50 ms </button>
+                <button class="btn btn-small binwidth" value="100"> 100 ms </button>
+<!--                    <button class="btn btn-small binwidth" value="200"> 200 ms </button>-->
+            </span>
 
-            </div>
+        </div>
 
-            <hr>
-            <div id="smoothed_histogram"></div>
+        <hr>
+        <div id="smoothed_histogram"></div>
 
-            <hr>
-            <div id="correlation_plot"></div>
+        <hr>
+        <div id="correlation_plot"></div>
 
 <!--            <span style="font-size: 14px">Valid correlation of</span>-->
 
@@ -59,14 +58,13 @@
 <!--                </div>-->
 <!--            </span>-->
 
-        {% else %}
+    {% else %}
 
-        <div style="padding-top: 20px; text-align:center; font-size: 14px">No spikes detected. Check your input devices.</div>
+    <div style="padding-top: 20px; text-align:center; font-size: 14px">No spikes detected. Check your input devices.</div>
 
-        {% endif %}
-    </div>
+    {% endif %}
+</div>
 
-{% endif %}
 
 
 <!--    <div class="fig">-->

@@ -67,6 +67,13 @@
              ( {{ network_obj.date_simulated|timesince|default:"not simulated" }}{% if network_obj.date_simulated %} ago{% endif %} )
         </li>
 
+        {% if network_obj.SPIC.solution %}
+            <li><a href="/network/{{network_obj.SPIC.group}}/{{network_obj.SPIC.local_id}}/solution/">
+                Solution
+            </a></li>
+        {% endif %}
+
+
         <br>
         <div id="network_description" class="{% if network_obj.comment %}hide fade{% endif %}">
                 {{ SPIC_obj.description|default:"no description" }}
@@ -81,6 +88,10 @@
     </ul>
 
     <div id="network-content" style="font-size:14px">
+        <div class="alert warning hide fade" id="global_warning" style="margin:20px">
+            <a class="close" data-dismiss="alert" href="#">&times;</a>
+            <p class="alert-content"></p>
+        </div>
 
         <div class="container-fluid">
             <div class="row-fluid">
@@ -111,8 +122,33 @@
             </div>
         </div>
 
+
+<div id="dialog-msg" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="dialog-msg-label" aria-hidden="true" style="margin-top: 100px">
+
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 id="dialog-msg-title">Network messenger</h3>
     </div>
 
+    <div class="modal-body">
+        <div class="logo-animation"><img src="/media/img/icons/bcf_logo-animation.gif" ></div>
+        <div id="dialog-msg-content"></div>
+    </div>
+
+    <div class="modal-footer">
+        <div id="dialog-msg-simulation_confirm" class="button">
+            <a href="#" class="btn btn-primary" onclick="simulate()">Yeah!</a>
+            <a href="#" class="btn" data-dismiss="modal" >No</a>
+        </div>
+        <div id="dialog-msg-warning" class="button">
+            <a href="#" class="btn ok" data-dismiss="modal" >Ok</a>
+        </div>
+        <span id="task_status" class="label label-info"></span>
+    </div>
+</div>
+
+
+    </div>
 {% endblock %}
 
 
@@ -140,12 +176,14 @@
         var data = {};
         data['voltmeter'] = {{ network_obj.voltmeter_data|safe }};
         data['spike_detector'] = {{ network_obj.spike_detector_data_index|safe }};
+
+        var msg = {{ SPIC_obj.msg|safe }};
     </script>
 
     <script type="text/javascript" src="{{ MEDIA_URL }}js/json2.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/plugins/jquery.cookie.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/plugins/jquery.form.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/layout.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/layout.js?n"></script>
 
     {% if network_obj.has_spike_detector %}
         <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/raster_plot.js"></script>
@@ -160,8 +198,8 @@
         <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/voltmeter.js"></script>
     {% endif %}
 
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/network/interaction.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/network/simulation.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/network/run.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/network/interaction.js?n"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/network/simulation.js?n"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/network/run.js?n"></script>
 
 {% endblock %}

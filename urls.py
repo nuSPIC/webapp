@@ -14,6 +14,7 @@ urlpatterns = patterns('',
     (r'^feed/', include('feed.urls')),
     (r'^forum/', include('forum.urls')),
     (r'^network/', include('network.urls')),
+#    (r'^upload/', include('upload.urls')),
 
     url(r'^status/(?P<task_id>[\w\d\-]+)/?$', celery_views.task_status, name="celery_task_status"),
 )

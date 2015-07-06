@@ -13,6 +13,15 @@ function stringify(value) {
     return n.join(', ');
 }
 
+function show_msg(title, content, mode) {
+
+    $( "#dialog-msg #dialog-msg-title" ).html(title);
+    $( "#dialog-msg #dialog-msg-content" ).html(content);
+    $( "#dialog-msg .button").addClass('hide fade');
+    $( "#dialog-msg").find("#dialog-msg-"+ mode).removeClass('hide fade');
+    $( "#dialog-msg" ).modal();
+}
+
 function active_buttons() {
     $("#layout-option-content #nodes-display").find("#input").addClass( (options.layout.nodes.display.input ? "active" : ""));
     $("#layout-option-content #nodes-display").find("#neuron").addClass((options.layout.nodes.display.neuron ? "active" : ""));
@@ -155,21 +164,34 @@ function show_form(model) {
     $("#node-form input").val('');
 
     if (selected_node) {
-        if (selected_node.type == 'output' && SPIC_group == 1) return;
+        if (selected_node.type == 'output') return;
 
         var status = selected_node.status;
         selected_model = (model == null ? status.model : model)
 
         for (var key in status) {
             key != 'model' ? $("#node-form").find("#id_"+key).val(status[key]) : '';
-        }
+        };
 
         $("#node-form #id_model #" + selected_model).prop('selected', true).parents(".fieldWrapper").removeClass('hide fade');
         if (SPIC_group == 1) {
             $("#node-form #id_model option."+selected_node.type).removeClass('hide fade');
         } else {
             $("#node-form #id_model option").removeClass('hide fade');
+        };
+
+        if (SPIC_group != 1 && selected_node.type == 'neuron') {
+            $("#id_synapse").find("#" + selected_node.synapse).prop('selected', true);
+            $("#id_synapse").parents(".fieldWrapper").removeClass('hide fade');
         }
+
+        // hide output models if existed in nodes
+        nodes.forEach(function(node) {
+            if (node.type == 'output') {
+                $("#id_model #"+ node.status.model).addClass('hide fade');
+            }
+        })
+
 
         $("#node-form").find("."+ selected_model).parents(".fieldWrapper").removeClass('hide fade');
         $("#node-form .btn-group").removeClass('hide fade');
@@ -195,14 +217,28 @@ function show_form(model) {
     }
 }
 
+function update_selected_node(reference, object) {
+    var ref_obj = d3.select(reference);
+    ref_obj.selectAll(object).classed('active', selected_node != null)
+    ref_obj.selectAll(object).classed('selected', false)
+    ref_obj.selectAll(object).classed('compared', false)
+
+    if (selected_node) {
+        ref_obj.select("#neuron_"+selected_node.id.toString()).classed('selected', true)
+        if (compared_node) { ref_obj.select("#neuron_"+compared_node.id.toString()).classed('compared', true)};
+    }
+}
+
 function update_after_select() {
     update_layout();
     highlight_selected();
     show_form(null);
-    update_raster_plot("#raster_plot");
-    update_smoothed_histogram("g.smoothed_histogram");
-    update_correlation("#correlation_plot");
-    update_voltmeter("g.voltmeter");
+
+    if (data.spike_detector.meta.neurons.length > 0) {
+        update_selected_node("g.smoothed_histogram", "path");
+        update_correlation("#correlation_plot");
+    }
+    if (data.voltmeter.meta.neurons.length > 0) { update_selected_node("g.voltmeter", "path"); }
 }
 
 function node_interaction() {
@@ -263,12 +299,9 @@ function link_interaction_dblclick() {
 
 function update_after_change() {
 
-//   alert(JSON.stringify(selected_node));
    update_layout();
 
    tabulate('#nodes-table', nodes, ['id', 'label', 'targets', 'status'], ['node_', 'node_'])
-//   tabulate('#nodes-table', nodes, ['id', 'label', 'targets', 'weights', 'delays'], ['node_', 'node_'])
-
    tabulate('#weights-table', nodes.map(function(node) {return {id: node.id} }), ['id'].concat(nodes.map(function(node) {return node.id })), ['source_', 'target_'])
    tabulate('#delays-table', nodes.map(function(node) {return {id: node.id} }), ['id'].concat(nodes.map(function(node) {return node.id })), ['source_', 'target_'])
 
@@ -282,7 +315,7 @@ function update_after_change() {
     $('#connection_matrix td:not(.target_id)').dblclick(link_interaction_dblclick)
 }
 
-function node_validate(formData, jqForm, options) { 
+function node_form_validation(formData, jqForm, options) { 
     // jqForm is a jQuery object which wraps the form DOM element 
     // 
     // To validate, we can access the DOM elements directly and return true 
@@ -354,10 +387,10 @@ function node_validate(formData, jqForm, options) {
             if ('synapse' in selected_node) {delete selected_node["synapse"];}
         } else {
             selected_node.type = 'neuron';
-            selected_node.synapse = 'excitatory';
+            selected_node.synapse = $("#node-form #id_synapse :selected").text();
         }
 
-        hasChanged = true;
+        link_validation();
         update_after_change();
     } else {
         $('#node-form .portlet-body').prepend('<h4 class="text-warning" style="margin:10px">Oh snap! You got an error!</h4>')
@@ -366,7 +399,7 @@ function node_validate(formData, jqForm, options) {
     return false;
 }
 
-function link_validate(formData, jqForm, options) { 
+function link_form_validation(formData, jqForm, options) { 
     // jqForm is a jQuery object which wraps the form DOM element 
     // 
     // To validate, we can access the DOM elements directly and return true 
@@ -412,12 +445,34 @@ function link_validate(formData, jqForm, options) {
     if (weight_error_msg == null && delay_error_msg == null) {
         selected_link.weight = parseFloat(weight_val);
         selected_link.delay = parseFloat(delay_val);
-        hasChanged = true;
         update_after_change();
     } else {
         $('#link-form .portlet-body').prepend('<h4 class="text-warning" style="margin:10px">Oh snap! You got an error!</h4>')
     }
 
     return false;
+}
+
+
+function link_validation() {
+    var links_copy = links.slice();
+    var invalid_links = new Array();
+    var warning = false;
+
+    for (var link_idx in links_copy) {
+        if ((links_copy[link_idx].source.status.model == 'spike_detector')
+        || (links_copy[link_idx].target.status.model == 'voltmeter')
+        || (links_copy[link_idx].target.type == 'input')) {
+            invalid_links.push(links.splice(links.indexOf(links_copy[link_idx]), 1)[0]);
+            warning = true;
+        }
+    }
+    if (warning) {
+        $( "#global_warning .alert-content").html('<b>Attention!</b> All invalid links had to been deleted.<ul class="invalid_links"></ul>');
+        for (var link_idx in invalid_links) {
+            $( "#global_warning .invalid_links").append('<li>Link from ' + invalid_links[link_idx].source.id + ' to ' + invalid_links[link_idx].target.id + '</li>');
+        }
+        $( "#global_warning").removeClass("hide fade");
+    }
 }
 
