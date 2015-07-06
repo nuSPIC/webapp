@@ -1,0 +1,32 @@
+{% if form.fieldsets %}
+    {% for fieldset in form.fieldsets %}
+        <div class="{{ fieldset.classes }}">
+
+            {% if fieldset.description %}
+                <p class="description">{{ fieldset.description }}</p>
+            {% endif %}
+
+            {% for field in fieldset %}
+                {% if field.is_hidden %}
+                    {{ field }}
+                {% else %}
+                <div class="fieldWrapper control-group hide fade {% if field.help_text %}input-append{% endif %} ">
+                    <label class="control-label" for="{{ field.auto_id }}">{{ field.label }}</label>
+                    <div class="controls">
+                        {{ field.errors }}
+                        <ul class="errorlist hide fade"></ul>
+                        <div>
+                            {{ field }}
+                            {% if field.help_text %}<span class="add-on" value="{{ field.help_text }}">?</span>{% endif %}
+                        </div>
+                        <span class="help_text">{{ field.help_text }}</span>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+
+        </div>
+    {% endfor %}
+{% else %}
+    {{ form.as_div }}
+{% endif %}

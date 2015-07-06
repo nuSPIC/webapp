@@ -6,25 +6,115 @@
 
 {% block title %}{{ flatpage.title }}{% endblock %}
 
-{% block content %}
-    <div style="float:right; width:30%">
-        {% for news in news_list %}
-            <div>
-                <strong>{{ news.pub_date|date:"DATE_FORMAT" }} &raquo; {{ news.title }}</strong>
-                <div>
-                    {{ news.summary|safe }}
-                </div>
-                <a href="{{ news.get_absolute_url }}">Continue reading</a>
+{% block jumbotron %}
+    <div class="jumbotron masthead">
+        <div class="container">
+            <div style="padding: 40px 0">
+
+            <p>
+                <img src="/media/img/special/nuspic_logo_inverse.png" class="watermark"></img>
+            </p>
+        <!--        <p style="padding-top:200px">Neural System Prediction and Identification Challenge</p>-->
+
+            <p>
+              <a class="btn btn-primary btn-large" href="/network/">Take the challenge</a>
+            </p>
+
+            <ul class="masthead-links">
+              <li>
+                <a href="https://github.com/nuSPIC/webapp">GitHub project</a>
+              </li>
+        <!--      <li>-->
+        <!--        <a href="http://www.youtube.com/watch?v=qH83Pyh4sZs">Tutorial</a>-->
+        <!--      </li>-->
+              <li>
+                <a href="/faq">FAQ</a>
+              </li>
+              <li>
+                Version 1.5
+              </li>
+            </ul>
+
             </div>
-            <hr />
-        {% endfor %}
-        
-        <a href="{% url news_archive %}">News archive</a>
+        </div>
     </div>
-    
-    <div>
-        {{ flatpage.content }}
+{% endblock %}
+
+{% block content %}
+
+    <div class="marketing">
+        <h1>Introducing nuSPIC</h1>
+        <p class="marketing-byline">
+            What is the purpose of nuSPIC?
+        </p>
+
+        <div class="row-fluid">
+            <div class="span3">
+                <img src="/media/img/special/nuspic_observe.png" style="height:100px">
+                <h2>Observe</h2> 
+                <p> the connection and its inputs</p>
+            </div>
+
+            <div class="span3">
+                <img src="/media/img/special/nuspic_analyse.png" style="height:100px">
+                <h2>Analyse</h2>
+                <p>the output of recorded neurons.</p>
+            </div>
+
+            <div class="span3">
+                <img src="/media/img/special/nuspic_explain.png" style="height:100px">
+                <h2>Explain</h2>
+                <p>network with your assumption.</p>
+            </div>
+            <div class="span3">
+                <a href="/forum/"><img src="/media/img/special/nuspic_share.png" style="height:100px"></a>
+                <h2>Share</h2>
+                <p>your idea with other users.</p>
+            </div>
+
+        </div>
+
+        <hr style="margin: 50px 0">
     </div>
+
+
+    <div class="row-fluid">
+
+        <div class="span8">
+
+            <p>{{ flatpage.content }}<p>
+        </div>
+
+        <div class="span4">
+            <h2>Announcements</h2>
+            <hr>
+
+            <p>
+                {% for news in news_list %}
+                    <div>
+                        <strong><span style="color:#AAAAAA">{{ news.pub_date|date:"DATE_FORMAT" }}</span> <br> &raquo; {{ news.title }}</strong>
+                        <div>
+                            {{ news.summary|safe }}
+                        </div>
+                        <a href="{{ news.get_absolute_url }}">Continue reading</a>
+                    </div>
+                    <hr>
+                {% endfor %}
+
+            </p>
+        </div>
+
+    </div>
+
+    <hr style="margin: 100px 0 10px 0">
+
+    <div id="logo">
+        <a href="http://www.bcf.uni-freiburg.de/" target="_blank"><img src="/media/img/special/bcf_logo_small.png" id="bcf_logo"></a>
+        <a href="http://www.uni-freiburg.de/" target="_blank"><img src="/media/img/special/uni_freiburg_logo_small.png" id="uni_freiburg_logo" ></a>
+        <a href="http://www.g-node.org/" target="_blank"><img src="/media/img/special/g_node_logo_small.png" id="gnode_logo" style='height:70px'></a>
+        <a href="http://www.nest-initiative.org/" target="_blank"><img src="/media/img/special/nest_logo_small.png" id="nest_logo" style='height:40px'></a>
+    </div>
+
 {% endblock %}
 
 {% block footer_feeds %}

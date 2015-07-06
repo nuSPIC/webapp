@@ -1,56 +1,95 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">  
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 
     <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="description" content="Neural System Prediction and Identification Challenge" />
+        <meta name="keywords" content="nuSPIC, NEST, g-node, BCF" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{% block title %}{% endblock %}</title>
-        
-        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-        
-        <link rel="icon" href="{{ MEDIA_URL }}favicon.ico" type="image/x-icon" />
-        <link rel="shortcut icon" href="{{ MEDIA_URL }}favicon.ico" type="image/x-icon" />
-        <link href="{{ MEDIA_URL }}css/default.css" type="text/css" rel="stylesheet" />
-        
+
+        <link type="image/x-icon" rel="icon" href="{{ MEDIA_URL }}nuSPIC_blue.ico" />
+        <link type="image/x-icon" rel="shortcut icon" href="{{ MEDIA_URL }}nuSPIC_blue.ico" />
+
+        <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/normalize.css" />
+        <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/bootstrap.min.css" media="screen">
+        <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/bootstrap-responsive.min.css">
+        <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/docs.css" />
+        <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/main.css">
+
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/vendor/modernizr-2.6.2.min.js"></script>
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/vendor/jquery-1.9.1.min.js"></script>
+        <script type="text/javascript">
+            if (typeof String.prototype.startsWith != 'function') {
+              String.prototype.startsWith = function (str){
+                return this.indexOf(str) == 0;
+              };
+            }
+
+            $(document).ready(function() {
+                $(".add-on").on('click', function() {
+                    $(this).parents(".fieldWrapper").find(".help_text").toggle();
+                })
+            })
+
+        </script>
+
         {% block feeds %}{% endblock %}
         {% block extrahead %}{% endblock %}
     </head>
-    
+
     <body>
-        <div id="header">
-            <div class="top_links">
-                {% if user.is_authenticated %}
-                    Welcome, <a href="{% url profile user.profile.id %}">{{ user.get_full_name }}</a> | <a href="{% url logout %}">Logout</a>
-                {% else %}
-                    <a href="{% url login %}">Login</a> or <a href="{% url registration %}">register</a>
-                {% endif %}
+            <div class="navbar navbar-inverse navbar-fixed-top" style="line-height: 1">
+                <div class="navbar-inner">
+                    <div class="container">
+                        {% include "navbar.html" %}
+                    </div>
+                </div>
             </div>
-            
-            <div class="navigation">
-                <a href="{% url mainpage %}">Home</a> |
-                <a href="{% url news_archive %}">News</a> |
-                <a href="/about/">About</a> |
-                <a href="{% url accounts %}">Community</a> |
-                <a href="{% url forum %}">Discussions</a> |
-                <a href="/contact/">Contact</a>
+
+        <div id="container">
+            <!--[if lt IE 7]>
+                <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
+            <![endif]-->
+
+            <!-- Add your site or application content here -->
+
+            {% block jumbotron %}<div class="jumbotron"></div>{% endblock %}
+
+            <div id="content" class="container">
+                {% block content %}{% endblock %}
             </div>
-        </div>
-        
-        <div id="content">
-            {% block content %}{% endblock %}
-        </div>
-        
-        <div id="footer">
-            <div class="navigation">
-                <a href="{% url mainpage %}">Home</a> |
-                <a href="{% url news_archive %}">News</a> |
-                <a href="/about/">About</a> |
-                <a href="{% url accounts %}">Community</a> |
-                <a href="{% url forum %}">Discussions</a> |
-                <a href="/contact/">Contact</a>
-            </div>
-            
-            <div class="feeds">
+
+            <footer class="footer">
+                <div class="container">
                 {% block footer_feeds %}{% endblock %}
-            </div>
+
+                    <div>
+                        <p>
+                            <a href="http://getbootstrap.com/2.3.2/" target="_blank">Bootstrap 2.3.2</a> licensed under 
+                            <a target="_blank" href="http://www.apache.org/licenses/LICENSE-2.0">Apache License v2.0</a>.
+                        </p>
+
+                        <p>
+                            <a href="http://glyphicons.com" target="_blank">Glyphicons Free</a> licensed under 
+                            <a href="http://creativecommons.org/licenses/by/3.0/"> CC BY 3.0</a>.
+                        </p>
+                    </div>
+
+                </div>
+            </footer>
+
+
+            <script type="text/javascript" src="{{ MEDIA_URL }}js/vendor/jquery-ui-1.10.3.custom.min.js"></script>
+            <script type="text/javascript" src="{{ MEDIA_URL }}js/vendor/bootstrap.min.js"></script>
+
+            {% block extrascript %}{% endblock %}
         </div>
     </body>
+
 </html>

@@ -5,32 +5,53 @@
 
 {% block title %}Community{% endblock %}
 
+{% block jumbotron %}
+    <div class="jumbotron subhead">
+        <div class="container">
+            <div style="padding: 20px; text-align:left">
+                <h2>Community</h2>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
 {% block content %}
-    <div style="overflow:hidden;">
-        <form action="." method="get" id="accounts-search-form" style="float:right;">
-            {{ search_form.term }}
-            <input type="submit" value="Search" />
-        </form>
-        
+<!--    <h2>Community</h2>-->
+<!--    <hr>-->
+
+    <div class="row" style="margin-top:40px">
+
+        <div class="span pull-right">
+            <form action="." method="get" id="accounts-search-form" class="form-search">
+                <div class="fieldWrapper input-append">
+                    {{ search_form.term }}
+                    <button type="submit" class="btn">Search</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="span">
         Sort by:
         <a href="{% url accounts %}{% if search_term %}?{{ search_term }}{% endif %}">last name</a> |
         <a href="{% url accounts_by_date %}{% if search_term %}?{{ search_term }}{% endif %}">registration date</a>
+        </div>
+
     </div>
-    
-    <div id="accounts">
-        {% for column in page.object_list|columns:3 %}
-            <div class="column">
+
+    <div id="accounts" class="row-fluid" style="margin-top:40px">
+        {% for column in page.object_list|columns:4 %}
+            <div class="span3">
                 {% for profile in column %}
                     <div class="profile">
                         <a href="{{ profile.get_absolute_url }}" class="username">
                             <strong>{{ profile.user.get_full_name }}</strong>
                         </a>
-                        Registration date: {{ profile.user.date_joined|date:"DATE_FORMAT" }}
+                        <div>{{ profile.user.date_joined|date:"DATE_FORMAT" }}</div>
                     </div>
+                    <hr>
                 {% endfor %}
             </div>
         {% endfor %}
     </div>
-    
     {% pagination page "user" search_term %}
 {% endblock %}

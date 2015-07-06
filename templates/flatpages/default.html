@@ -2,6 +2,18 @@
 
 {% block title %}{{ flatpage.title }}{% endblock %}
 
+{% block jumbotron %}
+    <div class="jumbotron subhead">
+        <div class="container">
+            <div style="padding: 20px; text-align:left">
+                <h2> {{ flatpage.title }} </h2>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
 {% block content %}
-    {{ flatpage.content }}
+    <div class="flatpage">
+        {{ flatpage.content }}
+    </div>
 {% endblock %}

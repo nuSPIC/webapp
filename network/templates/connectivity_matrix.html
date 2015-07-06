@@ -1,0 +1,89 @@
+<div class="portlet" id="connectivity_matrix">
+
+    <div class="portlet-header portlet-toggle" title="">
+        <h3>Connectivity matrix</h3>
+    </div>
+
+    <div class="portlet-body" id="connections-tabs">
+
+        <ul class="nav nav-tabs tabs">
+            <li class="active"><a href="#weights-tab" data-toggle="tab">Weights (pA)</a></li>
+            <li><a href="#delays-tab" data-toggle="tab">Delays (ms)</a></li>
+        </ul>
+
+        <div class="tab-content">
+    <!--                 WEIGHT TAB -->
+
+            <div id="weights-tab" class="tab-pane active">
+                <table class="connections-table table table-striped table-bordered table-condensed" id="weight-table">
+                    <thead>
+
+                        <tr>
+                            <th>ID</th>
+
+                            {% for target in network_obj.nodes %}
+                                <th class="target_{{ target.id }} {{ target.type }} {{ target.label|safe }}">{{ target.id }}</th>
+                            {% endfor %}
+
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for source in network_obj.nodes %}
+
+                            <tr class="source_{{ source.id }} {{ source.type }} {{ source.label|safe }}">
+
+                                <td>
+                                    <b>{{ source.id }}</b>
+                                </td>
+
+                                {% for target in network_obj.nodes %}
+                                    <td class="target_{{ target.id }} {{ target.type }} {{ target.label|safe }}"></td>
+                                {% endfor %}
+
+                            </tr>
+
+                        {% endfor %}
+                    <tbody>
+
+                </table>
+            </div>
+
+            <div id="delays-tab" class="tab-pane">
+                <table class="connections-table table table-striped table-bordered table-condensed" id="delay-table">
+                    <thead>
+
+                        <tr>
+                            <th>ID</th>
+
+                            {% for target in network_obj.nodes %}
+                                <th class="target_{{ target.id }} {{ target.type }} {{ target.label|safe }}">{{ target.id }}</th>
+                            {% endfor %}
+
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for source in network_obj.nodes %}
+
+                            <tr class="source_{{ source.id }} {{ source.type }} {{ source.label|safe }}">
+
+                                <td>
+                                    <b>{{ source.id }}</b>
+                                </td>
+
+                                {% for target in network_obj.nodes %}
+                                    <td class="target_{{ target.id }} {{ target.type }} {{ target.label|safe }}"></td>
+                                {% endfor %}
+
+                            </tr>
+
+                        {% endfor %}
+                    <tbody>
+
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>

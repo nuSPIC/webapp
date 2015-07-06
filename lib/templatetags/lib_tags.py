@@ -64,3 +64,12 @@ def pagination(page, objects_caption, query_string=''):
         'query_string': query_string,
         'objects_caption': objects_caption,
     }
+
+
+@register.simple_tag
+def active(request, pattern):
+    print 'bababab', request
+    import re
+    if re.search(pattern, request.path):
+        return 'active'
+    return ''

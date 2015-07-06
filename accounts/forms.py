@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # coding: utf-8
 
 from django import forms
@@ -26,10 +27,6 @@ class UserEditForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ('first_name', 'last_name', 'email',)
-    
-    def as_div(self):
-        return self._html_output(u'<div class="field-wrapper">%(label)s %(errors)s %(field)s%(help_text)s</div>', u'%s', '</div>', u'<span class="help_text">%s</span>', False)
-
 
 class UserRegistrationForm(forms.ModelForm):
     """
@@ -51,7 +48,7 @@ class UserRegistrationForm(forms.ModelForm):
         fields = ('username', 'first_name', 'last_name', 'email', 'password',)
     
     def as_div(self):
-        return self._html_output(u'<div class="field-wrapper">%(label)s %(errors)s %(field)s%(help_text)s</div>', u'%s', '</div>', u'<span class="help_text">%s</span>', False)
+        return self._html_output(u'<div class="fieldWrapper">%(label)s %(errors)s %(field)s%(help_text)s</div>', u'%s', '</div>', u'<span class="help_text">%s</span>', False)
 
     def clean_email(self):
         """
@@ -89,14 +86,14 @@ class ProfileEditForm(forms.ModelForm):
     
     class Meta:
         model = UserProfile
-        fields = ('present_occupation', 'academic_affiliation', 'public_email', 'web_page', 'notes', 'forum_email_notification',)
+        fields = ('present_occupation', 'academic_affiliation', 'public_email', 'web_page', 'notes', 'forum_email_notification')
         widgets = {
             'present_occupation': forms.RadioSelect(attrs={'class': 'radio-select'}),
             'forum_email_notification': forms.CheckboxInput(attrs={'class': 'checkbox'}),
         }
-    
+
     def as_div(self):
-        return self._html_output(u'<div class="field-wrapper">%(label)s %(errors)s %(field)s%(help_text)s</div>', u'%s', '</div>', u'<span class="help_text">%s</span>', False)
+        return self._html_output(u'<div class="fieldWrapper">%(label)s %(errors)s %(field)s%(help_text)s</div>', u'%s', '</div>', u'<span class="help_text">%s</span>', False)
         
 
 class ProfileRegistrationForm(forms.ModelForm):
@@ -108,13 +105,14 @@ class ProfileRegistrationForm(forms.ModelForm):
     
     class Meta:
         model = UserProfile
-        fields = ('present_occupation', 'academic_affiliation', 'public_email', 'web_page', 'notes',)
+        fields = ('present_occupation', 'academic_affiliation', 'public_email', 'web_page', 'notes', 'forum_email_notification')
         widgets = {
             'present_occupation': forms.RadioSelect(attrs={'class': 'radio-select'}),
+            'forum_email_notification': forms.CheckboxInput(attrs={'class': 'checkbox'}),
         }
     
     def as_div(self):
-        return self._html_output(u'<div class="field-wrapper">%(label)s %(errors)s %(field)s%(help_text)s</div>', u'%s', '</div>', u'<span class="help_text">%s</span>', False)
+        return self._html_output(u'<div class="fieldWrapper">%(label)s %(errors)s %(field)s%(help_text)s</div>', u'%s', '</div>', u'<span class="help_text">%s</span>', False)
         
 
 class CustomPasswordResetForm(PasswordResetForm):
@@ -124,7 +122,7 @@ class CustomPasswordResetForm(PasswordResetForm):
     """
     
     def as_div(self):
-        return self._html_output(u'<div class="field-wrapper">%(label)s %(errors)s %(field)s%(help_text)s</div>', u'%s', '</div>', u'<span class="help_text">%s</span>', False)
+        return self._html_output(u'<div class="fieldWrapper">%(label)s %(errors)s %(field)s%(help_text)s</div>', u'%s', '</div>', u'<span class="help_text">%s</span>', False)
     
     def clean_email(self):
         email = super(CustomPasswordResetForm, self).clean_email()
@@ -171,4 +169,4 @@ class AccountSearchForm(forms.Form):
     Used on the community page
     """
     
-    term = forms.RegexField(label='', regex=r'\w+', required=False)
+    term = forms.RegexField(label='', regex=r'\w+', required=False, widget=forms.TextInput(attrs={'class': 'search_term search-query', 'placeholder': 'Search'}))

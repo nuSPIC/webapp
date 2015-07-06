@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% load lib_filters %}
+{% load network_filters %}
+{% load humanize %}
+
+{% block title %}
+    {{ SPIC_obj.title }}
+     - {{ network_obj.local_id }}
+{% endblock %}
+<!--     - {{ network_obj.label|default_if_none:'' }}-->
+
+{% block extrahead %}
+
+    <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/network_main.css" />
+    <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/d3_layout.css" />
+    <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/d3_result.css" />
+
+    <style type="text/css">
+        .container {
+            width: 100%;
+        }
+
+        .span4 {
+            min-width: 430px
+        }
+
+        {% ifequal SPIC_obj.group '1' %}
+            #node-add .neuron {
+                display: none
+            }
+        {% endifequal %}
+
+    </style>
+{% endblock %}
+
+
+{% block content %}
+
+    <ul class="breadcrumb" style="margin-bottom:0">
+        <div class="pull-right">
+            <span>
+                <span class="font-size" style="font-size:10px">A</span>
+                <span class="font-size" style="font-size:14px">A</span>
+                <span class="font-size" style="font-size:18px">A</span>
+            </span>
+
+            {% include "history.html" %}
+            <span>
+                <button class="btn" id="network-comment" data-toggle="button"><i class="icon-pencil"></i> Comment</button>
+                <button class="btn {% if network_obj.favorite %}hide fade{% endif %}" id="network-like"><i class="icon-thumbs-up"></i> Like it</button>
+                <button class="btn {% if not network_obj.favorite %}hide fade{% endif %}" id="network-dislike"><i class="icon-thumbs-down"></i> Dislike it</button>
+            </span>
+        </div>
+
+        <li>
+            <a href="{% url network_list %}">Network</a>
+        </li>
+        <span class="divider">/</span>
+        <li id="network_title">
+            <h4>{{ SPIC_obj.title }}</h4>
+        </li>
+        <span class="divider">/</span>
+        <li id="network_title">
+            {{ network_obj.local_id }}
+             - <span id="network_label">{{ network_obj.label|default_if_none:'' }}</span>
+             ( {{ network_obj.date_simulated|timesince|default:"not simulated" }}{% if network_obj.date_simulated %} ago{% endif %} )
+        </li>
+
+        <br>
+        <div id="network_description" class="{% if network_obj.comment %}hide fade{% endif %}">
+                {{ SPIC_obj.description|default:"no description" }}
+        </div>
+
+        <div id="network_comment">{{ network_obj.comment|default_if_none:"" }}</div>
+
+        <div id="network-comment-form" class="hide fade">
+            {% include "comment_form.html" %}
+        </div>
+
+    </ul>
+
+    <div id="network-content" style="font-size:14px">
+
+        <div class="container-fluid">
+            <div class="row-fluid">
+
+                        <div class="span4" id="devices">
+
+                            {% include "nodes.html" %}
+                            {% include "node_form.html" %}
+                            {% include "link_form.html" %}
+
+                        </div>
+
+
+                        <div class="span4" id="network">
+
+                            {% include "d3_layout.html" %}
+                            {% include "connection_matrix.html" %}
+
+                        </div>
+
+                        <div class="span4" id="result">
+
+                            {% include "simulation.html" %}
+                            {% include "result.html" %}
+
+                        </div>
+
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}
+
+
+{% block extrascript %}
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/vendor/d3.v3.js"></script>
+
+    <script type="text/javascript">
+        var SPIC_group = {{ SPIC_obj.group }},
+            SPIC_local_id = {{ SPIC_obj.local_id }};
+
+        var network_id = {{ network_obj.id }},
+            local_id = {{ network_obj.local_id }},
+            csrf_token = "{{ csrf_token }}",
+            simulation_stop = {{ network_obj.duration|safe }};
+
+        var nodes = {{ network_obj.nodes|safe }},
+            links = {{ network_obj.links|safe }};
+
+        {% if task_id %}
+            var task_id = "{{task_id|safe}}";
+        {% else %}
+            var task_id;
+        {% endif %}
+
+        var data = {};
+        data['voltmeter'] = {{ network_obj.voltmeter_data|safe }};
+        data['spike_detector'] = {{ network_obj.spike_detector_data_index|safe }};
+    </script>
+
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/json2.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/plugins/jquery.cookie.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/plugins/jquery.form.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/layout.js"></script>
+
+    {% if network_obj.has_spike_detector %}
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/raster_plot.js"></script>
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/histogram.js"></script>
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/smooth_histogram.js"></script>
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/correlation.js"></script>
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/spike_detector.js"></script>
+
+    {% endif %}
+
+    {% if network_obj.has_voltmeter %}
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/voltmeter.js"></script>
+    {% endif %}
+
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/network/interaction.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/network/simulation.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/network/run.js"></script>
+
+{% endblock %}

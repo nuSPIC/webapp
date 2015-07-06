@@ -5,6 +5,7 @@
 {% block content %}
     <div id="profile">
         <h2>{{ profile.user.get_full_name }}</h2>
+        <hr>
             
         {% if user == profile.user %}
             <div class="row">

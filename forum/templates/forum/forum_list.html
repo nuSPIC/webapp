@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% load forum_tags %}
+{% load lib_filters %}
 {% load humanize %}
 
 {% block feeds %}
@@ -14,23 +14,40 @@
 <link href="{{ MEDIA_URL }}css/forum.css" type="text/css" rel="stylesheet" />
 {% endblock %}
 
+{% block jumbotron %}
+    <div class="jumbotron subhead">
+        <div class="container">
+            <div style="padding: 20px; text-align:left">
+                <h2>Discussion</h2>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
 {% block content %}
     <div id="forum_list">
+<!--        <h2>Discussions</h2>-->
+<!--        <hr>-->
 
-        {% if user.is_authenticated %}
-            <div class="forum_list_menu">
-                <a href="{% url forum_subscription %}">My subscriptions</a>
+        <div class="row">
+
+            {% if user.is_authenticated %}
+                <div class="forum_list_menu span">
+                    <a href="{% url forum_subscription %}">My subscriptions</a>
+                </div>
+            {% endif %}
+
+            <div class="forum_search">
+                <form action="{% url search %}" method="get" class="form-search">
+                    <div class="input-append">
+                        {{ search_form.term }}
+                        <button class="btn" type="submit" >Search</button>
+                    </div>
+                </form>
             </div>
-        {% endif %}
-
-        <div class="forum_search">
-            <form action="{% url search %}" method="get">
-                {{ search_form.term }}
-                <input type="submit" value="Search" />
-            </form>
         </div>
-        
-        <div class="header delimiter">
+
+        <div class="row header">
             <div class="forum_icon">
                 &nbsp;
             </div>
@@ -39,22 +56,23 @@
                 <h3>Forum</h3>
             </div>
 
-            <div class="posts_count">
-                <h3>Posts count</h3>
-            </div>
-
-            <div class="topics_count">
-                <h3>Topics count</h3>
-            </div>
-
             <div class="last_post">
                 <h3>Last post</h3>
             </div>
 
+            <div class="posts_count">
+                <h3>Counts</h3>
+            </div>
+
+            <div class="topics_count">
+                <h3>Topics</h3>
+            </div>
+
         </div>
-        
+        <hr>
+
         {% for forum in forum_list %}
-            <div class="row {% if not forloop.last %}delimiter{% endif %}">
+            <div class="row">
                 <div class="forum_icon">
                     {% if forum.unread %}
                         <a href="{{ forum.get_absolute_url }}" title="New posts" class="status_icon forum_unread"></a>
@@ -63,19 +81,6 @@
                     {% endif %}
                 </div>
                     
-                <div class="forum_name">
-                    <h2><a href="{{ forum.get_absolute_url }}">{{ forum.name }}</a></h2>
-                    <div class="description">{{ forum.description }}</div>
-                </div>
-                
-                <div class="posts_count">
-                    <div class="count">{{ forum.posts_count|intcomma }}</div>
-                </div>
-
-                <div class="topics_count">
-                    <div class="count">{{ forum.topics_count|intcomma }}</div>
-                </div>
-
                 <div class="last_post">
                     {% if forum.last_post %}
                         <strong>{{ forum.last_post.profile }}</strong><br />
@@ -86,24 +91,43 @@
                     {% endif %}
                 </div>
 
+                <div class="posts_count">
+                    <div class="count">{{ forum.posts_count|intcomma }}</div>
+                </div>
+
+                <div class="topics_count">
+                    <div class="count">{{ forum.topics_count|intcomma }}</div>
+                </div>
+
+                <div class="forum_name">
+                    <h2><a href="{{ forum.get_absolute_url }}">{{ forum.name }}</a></h2>
+                    <div class="description">{{ forum.description }}</div>
+                </div>
+
             </div>
+
+        <hr>
         {% endfor %}
-        
-        <div class="footer">
-            <div class="new_topics">
+
+        <div class="row-fluid">
+            <div class="new_topics span4">
                 <h3>New topics</h3>
-                
+                <hr>
+
                 <div class="list">
                     {% for topic in new_topics %}
-                        <div class="row delimiter">
-                            <span class="count" title="Posts count">
-                                <strong>{{ topic.posts_count }}</strong>
-                            </span>
-                            
+                        <div class="pull-right">
                             <a href="{{ topic.get_absolute_url }}" title="{{ topic.name }}">
                                 <strong>{{ topic.name|truncate:"47" }}</strong>
                             </a>
                         </div>
+
+                        <div class="count" title="Posts count">
+                            <strong>{{ topic.posts_count }}</strong>
+                        </div>
+
+                        <hr>
+
                     {% empty %}
                         <div class="row empty delimiter">
                             No new topics
@@ -111,54 +135,48 @@
                     {% endfor %}
                 </div>
             </div>
-            
-            <div class="popular_topics">
+
+            <div class="popular_topics span4">
                 <h3>Popular topics</h3>
-                
+                <hr>
+
                 <div class="list">
                     {% for topic in popular_topics %}
-                        <div class="row delimiter">
-                            <span class="count" title="New posts count">
-                                <strong>+{{ topic.count }}</strong>
-                            </span>
-                            
+                            <div class="pull-right">
                             <a href="{{ topic.get_absolute_url }}" title="{{ topic.name }}">
                                 <strong>{{ topic.name|truncate:"47" }}</strong>
                             </a>
-                        </div>
+                            </div>
+
+                            <div title="New posts count">
+                                <strong>+{{ topic.count }}</strong>
+                            </div>
                     {% empty %}
-                        <div class="row empty delimiter">
-                            No popular topics
-                        </div>
+                            <p>No popular topics</p>
                     {% endfor %}
                 </div>
             </div>
-            
-            <div class="statistics">
+
+            <div class="statistics span4">
                 <h3>Forum statistics</h3>
-                
+                <hr>
+
                 <div class="list">
-                    <div class="row delimiter">
-                        <div class="count">{{ total_posts_count|intcomma }}</div>
+                        <div class="pull-right">{{ total_posts_count|intcomma }}</div>
                         <div><strong>Total posts</strong></div>
-                    </div>
+                    <hr>
                     
-                    <div class="row delimiter">
-                        <div class="count">{{ total_topics_count|intcomma }}</div>
+                        <div class="pull-right">{{ total_topics_count|intcomma }}</div>
                         <div><strong>Total topics</strong></div>
-                    </div>
-                    
-                    <div class="row delimiter">
-                        <div class="count">{{ total_users_count|intcomma }}</div>
+                    <hr>
+
+                        <div class="pull-right">{{ total_users_count|intcomma }}</div>
                         <div><strong>Total users</strong></div>
-                    </div>
-                    
-                    <div class="row delimiter">
-                        <div class="count">
+                    <hr>
+                        <div class="pull-right">
                             <a href="{{ novice_profile.get_absolute_url }}">{{ novice_profile.user.username }}</a>
                         </div>
                         <div><strong>New user</strong></div>
-                    </div>
                 </div>
             </div>
         </div>

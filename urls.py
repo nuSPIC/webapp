@@ -1,8 +1,7 @@
-# coding: utf-8
-
 from django.conf import settings
 from django.conf.urls.defaults import *
 from django.contrib import admin
+from djcelery import views as celery_views
 
 
 # Activate Django admin
@@ -14,6 +13,9 @@ urlpatterns = patterns('',
     (r'^admin/', include(admin.site.urls)),
     (r'^feed/', include('feed.urls')),
     (r'^forum/', include('forum.urls')),
+    (r'^network/', include('network.urls')),
+
+    url(r'^status/(?P<task_id>[\w\d\-]+)/?$', celery_views.task_status, name="celery_task_status"),
 )
 
 # Serve static files in Django development server mode

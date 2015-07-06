@@ -17,8 +17,11 @@
 
 {% block content %}
     <div id="topic_list">
-        <h2 class="delimiter">{{ forum.name }}</h2>
-        
+        <h2>{{ forum.name }}</h2>
+        <hr>
+
+        <div class="breadcrumbs">&raquo; <a href="{% url forum %}">Discussions</a></div>
+
         {% if user.is_authenticated %}
             <div class="forum_menu">
                 <a href="{% url subscribe_forum forum.id %}">
@@ -32,10 +35,6 @@
             </div>
         {% endif %}
         
-        <div class="breadcrumbs">
-            &raquo; <a href="{% url forum %}">Discussions</a>
-        </div>
-        
         {% if forum_perms.can_add_topic %}
             <div class="headline">
                 <a href="{% url topic_add forum.id %}">
@@ -44,7 +43,7 @@
             </div>
         {% endif %}
         
-        <div class="header delimiter">
+        <div class="row header">
             <div class="topic_icon">
                 &nbsp;
             </div>
@@ -64,7 +63,8 @@
         
         <div class="topics">
             {% for topic in topic_list.object_list %}
-                <div class="row{% if not forloop.last %} delimiter{% endif %}{% if topic.is_sticky %} sticky{% endif %}">
+                <div class="row">
+                    <hr>
                     <div class="topic_icon">
                         {% if topic.unread %}
                             <a href="{% url unread_post_redirect topic.id %}" title="Go to first unread post" class="status_icon topic_unread{% if topic.is_sticky %}_sticky{% endif %}{% if topic.is_closed %}_closed{% endif %}"></a>

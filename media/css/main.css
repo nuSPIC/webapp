@@ -1,0 +1,513 @@
+/*
+ * HTML5 Boilerplate
+ *
+ * What follows is the result of much research on cross-browser styling.
+ * Credit left inline and big thanks to Nicolas Gallagher, Jonathan Neal,
+ * Kroc Camen, and the H5BP dev community and team.
+ */
+
+/* ==========================================================================
+   Base styles: opinionated defaults
+   ========================================================================== */
+
+html,
+button,
+input,
+select,
+textarea {
+    color: #222;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    font-size: 16px;
+}
+
+div.centered-error {
+    background: url(/media/img/special/error_carlos.png) no-repeat center center;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 760px;
+    height: 500px;
+    margin-left: -380px;
+    margin-top: -250px;
+}
+
+#container {
+    min-height: 100%;
+    position: relative;
+    line-height: 1.4;
+}
+
+
+#content {
+    padding-bottom: 150px;
+}
+
+footer {
+    position:absolute;
+    bottom: 0;
+    width: 100%;
+}
+
+/*
+ * Remove text-shadow in selection highlight: h5bp.com/i
+ * These selection rule sets have to be separate.
+ * Customize the background color to match your design.
+ */
+
+::-moz-selection {
+    background: #b3d4fc;
+    text-shadow: none;
+}
+
+::selection {
+    background: #b3d4fc;
+    text-shadow: none;
+}
+
+/*
+ * A better looking default horizontal rule
+ */
+
+hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid #ccc;
+    margin: 1em 0;
+    padding: 0;
+    background-image: -webkit-linear-gradient(left, rgba(0,0,0,0), rgba(0,0,0,.1), rgba(0,0,0,0));
+    background-image:    -moz-linear-gradient(left, rgba(0,0,0,0), rgba(0,0,0,.1), rgba(0,0,0,0));
+    background-image:     -ms-linear-gradient(left, rgba(0,0,0,0), rgba(0,0,0,.1), rgba(0,0,0,0));
+    background-image:      -o-linear-gradient(left, rgba(0,0,0,0), rgba(0,0,0,.1), rgba(0,0,0,0));
+    border: 0;
+}
+
+
+/*
+ * Remove the gap between images and the bottom of their containers: h5bp.com/i/440
+ */
+
+img {
+    vertical-align: middle;
+}
+
+/*
+ * Remove default fieldset styles.
+ */
+
+fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+}
+
+/*
+ * Allow only vertical resizing of textareas.
+ */
+
+textarea {
+    resize: vertical;
+}
+
+/* ==========================================================================
+   Chrome Frame prompt
+   ========================================================================== */
+
+.chromeframe {
+    margin: 0.2em 0;
+    background: #ccc;
+    color: #000;
+    padding: 0.2em 0;
+}
+
+/* ==========================================================================
+   Author's custom styles
+   ========================================================================== */
+
+div.centered-404 {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 760px;
+    height: 500px;
+    margin-left: -380px;
+    margin-top: -250px;
+}
+
+/* News
+*********************/
+
+#news {
+    float: right;
+    padding-left: 10px;
+    border-left: 1px solid #CCCCCC;
+}
+
+#news hr {
+    border: 0;
+    background-color: #CCCCCC;
+    height: 1px;
+}
+
+.news-block {
+}
+
+    .news-block .news-date {
+        float: left;
+        width: 150px;
+    }
+
+    .news-block .news-separator {
+        float: left;
+        padding-left: 0;
+        padding-right: 25px;
+    }
+
+.share-in-social-media {
+    font-size: 0.8em;
+    padding-top: 25px;
+    padding-bottom: 25px;
+}
+
+
+/* User profile
+*******************/
+
+#profile {
+}
+
+    #profile .row {
+        overflow: hidden;
+        padding: 5px 0px;
+        margin-left: 20px;
+    }
+
+        #profile .row .title {
+            font-weight: bold;
+            width: 300px;
+            float: left;
+        }
+
+
+/* Forms and fields
+*************************/
+
+form .alert, form .alert-error {
+    background-color: transparent;
+    border: none;
+    margin: 0;
+    padding: 0;
+}
+
+.form-horizontal li {
+    list-style:none
+}
+
+.input-append .add-on {
+    cursor: pointer;
+}
+
+.fieldWrapper .help_text {
+    display: none;
+    white-space: normal;
+    font-size: small;
+    padding: 3px 7px;
+}
+
+.fieldWrapper ul.errorlist {
+    font-size: small;
+    padding: 0;
+    margin: 0;
+}
+
+    .fieldWrapper ul.errorlist li {
+        color           : #b94a48;
+/*        background-color: #FF7F7F;*/
+/*        display         : block;*/
+/*        font-weight     : bold;*/
+/*        margin-bottom   : 3px;*/
+/*        padding         : 3px 7px;*/
+/*        list-style      : none;*/
+    }
+
+
+.fieldWrapper textarea {
+    width : 98%;
+/*    background-color: transparent;*/
+    border : 1px solid #BBBBBB;
+    padding : 4px;
+}
+
+
+/* Pagination
+******************/
+
+#page-navigation {
+    margin-top: 15px;
+    text-align: center;
+}
+
+        #page-navigation .pages .prev {
+            float: left;
+        }
+
+        #page-navigation .pages .next {
+            float: right;
+        }
+
+        #page-navigation .pages .page {
+            padding: 5px;
+        }
+
+        #page-navigation .pages .current {
+            font-weight: bold;
+        }
+    
+        #page-navigation .pages .inactive {
+            color: #BBBBBB;
+        }
+
+    #page-navigation .total {
+        color     : #BBBBBB;
+    }
+
+div.rss-link {
+    background: url(/media/img/icons/rss-16x16.png) no-repeat 16px center;
+    padding-right: 16px;
+    padding-left: 40px;
+    display: inline;
+}
+
+
+
+
+
+
+
+/* ==========================================================================
+   Helper classes
+   ========================================================================== */
+
+/*
+ * Image replacement
+ */
+
+.ir {
+    background-color: transparent;
+    border: 0;
+    overflow: hidden;
+    /* IE 6/7 fallback */
+    *text-indent: -9999px;
+}
+
+.ir:before {
+    content: "";
+    display: block;
+    width: 0;
+    height: 150%;
+}
+
+/*
+ * Hide from both screenreaders and browsers: h5bp.com/u
+ */
+
+.hidden {
+    display: none !important;
+    visibility: hidden;
+}
+
+/*
+ * Hide only visually, but have it available for screenreaders: h5bp.com/v
+ */
+
+.visuallyhidden {
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+}
+
+/*
+ * Extends the .visuallyhidden class to allow the element to be focusable
+ * when navigated to via the keyboard: h5bp.com/p
+ */
+
+.visuallyhidden.focusable:active,
+.visuallyhidden.focusable:focus {
+    clip: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    position: static;
+    width: auto;
+}
+
+/*
+ * Hide visually and from screenreaders, but maintain layout
+ */
+
+.invisible {
+    visibility: hidden;
+}
+
+/*
+ * Clearfix: contain floats
+ *
+ * For modern browsers
+ * 1. The space content is one way to avoid an Opera bug when the
+ *    `contenteditable` attribute is included anywhere else in the document.
+ *    Otherwise it causes space to appear at the top and bottom of elements
+ *    that receive the `clearfix` class.
+ * 2. The use of `table` rather than `block` is only necessary if using
+ *    `:before` to contain the top-margins of child elements.
+ */
+
+.clearfix:before,
+.clearfix:after {
+    content: " "; /* 1 */
+    display: table; /* 2 */
+}
+
+.clearfix:after {
+    clear: both;
+}
+
+/*
+ * For IE 6/7 only
+ * Include this rule to trigger hasLayout and contain floats.
+ */
+
+.clearfix {
+    *zoom: 1;
+}
+
+/* ==========================================================================
+   EXAMPLE Media Queries for Responsive Design.
+   These examples override the primary ('mobile first') styles.
+   Modify as content requires.
+   ========================================================================== */
+
+@media only screen and (min-width: 35em) {
+    /* Style adjustments for viewports that meet the condition */
+}
+
+@media print,
+       (-o-min-device-pixel-ratio: 5/4),
+       (-webkit-min-device-pixel-ratio: 1.25),
+       (min-resolution: 120dpi) {
+    /* Style adjustments for high resolution devices */
+}
+
+/* ==========================================================================
+   Print styles.
+   Inlined to avoid required HTTP connection: h5bp.com/r
+   ========================================================================== */
+
+@media print {
+    * {
+        background: transparent !important;
+        color: #000 !important; /* Black prints faster: h5bp.com/s */
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+
+    a,
+    a:visited {
+        text-decoration: underline;
+    }
+
+    a[href]:after {
+        content: " (" attr(href) ")";
+    }
+
+    abbr[title]:after {
+        content: " (" attr(title) ")";
+    }
+
+    /*
+     * Don't show links for images, or javascript/internal links
+     */
+
+    .ir a:after,
+    a[href^="javascript:"]:after,
+    a[href^="#"]:after {
+        content: "";
+    }
+
+    pre,
+    blockquote {
+        border: 1px solid #999;
+        page-break-inside: avoid;
+    }
+
+    thead {
+        display: table-header-group; /* h5bp.com/t */
+    }
+
+    tr,
+    img {
+        page-break-inside: avoid;
+    }
+
+    img {
+        max-width: 100% !important;
+    }
+
+    @page {
+        margin: 0.5cm;
+    }
+
+    p,
+    h2,
+    h3 {
+        orphans: 3;
+        widows: 3;
+    }
+
+    h2,
+    h3 {
+        page-break-after: avoid;
+    }
+}
+
+/*==========================================================================
+   Custom styles
+   ========================================================================== */
+
+.jumbotron {
+  padding-bottom: 0;
+  background: #1c3047 ; /* Old browsers */
+  background: -moz-linear-gradient(45deg,  #1c3047  0%, #467ab3 100%); /* FF3.6+ */
+  background: -webkit-gradient(linear, left bottom, right top, color-stop(0%,#1c3047 ), color-stop(100%,#467ab3)); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(45deg,  #1c3047  0%,#467ab3 100%); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(45deg,  #1c3047  0%,#467ab3 100%); /* Opera 11.10+ */
+  background: -ms-linear-gradient(45deg,  #1c3047  0%,#467ab3 100%); /* IE10+ */
+  background: linear-gradient(45deg,  #1c3047  0%,#467ab3 100%); /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1c3047 ', endColorstr='#467ab3',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+}
+
+.jumbotron:after {
+  background: url(/media/img/bg_rasterplot.png) repeat center center;
+  opacity: .1;
+}
+
+.form-search {
+    padding-right: 90px;
+}
+
+
+#logo a {
+    padding       : 15px;
+    height        : 75px;
+    vertical-align: bottom;
+}

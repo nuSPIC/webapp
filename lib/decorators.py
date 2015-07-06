@@ -1,5 +1,3 @@
-# coding: utf-8
-
 from django.db.models import signals as signalmodule
 from django.shortcuts import render_to_response
 from django.template import RequestContext

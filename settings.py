@@ -1,5 +1,3 @@
-# coding: utf-8
-
 from datetime import timedelta
 
 
@@ -50,6 +48,8 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'urls'
 
+DATABASE_ROUTERS = ['lib.db_routers.AppRouter']
+
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
@@ -64,6 +64,11 @@ INSTALLED_APPS = (
     'forum',
     'lib',
     'news',
+
+    'network',
+
+    'djcelery',
+    'djkombu',
 )
 
 
@@ -85,7 +90,7 @@ EMAIL_CHANGE_TIMEOUT_DAYS = 3
 EMAIL_REQUEST_DELAY = timedelta(minutes=30)
 
 # Community page
-ACCOUNTS_PER_PAGE = 15
+ACCOUNTS_PER_PAGE = 20
 
 
 #  Forum

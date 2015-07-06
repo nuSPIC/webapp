@@ -7,11 +7,13 @@
 {% block title %}News archive{% endblock %}
 
 {% block content %}
+    <h2>News archive</h2>
+
     {% regroup news_list by pub_date.year as news_by_year %}
-    
+
     {% for group in news_by_year %}
+        <hr>
         <h3>{{ group.grouper }}</h3>
-        
         {% for news in group.list %}
             <div class="news-block">
 
@@ -30,7 +32,9 @@
             </div>
         {% endfor %}
     {% endfor %}
+
 {% endblock %}
+
 
 {% block footer_feeds %}
     <div class="rss-link"><a href="{% url news_feed %}">Latest news</a></div>

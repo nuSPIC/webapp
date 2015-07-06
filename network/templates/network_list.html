@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% load network_filters %}
+
+{% block title %}{{ flatpage.title }}{% endblock %}
+
+{% block jumbotron %}
+    <div class="jumbotron subhead">
+        <div class="container">
+            <div style="padding: 20px; text-align:left">
+                <h2>Competition</h2>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div class="flatpage">
+
+        {% regroup network_list by SPIC.group as network_by_SPIC %}
+
+        {% for item in network_by_SPIC %}
+            {{ flatpage.content|index:forloop.counter0 }}
+
+            {% if item.grouper != '0' %}
+                <ul class="breadcrumb">
+
+                    {% for network in item.list %}
+                        <li id="{{ network.title }}" style="width:100%">
+
+                            <div style="float:right">
+                                <a href="{% url network_history network.SPIC.group network.SPIC.local_id %}">
+                                    History
+                                </a>
+                            </div>
+
+                            <a href="{% url network_latest network.SPIC.group network.SPIC.local_id %}">
+                                <h3>{{ network.SPIC.title|default_if_none:"Network" }}</h3>
+                            </a>
+
+                            <div>
+                                <small>{{ network.SPIC.description|default:"no description" }}</small>
+                            </div>
+
+                        </li>
+                        {% if not forloop.last %}<hr>{% endif %}
+                    {% endfor %}
+
+                </ul>
+            {% endif %}
+
+        {% endfor %}
+
+        {{ flatpage.content|index:-1 }}
+    </div>
+
+{% endblock %}
