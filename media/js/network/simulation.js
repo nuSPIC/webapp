@@ -61,19 +61,3 @@ function simulate() {
             check_task_status(task_id);
     });
 };
-
-
-
-$( "form#network-form" ).on('submit',  function(e) {
-    e.preventDefault();
-
-    if (links.filter(connect_to_output).length <1) {
-        show_msg('Warning', 'No <b>recording device</b> connected. <p>Check your output connections.</p>', 'warning');
-    } else if (links.filter(connect_to_input).length <1) {
-        show_msg('Warning', 'No <b>input device</b> connected. Network may be silent. <p>Do you want to continue?</p>', 'simulation_confirm');
-    } else if ($( "#id_duration" ).val() > 5000.0) {
-        show_msg('Warning', 'The simulation lasts more than 5 seconds and it could have a speed effect on page loading time. <p>Are you sure?</p>', 'simulation_confirm');
-    } else {
-        simulate();
-    }
-});

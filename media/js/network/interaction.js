@@ -36,7 +36,7 @@ function active_buttons() {
         $("#spike_detector #binwidth").find("button[value=" + options.histogram.binwidth + "]").addClass("active");
         if (options.correlation.neuronA < data.spike_detector.meta.neurons.length) {
             $("#correlated_neurons #neuronA").find(".title").html("Neuron " + data.spike_detector.meta.neurons[options.correlation.neuronA].id);
-        } 
+        }
         if (options.correlation.neuronB < data.spike_detector.meta.neurons.length) {
             $("#correlated_neurons #neuronB").find(".title").html("Neuron " + data.spike_detector.meta.neurons[options.correlation.neuronB].id);
         }
@@ -78,7 +78,7 @@ function tabulate(reference, data, columns, prefixes) {
         .append("td")
         .attr('class', function(d) {return prefixes[1]+d.column})
             .html(function(d) { return stringify(d.value); });
-    
+
     return table;
 }
 
@@ -153,7 +153,7 @@ function show_form(model) {
     $("#node-form").parent().addClass('hide fade');
     $("#node-form .fieldWrapper").addClass('hide fade');
     $("#node-form .btn-group").addClass('hide fade');
-    $("#node-form").parent().addClass('hide fade'); 
+    $("#node-form").parent().addClass('hide fade');
     $("#node-form #id_model option").addClass('hide fade');
     $('#node-form').find(".alert").remove();
 
@@ -314,165 +314,3 @@ function update_after_change() {
     $('#connection_matrix td:not(.target_id)').click(link_interaction_click)
     $('#connection_matrix td:not(.target_id)').dblclick(link_interaction_dblclick)
 }
-
-function node_form_validation(formData, jqForm, options) { 
-    // jqForm is a jQuery object which wraps the form DOM element 
-    // 
-    // To validate, we can access the DOM elements directly and return true 
-    // only if the values of both the username and password fields evaluate 
-    // to true 
-
-    $('#node-form').find(".errorlist").remove();
-    $('#node-form').find(".text-warning").remove();
-
-    var error_prefix = '<ul class="errorlist"><li>';
-    var error_suffix = '</li></ul>';
-
-    var status = {'model': $("#node-form #id_model :selected").val()};
-    var clean = true;
-    $('#node-form').find('input:visible').each(function () {
-        var error_msg;
-
-        if ($(this).val() != '') {
-
-            if ( !(isNumber( $(this).val() )) ) {
-                error_msg = 'Enter a valid number value.';
-            } else if ( ($(this).hasClass('positive')) && (parseFloat($(this).val()) < 0.0) ) {
-                error_msg = 'Enter a valid positive value.';
-            } else if ( ($(this).hasClass('nonzero')) && (parseFloat($(this).val()) == 0.0) ) {
-                error_msg = 'Enter a valid nonzero value.';
-            } else if ( $(this).hasClass('limit') ) {
-                var classes = $(this).attr("class").split(' ');
-
-                if (classes.indexOf('max')) {
-                    var val_max = parseFloat(classes[classes.indexOf('max')+1]);
-                    if (parseFloat($(this).val()) > val_max) {
-                        error_msg = 'Enter a valid value that is smaller than ' + val_max +'.';
-                    }
-                }
-
-                if (classes.indexOf('min')) {
-                    var val_min = parseFloat(classes[classes.indexOf('min')+1]);
-                    if (parseFloat($(this).val()) < val_min) {
-                        error_msg = 'Enter a valid value that is greater than ' + val_min +'.';
-                    }
-                }
-            }
-
-            if (error_msg == null) {
-                status[$(this).attr('id').substr(3)] = parseFloat($(this).val());
-            }
-
-        } else if ($(this).hasClass('required')) {
-            error_msg = 'This field is required.';
-
-        }
-
-        if (!(error_msg == null)) {
-            $(this).parents('.controls').append(error_prefix + error_msg + error_suffix);
-            clean = false;
-        }
-
-    })
-
-    if (clean) {
-        selected_node.status = status;
-        selected_node.label = $("#node-form #id_model :selected").text()
-        selected_node.disabled = 0;
-        if (status.model.indexOf("meter") != -1 || status.model.indexOf('detector') != -1) {
-            selected_node.type = 'output'
-            if ('synapse' in selected_node) {delete selected_node["synapse"];}
-        } else if (status.model.indexOf("generator") != -1) {
-            selected_node.type = 'input'
-            if ('synapse' in selected_node) {delete selected_node["synapse"];}
-        } else {
-            selected_node.type = 'neuron';
-            selected_node.synapse = $("#node-form #id_synapse :selected").text();
-        }
-
-        link_validation();
-        update_after_change();
-    } else {
-        $('#node-form .portlet-body').prepend('<h4 class="text-warning" style="margin:10px">Oh snap! You got an error!</h4>')
-    }
-
-    return false;
-}
-
-function link_form_validation(formData, jqForm, options) { 
-    // jqForm is a jQuery object which wraps the form DOM element 
-    // 
-    // To validate, we can access the DOM elements directly and return true 
-    // only if the values of both the username and password fields evaluate 
-    // to true 
-
-    $('#link-form').find(".errorlist").remove();
-    $('#link-form').find(".text-warning").remove();
-
-    var error_prefix = '<ul class="errorlist"><li>';
-    var error_suffix = '</li></ul>';
-
-    var synapse = selected_link.source.synapse;
-
-    var weight_val = $('#link-form').find('input#id_weight').val();
-    var weight_error_msg;
-    if ( weight_val == '' ) {
-        weight_val = (synapse == 'excitatory' ? 1.0 : -1.0) ;
-    } else if ( !(isNumber( weight_val )) ) {
-        weight_error_msg = 'Enter a valid number value.';
-    } else if (parseFloat(weight_val) < 0.0 && synapse == 'excitatory' && selected_link.source.type == 'neuron') {
-        weight_error_msg = 'This neuron contains only excitatory synapses.\n Enter a positive value.';
-    } else if (parseFloat(weight_val) < 0.0 && (selected_link.target.type == 'output' || selected_link.source.type == 'output')) {
-        weight_error_msg = 'The output device accepts only positive weight.\n Enter a positive value.';
-    } else if (parseFloat(weight_val) > 0.0 && synapse == 'inhibitory'  && selected_link.source.type == 'neuron' && selected_link.target.type != 'output') {
-        weight_error_msg = 'This neuron contains only inhibitory synapses.\n Enter a negative value.';
-    }
-    if (!(weight_error_msg == null)) {$('#link-form').find('#id_weight').parents('.controls').append(error_prefix + weight_error_msg + error_suffix);}
-
-    var delay_val = $('#link-form').find('input#id_delay').val();
-    var delay_error_msg;
-    if ( delay_val == '' ) {
-        delay_val = 1.0;
-    } else if ( !(isNumber( delay_val )) ) {
-        delay_error_msg = 'Enter a valid positive value.';
-    } else if (parseFloat(delay_val) < 0.0) {
-        delay_error_msg ='Delay value cannot be negative.<br> Enter a positive value.';
-    } else if (parseFloat(delay_val) >= 10.0) {
-        delay_error_msg = 'Delay value is too large.\n Enter a value that is smaller than 10 ms.';
-    }
-    if (!(delay_error_msg == null)) {$('#link-form').find('#id_delay').parents('.controls').append(error_prefix + delay_error_msg + error_suffix);}
-
-    if (weight_error_msg == null && delay_error_msg == null) {
-        selected_link.weight = parseFloat(weight_val);
-        selected_link.delay = parseFloat(delay_val);
-        update_after_change();
-    } else {
-        $('#link-form .portlet-body').prepend('<h4 class="text-warning" style="margin:10px">Oh snap! You got an error!</h4>')
-    }
-
-    return false;
-}
-
-
-function link_validation() {
-    var links_copy = links.slice();
-    var invalid_links = new Array();
-    var warning = false;
-
-    for (var link_idx in links_copy) {
-        if ((links_copy[link_idx].source.status.model == 'spike_detector')
-        || (links_copy[link_idx].target.status.model == 'voltmeter')
-        || (links_copy[link_idx].target.type == 'input')) {
-            invalid_links.push(links.splice(links.indexOf(links_copy[link_idx]), 1)[0]);
-            warning = true;
-        }
-    }
-    if (warning) {
-        $( "#global_warning .alert-content").html('<b>Attention!</b> All invalid links had to been deleted.<ul class="invalid_links"></ul>');
-        for (var link_idx in invalid_links) {
-            $( "#global_warning .invalid_links").append('<li>Link from ' + invalid_links[link_idx].source.id + ' to ' + invalid_links[link_idx].target.id + '</li>');
-        }
-        $( "#global_warning").removeClass("hide fade");
-    }
-}
-

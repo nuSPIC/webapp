@@ -167,6 +167,11 @@
         var nodes = {{ network_obj.nodes|safe }},
             links = {{ network_obj.links|safe }};
 
+        // Forms
+        var node_form = $("#node-form"),
+            link_form = $("#link-form"),
+            network_form = $("#network-form");
+
         {% if task_id %}
             var task_id = "{{task_id|safe}}";
         {% else %}
@@ -198,6 +203,8 @@
         <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/voltmeter.js"></script>
     {% endif %}
 
+
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/network/validation.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/network/interaction.js?n"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/network/simulation.js?n"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/network/run.js?n"></script>

@@ -10,7 +10,7 @@
                 {% if field.is_hidden %}
                     {{ field }}
                 {% else %}
-                <div class="fieldWrapper control-group hide fade {% if field.help_text %}input-append{% endif %} ">
+                <div class="fieldWrapper form-group hide fade {% if field.help_text %}input-append{% endif %} ">
                     <label class="control-label" for="{{ field.auto_id }}">{{ field.label }}</label>
                     <div class="controls">
                         {{ field.errors }}

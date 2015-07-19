@@ -141,7 +141,7 @@ $( "button.links-curve" ).on('click', function() {
 ////        $.post('/network/ajax/'+ network_id  +'/save_layout/',
 ////                {'csrfmiddlewaretoken': csrf_token, 'devices_json':devices_json, 'nodes': JSON.stringify(nodes)},
 ////                function(data) {
-////                
+////
 ////        }, 'json');
 //});
 
@@ -189,6 +189,24 @@ $( "#node-form #id_step" ).on('keyup', function() {
     $(this).parents( "#node-form" ).find( "#id_spike_times" ).val(spike_times.toString());
 
 });
+
+// Live validation check
+node_form.find('input').on('change', function() {
+    field_validation($(this));
+});
+
+link_form.find('input').on('change', function() {
+    field_validation($(this));
+});
+
+network_form.find('input').on('change', function() {
+    field_validation($(this));
+});
+
+// Validation check on submit
+node_form.on('submit', node_form_validation );
+link_form.on('submit', link_form_validation );
+network_form.on('submit', network_form_validation );
 
 
 $('#node-form #reset-node-form-button').on('click', function(e) {
@@ -266,9 +284,6 @@ $(document).ready(function() {
     if (data.spike_detector.meta.neurons.length > 0) {
         draw_spike_detector("#spike_detector");
     }
-
-    $('#node-form').ajaxForm( { beforeSubmit: node_form_validation } );
-    $('#link-form').ajaxForm( { beforeSubmit: link_form_validation } );
 
     $( "#results-tabs .tabs").find(".tab").first().parent().addClass('active');
     $( "#results-tabs .tab-content").find(".tab-pane").first().addClass('active');
