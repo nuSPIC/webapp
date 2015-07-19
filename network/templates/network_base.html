@@ -12,9 +12,9 @@
 
 {% block extrahead %}
 
-    <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/network_main.css" />
-    <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/d3_layout.css" />
-    <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/d3_result.css" />
+    <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/network_main.css" />
+    <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/d3_layout.css" />
+    <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/d3_result.css" />
 
     <style type="text/css">
         .container {
@@ -153,7 +153,7 @@
 
 
 {% block extrascript %}
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/vendor/d3.v3.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/vendor/d3.v3.js"></script>
 
     <script type="text/javascript">
         var SPIC_group = {{ SPIC_obj.group }},
@@ -185,28 +185,28 @@
         var msg = {{ SPIC_obj.msg|safe }};
     </script>
 
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/json2.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/plugins/jquery.cookie.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/plugins/jquery.form.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/layout.js?n"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/json2.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/plugins/jquery.cookie.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/plugins/jquery.form.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/d3/layout.js?n"></script>
 
     {% if network_obj.has_spike_detector %}
-        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/raster_plot.js"></script>
-        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/histogram.js"></script>
-        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/smooth_histogram.js"></script>
-        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/correlation.js"></script>
-        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/spike_detector.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/d3/raster_plot.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/d3/histogram.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/d3/smooth_histogram.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/d3/correlation.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/d3/spike_detector.js"></script>
 
     {% endif %}
 
     {% if network_obj.has_voltmeter %}
-        <script type="text/javascript" src="{{ MEDIA_URL }}js/d3/voltmeter.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/d3/voltmeter.js"></script>
     {% endif %}
 
 
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/network/validation.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/network/interaction.js?n"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/network/simulation.js?n"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/network/run.js?n"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/network/validation.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/network/interaction.js?n"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/network/simulation.js?n"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/network/run.js?n"></script>
 
 {% endblock %}

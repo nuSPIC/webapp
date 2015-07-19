@@ -1,5 +1,5 @@
-<!--<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.textarearesizer.compressed.js"></script>-->
-<!--<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.bbcodeeditor-1.0.js"></script>-->
+<!--<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.textarearesizer.compressed.js"></script>-->
+<!--<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.bbcodeeditor-1.0.js"></script>-->
 <!--<script type="text/javascript" language="javascript">-->
 <!--//<![CDATA[-->
 <!--    $(document).ready(function(){-->
@@ -34,7 +34,7 @@
 <!--</div>-->
 
 
-<link rel="stylesheet" type="text/css" media="all" href="{{ MEDIA_URL }}/themes/default.min.css" />
+<link rel="stylesheet" type="text/css" media="all" href="{{ STATIC_URL }}/themes/default.min.css" />
 
 <style>
 .sceditor-container {
@@ -42,7 +42,7 @@
 }
 </style>
 
-<script src="{{ MEDIA_URL }}js/plugins/jquery.sceditor.bbcode.min.js"></script>
+<script src="{{ STATIC_URL }}js/plugins/jquery.sceditor.bbcode.min.js"></script>
 <script>
 //<![CDATA[
     var loadCSS = function(url, callback){
@@ -65,8 +65,8 @@
         var initEditor = function() {
             $("textarea.bbcode").sceditor({
                 plugins: 'bbcode',
-                style: "{{ MEDIA_URL}}css/jquery.sceditor.default.min.css",
-                emoticonsRoot: "{{ MEDIA_URL}}/img/",
+                style: "{{ STATIC_URL}}css/jquery.sceditor.default.min.css",
+                emoticonsRoot: "{{ STATIC_URL}}/img/",
                 resizeWidth: false,
                 height: 300,
                 toolbar: "bold,italic,underline,strike,subscript,superscript|left,center,right,justify|size,color,removeformat|bulletlist,orderedlist|code,quote|horizontalrule,image,email,link,unlink|emoticon,youtube,date,time|source"
@@ -74,7 +74,7 @@
         }
 
 <!--        $("#theme").change(function() {-->
-<!--            var theme = "{{ MEDIA_URL }}/themes/" + $(this).val() + ".min.css";-->
+<!--            var theme = "{{ STATIC_URL }}/themes/" + $(this).val() + ".min.css";-->
 
 <!--            $("textarea.bbcode").sceditor("instance").destroy();-->
 <!--            $("link:first").remove();-->

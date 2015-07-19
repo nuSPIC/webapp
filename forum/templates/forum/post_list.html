@@ -11,7 +11,7 @@
 {% block title %}Discussions &raquo; {{ forum.name }} &raquo; {{ topic.name }}{% endblock %}
 
 {% block extrahead %}
-    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/forum.css?n" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/forum.css?n" />
 {% endblock %}
 
 {% block content %}
@@ -162,8 +162,8 @@
 {% endblock %}
 
 {% block extrascript %}
-<script src="{{ MEDIA_URL }}/js/plugins/jquery.sceditor.bbcode.min.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}js/plugins/jquery.scrollto.js"></script>
+<script src="{{ STATIC_URL }}/js/plugins/jquery.sceditor.bbcode.min.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/plugins/jquery.scrollto.js"></script>
 
 <script type="text/javascript" language="javascript">
 //<![CDATA[

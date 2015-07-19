@@ -6,7 +6,7 @@
 
 {% block extrahead %}
 {{ block.super }}
-<link href="{{ MEDIA_URL }}css/forum.css" type="text/css" rel="stylesheet" />
+<link href="{{ STATIC_URL }}css/forum.css" type="text/css" rel="stylesheet" />
 {% endblock %}
 
 {% block content %}
@@ -106,7 +106,7 @@
 
 
 {% block extrascript %}
-<script type="text/javascript" src="{{ MEDIA_URL }}js/plugins/jquery.scrollto.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/plugins/jquery.scrollto.js"></script>
 
 <script type="text/javascript" language="javascript">
 //<![CDATA[

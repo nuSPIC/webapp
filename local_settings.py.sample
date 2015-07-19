@@ -13,7 +13,7 @@ SECRET_KEY = ''
 
 # reCAPTCHA keys
 # Obtain key pair at http://recaptcha.net/api/getkey
-RECAPTCHA_PUBLIC_KEY = '' 
+RECAPTCHA_PUBLIC_KEY = ''
 RECAPTCHA_PRIVATE_KEY = ''
 
 # Configure the broker settings:
@@ -29,7 +29,7 @@ BROKER_VHOST = '/'
 
 # Define the backend used to store task metadata and return values
 CELERY_RESULT_BACKEND = "amqp"
-CELERY_IMPORTS = ('lib.tasks',) 
+CELERY_IMPORTS = ('lib.tasks',)
 
 ADMINS = (
     ('Yury V. Zaytsev', 'yury@shurup.com'),
@@ -84,4 +84,4 @@ TEMPLATE_DIRS = (
 )
 
 EMAIL_HOST = "calculon.imtek.privat"
-DEFAULT_FROM_EMAIL = "vlachos@bcf.uni-freiburg.de" 
+DEFAULT_FROM_EMAIL = "vlachos@bcf.uni-freiburg.de"

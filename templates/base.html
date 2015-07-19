@@ -13,17 +13,17 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{% block title %}{% endblock %}</title>
 
-        <link type="image/x-icon" rel="icon" href="{{ MEDIA_URL }}nuSPIC_blue.ico" />
-        <link type="image/x-icon" rel="shortcut icon" href="{{ MEDIA_URL }}nuSPIC_blue.ico" />
+        <link type="image/x-icon" rel="icon" href="{{ STATIC_URL }}nuSPIC_blue.ico" />
+        <link type="image/x-icon" rel="shortcut icon" href="{{ STATIC_URL }}nuSPIC_blue.ico" />
 
-        <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/normalize.css" />
-        <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/bootstrap.min.css" media="screen">
-        <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/bootstrap-responsive.min.css">
-        <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/docs.css" />
-        <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/main.css">
+        <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/normalize.css" />
+        <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/bootstrap.min.css" media="screen">
+        <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/bootstrap-responsive.min.css">
+        <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/docs.css" />
+        <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/main.css">
 
-        <script type="text/javascript" src="{{ MEDIA_URL }}js/vendor/modernizr-2.6.2.min.js"></script>
-        <script type="text/javascript" src="{{ MEDIA_URL }}js/vendor/jquery-1.9.1.min.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/vendor/modernizr-2.6.2.min.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/vendor/jquery-1.9.1.min.js"></script>
         <script type="text/javascript">
             if (typeof String.prototype.startsWith != 'function') {
               String.prototype.startsWith = function (str){
@@ -71,12 +71,12 @@
 
                     <div>
                         <p>
-                            <a href="http://getbootstrap.com/2.3.2/" target="_blank">Bootstrap 2.3.2</a> licensed under 
+                            <a href="http://getbootstrap.com/2.3.2/" target="_blank">Bootstrap 2.3.2</a> licensed under
                             <a target="_blank" href="http://www.apache.org/licenses/LICENSE-2.0">Apache License v2.0</a>.
                         </p>
 
                         <p>
-                            <a href="http://glyphicons.com" target="_blank">Glyphicons Free</a> licensed under 
+                            <a href="http://glyphicons.com" target="_blank">Glyphicons Free</a> licensed under
                             <a href="http://creativecommons.org/licenses/by/3.0/"> CC BY 3.0</a>.
                         </p>
                     </div>
@@ -85,8 +85,8 @@
             </footer>
 
 
-            <script type="text/javascript" src="{{ MEDIA_URL }}js/vendor/jquery-ui-1.10.3.custom.min.js"></script>
-            <script type="text/javascript" src="{{ MEDIA_URL }}js/vendor/bootstrap.min.js"></script>
+            <script type="text/javascript" src="{{ STATIC_URL }}js/vendor/jquery-ui-1.10.3.custom.min.js"></script>
+            <script type="text/javascript" src="{{ STATIC_URL }}js/vendor/bootstrap.min.js"></script>
 
             {% block extrascript %}{% endblock %}
         </div>

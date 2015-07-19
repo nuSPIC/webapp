@@ -84,6 +84,6 @@ def post_editor(context, post_form):
     """
     
     return {
-        'MEDIA_URL': context['MEDIA_URL'],
+        'STATIC_URL': context['STATIC_URL'],
         'post_form': post_form,
     }
