@@ -37,15 +37,12 @@
 
             {% for field in node_form %}
                 {% if field.html_name != 'model' and field.html_name != 'synapse' %}
-                <div class="fieldWrapper control-group hide fade">
+                <div class="fieldWrapper form-group hide fade">
                     <label class="control-label" for="{{ field.auto_id }}">{{ field.label }}</label>
                     <div class="controls">
-                        <div class="{% if field.help_text%}input-append{% endif %}">
-                            {{ field }}
-                            {% if field.help_text %}<span class="add-on" value="{{ field.help_text }}">?</span>{% endif %}
-                        </div>
-                        <div class="help_text">{{ field.help_text }}</div>
+                        {{ field }}
                         {{ field.errors }}
+                        <div class="help_text">{{ field.help_text }}</div>
                     </div>
                 </div>
                 {% endif %}
