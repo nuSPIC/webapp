@@ -9,7 +9,7 @@ function newFilledArray(len, val) {
 
 function fillArray(value, len) {
     var arr = [];
-    for (var idx = 0; idx < value.length; idx++) { 
+    for (var idx = 0; idx < value.length; idx++) {
         for (var i = 0; i < len; i++) {
             arr.push(1000.0 * parseFloat(value[idx].y) / parseFloat(value[idx].dx));
         };
@@ -101,11 +101,11 @@ function weightGauss(kw, win) {
 
 // smooth histogram
 function smooth_hist(hist) {
-    var kw = options.smoothed_histogram.kw, 
+    var kw = options.smoothed_histogram.kw,
         kernel_function = options.smoothed_histogram.kernel_function,
-        fac = 1; 
+        fac = 1;
 
-    var win = 2*kw; 
+    var win = 2*kw;
     if (kernel_function == 'gauss') {
         win *= 4;
         weight = weightGauss(kw, win)
@@ -133,7 +133,7 @@ function smooth_hist(hist) {
     var post = newFilledArray(win/2+1, 0)
     var filled_hist = fillArray(hist, options.histogram.binwidth)
     var extended_hist = pre.concat(filled_hist, post)
-    
+
     var smoothed_hist = newFilledArray(filled_hist.length, 0.0)
     for (var i=0; i<smoothed_hist.length; i++) {
         var hist_slice = extended_hist.slice(i, i+win+1)                                                // get a window of each time step
@@ -148,15 +148,15 @@ function draw_smoothed_histogram(reference) {
 
     var times = d3.range(0,simulation_stop)
 
-    var margin = {top: 30, right: 20, bottom: 35, left: 50},
+    var margin = {top: 30, right: 20, bottom: 35, left: 40},
         width = options.smoothed_histogram.width - margin.left - margin.right,
         height = options.smoothed_histogram.height - margin.top - margin.bottom;
 
     var xScale = d3.scale.linear().range([0, width]).domain([0, simulation_stop]),
         yScale = d3.scale.linear().range([height, 0]).domain([-2, Math.ceil(data.spike_detector.hist[options.histogram.binwidth]['smooth_ymax'])+2]);
 
-    var xAxis = d3.svg.axis().scale(xScale).orient("bottom"),
-        yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(-width).ticks(3);
+    var xAxis = d3.svg.axis().scale(xScale).orient("bottom").ticks(5),
+        yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(-width).ticks(2);
 
     var line = d3.svg.line()
         .interpolate("monotone")
@@ -168,7 +168,7 @@ function draw_smoothed_histogram(reference) {
         .attr("height", "100%")
         .attr("viewBox", "0 0 " + (width+margin.left+margin.right) + " " + (height+margin.top+margin.bottom))
         .attr("class", "spike_detector smoothed_histogram")
-        .call(d3.behavior.zoom().x(xScale).y(yScale).on("zoom", zoomed));
+        .call(d3.behavior.zoom().x(xScale).on("zoom", zoomed));
 
     svg.append("svg:text")
         .attr("class", "title")
@@ -220,4 +220,3 @@ function draw_smoothed_histogram(reference) {
         svg.selectAll(".line").attr("d", line);
     }
 }
-

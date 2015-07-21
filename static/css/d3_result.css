@@ -20,7 +20,11 @@
  * Spike detector
  */
 
-#result #spike_detector {
+.result {
+    font-size: 11px;
+}
+
+#spike_detector {
     padding: 10px 0;
 }
 
@@ -32,7 +36,6 @@ svg.spike_detector {
 
 svg.spike_detector .title {
     font-weight: bold;
-    font-size: 20px;
     color: #333333;
 }
 
@@ -57,7 +60,6 @@ svg#raster_plot .dot {
 
 svg.smoothed_histogram .title {
     font-weight: bold;
-    font-size: 20px;
     color: #333333;
 }
 
@@ -98,7 +100,6 @@ svg.voltmeter.active {
 }
 
 svg.voltmeter .title {
-    font-size: 24px;
     color: #333333;
 }
 

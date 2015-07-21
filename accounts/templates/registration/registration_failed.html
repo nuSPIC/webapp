@@ -3,10 +3,12 @@
 {% block title %}Account activation failed{% endblock %}
 
 {% block content %}
-    <h2>Account activation failed</h2>
-    
+<div class="container">
+    <h2 class="page-header">Account activation failed</h2>
+
     <p>
         Sorry, there was an error verifying your account.
         Please make sure you used the entire URL included in the email you received in a timely manner (the activation links expire in {{ expire }} days).
     </p>
+</div>
 {% endblock %}

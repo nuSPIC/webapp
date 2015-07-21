@@ -1,37 +1,53 @@
 {% if network_obj.is_recorded %}
+    <div id="result">
+        <h3 class="page-header">Results</h3>
 
-    <div class="portlet" id="result" data-placement="{{ SPIC_obj.tooltip.result.placement }}" data-toggle="popover" data-title="{{ SPIC_obj.tooltip.result.title }}" data-content="{{ SPIC_obj.tooltip.result.content }}">
-
-        <div class="portlet-header portlet-toggle">
-            <h3>
-                <span>Results</span>
-                <div class="pull-right">
-                    <button type="button" class="btn bing"><i class="icon-chevron-up"></i></button>
-                    <button type="button" class="btn bing hide fade"><i class="icon-chevron-down"></i></button>
-                </div>
-            </h3>
-
-        </div>
-
-        <div class="portlet-body" id="results-tabs">
+        <div id="results-tabs">
 
             <ul class="nav nav-tabs tabs">
-                {% if network_obj.spike_detector_data.meta.connect_to %}<li><a href="#spike_detector-tab" class="tab" data-toggle="tab">Spike Detector</a></li>{% endif %}
-                {% if network_obj.voltmeter_data.meta.neurons %}<li><a href="#voltmeter-tab" class="tab" data-toggle="tab">Voltmeter</a></li>{% endif %}
+                {% if network_obj.spike_detector_data.meta.connect_to %}<li><a class="tab" href="#spike_detector-tab" data-toggle="tab"><i class="fa fa-bar-chart"></i> Spike Detector</a></li>{% endif %}
+                {% if network_obj.voltmeter_data.meta.neurons %}<li><a class="tab" href="#voltmeter-tab" data-toggle="tab"><i class="fa fa-line-chart"></i> Voltmeter</a></li>{% endif %}
             </ul>
 
             <div class="tab-content" style="padding:1px">
 <!--             SPIKE DETECTOR TAB CONTENT -->
                 {% if network_obj.spike_detector_data.meta.connect_to %}
                     <div id="spike_detector-tab" class="tab-pane">
-                        {% include "d3_spike_detector.html" %}
+                        <div id="spike_detector" class="result">
+                            {% if network_obj.spike_detector_data.meta.neurons %}
+
+                                <div id="raster_plot"></div>
+
+                                <div class="container-fluid">
+                                    <div class="col-xs-3">
+                                    <label for="binwidth" class="control-label input-group">Binwidth</label>
+                                    </div>
+                                    <div id="binwidth" class="btn-group col-xs-9" data-toggle="buttons">
+                                        <label class="btn btn-default btn-xs binwidth"><input type="radio" name="binwidth" value="5"> 5 ms </label>
+                                        <label class="btn btn-default btn-xs binwidth"><input type="radio" name="binwidth" value="10"> 10 ms </label>
+                                        <label class="btn btn-default btn-xs binwidth"><input type="radio" name="binwidth" value="20"> 20 ms </label>
+                                        <label class="btn btn-default btn-xs binwidth"><input type="radio" name="binwidth" value="50" checked=""> 50 ms </label>
+                                        <label class="btn btn-default btn-xs binwidth"><input type="radio" name="binwidth" value="100"> 100 ms </label>
+                                    </div>
+                                </div>
+
+                                <div id="histogram"></div>
+                                <div id="smoothed_histogram"></div>
+                                <div id="correlation_plot"></div>
+                            {% else %}
+
+                            <div style="padding-top: 20px; text-align:center; font-size: 14px">No spikes detected. Check your input devices.</div>
+
+                            {% endif %}
+                        </div>
+
                     </div>
                 {% endif %}
 
     <!--             VOLTMETER TAB CONTENT -->
                 {% if network_obj.voltmeter_data.meta.neurons %}
                     <div id="voltmeter-tab" class="tab-pane">
-                        <div id="voltmeter_holder">
+                        <div id="voltmeter_holder" class="result">
                             <div style="margin: 20px 0">The number of points is too big.</div>
                         </div>
                     </div>
@@ -40,10 +56,7 @@
             </div>
         </div>
 
-        <div class="portlet-footer">
-                <a href="{% url data network_obj.pk %}" class="btn">Download Results</a>
-        </div>
-
+        <a class="form-actions btn btn-default" role="button" href="{% url data network_obj.pk %}"><i class="fa fa-file-text"></i> Download Results</a>
     </div>
 
 {% endif %}

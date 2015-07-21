@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block css %}
+<link type="text/css" rel="stylesheet" href="/static/css/forum.css">
+{% block forum_css %}
+{% endblock %}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="page-header">{% block page-header%}{% endblock %}</h2>
+
+    {% if forum %}
+    {% block breadcrumb %}
+    <div class="breadcrumb">
+        <a href="{% url forum %}">Discussions</a>
+         {% if forum.name %} &raquo; <a href="{{ forum.get_absolute_url }}">{{ forum.name }}</a>{% endif %}
+         {% if topic.name %} &raquo; {{ topic.name }}{% endif %}
+     </div>
+     {% endblock %}
+     {% endif %}
+
+    {% block forum_nav %}{% endblock %}
+    {% block forum %}{% endblock %}
+</div>
+{% endblock %}

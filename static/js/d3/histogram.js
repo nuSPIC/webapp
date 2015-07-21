@@ -4,71 +4,98 @@ function draw_histogram(reference) {
     // A formatter for counts.
     var formatCount = d3.format(",.0f");
 
-    var margin = {top: 30, right: 20, bottom: 35, left: 50},
+    var margin = {top: 30, right: 20, bottom: 35, left: 40},
         width = options.histogram.width - margin.left - margin.right,
         height = options.histogram.height - margin.top - margin.bottom;
 
-    var xScale = d3.scale.linear().range([0, width]).domain([0, simulation_stop]);
+    var xScale = d3.scale.linear()
+        .range([0, width])
+        .domain([0, simulation_stop]);
 
     var hist = d3.layout.histogram()
         .bins(xScale.ticks(parseInt(simulation_stop / options.histogram.binwidth)))
         (data.spike_detector.times);
 
-    yScale = d3.scale.linear().range([height, 0]).domain([0, Math.ceil(d3.max(hist, function(d) { return d.y*1000.0/d.dx/data.spike_detector.meta.neurons.length; }))]);
+    var yScale = d3.scale.linear()
+        .range([height, 0])
+        .domain(d3.extent(hist, function(d) { return d.y }))
+        .nice(10);
 
-    var xAxis = d3.svg.axis().scale(xScale).orient("bottom").ticks(5);
-    var yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(-width).ticks(2);
+    var xAxis = d3.svg.axis()
+        .scale(xScale)
+        .orient("bottom")
+        .ticks(5);
 
-    var svg = d3.select(reference).append("svg:svg")
+    var yAxis = d3.svg.axis()
+        .scale(yScale)
+        .orient("left")
+        .tickSize(-width)
+        .ticks(2);
+
+    var svg = d3.select(reference).append("svg")
+        // .attr('width', width + margin.right + margin.left)
+        // .attr('height', height + margin.top + margin.bottom)
         .attr("width", "100%")
         .attr("height", "100%")
         .attr("viewBox", "0 0 " + (width+margin.left+margin.right) + " " + (height+margin.top+margin.bottom))
-        .attr("class", "spike_detector");
+      .append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+        .attr("class", "spike_detector")
+      .call(d3.behavior.zoom().x(xScale).on("zoom", zoomed));
 
-    svg.append("svg:text")
+    svg.append("rect")
+          .attr("x", 0)
+          .attr("y", 0)
+          .attr("width", width )
+          .attr("height", height )
+          .style("fill", 'white');
+
+    svg.append("text")
         .attr("class", "title")
         .attr("x", margin.right)
-        .attr("y", (margin.top/2+5))
+        .attr("y", -10)
         .text("Histogram of population activity");
 
-    var g = svg.append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    svg.selectAll(".bar")
+        .data(hist)
+      .enter().append("rect")
+        .attr("class", "bar")
+        .attr("x", function(d) {return xScale(d.x)+.5; })
+        .attr("y", function(d) {return yScale(d.y); })
+        .attr("width", width / hist.length - 1)
+        .attr("height", function(d) { return height - yScale(d.y); });
 
-    g.append("g")
+    // draw the x axis
+    svg.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0," + height + ")")
-        .call(xAxis);
+        .call(xAxis)
 
-    g.append("svg:text")
+    // draw the y axis
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis)
+
+    svg.append("text")
         .attr("class", "x label")
         .attr("text-anchor", "middle")
         .attr("x", width/2)
         .attr("y", height + margin.bottom - 5)
         .text("Time (ms)");
 
-    g.append("g")
-        .attr("class", "y axis")
-        .attr("transform", "translate(0,0)")
-        .call(yAxis);
-
-    g.append("svg:text")
+    svg.append("text")
         .attr("class", "y label")
         .attr("text-anchor", "middle")
-        .attr("x", -height/2)
-        .attr("y", -(margin.left-5))
-        .attr("dy", ".75em")
+        .attr("y", -38)
+        .attr('x', -height/2)
+        .attr("dy", ".71em")
         .attr("transform", "rotate(-90)")
-        .text("Rate (Hz)");
+        .text("Spike count");
 
-    var bar = g.selectAll(".bar")
-        .data(hist)
-      .enter().append("g")
-        .attr("class", "bar")
-        .attr("transform", function(d) { return "translate(" + xScale(d.x) + "," + yScale(d.y*1000.0/d.dx/data.spike_detector.meta.neurons.length) + ")"; });
+    function zoomed() {
+        svg.select(".x.axis").call(xAxis);
+        svg.select(".y.axis").call(yAxis);
+        svg.selectAll(".bar").attr("transform", "translate(" + d3.event.translate[0] + ",0)scale(" + d3.event.scale + ", 1)");
+    }
 
-    bar.append("svg:rect")
-        .attr("x", 1)
-        .attr("width", function(d) { return xScale(d.dx) - 2 })
-        .attr("height", function(d) { return height - yScale(d.y*1000.0/d.dx/data.spike_detector.meta.neurons.length); });
-}
-
+};

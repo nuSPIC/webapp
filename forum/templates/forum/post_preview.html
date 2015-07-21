@@ -1,20 +1,24 @@
 {% load humanize %}
 
-<div class="post">
-    <div class="date">0 minutes ago</div>
-    
-    <div class="profile">
-        <div class="username">
+<div class="post row">
+    <div class="profile col-lg-2 col-md-2 col-sm-2">
+        <div class="username col-lg-12 col-md-12 col-sm-12 col-xs-3">
             <a href="{{ profile.get_absolute_url }}">{{ profile.user.username }}</a>
         </div>
-        
-        <div class="status">
-            <span class="member_{{ profile.forum_group.slug }}">{{ profile.forum_group.member_title }}</span><br />
-            Posts: {{ profile.post_count|intcomma }}
+
+        <div class="status col-lg-12 col-md-12 col-sm-12 col-xs-3">
+            <span class="member_{{ profile.forum_group.slug }}">{{ profile.forum_group.member_title }}</span>
+        </div>
+
+        <div class="counts col-lg-12 col-md-12 col-sm-12 col-xs-3">
+            Posts count: {{ post.profile.post_count|intcomma }}
         </div>
     </div>
-    
-    <div class="body">
+
+        <div class="date">0 minutes ago</div>
+
+    <div class="body col-lg-10 col-md-10 col-sm-10">
+
         {{ message_html|safe }}
     </div>
 </div>

@@ -1,10 +1,9 @@
-# coding: utf-8
-
 from django import forms
 from django.contrib import admin
 
 from accounts.models import Group
-from forum.models import Forum, Topic, Permission, Post, Poll, PollChoice, PollVote
+
+from .models import Forum, Topic, Permission, Post, Poll, PollChoice, PollVote
 
 
 
@@ -33,25 +32,25 @@ admin.site.register(Forum, ForumAdmin)
 class TopicForm(forms.ModelForm):
     class Meta:
         model = Topic
-    
+
     def save(self, commit=True):
         """
         Remove or restore the topic when is_removed flag changes
         """
-        
+
         topic = super(TopicForm, self).save(commit=True)
-        
+
         if 'is_removed' in self.changed_data:
             if topic.is_removed:
                 topic.remove()
             else:
                 topic.restore()
-        
+
         return topic
 
 class TopicAdmin(admin.ModelAdmin):
     form = TopicForm
-    
+
     fieldsets = (
         (None, {'fields': ('forum', 'name', 'is_sticky', 'is_closed', 'is_removed',)}),
     )
@@ -67,28 +66,28 @@ admin.site.register(Topic, TopicAdmin)
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-    
+
     def save(self, commit=True):
         """
         Remove or restore the post when is_removed flag changes
         """
-        
+
         post = super(PostForm, self).save(commit=True)
-        
+
         if 'is_removed' in self.changed_data:
             if post.is_removed:
                 post.remove()
             else:
                 post.restore()
-        
+
         return post
 
 class PostAdmin(admin.ModelAdmin):
     def queryset(self, request):
         return self.model._default_manager.select_related('profile', 'profile__user', 'topic', 'topic__name')
-    
+
     form = PostForm
-    
+
     fieldsets = (
         (None, {'fields': ('topic', 'profile', 'ip_address', 'message', 'message_html', 'is_removed',)}),
     )
@@ -105,9 +104,9 @@ admin.site.register(Post, PostAdmin)
 class PollChoiceInline(admin.TabularInline):
     def queryset(self, request):
         return self.model._default_manager.select_related('poll')
-    
+
     model = PollChoice
-    
+
     fieldsets = (
         (None, {'fields': ('poll', 'title', 'votes_count',)}),
     )
@@ -120,9 +119,9 @@ class PollChoiceInline(admin.TabularInline):
 class PollAdmin(admin.ModelAdmin):
     def queryset(self, request):
         return self.model._default_manager.select_related('topic')
-    
+
     inlines = [PollChoiceInline,]
-    
+
     fieldsets = (
         (None, {'fields': ('topic', 'title', 'total_votes', 'expires',)}),
     )
@@ -138,7 +137,7 @@ admin.site.register(Poll, PollAdmin)
 class PollVoteAdmin(admin.ModelAdmin):
     def queryset(self, request):
         return self.model._default_manager.select_related('profile', 'profile__user', 'poll', 'choice',)
-    
+
     fieldsets = (
         (None, {'fields': ('profile', 'poll', 'choice',)}),
     )
@@ -154,7 +153,7 @@ admin.site.register(PollVote, PollVoteAdmin)
 class PermissionAdmin(admin.ModelAdmin):
     def queryset(self, request):
         return self.model._default_manager.select_related('group', 'forum')
-    
+
     fieldsets = (
         (u'Permission assignment objects', {'fields': ('group', 'forum',)}),
         (u'Group level permissions',

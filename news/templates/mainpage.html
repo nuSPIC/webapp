@@ -6,117 +6,106 @@
 
 {% block title %}{{ flatpage.title }}{% endblock %}
 
-{% block jumbotron %}
-    <div class="jumbotron masthead">
-        <div class="container">
-            <div style="padding: 40px 0">
-
-            <p>
-                <img src="/media/img/special/nuspic_logo_inverse.png" class="watermark"></img>
-            </p>
-        <!--        <p style="padding-top:200px">Neural System Prediction and Identification Challenge</p>-->
-
-            <p>
-              <a class="btn btn-primary btn-large" href="/network/">Take the challenge</a>
-            </p>
-
-            <ul class="masthead-links">
-              <li>
-                <a href="https://github.com/nuSPIC/webapp">GitHub project</a>
-              </li>
-        <!--      <li>-->
-        <!--        <a href="http://www.youtube.com/watch?v=qH83Pyh4sZs">Tutorial</a>-->
-        <!--      </li>-->
-              <li>
-                <a href="/faq">FAQ</a>
-              </li>
-              <li>
-                Version 1.5
-              </li>
-            </ul>
-
-            </div>
-        </div>
-    </div>
-{% endblock %}
-
 {% block content %}
+<div class="jumbotron">
+    <div id="nuspic-logo" class="parallax-window" data-parallax="scroll" data-image-src="/static/images/webpage/bg_rasterplot.png"></div>
+</div>
 
-    <div class="marketing">
-        <h1>Introducing nuSPIC</h1>
-        <p class="marketing-byline">
-            What is the purpose of nuSPIC?
-        </p>
+<div class="container" style="text-align:center; padding-bottom:50px">
+    <h1 style="font-size: 60px">Introducing nuSPIC</h1>
+    <p style="font-size:32px; color:grey; margin-bottom:30px">What is the purpose of nuSPIC?</p>
 
-        <div class="row-fluid">
-            <div class="span3">
-                <img src="/media/img/special/nuspic_observe.png" style="height:100px">
-                <h2>Observe</h2> 
-                <p> the connection and its inputs</p>
-            </div>
-
-            <div class="span3">
-                <img src="/media/img/special/nuspic_analyse.png" style="height:100px">
-                <h2>Analyse</h2>
-                <p>the output of recorded neurons.</p>
-            </div>
-
-            <div class="span3">
-                <img src="/media/img/special/nuspic_explain.png" style="height:100px">
-                <h2>Explain</h2>
-                <p>network with your assumption.</p>
-            </div>
-            <div class="span3">
-                <a href="/forum/"><img src="/media/img/special/nuspic_share.png" style="height:100px"></a>
-                <h2>Share</h2>
-                <p>your idea with other users.</p>
-            </div>
-
+    <div class="row">
+        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+            <img src="/static/images/webpage/nuspic_observe.png" style="height:100px">
+            <h2>Observe</h2>
+            <p>the connection and its inputs</p>
         </div>
 
-        <hr style="margin: 50px 0">
+        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+            <img src="/static/images/webpage/nuspic_analyse.png" style="height:100px">
+            <h2>Analyse</h2>
+            <p>the output of recorded neurons.</p>
+        </div>
+
+        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+            <img src="/static/images/webpage/nuspic_explain.png" style="height:100px">
+            <h2>Explain</h2>
+            <p>network with your assumption.</p>
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+            <a href="/forum/"><img src="/static/images/webpage/nuspic_share.png" style="height:100px"></a>
+            <h2>Share</h2>
+            <p>your idea with other users.</p>
+        </div>
+
     </div>
+</div>
 
+<div class="jumbotron">
+    <div id="carlos" class="parallax-window" data-parallax="scroll" data-image-src="/static/images/special/blowball_carlos.png"></div>
+</div>
 
-    <div class="row-fluid">
-
-        <div class="span8">
-
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8">
             <p>{{ flatpage.content }}<p>
         </div>
 
-        <div class="span4">
+        <div class="col-lg-4">
             <h2>Announcements</h2>
             <hr>
-
             <p>
-                {% for news in news_list %}
+            {% for news in news_list %}
+                <div>
+                    <strong><span style="color:#aaaaaa">{{ news.pub_date|date:"DATE_FORMAT" }}</span> <br> &raquo; {{ news.title }}</strong>
                     <div>
-                        <strong><span style="color:#AAAAAA">{{ news.pub_date|date:"DATE_FORMAT" }}</span> <br> &raquo; {{ news.title }}</strong>
-                        <div>
-                            {{ news.summary|safe }}
-                        </div>
-                        <a href="{{ news.get_absolute_url }}">Continue reading</a>
+                        {{ news.summary|safe }}
                     </div>
-                    <hr>
-                {% endfor %}
-
+                    <a href="{{ news.get_absolute_url }}">Continue reading</a>
+                </div>
+                <hr>
+            {% endfor %}
             </p>
         </div>
-
     </div>
+</div>
 
-    <hr style="margin: 100px 0 10px 0">
+<div class="jumbotron">
+    <div id="neurofilament" class="parallax-window" data-parallax="scroll" data-image-src="/static/images/exernal/neurofilament_egert_small.jpg"></div>
+</div>
 
-    <div id="logo">
-        <a href="http://www.bcf.uni-freiburg.de/" target="_blank"><img src="/media/img/special/bcf_logo_small.png" id="bcf_logo"></a>
-        <a href="http://www.uni-freiburg.de/" target="_blank"><img src="/media/img/special/uni_freiburg_logo_small.png" id="uni_freiburg_logo" ></a>
-        <a href="http://www.g-node.org/" target="_blank"><img src="/media/img/special/g_node_logo_small.png" id="gnode_logo" style='height:70px'></a>
-        <a href="http://www.nest-initiative.org/" target="_blank"><img src="/media/img/special/nest_logo_small.png" id="nest_logo" style='height:40px'></a>
+<div class="container-fluid">
+    <div id="logo" class="row" style="align:center">
+        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6">
+            <a href="http://www.bcf.uni-freiburg.de/" target="_blank">
+                <img src="/static/images/logo/bcf_logo_small.png" id="bcf_logo">
+        </a></div>
+        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6">
+            <a href="http://www.uni-freiburg.de/" target="_blank">
+                <img src="/static/images/logo/uni_freiburg_logo_small.png" id="uni_freiburg_logo" >
+        </a></div>
+        <div class="col-lg-3 col-md-3 col-sm-3">
+            <a href="http://www.nest-initiative.org/" target="_blank">
+                <img src="/static/images/logo/nest_logo_small.png" id="nest_logo" style='height:60px'>
+        </a></div>
+        <div class="col-lg-5 col-md-5 col-sm-5">
+            <a href="http://www.g-node.org/" target="_blank">
+                <img src="/static/images/logo/g_node_logo_small.png" id="gnode_logo" style='height:70px'>
+        </a></div>
     </div>
-
+</div>
 {% endblock %}
 
 {% block footer_feeds %}
-    <div class="rss-link"><a href="{% url news_feed %}">Latest news</a></div>
+    <div class="rss-link"><i class="fa fa-rss"></i> <a href="{% url news_feed %}">Latest news</a></div>
+{% endblock %}
+
+{% block extrascript %}
+<script type="text/javascript" src="/static/js/parallax.min.js"></script>
+<script type="text/javascript">
+    $('#nuspic-logo').parallax({imageSrc: '/static/images/webpage/bg_rasterplot_lg.png'});
+    $('#carlos').parallax({imageSrc: '/static/images/special/blowball_carlos.png'});
+    $('#neurofilament').parallax({imageSrc: '/static/images/external/neurofilament_egert_small.jpg'});
+</script>
 {% endblock %}

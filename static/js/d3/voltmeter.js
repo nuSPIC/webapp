@@ -3,17 +3,17 @@ function draw_voltmeter(reference) {
 
     var times = data.voltmeter.times_reduced;
 
-    var margin = {top: 30, right: 20, bottom: 40, left: 55},
+    var margin = {top: 30, right: 20, bottom: 40, left: 45},
         width = options.voltmeter.width - margin.left - margin.right,
         height = 300 - margin.top - margin.bottom;
 
     var xScale = d3.scale.linear().range([0, width]).domain([0, simulation_stop]),
         yScale = d3.scale.linear().range([height, 0]).domain([
-            Math.floor(data.voltmeter.meta.Vm_min-2.0), 
+            Math.floor(data.voltmeter.meta.Vm_min-2.0),
             Math.ceil(data.voltmeter.meta.Vm_max+2.0)]);
 
-    var xAxis = d3.svg.axis().scale(xScale).orient("bottom"),
-        yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(-width).ticks(3);
+    var xAxis = d3.svg.axis().scale(xScale).orient("bottom").ticks(3),
+        yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(-width).ticks(5);
 
     var line = d3.svg.line()
         .interpolate("monotone")
@@ -76,4 +76,3 @@ function draw_voltmeter(reference) {
         svg.selectAll(".line").attr("d", line)
     }
 }
-

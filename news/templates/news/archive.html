@@ -7,35 +7,37 @@
 {% block title %}News archive{% endblock %}
 
 {% block content %}
-    <h2>News archive</h2>
+<div class="container">
+    <h2 class="page-header">News archive</h2>
 
-    {% regroup news_list by pub_date.year as news_by_year %}
+    <div class="col-sm-8 col-sm-offset-2">
+        {% regroup news_list by pub_date.year as news_by_year %}
 
-    {% for group in news_by_year %}
-        <hr>
-        <h3>{{ group.grouper }}</h3>
-        {% for news in group.list %}
-            <div class="news-block">
+        {% for group in news_by_year %}
+            <h3>{{ group.grouper }}</h3>
+            {% for news in group.list %}
+                <div class="news-block">
 
-                <div class="news-date">
-                    {{ news.pub_date|date:"DATE_FORMAT" }}
+                    <div class="news-date">
+                        {{ news.pub_date|date:"DATE_FORMAT" }}
+                    </div>
+
+                    <div class="news-separator">&raquo;</div>
+
+                    <div class="news-link">
+                        <a href="{{ news.get_absolute_url }}">
+                            {{ news.title }}
+                        </a>
+                    </div>
+
                 </div>
-
-                <div class="news-separator">&raquo;</div>
-
-                <div class="news-link">
-                    <a href="{{ news.get_absolute_url }}">
-                        {{ news.title }}
-                    </a>
-                </div>
-
-            </div>
+            {% endfor %}
         {% endfor %}
-    {% endfor %}
+    </div>
 
+</div>
 {% endblock %}
 
-
 {% block footer_feeds %}
-    <div class="rss-link"><a href="{% url news_feed %}">Latest news</a></div>
+    <div class="rss-link"><i class="fa fa-rss"></i>  <a href="{% url news_feed %}">Latest news</a></div>
 {% endblock %}

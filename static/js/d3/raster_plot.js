@@ -1,7 +1,7 @@
 function draw_raster_plot(reference) {
     $(reference).empty()
 
-    var margin = {top: 30, right: 20, bottom: 10, left: 50},
+    var margin = {top: 30, right: 20, bottom: 10, left: 40},
         width = options.raster_plot.width - margin.left - margin.right,
         height = options.raster_plot.height_per_neuron * data.spike_detector.meta.neurons.length;
 
@@ -71,4 +71,3 @@ function draw_raster_plot(reference) {
         .attr("cy", function(d) { return y(d); })
         .attr("r", 1.5);
 }
-

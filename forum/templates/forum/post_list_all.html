@@ -1,0 +1,121 @@
+{% extends "forum_base.html" %}
+
+{% load humanize %}
+{% load webapp_tags %}
+{% load forum_tags %}
+
+{% block title %}Discussions &raquo; {{ forum.name }} &raquo; {{ topic.name }}{% endblock %}
+
+{% block page-header %}Posts{% endblock %}
+
+{% block forum_nav %}
+<nav class="nav navbar">
+    <div class="forum_search">
+        <form action="{% url search %}" method="get" class="form-search form-inline">
+            {% csrf_token %}
+            {% crispy_inline search_form %}
+            <button class="btn btn-default" type="submit" >Search</button>
+        </form>
+    </div>
+</nav>
+{% endblock %}
+
+{% block forum %}
+<div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 pull-right">
+    <div class="list-group">
+        <a href="{% url post_list %}"class="list-group-item">
+            All categories</a>
+        {% for forum in forum_list %}
+        <a href="{% url post_list %}?category={{forum.name}}"class="list-group-item">
+            <span class="badge">{{forum.posts_count|intcomma}}</span>
+            {{forum.name}}</a>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="posts post-striped col-lg-9 col-md-9 col-sm-9 col-xs-9">
+    {% for post in post_list.object_list %}
+        <div class="post">
+            <div id="post{{ post.id }}" class="anchor">&nbsp;</div>
+
+            <div class="profile col-lg-3 col-md-3 col-sm-3">
+                <div class="username col-lg-12 col-md-12 col-sm-12 col-xs-5">
+                    <a href="{{ post.profile.get_absolute_url }}">{{ post.profile.user.get_full_name }}</a>
+                </div>
+
+                <div class="status col-lg-12 col-md-12 col-sm-12 col-xs-3">
+                    <span class="member_{{ post.profile.forum_group.slug }}">{{ post.profile.forum_group.member_title }}</span>
+                </div>
+
+                <div class="counts col-lg-12 col-md-12 col-sm-12 col-xs-4">
+                    Posts count: {{ post.profile.post_count|intcomma }}
+                </div>
+            </div>
+
+            <div class="body col-lg-9 col-md-9 col-sm-9">
+
+                <div class="date pull-right">{{ post.date|timesince }} ago</div>
+
+                <div>
+                    <a href="{{post.topic.forum.get_absolute_url}}">{{post.topic.forum.name }}</a> /
+                    <a href="{{post.topic.get_absolute_url}}">{{post.topic.name }}</a> /
+                    <a href="{{post.get_absolute_url}}">Post</a>
+                </div>
+
+                {{ post.message_html|safe }}
+
+                {% if polls and topic.first_post == post %}
+                    <div class="poll_list">
+                        {% for poll in polls %}
+                            <div class="poll_{{ poll.id }}">
+                                {% if poll.user_can_vote %}
+                                    <div class="poll_voting">
+                                        <div class="poll_title">
+                                            {{ poll.title }}
+                                        </div>
+
+                                        <div class="choices">
+                                            {% for choice in poll.choices.all %}
+                                                <div class="choice">
+                                                    <label>
+                                                        <input type="radio" name="poll_{{ poll.id }}" value="{{ choice.id }}" />
+                                                        {{ choice.title }}
+                                                    </label>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+
+                                        <div class="total">
+                                            {{ poll.total_votes }} vote{{ poll.total_votes|pluralize }}
+                                            {% if poll.expires %}
+                                                <br />Poll expire at {{ poll.expires|date:"DATE_FORMAT" }}
+                                            {% endif %}
+                                        </div>
+
+                                        <div class="buttons">
+                                            <a href="#" class="poll_vote disabled" rel="{{ poll.id }}">Vote</a> &middot;
+                                            <a href="#" class="show_poll_results" rel="{{ poll.id }}">Show results</a>
+                                        </div>
+                                    </div>
+
+                                    <div class="poll_results" style="display:none;">
+                                        {% include "forum/poll_results.html" %}
+                                    </div>
+                                {% else %}
+                                    <div class="poll_results">
+                                        {% include "forum/poll_results.html" %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+            </div>
+        </div>
+    {% endfor %}
+
+    {% pagination post_list "post" term %}
+</div>
+
+{% endblock %}

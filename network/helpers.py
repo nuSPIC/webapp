@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-#from reversion import revision
-
 import numpy as np
-from network.network_settings import PARAMS_ORDER
+
+from .network_settings import PARAMS_ORDER
 
 params_order = {}
 for key, val in PARAMS_ORDER.items():
@@ -11,16 +9,16 @@ for key, val in PARAMS_ORDER.items():
 def dict_to_JSON(valDict):
     params_order = PARAMS_ORDER[valDict['model']][0] + PARAMS_ORDER[valDict['model']][1]
     valList = []
-    
+
     for keyJSON in params_order:
         if keyJSON in valDict:
             if valDict[keyJSON]:
                 valList.append('"%s":"%s"' %(keyJSON, valDict[keyJSON]))
                 continue
         valList.append('"%s":""' %keyJSON)
-        
+
     return '{' + ', '.join(valList) + '}'
-    
+
 def csv_to_dict(csv):
     csvList = csv.split('\r\n')
     devList = []
@@ -32,4 +30,3 @@ def csv_to_dict(csv):
             params = params_order[statusList[0]]
             devList.append(dict(zip(params,statusList)))
     return devList
-

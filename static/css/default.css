@@ -1,165 +1,47 @@
+html {
+    overflow: auto;
+}
+
 body {
-    background-color: white;
+    font-family: Verdana,Arial,Helvetica,sans-serif;
+    font-size: 13px;
 }
 
-div.centered-error {
-    background: url(/media/img/special/error_carlos.png) no-repeat center center;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 760px;
-    height: 500px;
-    margin-left: -380px;
-    margin-top: -250px;
-}
-
-a {
-    color: #865e34; /*#b37e46;*//* #914E0C;*/
-    text-decoration: none;
-}
-
-a:hover {
-    color: #432f1a; /*#593f23;*/ /*#6c3a09;*/
-}
-
-iframe {
-    border: none;
-}
-
-#wrap {
-    height: auto !important;
-    margin: 0 auto -60px;
-    min-height: 100%;
-}
-
-#wrap > .container {
-padding-top: 60px;
-}
-
-/* HEADER
-***********************/
-
-#header {
-/*    color: #2B2924;*/
-    font-family: sans-serif;
+.jumbotron {
+    position: relative;
+    background: transparent;
     padding: 0;
 }
 
-#header_top {
-/*     background-color: #29496A; */
-/*     background: url(/media/images/icons/header-bg.png); */
-    padding-bottom: 2px;
+.parallax-window {
+    min-height: 350px;
+    background: transparent;
 }
 
-
-
-
-
-#banner {
-/*     background-color: #FAFAF9 ; */
-    margin: auto;
+#logo div{
+    text-align: center;
+    vertical-align: middle;
+    margin: 10px 0;
 }
 
-.logo {
-    background: url(/media/images/special/nuspic_logo.png) no-repeat;
-    height: 171px;
-    width : 396px;
-    margin: auto;
+.footer {
+    /*margin-top: 20px;*/
+    border-top: 1px solid #e5e5e5;
+    padding: 30px;
+    background: #f5f5f5;
+    width: 100%;
 }
 
-.watermark {
- -khtml-opacity:.80; 
- -moz-opacity:.80; 
- -ms-filter:"alpha(opacity=80)";
-  filter:alpha(opacity=80);
-  filter: progid:DXImageTransform.Microsoft.Alpha(opacity=0.8);
-  opacity:.80;
-
+#top-link-block.affix-top {
+    position: absolute; /* allows it to "slide" up into view */
+    bottom: -82px;
+    right: 10px;
 }
 
-.logo_small {
-    background: url(/media/images/special/nuspic_banner_small.png) no-repeat;
-    height: 85px;
-    width : 880px;
-}
-
-#header .navigation {
-    padding-top: 1px;
-    height: 30px;
-    position: relative;
-}
-
-    #main_menu ul {
-        bottom: -1;
-        position: absolute;
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-    }
-
-    #main_menu li {
-        cursor: pointer;
-        display: inline-block; 
-        padding: 10px 9px 4px 9px; 
-        border: 1px solid #CCCCCC;
-        border-bottom: none;
-        margin-right: 2px;
-    }
-
-    #main_menu a {
-        color: #666666;
-        text-decoration: none;
-    }
-
-    #main_menu #competition a {
-        color: #29496A; /*#865e34;*/
-        font-weight: bold;
-    }
-
-    #main_menu li:hover {
-        background-color: #FAFAF9;
-        border: 1px solid #A2A2A2;
-        border-bottom: 2px solid #FFCE2E;
-    }
-
-    #main_menu li:hover a {
-        color: #2B2924;
-    }
-
-        #main_menu li.currentpage {
-            cursor: default;
-            background-color: #FAFAF9;
-            border: 1px solid #A2A2A2;
-            border-bottom: 1px solid #FAFAF9;
-        }
-
-        #main_menu li.currentpage a {
-            color: #2B2924;
-            cursor: default;
-        }
-
-    #header .top_links {
-        padding: 11px 5px 4px 5px;
-        position: absolute;
-        right: 0;
-        top: 0;
-    }
-
-
-/* CONTENT
-***********************/
-
-#content .container form {
-    max-width: 600px;
-    margin: auto;
-}
-
-
-/* FOOTER
-***********************/
-
-#push, #footer {
-    min-height: 60px;
+#top-link-block.affix {
+    position: fixed; /* keeps it on the bottom once in view */
+    bottom: 18px;
+    right: 10px;
 }
 
 
@@ -171,181 +53,30 @@ padding-top: 60px;
     line-height: 1.5em;
 }
 
-/* News
+/* Form
 *********************/
 
-#news {
-    float: right;
-    padding-left: 10px;
-    border-left: 1px solid #CCCCCC;
+.help-block {
+    font-size: 10px;
+    margin: 2px;
 }
 
-#news hr {
-    border: 0;
-    background-color: #CCCCCC;
-    height: 1px;
+.form-actions {
+    margin: 10px;
 }
+
+/* News
+*********************/
 
 .news-block {
 }
 
-    .news-block .news-date {
-        float: left;
-        width: 150px;
-    }
-
-    .news-block .news-separator {
-        float: left;
-        padding-left: 0;
-        padding-right: 25px;
-    }
-
-.share-in-social-media {
-    font-size: 0.8em;
-    padding-top: 25px;
-    padding-bottom: 25px;
+.news-block .news-date {
+    float: left;
+    width: 150px;
 }
-
-/* Community page
-*********************/
-
-#accounts {
-    overflow: hidden;
+.news-block .news-separator {
+    float: left;
+    padding-left: 0;
+    padding-right: 25px;
 }
-
-    #accounts .column {
-        float: left;
-        width: 25%;
-    }
-
-        #accounts .column .profile {
-            padding: 10px;
-        }
-
-            #accounts .column .profile .username {
-                display: block;
-            }
-
-
-/* User profile
-*******************/
-
-#profile {
-}
-
-    #profile .row {
-        overflow: hidden;
-        padding: 5px 0px;
-        margin-left: 20px;
-    }
-
-        #profile .row .title {
-            font-weight: bold;
-            width: 300px;
-            float: left;
-        }
-
-
-/* Forms and fields
-*************************/
-
-.form-horizontal li {
-    list-style:none
-}
-
-.control-group .add-on {
-    cursor: pointer;
-}
-
-
-ul.errorlist {
-    padding: 0;
-    margin: 0;
-}
-
-    ul.errorlist li {
-        color           : #FFFFFF;
-        background-color: #FF7F7F;
-        display         : block;
-        font-size       : 0.85em;
-        font-weight     : bold;
-        margin-bottom   : 3px;
-        padding         : 3px 7px;
-        list-style      : none;
-    }
-
-input, textarea, keygen, select, button, isindex {
-    margin: 0em;
-}
-
-
-/* Pagination
-******************/
-
-#page-navigation {
-    margin-top: 15px;
-    text-align: center;
-}
-
-        #page-navigation .pages .prev {
-            float: left;
-        }
-
-        #page-navigation .pages .next {
-            float: right;
-        }
-
-        #page-navigation .pages .page {
-            padding: 5px;
-        }
-
-        #page-navigation .pages .current {
-            font-weight: bold;
-        }
-    
-        #page-navigation .pages .inactive {
-            color: #BBBBBB;
-        }
-
-    #page-navigation .total {
-        color     : #BBBBBB;
-    }
-
-.feeds {
-    padding: 25px 0;
-}
-
-div.rss-link {
-    background: url(/media/images/icons/rss-16x16.png) no-repeat 16px center;
-    padding-right: 16px;
-    padding-left: 40px;
-    display: inline;
-}
-
-/* Misc styles
-************************/
-
-h2 {
-    color: #3b3831;
-}
-
-h2.delimiter {
-    padding: 10px 0;
-}
-
-.delimiter {
-    border-bottom: 1px solid #CCCCCC;
-    overflow     : hidden;
-}
-
-
-#logo {
-    margin-top: 100px;
-    overflow  :  hidden;
-}
-
-    #logo a {
-        padding       : 15px;
-        height        : 75px;
-        vertical-align: bottom;
-    }

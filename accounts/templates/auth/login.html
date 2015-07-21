@@ -2,48 +2,67 @@
 
 {% block title %}Log in{% endblock %}
 
-{% block content %}
-<form method="post" action="{% url login %}" class="form-horizontal" id="login-form">
-    <div class="modal">
-        <div class="modal-header">
-        <h3>Log in</h3>
-        </div>
+{% block css %}
+<style>
+.form-signin {
+    opacity: 1.0;
+    /*margin: 40px auto;*/
+    max-width: 330px;
+    /*padding: 15px;*/
+    /*padding-bottom:30px;*/
+}
+.form-signin .form-signin-heading {
+    margin-bottom: 10px;
+}
 
-         <div class="modal-body">
+.form-signin .form-control {
+    box-sizing: border-box;
+    font-size: 16px;
+    height: auto;
+    padding: 10px;
+    position: relative;
+}
+
+.form-signin .form-control:focus {
+    z-index: 2;
+}
+
+.form-signin input[name="username"] {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    margin-bottom: -1px;
+}
+
+.form-signin input[name="password"] {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    margin-bottom: 10px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-signin center-block">
+        <form method="post" action="{% url login %}" id="login-form">
+            <h2 class="form-signin-heading">Please sign in</h2>
             {% csrf_token %}
             {{ form.non_field_errors }}
-
-            {% for field in form %}
-                <div class="fieldWrapper control-group">
-                    <label class="control-label" for="{{ field.auto_id }}">{{ field.label }}</label>
-                    <div class="controls">
-                        <div class="{% if field.help_text %}input-append{% endif %}">
-                            {{ field }}
-                            {% if field.help_text %}<span class="add-on">?</span>{% endif %}
-                        </div>
-                        <span class="help_text">{{ field.help_text }}</span>
-                        {{ field.errors }}
-                    </div>
-                </div>
-            {% endfor %}
-<!--            <label class="checkbox">-->
-<!--                <input type="checkbox"> Remember me-->
-<!--            </label>-->
+            <label class="sr-only" for="inputEmail">Username</label>
+            <input type="text" class="form-control" placeholder="Username" name="username" value="" size="50" id="inputUsername" autofocus/>
+            <label class="sr-only" for="inputPassword">Password</label>
+            <input type="password" class="form-control" placeholder="Password" name="password" value="" size="50" id="inputPassword" />
+            <button type="submit" class="login-form-submit btn btn-lg btn-primary btn-block">Sign in</button>
+            <input type="hidden" name="next" value="{{ next }}" />
+        </form>
+        <div style="float:left">
+            <a href="{% url password_reset %}">Forgot your password?</a>
         </div>
-
-        <div class="modal-footer">
-            <div class="control-group">
-                <div class="controls">
-                    <button type="submit" class="login-form-submit btn">Sign in</button>
-                    <input type="hidden" name="next" value="{{ next }}" />
-
-                    <div class="forgot-password">
-                        <a href="{% url password_reset %}">Forgot your password?</a>
-                    </div>
-                </div>
-            </div>
+        <div style="float:right">
+            <a href="{% url registration %}">Register</a>
         </div>
     </div>
-</form>
-
+</div>
 {% endblock %}
+
+{% block footer %}{% endblock %}

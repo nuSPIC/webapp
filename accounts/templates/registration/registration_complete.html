@@ -3,11 +3,11 @@
 {% block title %}Account activated successfully{% endblock %}
 
 {% block content %}
-    <h2>Account activated successfully</h2>
-    
+<div class="container">
+    <h2 class="page-header">Account activated successfully</h2>
+
     <p>Thank you for taking your time to complete the registration process! Your account is now active.</p>
-    
-    <p>
-        <a href="{% url login %}">Log in</a>
-    </p>
+
+    <a role="button" class="btn btn-default" href="{% url login %}">Log in</a>
+</div>
 {% endblock %}

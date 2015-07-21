@@ -1,5 +1,3 @@
-# coding: utf-8
-
 from datetime import date
 from django.conf import settings
 from django.utils.hashcompat import sha_constructor
@@ -10,10 +8,10 @@ class TokenGenerator(object):
     """
     Generates and validates confirmation tokens
     """
-    
+
     def __init__(self, timeout):
         self.timeout = timeout
-    
+
     def make_token(self, user):
         """
         Returns a token that can be used once to perform activation for a given user
@@ -24,7 +22,7 @@ class TokenGenerator(object):
         """
         Check that the token is correct for a given user
         """
-        
+
         # Parse the token
         try:
             ts_b36, hash = token.split("-")
@@ -51,7 +49,7 @@ class TokenGenerator(object):
         # Timestamp is number of days since 2001-1-1.  Converted to
         # base 36, this gives us a 3 digit string until about 2121
         ts_b36 = int_to_base36(timestamp)
-        
+
         # By hashing on the internal state of the user and using state
         # that is sure to change , we produce a hash that will be
         # invalid as soon as it is used.

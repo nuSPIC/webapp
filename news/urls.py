@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
-# coding: utf-8
+from django.conf.urls.defaults import url
 
-from django.conf.urls.defaults import *
+import views
 
-
-urlpatterns = patterns('news.views',
-    url(r'^$', 'mainpage', name='mainpage'),
-    url(r'^news/(?P<news_id>\d+)/$', 'single', name='news_single'),
-    url(r'^news/archive/$', 'archive', name='news_archive'),
-)
+urlpatterns = [
+    url(r'^$', views.mainpage, name='mainpage'),
+    url(r'^news/(?P<news_id>\d+)/$', views.single, name='news_single'),
+    url(r'^news/archive/$', views.archive, name='news_archive'),
+]

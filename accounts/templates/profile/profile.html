@@ -2,52 +2,58 @@
 
 {% block title %}{{ profile.user.get_full_name }} &raquo; User profile{% endblock %}
 
+{% block css %}
+<style>
+/*.dl-horizontal dt {
+    width: 240px;
+}
+
+.dl-horizontal dd {
+    margin-left: 260px;
+    margin-bottom: 10px;
+}*/
+</style>
+{% endblock %}
+
 {% block content %}
-    <div id="profile">
-        <h2>{{ profile.user.get_full_name }}</h2>
-        <hr>
-            
-        {% if user == profile.user %}
-            <div class="row">
-                <div class="title">Username</div>
-                <div class="value">{{ profile.user.username }}</div>
+    <div class="container">
+        <h2 class="page-header">
+            {{ profile.user.get_full_name }}
+        </h2>
+
+        <div class="col-sm-8 col-sm-offset-2">
+            <dl class="dl-horizontal">
+                {% if user == profile.user %}
+                <dt>Username</dt>
+                <dd>{{ profile.user.username }}</dd>
+
+                <dt>E-mail address</dt>
+                <dd>{{ profile.user.email|urlize }}</dd>
+                {% endif %}
+
+                <dt>Present occupation</dt>
+                <dd>{{ profile.get_present_occupation_display|default:"&mdash;" }}</dd>
+
+                <dt>Present academic affiliation</dt>
+                <dd>{{ profile.academic_affiliation|default:"&mdash;" }}</dd>
+
+                <dt>Public e-mail address</dt>
+                <dd>{{ profile.public_email|urlize|default:"&mdash;" }}</dd>
+
+                <dt>Publicly visible web page address</dt>
+                <dd>{{ profile.web_page|urlize|default:"&mdash;" }}</dd>
+
+                <dt>Miscellaneous notes (bio)</dt>
+                <dd>{{ profile.notes|default:"&mdash;" }}</dd>
+            </dl>
+
+            {% if user == profile.user %}
+            <div class="btn-group" role="group">
+                <a role="button" class="btn btn-default" href="{% url profile_edit profile.id %}">Edit profile</a>
+                <a role="button" class="btn btn-default" href="{% url password_change %}">Change password</a>
+                <a role="button" class="btn btn-default" href="{% url forum_subscription %}">Forum subscriptions</a>
             </div>
-            
-            <div class="row">
-                <div class="title">E-mail address</div>
-                <div class="value">{{ profile.user.email|urlize }}</div>
-            </div>
-        {% endif %}
-        
-        <div class="row">
-            <div class="title">Present occupation</div>
-            <div class="value">{{ profile.get_present_occupation_display|default:"&mdash;" }}</div>
+            {% endif %}
         </div>
-        
-        <div class="row">
-            <div class="title">Present academic affiliation</div>
-            <div class="value">{{ profile.academic_affiliation|default:"&mdash;" }}</div>
-        </div>
-    
-        <div class="row">
-            <div class="title">Public e-mail address</div>
-            <div class="value">{{ profile.public_email|urlize|default:"&mdash;" }}</div>
-        </div>
-    
-        <div class="row">
-            <div class="title">Publicly visible web page address</div>
-            <div class="value">{{ profile.web_page|urlize|default:"&mdash;" }}</div>
-        </div>
-    
-        <div class="row">
-            <div class="title">Miscellaneous notes (bio)</div>
-            <div class="value">{{ profile.notes|default:"&mdash;" }}</div>
-        </div>
-        
-        {% if user == profile.user %}
-            <a href="{% url profile_edit profile.id %}">Edit profile</a> |
-            <a href="{% url password_change %}">Change password</a> |
-            <a href="{% url forum_subscription %}">Forum subscriptions</a>
-        {% endif %}
     </div>
 {% endblock %}

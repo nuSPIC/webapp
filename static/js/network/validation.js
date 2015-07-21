@@ -10,16 +10,16 @@ function clear_field(field) {
     field.parents('.form-group').removeClass('has-error has-success has-feedback');
     field.parent().find(".error-text").remove();
     field.parent().find("span.glyphicon").remove();
-}
+};
 
 function clear_form(form) {
     form.find(".alert").remove();
     form.find('.form-group').removeClass('has-error has-success has-feedback');
     form.find(".error-text").remove();
     form.find("span.glyphicon").remove();
-}
+};
 
-function isNumber(n) { return !isNaN(parseFloat(n)) && isFinite(n); }
+function isNumber(n) { return !isNaN(parseFloat(n)) && isFinite(n); };
 
 function numeric_validation(div, val) {
     var error_msg = [];
@@ -51,7 +51,7 @@ function numeric_validation(div, val) {
         }
     }
     return error_msg
-}
+};
 
 function field_validation(field) {
     field.prop('disabled', true);
@@ -69,7 +69,7 @@ function field_validation(field) {
                 val_list = val.split(',');
                 for (var i=0; i<val_list.length; i++) {
                     if (val_list[i] != '') {
-                        error_msg.push(numeric_validation(field,val_list[i]));
+                        error_msg = error_msg.length == 0 ? numeric_validation(field,val_list[i]) : error_msg;
                     }
                 }
             } else {
@@ -93,12 +93,12 @@ function field_validation(field) {
     div.addClass('has-feedback');
     field.prop('disabled', false);
     return (error_msg.length == 0)
-}
+};
 
 // Experiment
 function form_validation(form, clean_form_action, clean_field_action) {
     form.find('input').prop('disabled', true);
-    clear_form(form)
+    clear_form(form);
 
     var error_fields = [];
     form.find('input:visible:not(.checkboxinput):not(.btn)').each(function () {
@@ -116,12 +116,12 @@ function form_validation(form, clean_form_action, clean_field_action) {
 
     form.find('input').prop('disabled', false);
     return error_fields
-}
+};
 
 // Experiment
 function clean_node_form_action() {
     if (selected_model == 'spike_generator') {
-        selected_node.status = {'spike_times': status.spike_times, 'model': status.model}
+        selected_node.status = {'spike_times': status.spike_times, 'model': status.model};
     } else {
         selected_node.status = status;
     }
@@ -139,19 +139,19 @@ function clean_node_form_action() {
     }
     link_validation();
     update_after_change();
-}
+};
 
 function node_form_validation(e) {
     e.preventDefault();
     var form = $(this);
     form.find('input').prop('disabled', true);
-    clear_form(form)
+    clear_form(form);
 
     var status = {'model': form.find("#id_model :selected").val()};
     var error_fields = [];
     form.find('input:visible').each(function () {
         if ($(this).val()) {
-            var clean_field = field_validation($(this))
+            var clean_field = field_validation($(this));
 
             if (clean_field) {
                 status[$(this).attr('id').substr(3)] = $(this).hasClass('list') ? $(this).val() : parseFloat($(this).val());
@@ -187,13 +187,13 @@ function node_form_validation(e) {
         error_fields[0].focus();
     }
     form.find('input').prop('disabled', false);
-}
+};
 
 function link_form_validation(e) {
     e.preventDefault();
     var form = $(this);
     form.find('input').prop('disabled', true);
-    clear_form(form)
+    clear_form(form);
 
     var synapse = selected_link.source.synapse;
 
@@ -243,7 +243,7 @@ function link_form_validation(e) {
         form.prepend('<h4 class="alert alert-danger">Oh snap! You got an error!</h4>')
     }
     form.find('input').prop('disabled', false);
-}
+};
 
 function link_validation() {
     var links_copy = links.slice();
@@ -265,7 +265,7 @@ function link_validation() {
         }
         $( "#global_warning").removeClass("hide fade");
     }
-}
+};
 
 function network_form_validation(e) {
     e.preventDefault();
@@ -278,12 +278,12 @@ function network_form_validation(e) {
 
     clear_form($(this));
     if (links.filter(connect_to_output).length <1) {
-        show_msg('Warning', 'No <b>recording device</b> connected. <p>Check your output connections.</p>', 'warning');
+        show_msg('<i class="fa fa-exclamation-triangle"></i> Warning', 'No <b>recording device</b> connected. <p>Check your output connections.</p>', 'warning');
     } else if (links.filter(connect_to_input).length <1) {
-        show_msg('Warning', 'No <b>input device</b> connected. Network may be silent. <p>Do you want to continue?</p>', 'simulation_confirm');
+        show_msg('<i class="fa fa-exclamation-triangle"></i> Warning', 'No <b>input device</b> connected. Network may be silent. <p>Do you want to continue?</p>', 'simulation-confirm');
     } else if ($( "#id_duration" ).val() > 5000.0) {
-        show_msg('Warning', 'The simulation lasts more than 5 seconds and it could have a speed effect on page loading time. <p>Are you sure?</p>', 'simulation_confirm');
+        show_msg('<i class="fa fa-exclamation-triangle"></i> Warning', 'The simulation lasts more than 5 seconds and it could have a speed effect on page loading time. <p>Are you sure?</p>', 'simulation-confirm');
     } else {
         simulate();
     }
-}
+};

@@ -1,6 +1,6 @@
 function binwidth_changed() {
 
-    options.histogram.binwidth = parseInt($( this ).attr('value'));
+    options.histogram.binwidth = parseInt($( this ).find('input').attr('value'));
     $.cookie('options', options, { expires: 7});
 
     var hist = d3.layout.histogram()
@@ -86,4 +86,3 @@ function draw_spike_detector(reference) {
 //    draw_correlation_plot(reference +" #correlation_plot", calc_correlation(data.spike_detector.hist[options.histogram.binwidth][options.correlation.neuronA], data.spike_detector.hist[options.histogram.binwidth][options.correlation.neuronB], 'valid'));
 
 };
-

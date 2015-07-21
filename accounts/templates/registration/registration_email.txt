@@ -4,7 +4,7 @@ Dear {{ user.get_full_name }},
 
 Thank you for registering. In order to verify your e-mail address, we kindly ask you to follow the link below to activate your account:
 
-{{ protocol }}://{{ domain }}{% url registration_confirm uidb36=uid token=token %}
+{{ protocol }}://{{ domain }}{% url 'registration_confirm' uidb36=uid token=token %}
 
 The link above will expire in {{ expire }} days and the account will be automatically removed.
 

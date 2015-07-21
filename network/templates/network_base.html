@@ -1,161 +1,135 @@
 {% extends "base.html" %}
 
-{% load lib_filters %}
+{% load webapp_filters %}
 {% load network_filters %}
 {% load humanize %}
 
-{% block title %}
-    {{ SPIC_obj.title }}
-     - {{ network_obj.local_id }}
-{% endblock %}
-<!--     - {{ network_obj.label|default_if_none:'' }}-->
+{% block title %}{{ SPIC_obj.title }} - {{ network_obj.local_id }}{% endblock %}
 
-{% block extrahead %}
-
-    <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/network_main.css" />
-    <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/d3_layout.css" />
-    <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/d3_result.css" />
-
+{% block css %}
+    <link type="text/css" rel="stylesheet" href="/static/css/bootstrap-tour.css" />
+    <link type="text/css" rel="stylesheet" href="/static/css/network.css" />
+    <link type="text/css" rel="stylesheet" href="/static/css/d3_layout.css" />
+    <link type="text/css" rel="stylesheet" href="/static/css/d3_result.css" />
     <style type="text/css">
-        .container {
-            width: 100%;
-        }
-
-        .span4 {
-            min-width: 430px
-        }
-
         {% ifequal SPIC_obj.group '1' %}
             #node-add .neuron {
                 display: none
             }
         {% endifequal %}
-
     </style>
 {% endblock %}
 
 
 {% block content %}
 
-    <ul class="breadcrumb" style="margin-bottom:0">
-        <div class="pull-right">
-            <span>
-                <span class="font-size" style="font-size:10px">A</span>
-                <span class="font-size" style="font-size:14px">A</span>
-                <span class="font-size" style="font-size:18px">A</span>
-            </span>
+    {% include 'network_nav.html' %}
 
-            {% include "history.html" %}
-            <span>
-                <button class="btn" id="network-comment" data-toggle="button"><i class="icon-pencil"></i> Comment</button>
-                <button class="btn {% if network_obj.favorite %}hide fade{% endif %}" id="network-like"><i class="icon-thumbs-up"></i> Like it</button>
-                <button class="btn {% if not network_obj.favorite %}hide fade{% endif %}" id="network-dislike"><i class="icon-thumbs-down"></i> Dislike it</button>
-            </span>
-        </div>
+    <div id="global_warning" class="container alert alert-warning hide fade col-xs-10 col-xs-offset-1">
+        <a class="close" data-dismiss="alert" href="#"><i class="fa fa-remove"></i></a>
+        <div class="col-xs-1 col-xs-offset-1"><i class="fa fa-exclamation-triangle fa-3x"></i></div>
+        <div class="col-xs-8 alert-content"></div>
+    </div>
 
-        <li>
-            <a href="{% url network_list %}">Network</a>
-        </li>
-        <span class="divider">/</span>
-        <li id="network_title">
-            <h4>{{ SPIC_obj.title }}</h4>
-        </li>
-        <span class="divider">/</span>
-        <li id="network_title">
-            {{ network_obj.local_id }}
-             - <span id="network_label">{{ network_obj.label|default_if_none:'' }}</span>
-             ( {{ network_obj.date_simulated|timesince|default:"not simulated" }}{% if network_obj.date_simulated %} ago{% endif %} )
-        </li>
+    {% include 'network_content.html' %}
 
-        {% if network_obj.SPIC.solution %}
-            <li><a href="/network/{{network_obj.SPIC.group}}/{{network_obj.SPIC.local_id}}/solution/">
-                Solution
-            </a></li>
-        {% endif %}
+    <!-- Modal message -->
+    <div id="dialog-msg" class="modal fade in">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 id="dialog-msg-title" class="modal-title">Network messenger</h4>
+                </div>
 
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-xs-2 col-xs-offset-2"><img src="/static/images/special/bcf_logo-animation.gif" style="height:80px"></div>
+                        <div id="dialog-msg-content" class="col-xs-6"></div>
+                    </div>
+                </div>
 
-        <br>
-        <div id="network_description" class="{% if network_obj.comment %}hide fade{% endif %}">
-                {{ SPIC_obj.description|default:"no description" }}
-        </div>
-
-        <div id="network_comment">{{ network_obj.comment|default_if_none:"" }}</div>
-
-        <div id="network-comment-form" class="hide fade">
-            {% include "comment_form.html" %}
-        </div>
-
-    </ul>
-
-    <div id="network-content" style="font-size:14px">
-        <div class="alert warning hide fade" id="global_warning" style="margin:20px">
-            <a class="close" data-dismiss="alert" href="#">&times;</a>
-            <p class="alert-content"></p>
-        </div>
-
-        <div class="container-fluid">
-            <div class="row-fluid">
-
-                        <div class="span4" id="devices">
-
-                            {% include "nodes.html" %}
-                            {% include "node_form.html" %}
-                            {% include "link_form.html" %}
-
-                        </div>
-
-
-                        <div class="span4" id="network">
-
-                            {% include "d3_layout.html" %}
-                            {% include "connection_matrix.html" %}
-
-                        </div>
-
-                        <div class="span4" id="result">
-
-                            {% include "simulation.html" %}
-                            {% include "result.html" %}
-
-                        </div>
-
+                <div class="modal-footer">
+                    <div id="dialog-msg-simulation-confirm" class="button">
+                        <a href="#" class="btn btn-primary" onclick="simulate()">Yeah!</a>
+                        <a href="#" class="btn btn-default" data-dismiss="modal" >No</a>
+                    </div>
+                    <div id="dialog-msg-warning" class="button">
+                        <a href="#" class="btn btn-default" data-dismiss="modal" >Ok</a>
+                    </div>
+                    <div id="dialog-msg-pending" class="button">
+                        <span id="task_status" class="label label-info"><i class="fa fa-circle-o-notch fa-spin"></i><span id="task_status"></span></span>
+                    </div>
+                </div>
             </div>
         </div>
-
-
-<div id="dialog-msg" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="dialog-msg-label" aria-hidden="true" style="margin-top: 100px">
-
-    <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h3 id="dialog-msg-title">Network messenger</h3>
     </div>
 
-    <div class="modal-body">
-        <div class="logo-animation"><img src="/media/img/icons/bcf_logo-animation.gif" ></div>
-        <div id="dialog-msg-content"></div>
-    </div>
-
-    <div class="modal-footer">
-        <div id="dialog-msg-simulation_confirm" class="button">
-            <a href="#" class="btn btn-primary" onclick="simulate()">Yeah!</a>
-            <a href="#" class="btn" data-dismiss="modal" >No</a>
-        </div>
-        <div id="dialog-msg-warning" class="button">
-            <a href="#" class="btn ok" data-dismiss="modal" >Ok</a>
-        </div>
-        <span id="task_status" class="label label-info"></span>
-    </div>
-</div>
-
-
-    </div>
 {% endblock %}
 
 
+{% block footer %}{% endblock %}
+
 {% block extrascript %}
-    <script type="text/javascript" src="{{ STATIC_URL }}js/vendor/d3.v3.js"></script>
+
+    <script type="text/javascript" src="/static/js/vendor/d3.min.js"></script>
+    <script type="text/javascript" src="/static/js/json2.js"></script>
+    <!-- // <script type="text/javascript" src="/static/js/plugins/js.cookie.js"></script> -->
+    <script type="text/javascript" src="/static/js/plugins/jquery.cookie.js"></script>
+    <script type="text/javascript" src="/static/js/plugins/bootstrap-tour.js"></script>
 
     <script type="text/javascript">
+        $.cookie.json = true;
+        var options = ($.cookie('options') ? $.cookie('options') : {
+            layout: {
+                width: 500.0,
+                height: 360.0,
+                linkDistance: 150.0,
+                charge: -500.0,
+                links: {
+                    display: {
+                        pre: false,
+                        post: true,
+                        weight: false,
+                    },
+                    curve: 'right',
+                },
+                nodes: {
+                    fixed: true,
+                    display: {
+                        neuron: true,
+                        input: true,
+                        output: true,
+                        position: false,
+                    },
+                },
+            },
+            raster_plot: {
+                width: 400.0,
+                height_per_neuron: 18.0,
+            },
+            histogram: {
+                width: 400.0,
+                height: 120.0,
+                binwidth: 50.0,
+            },
+            smoothed_histogram: {
+                width: 400.0,
+                height: 120.0,
+                kernel_function: 'gauss',
+                kw: 10.0,
+                fac: 1.0,
+            },
+            correlation: {
+                width: 400.0,
+                height: 120.0,
+            },
+            voltmeter: {
+                width: 400.0,
+                height: 80.0,
+            },
+        });
+
         var SPIC_group = {{ SPIC_obj.group }},
             SPIC_local_id = {{ SPIC_obj.local_id }};
 
@@ -167,10 +141,26 @@
         var nodes = {{ network_obj.nodes|safe }},
             links = {{ network_obj.links|safe }};
 
+        var lastNodeId = nodes.length > 1 ? nodes[nodes.length-1].id : 0;
+        var nodes_uid = [];
+        nodes.forEach(function(node) {
+            node.fixed = options.layout.nodes.fixed;
+            node.x = node.x * options.layout.width;
+            node.y = node.y * options.layout.height;
+            nodes_uid.push(node.uid);
+        });
+
+        links.forEach(function(link) {
+            link.source = nodes[nodes_uid.indexOf(link.source)];
+            link.target = nodes[nodes_uid.indexOf(link.target)];
+        });
+
+        var selected_model = null;
+
         // Forms
-        var node_form = $("#node-form"),
-            link_form = $("#link-form"),
-            network_form = $("#network-form");
+        var node_form = $("#id-node-form"),
+            link_form = $("#id-link-form"),
+            network_form = $("#id-network-form");
 
         {% if task_id %}
             var task_id = "{{task_id|safe}}";
@@ -178,35 +168,54 @@
             var task_id;
         {% endif %}
 
+        // Results
         var data = {};
         data['voltmeter'] = {{ network_obj.voltmeter_data|safe }};
         data['spike_detector'] = {{ network_obj.spike_detector_data_index|safe }};
 
         var msg = {{ SPIC_obj.msg|safe }};
-    </script>
+        var tour_steps = {{ SPIC_obj.tooltip|safe }}
 
-    <script type="text/javascript" src="{{ STATIC_URL }}js/json2.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/plugins/jquery.cookie.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/plugins/jquery.form.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/d3/layout.js?n"></script>
+        $(document).ready(function() {
+            active_buttons();
+
+            initiate_layout("#layout-holder");
+            update_after_change();
+
+            if (data.voltmeter.meta.neurons.length > 0) {
+                draw_voltmeter("#voltmeter_holder");
+            }
+
+            $( "#voltmeter-holder .voltmeter").addClass('active');
+
+            if (data.spike_detector.meta.neurons.length > 0) {
+                draw_spike_detector("#spike_detector");
+            }
+
+            $( "#results-tabs .tabs").find(".tab").first().parent().addClass('active');
+            $( "#results-tabs .tab-content").find(".tab-pane").first().addClass('active');
+
+            if ('content' in msg) {
+                show_msg(msg.title, msg.content, 'warning');
+            }
+
+        });
+    </script>
+    <script type="text/javascript" src="/static/js/d3/layout.js"></script>
 
     {% if network_obj.has_spike_detector %}
-        <script type="text/javascript" src="{{ STATIC_URL }}js/d3/raster_plot.js"></script>
-        <script type="text/javascript" src="{{ STATIC_URL }}js/d3/histogram.js"></script>
-        <script type="text/javascript" src="{{ STATIC_URL }}js/d3/smooth_histogram.js"></script>
-        <script type="text/javascript" src="{{ STATIC_URL }}js/d3/correlation.js"></script>
-        <script type="text/javascript" src="{{ STATIC_URL }}js/d3/spike_detector.js"></script>
-
+        <script type="text/javascript" src="/static/js/d3/raster_plot.js"></script>
+        <script type="text/javascript" src="/static/js/d3/histogram.js"></script>
+        <script type="text/javascript" src="/static/js/d3/smooth_histogram.js"></script>
+        <script type="text/javascript" src="/static/js/d3/correlation.js"></script>
+        <script type="text/javascript" src="/static/js/d3/spike_detector.js"></script>
     {% endif %}
 
     {% if network_obj.has_voltmeter %}
-        <script type="text/javascript" src="{{ STATIC_URL }}js/d3/voltmeter.js"></script>
+        <script type="text/javascript" src="/static/js/d3/voltmeter.js"></script>
     {% endif %}
-
-
-    <script type="text/javascript" src="{{ STATIC_URL }}js/network/validation.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/network/interaction.js?n"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/network/simulation.js?n"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/network/run.js?n"></script>
-
+    <script type="text/javascript" src="/static/js/network/interaction.js"></script>
+    <script type="text/javascript" src="/static/js/network/validation.js"></script>
+    <script type="text/javascript" src="/static/js/network/simulation.js"></script>
+    <script type="text/javascript" src="/static/js/network/events.js"></script>
 {% endblock %}

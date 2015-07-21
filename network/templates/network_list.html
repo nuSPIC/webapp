@@ -1,60 +1,45 @@
 {% extends "base.html" %}
+
 {% load humanize %}
 {% load network_filters %}
 
 {% block title %}{{ flatpage.title }}{% endblock %}
 
-{% block jumbotron %}
-    <div class="jumbotron subhead">
-        <div class="container">
-            <div style="padding: 20px; text-align:left">
-                <h2>Competition</h2>
-            </div>
-        </div>
-    </div>
-{% endblock %}
 
 {% block content %}
+<div class="container">
+    <h2 class="page-header">{{ flatpage.title }}</h2>
+
     <div class="flatpage">
-
         {% regroup network_list by SPIC.group as network_by_SPIC %}
-
         {% for item in network_by_SPIC %}
-            {{ flatpage.content|index:forloop.counter0 }}
 
-            {% if item.grouper != '0' %}
-                <ul class="breadcrumb">
+        {% if item.grouper == '1' %}
+        <h2 class="page-header" style="margin-top:100px"> The Challenges </h2>
+        {% endif %}
 
-                    {% for network in item.list %}
-                        <li id="{{ network.title }}" style="width:100%">
+            <div class="row">
 
-                            <div style="float:right">
-                                <div><a href="{% url network_history network.SPIC.group network.SPIC.local_id %}">
-                                    History
-                                </a></div>
+                <div class="col-sm-7">
+                {{ flatpage.content|index:forloop.counter0 }}
+                </div>
 
-                            </div>
-
-                            <a href="{% url network_latest network.SPIC.group network.SPIC.local_id %}"><h3 style="display:inline">{{ network.SPIC.title|default_if_none:"Network" }}</h3></a>
-
-                            {% if network.SPIC.solution %}
-                                ( <a href="/network/{{network.SPIC.group}}/{{network.SPIC.local_id}}/solution/">Solution</a> )
-                            {% endif %}
-
-                            <div>
-                                <small>{{ network.SPIC.description|default:"no description" }}</small>
-                            </div>
-
-                        </li>
-                        {% if not forloop.last %}<hr>{% endif %}
-                    {% endfor %}
-
-                </ul>
-            {% endif %}
+                <div class="col-sm-5">
+                    <div class="list-group" style="margin-top:60px">
+                        {% for network in item.list %}
+                            <a class="list-group-item" href="{% url network_latest network.SPIC.group network.SPIC.local_id %}" title='{{ network.SPIC.description|safe }}'>
+                                {% if user.is_authenticated %}
+                                <div class="badge">{{ network|count:user.id }}</div>
+                                {% endif %}
+                                <i class="fa fa-leaf"></i>  {{ network.SPIC.title|default_if_none:"Network" }}
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
 
         {% endfor %}
-
         {{ flatpage.content|index:-1 }}
     </div>
-
+</div>
 {% endblock %}

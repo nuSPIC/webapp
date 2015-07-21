@@ -1,0 +1,11 @@
+{% load webapp_filters %}
+
+{% for field in form %}
+    <div class="form-group">
+        <div class="controls">
+            {{ field|addcss:"form-control" }}
+            {{ field.errors }}
+            <div class="help-block">{{ field.help_text }}</div>
+        </div>
+    </div>
+{% endfor %}

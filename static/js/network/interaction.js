@@ -1,5 +1,4 @@
-function capitalise(value) { return (typeof value == 'string') ? value.charAt(0).toUpperCase() + value.slice(1) : value ;}
-function isNumber(n) { return !isNaN(parseFloat(n)) && isFinite(n); }
+function capitalise(value) { return (typeof value == 'string') ? value.charAt(0).toUpperCase() + value.slice(1) : value };
 
 function stringify(value) {
     if (!(typeof value == 'object')) {return value};
@@ -7,41 +6,41 @@ function stringify(value) {
     for (var key in value) {
         if (key != 'model') {
             var val = value[key];
-            n.push('<span class="'+key+'">' + key.toString() + ': ' + (!isNaN(val) && val.toString().indexOf('.') != -1 ? parseFloat(val).toFixed(1).toString() : val.toString()) + '</span>');
+            n.push('<span class="'+key+'">' + key.toString() + ': ' + (!isNaN(val) && val.toString().indexOf('.') != -1 ? parseFloat(val).toFixed(1).toString().slice(0,10) : val.toString().slice(0,10)) + '</span>');
         }
     }
     return n.join(', ');
-}
+};
 
 function show_msg(title, content, mode) {
-
-    $( "#dialog-msg #dialog-msg-title" ).html(title);
-    $( "#dialog-msg #dialog-msg-content" ).html(content);
-    $( "#dialog-msg .button").addClass('hide fade');
-    $( "#dialog-msg").find("#dialog-msg-"+ mode).removeClass('hide fade');
-    $( "#dialog-msg" ).modal();
-}
+    var dialog_msg = $( "#dialog-msg");
+    dialog_msg.find("#dialog-msg-title" ).html(title);
+    dialog_msg.find("#dialog-msg-content" ).html(content);
+    dialog_msg.find(".button").addClass('hide fade');
+    dialog_msg.find("#dialog-msg-"+ mode).removeClass('hide fade');
+    dialog_msg.modal('show');
+};
 
 function active_buttons() {
-    $("#layout-option-content #nodes-display").find("#input").addClass( (options.layout.nodes.display.input ? "active" : ""));
-    $("#layout-option-content #nodes-display").find("#neuron").addClass((options.layout.nodes.display.neuron ? "active" : ""));
-    $("#layout-option-content #nodes-display").find("#output").addClass((options.layout.nodes.display.output ? "active" : ""));
+    var layout_option_content = $("#layout-option-content");
 
-    $("#layout-option-content #links-display").find("#pre").addClass((options.layout.links.display.pre ? "active" : ""));
-    $("#layout-option-content #links-display").find("#post").addClass((options.layout.links.display.post ? "active" : ""));
-    $("#layout-option-content #links-weight-display").find((options.layout.links.display.weight ? "#true" : "#false")).addClass("active");
-    $("#layout-option-content #links-curve").find("#" + options.layout.links.curve).addClass("active");
+    layout_option_content.find("#nodes-display #input").addClass( (options.layout.nodes.display.input ? "active" : ""));
+    layout_option_content.find("#nodes-display #neuron").addClass((options.layout.nodes.display.neuron ? "active" : ""));
+    layout_option_content.find("#nodes-display #output").addClass((options.layout.nodes.display.output ? "active" : ""));
+
+    layout_option_content.find("#links-display #pre").addClass((options.layout.links.display.pre ? "active" : ""));
+    layout_option_content.find("#links-display #post").addClass((options.layout.links.display.post ? "active" : ""));
+    layout_option_content.find("#links-weight-display" +(options.layout.links.display.weight ? "#true" : "#false")).addClass("active");
+    layout_option_content.find("#links-curve #" + options.layout.links.curve).addClass("active");
 
     if (data.spike_detector.meta.neurons.length > 0) {
         $("#spike_detector #binwidth").find("button[value=" + options.histogram.binwidth + "]").addClass("active");
         if (options.correlation.neuronA < data.spike_detector.meta.neurons.length) {
-            $("#correlated_neurons #neuronA").find(".title").html("Neuron " + data.spike_detector.meta.neurons[options.correlation.neuronA].id);
-        }
+            $("#correlated_neurons #neuronA").find(".title").html("Neuron " + data.spike_detector.meta.neurons[options.correlation.neuronA].id);}
         if (options.correlation.neuronB < data.spike_detector.meta.neurons.length) {
-            $("#correlated_neurons #neuronB").find(".title").html("Neuron " + data.spike_detector.meta.neurons[options.correlation.neuronB].id);
-        }
+            $("#correlated_neurons #neuronB").find(".title").html("Neuron " + data.spike_detector.meta.neurons[options.correlation.neuronB].id);}
     }
-}
+};
 
 function tabulate(reference, data, columns, prefixes) {
     var table = d3.select(reference);
@@ -80,7 +79,7 @@ function tabulate(reference, data, columns, prefixes) {
             .html(function(d) { return stringify(d.value); });
 
     return table;
-}
+};
 
 function update_links() {
 
@@ -149,19 +148,20 @@ function highlight_selected() {
 };
 
 function show_form(model) {
-    // Hide and fade portlet, fields and buttons
-    $("#node-form").parent().addClass('hide fade');
-    $("#node-form .fieldWrapper").addClass('hide fade');
-    $("#node-form .btn-group").addClass('hide fade');
-    $("#node-form").parent().addClass('hide fade');
-    $("#node-form #id_model option").addClass('hide fade');
-    $('#node-form').find(".alert").remove();
+    var model_choice = $("#div_id_model");
+        synapse_choice = $("#div_id_synapse");
 
-    $("#link-form").parent().addClass('hide fade');
-    $('#link-form').find(".alert").remove();
+    // hide form
+    node_form.addClass('hide fade');
+    node_form.find(".form-group").addClass('hide fade');
+    node_form.find(".form-actions").addClass('hide fade');
+    model_choice.find("option").addClass('hide fade');
+    link_form.addClass('hide fade');
 
-    // Empty fields and remove selected model;
-    $("#node-form input").val('');
+    clear_form(node_form)
+    clear_form(link_form)
+
+    node_form.find("input").val('');
 
     if (selected_node) {
         if (selected_node.type == 'output') return;
@@ -170,52 +170,62 @@ function show_form(model) {
         selected_model = (model == null ? status.model : model)
 
         for (var key in status) {
-            key != 'model' ? $("#node-form").find("#id_"+key).val(status[key]) : '';
+            key != 'model' ? node_form.find("#id_"+key).val(status[key]) : '';
         };
 
-        $("#node-form #id_model #" + selected_model).prop('selected', true).parents(".fieldWrapper").removeClass('hide fade');
+        // Display model choice
+        model_choice.find("#" + selected_model).prop('selected', true).parents("#div_id_model").removeClass('hide fade');
         if (SPIC_group == 1) {
-            $("#node-form #id_model option."+selected_node.type).removeClass('hide fade');
+            model_choice.find("option."+selected_node.type).removeClass('hide fade');
         } else {
-            $("#node-form #id_model option").removeClass('hide fade');
+            model_choice.find("option").removeClass('hide fade');
         };
+        node_form.find("#id_model").val(selected_model);
 
+        // Display synapse choice
         if (SPIC_group != 1 && selected_node.type == 'neuron') {
-            $("#id_synapse").find("#" + selected_node.synapse).prop('selected', true);
-            $("#id_synapse").parents(".fieldWrapper").removeClass('hide fade');
+            synapse_choice.find("#" + selected_node.synapse).prop('selected', true);
+            synapse_choice.removeClass('hide fade');
+        }
+
+        // Display model choice if neuron not selected
+        if (selected_node.type != 'neuron') {
+            model_choice.removeClass('hide fade');
         }
 
         // hide output models if existed in nodes
         nodes.forEach(function(node) {
             if (node.type == 'output') {
-                $("#id_model #"+ node.status.model).addClass('hide fade');
+                model_choice.find("#"+ node.status.model).addClass('hide fade');
             }
         })
 
-
-        $("#node-form").find("."+ selected_model).parents(".fieldWrapper").removeClass('hide fade');
-        $("#node-form .btn-group").removeClass('hide fade');
-        $("#node-form").parent().removeClass('hide fade');
+        // display fields for selected node
+        node_form.find("."+ selected_model).parents(".form-group").removeClass('hide fade');
+        node_form.find(".form-actions").removeClass('hide fade');
+        node_form.removeClass('hide fade');
 
         if (selected_node.disabled == 1) {
-            $("#node-form input.neuron").prop('disabled', true);
-            $("#node-form #id_model").parents(".fieldWrapper").addClass('hide fade');
-            $("#node-form .btn-group").addClass('hide fade');
+            node_form.find("input.neuron").prop('disabled', true);
+            model_choice.addClass('hide fade');
+            node_form.find(".form-actions").addClass('hide fade');
         }
 
+        model_choice.removeClass('hide fade');
+
     } else if (selected_link) {
-        $("#link-form").find("#id_weight").val(selected_link.weight);
-        $("#link-form").find("#id_delay").val(selected_link.delay);
-        $("#link-form").parent().removeClass('hide fade');
-        $("#link-form input").prop('disabled', false);
-        $("#link-form .btn-group").removeClass('hide fade');
+        link_form.find("#id_weight").val(selected_link.weight);
+        link_form.find("#id_delay").val(selected_link.delay);
+        link_form.find("input").prop('disabled', false);
+        link_form.find(".form-actions").removeClass('hide fade');
+        link_form.removeClass('hide fade');
 
         if (selected_link.source.disabled != 0 && selected_link.target.disabled != 0) {
-                $("#link-form input").prop('disabled', true);
-                $("#link-form .btn-group").addClass('hide fade');
-            }
+            link_form.find("input").prop('disabled', true);
+            link_form.find(".form-actions").addClass('hide fade');
+        }
     }
-}
+};
 
 function update_selected_node(reference, object) {
     var ref_obj = d3.select(reference);
@@ -227,7 +237,7 @@ function update_selected_node(reference, object) {
         ref_obj.select("#neuron_"+selected_node.id.toString()).classed('selected', true)
         if (compared_node) { ref_obj.select("#neuron_"+compared_node.id.toString()).classed('compared', true)};
     }
-}
+};
 
 function update_after_select() {
     update_layout();
@@ -239,7 +249,7 @@ function update_after_select() {
         update_correlation("#correlation_plot");
     }
     if (data.voltmeter.meta.neurons.length > 0) { update_selected_node("g.voltmeter", "path"); }
-}
+};
 
 function node_interaction() {
     var id = $(this).attr('id').substring(5);
@@ -249,7 +259,7 @@ function node_interaction() {
     })[0];
     selected_link = null;
     update_after_select();
-}
+};
 
 function node_connection_interaction() {
     var id = $(this).parent().attr('id').substring(7);
@@ -258,7 +268,7 @@ function node_connection_interaction() {
         return (n.id == id);
     })[0];
     update_after_select();
-}
+};
 
 function link_interaction_click() {
     var source_id = $(this).parent().attr('id').substring(7);
@@ -268,7 +278,7 @@ function link_interaction_click() {
 
     selected_node = null;
     update_after_select();
-}
+};
 
 function link_interaction_dblclick() {
 
@@ -294,8 +304,7 @@ function link_interaction_dblclick() {
 
     selected_node = null;
     update_after_change();
-}
-
+};
 
 function update_after_change() {
 
@@ -313,4 +322,4 @@ function update_after_change() {
     $('#connection_matrix td.target_id').click(node_connection_interaction)
     $('#connection_matrix td:not(.target_id)').click(link_interaction_click)
     $('#connection_matrix td:not(.target_id)').dblclick(link_interaction_dblclick)
-}
+};
