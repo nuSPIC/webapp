@@ -1,7 +1,9 @@
-{% extends "base.html" %}
+{% extends "forum_base.html" %}
 
-{% load lib_filters %}
 {% load humanize %}
+{% load webapp_filters %}
+{% load webapp_tags %}
+
 
 {% block feeds %}
     <link rel="alternate" type="application/atom+xml" title="New topics" href="{% url topics_feed %}" />
@@ -10,180 +12,135 @@
 
 {% block title %}Discussions{% endblock %}
 
-{% block extrahead %}
-<link href="{{ MEDIA_URL }}css/forum.css" type="text/css" rel="stylesheet" />
-{% endblock %}
+{% block page-header %}Discussions{% endblock %}
 
-{% block jumbotron %}
-    <div class="jumbotron subhead">
-        <div class="container">
-            <div style="padding: 20px; text-align:left">
-                <h2>Discussion</h2>
-            </div>
-        </div>
+{% block forum_nav %}
+<nav class="nav navbar">
+    <div class="forum_list_menu pull-right">
+    {% if user.is_authenticated %}
+        <a role="button" class="btn btn-default" href="{% url forum_subscription %}">My subscriptions</a>
+    {% endif %}
+        <a role="button" class="btn btn-default" href="{% url post_list %}">All posts</a>
     </div>
+
+    <div class="forum_search">
+        <form action="{% url search %}" method="get" class="form-search form-inline">
+            {% csrf_token %}
+            {% crispy_inline search_form %}
+            <button class="btn btn-default" type="submit" >Search</button>
+        </form>
+    </div>
+</nav>
 {% endblock %}
 
-{% block content %}
-    <div id="forum_list">
-<!--        <h2>Discussions</h2>-->
-<!--        <hr>-->
+{% block forum %}
+<table class="forum table table-hover">
+    <thead>
+        <tr>
+            <th>&nbsp;</th>
+            <th class="forum_name">Forum</th>
+            <th class="last_post">Last post</th>
+            <th class="posts_count">Counts</th>
+            <th class="topics_count">Topics</th>
+        </tr>
+    </thead>
 
-        <div class="row">
-
-            {% if user.is_authenticated %}
-                <div class="forum_list_menu span">
-                    <a href="{% url forum_subscription %}">My subscriptions</a>
-                </div>
-            {% endif %}
-
-            <div class="forum_search">
-                <form action="{% url search %}" method="get" class="form-search">
-                    <div class="input-append">
-                        {{ search_form.term }}
-                        <button class="btn" type="submit" >Search</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <div class="row header">
-            <div class="forum_icon">
-                &nbsp;
-            </div>
-            
-            <div class="forum_name">
-                <h3>Forum</h3>
-            </div>
-
-            <div class="last_post">
-                <h3>Last post</h3>
-            </div>
-
-            <div class="posts_count">
-                <h3>Counts</h3>
-            </div>
-
-            <div class="topics_count">
-                <h3>Topics</h3>
-            </div>
-
-        </div>
-        <hr>
-
+    <tbody>
         {% for forum in forum_list %}
-            <div class="row">
-                <div class="forum_icon">
-                    {% if forum.unread %}
-                        <a href="{{ forum.get_absolute_url }}" title="New posts" class="status_icon forum_unread"></a>
-                    {% else %}
-                        <a href="{{ forum.get_absolute_url }}" title="No new posts" class="status_icon forum_read"></a>
-                    {% endif %}
-                </div>
-                    
-                <div class="last_post">
-                    {% if forum.last_post %}
-                        <strong>{{ forum.last_post.profile }}</strong><br />
-                        <a href="{{ forum.last_post.get_absolute_url }}" title="Go to last post">{{ forum.last_post.date|timesince }} ago</a><br />
-                        <a href="{{ forum.last_post.topic.get_absolute_url }}" title="{{ forum.last_post.topic.name }}">{{ forum.last_post.topic.name|truncate:"24" }}</a>
-                    {% else %}
-                        <div class="empty">No posts</div>
-                    {% endif %}
-                </div>
-
-                <div class="posts_count">
-                    <div class="count">{{ forum.posts_count|intcomma }}</div>
-                </div>
-
-                <div class="topics_count">
-                    <div class="count">{{ forum.topics_count|intcomma }}</div>
-                </div>
-
-                <div class="forum_name">
-                    <h2><a href="{{ forum.get_absolute_url }}">{{ forum.name }}</a></h2>
-                    <div class="description">{{ forum.description }}</div>
-                </div>
-
-            </div>
-
-        <hr>
+        <tr>
+            <td class="status_icon">
+                {% if forum.unread %}
+                    <a href="{{ forum.get_absolute_url }}" title="New posts"><i class="fa fa-comments fa-3x"></i></a>
+                {% else %}
+                    <a href="{{ forum.get_absolute_url }}" title="No new posts"><i class="fa fa-comments-o fa-3x text-info"></i></a>
+                {% endif %}
+            </td>
+            <td class="forum_name">
+                <h2><a href="{{ forum.get_absolute_url }}">{{ forum.name }}</a></h2>
+                <div class="description">{{ forum.description }}</div>
+            </td>
+            <td class="last_post">
+                {% if forum.last_post %}
+                    <strong>{{ forum.last_post.profile.user.get_full_name }}</strong><br />
+                    <a href="{{ forum.last_post.get_absolute_url }}" title="Go to last post">{{ forum.last_post.date|timesince }} ago</a><br />
+                    <a href="{{ forum.last_post.topic.get_absolute_url }}" title="{{ forum.last_post.topic.name }}">{{ forum.last_post.topic.name|truncate:"24" }}</a>
+                {% else %}
+                    <div class="empty">No posts</div>
+                {% endif %}
+            </td>
+            <td class="posts_count">
+                <div class="count">{{ forum.posts_count|intcomma }}</div>
+            </td>
+            <td class="topics_count">
+                <div class="count">{{ forum.topics_count|intcomma }}</div>
+            </td>
+        </tr>
         {% endfor %}
+    </tbody>
+</table>
 
-        <div class="row-fluid">
-            <div class="new_topics span4">
-                <h3>New topics</h3>
-                <hr>
+<div class="row">
+    <div class="new_topics col-md-4">
+        <h3 class="page-header">New topics</h3>
 
-                <div class="list">
-                    {% for topic in new_topics %}
-                        <div class="pull-right">
-                            <a href="{{ topic.get_absolute_url }}" title="{{ topic.name }}">
-                                <strong>{{ topic.name|truncate:"47" }}</strong>
-                            </a>
-                        </div>
-
-                        <div class="count" title="Posts count">
-                            <strong>{{ topic.posts_count }}</strong>
-                        </div>
-
-                        <hr>
-
-                    {% empty %}
-                        <div class="row empty delimiter">
-                            No new topics
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <div class="popular_topics span4">
-                <h3>Popular topics</h3>
-                <hr>
-
-                <div class="list">
-                    {% for topic in popular_topics %}
-                            <div class="pull-right">
-                            <a href="{{ topic.get_absolute_url }}" title="{{ topic.name }}">
-                                <strong>{{ topic.name|truncate:"47" }}</strong>
-                            </a>
-                            </div>
-
-                            <div title="New posts count">
-                                <strong>+{{ topic.count }}</strong>
-                            </div>
-                    {% empty %}
-                            <p>No popular topics</p>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <div class="statistics span4">
-                <h3>Forum statistics</h3>
-                <hr>
-
-                <div class="list">
-                        <div class="pull-right">{{ total_posts_count|intcomma }}</div>
-                        <div><strong>Total posts</strong></div>
-                    <hr>
-                    
-                        <div class="pull-right">{{ total_topics_count|intcomma }}</div>
-                        <div><strong>Total topics</strong></div>
-                    <hr>
-
-                        <div class="pull-right">{{ total_users_count|intcomma }}</div>
-                        <div><strong>Total users</strong></div>
-                    <hr>
-                        <div class="pull-right">
-                            <a href="{{ novice_profile.get_absolute_url }}">{{ novice_profile.user.username }}</a>
-                        </div>
-                        <div><strong>New user</strong></div>
-                </div>
-            </div>
+        <div class="list-group">
+            {% for topic in new_topics %}
+            <a class="list-group-item" href="{{ topic.get_absolute_url }}" title="{{ topic.name }}">
+                <span class="badge">{{ topic.posts_count }}</span>
+                <strong>{{ topic.name|truncate:"47" }}</strong>
+            </a>
+            {% empty %}
+            <a class="list-group-item">No new topic</a>
+            {% endfor %}
         </div>
     </div>
+
+    <div class="popular_topics col-md-4">
+        <h3 class="page-header">Popular topics</h3>
+
+        <div class="list-group">
+            {% for topic in popular_topics %}
+            <a class="list-group-item" href="{{ topic.get_absolute_url }}" title="{{ topic.name }}">
+                <span class="badge">{{ topic.count }}</span>
+                <strong>{{ topic.name|truncate:"47" }}</strong>
+            </a>
+            {% empty %}
+            <a class="list-group-item">No popular topic</a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="statistics col-md-4">
+        <h3 class="page-header">Forum statistics</h3>
+
+        <ul class="list-group">
+            <li class="list-group-item">
+                <span class="badge">{{ total_posts_count|intcomma }}</span>
+                <strong>Total posts</strong>
+            </li>
+            <li class="list-group-item">
+                <span class="badge">{{ total_topics_count|intcomma }}</span>
+                <strong>Total topics</strong>
+            </li>
+            <li class="list-group-item">
+                <span class="badge">{{ total_users_count|intcomma }}</span>
+                <strong>Total users</strong>
+            </li>
+            <lt class="list-group-item">
+                <span class="badge">
+                    {{ novice_profile.user.get_full_name }}
+                </span>
+                <strong>New user</strong>
+            </li>
+        </ul>
+    </div>
+</div>
 {% endblock %}
 
 {% block footer_feeds %}
-    <div class="rss-link"><a href="{% url topics_feed %}">New topics</a></div> |
-    <div class="rss-link"><a href="{% url posts_feed %}">New posts</a></div>
+    <div class="rss-link">
+        <i class="fa fa-rss"></i>
+        <a href="{% url topics_feed %}">New topics</a></span> |
+        <a href="{% url posts_feed %}">New posts</a>
+    </div>
 {% endblock %}

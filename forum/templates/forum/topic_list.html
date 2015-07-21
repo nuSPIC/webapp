@@ -1,7 +1,7 @@
-{% extends "base.html" %}
+{% extends "forum_base.html" %}
 
-{% load lib_tags %}
 {% load forum_tags %}
+{% load webapp_tags %}
 {% load humanize %}
 
 {% block feeds %}
@@ -11,101 +11,95 @@
 
 {% block title %}Discussions &raquo; {{ forum.name }}{% endblock %}
 
-{% block extrahead %}
-<link href="{{ MEDIA_URL }}css/forum.css" type="text/css" rel="stylesheet" />
+{% block page-header %}Forum: {{ forum.name }}{% endblock %}
+
+{% block forum_nav %}
+<nav class="nav navbar">
+    {% if user.is_authenticated %}
+        <div class="pull-right">
+            <div class="btn-group">
+            <a role="button" class="" href="{% url subscribe_forum forum.id %}">
+                {% if subscribed %}
+                    <span title="Unsubscribe topic">Unsubscribe</span>
+                {% else %}
+                    <span title="Subscribe topic">Subscribe</span>
+                {% endif %}
+            </a>
+            &middot;
+            <a role="button" class="" href="{% url forum_mark_read forum.id %}" class="mark_read">Mark forum as read</a>
+            </div>
+        </div>
+
+        {% if forum_perms.can_add_topic %}
+            <a role="button" class="btn btn-default" href="{% url topic_add forum.id %}">
+                New topic
+            </a>
+        {% endif %}
+    {% endif %}
+</nav>
 {% endblock %}
 
-{% block content %}
-    <div id="topic_list">
-        <h2>{{ forum.name }}</h2>
-        <hr>
+{% block forum %}
+    {% if topic_list %}
+    <table id="topic_list" class="forum table table-hover">
+        <thead>
+            <tr>
+                <th class="topic_icon">&nbsp;</th>
+                <th class="topic_name"><strong>Topics</strong></th>
+                <th class="posts_count"><strong>Posts</strong></th>
+                <th><strong>Last post</strong></th>
+            </tr>
+        </thead>
 
-        <div class="breadcrumbs">&raquo; <a href="{% url forum %}">Discussions</a></div>
-
-        {% if user.is_authenticated %}
-            <div class="forum_menu">
-                <a href="{% url subscribe_forum forum.id %}">
-                    {% if subscribed %}
-                        <span title="Unsubscribe forum">Unsubscribe</span>
-                    {% else %}
-                        <span title="Subscribe forum">Subscribe</span>
-                    {% endif %}
-                </a>
-                &middot; <a href="{% url forum_mark_read forum.id %}" class="mark_read">Mark forum as read</a>
-            </div>
-        {% endif %}
-        
-        {% if forum_perms.can_add_topic %}
-            <div class="headline">
-                <a href="{% url topic_add forum.id %}">
-                    New topic
-                </a>
-            </div>
-        {% endif %}
-        
-        <div class="row header">
-            <div class="topic_icon">
-                &nbsp;
-            </div>
-            
-            <div class="topic_name">
-                <strong>Topics</strong>
-            </div>
-            
-            <div class="posts_count">
-                <strong>Posts</strong>
-            </div>
-            
-            <div>
-                <strong>Last post</strong>
-            </div>
-        </div>
-        
-        <div class="topics">
+        <tbody>
             {% for topic in topic_list.object_list %}
-                <div class="row">
-                    <hr>
-                    <div class="topic_icon">
-                        {% if topic.unread %}
-                            <a href="{% url unread_post_redirect topic.id %}" title="Go to first unread post" class="status_icon topic_unread{% if topic.is_sticky %}_sticky{% endif %}{% if topic.is_closed %}_closed{% endif %}"></a>
-                        {% else %}
-                            <a href="{{ topic.get_absolute_url }}" title="No new posts" class="status_icon topic_read{% if topic.is_sticky %}_sticky{% endif %}{% if topic.is_closed %}_closed{% endif %}"></a>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="topic_name">
-                        <div class="name"><a href="{{ topic.get_absolute_url }}">{{ topic.name }}</a></div>
-                        
-                        <div class="first_post">
-                            <div class="topic_pagination">
-                                {% topic_pagination topic %}
-                            </div>
-                            <a href="{{ topic.first_post.profile.get_absolute_url }}">{{ topic.first_post.profile }}</a> &raquo;
-                            {{ topic.first_post.date|timesince }} ago
+            <tr>
+                <td class="status_icon">
+                    {% if topic.unread %}
+                        <a href="{% url 'unread_post_redirect' topic.id %}" title="Go to first unread post" class="status_icon fa fa-comment fa-2x"></a>
+                    {% else %}
+                        <a href="{{ topic.get_absolute_url }}" title="No new posts"><i class="status_icon fa fa-comment-o fa-2x"></i></a>
+                    {% endif %}
+                    {% if topic.is_closed %}<i class="status_icon fa fa-lock fa-2x" title="The topic is closed."></i>{% endif %}
+                    {% if topic.is_sticky %}<i class="status_icon fa fa-thumb-tack fa-2x" title="The topic is sticky."></i>{% endif %}
+                </td>
+
+                <td class="topic_name">
+                    <div class="name"><a href="{{ topic.get_absolute_url }}">{{ topic.name }}</a></div>
+
+                    <div class="first_post">
+                        <div class="topic_pagination">
+                            {% topic_pagination topic %}
                         </div>
+                        <a href="{{ topic.first_post.profile.get_absolute_url }}">{{ topic.first_post.profile.user.get_full_name }}</a> &raquo;
+                        {{ topic.first_post.date|timesince }} ago
                     </div>
-                    
-                    <div class="posts_count">
-                        <div class="count">{{ topic.posts_count|intcomma }}</div>
-                    </div>
-                    
-                    <div class="last_post">
-                        <strong>{{ topic.last_post.profile }}</strong><br />
-                        <a href="{{ topic.last_post.get_absolute_url }}" title="Go to last post">{{ topic.last_post.date|timesince }} ago</a>
-                    </div>
-                </div>
-            {% empty %}
-                <div class="empty_forum">
-                    There are no topics in this forum
-                </div>
+                </td>
+
+                <td class="posts_count">
+                    <div class="count">{{ topic.posts_count|intcomma }}</div>
+                </td>
+
+                <td class="last_post">
+                    <strong>{{ topic.last_post.profile.user.get_full_name }}</strong><br />
+                    <a href="{{ topic.last_post.get_absolute_url }}" title="Go to last post">{{ topic.last_post.date|timesince }} ago</a>
+                </td>
+            </tr>
             {% endfor %}
-        </div>
-        
-        {% pagination topic_list "topic" %}
+        </tbody>
+    </table>
+    {% pagination topic_list 'topic' %}
+    {% else %}
+    <div class="empty_forum">
+        There are no topics in this forum
     </div>
+    {% endif %}
 {% endblock %}
 
 {% block footer_feeds %}
-    <div class="rss-link"><a href="{% url forum_topics_feed forum.id %}">New topics in forum</a></div> |
-    <div class="rss-link"><a href="{% url forum_posts_feed forum.id %}">New posts in forum</a></div>
+    <div class="rss-link">
+        <i class="fa fa-rss"></i>
+        <a href="{% url forum_topics_feed forum.id %}">New topics in forum</a> |
+        <a href="{% url forum_posts_feed forum.id %}">New posts in forum</a>
+    </div>
 {% endblock %}

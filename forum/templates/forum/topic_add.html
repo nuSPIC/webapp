@@ -1,39 +1,21 @@
-{% extends "base.html" %}
+{% extends "forum_form_base.html" %}
 
+{% load webapp_tags %}
 {% load forum_tags %}
 
 {% block title %}Discussions &raquo; {{ forum.name }} &raquo; New topic{% endblock %}
 
-{% block extrahead %}
-<link href="{{ MEDIA_URL }}css/forum.css" type="text/css" rel="stylesheet" />
-{% endblock %}
+{% block page-header %}New topic{% endblock %}
 
-{% block content %}
-    <h2 >New topic</h2>
-    <hr>
-
-    <div class="breadcrumbs">&raquo; <a href="{% url forum %}">Discussions</a> &raquo; <a href="{{ forum.get_absolute_url }}">{{ forum.name }}</a></div>
-
+{% block forum %}
     <div id="preview"></div>
 
     <form action="." method="post" class="form-horizontal" id="add_topic_form">
         {% csrf_token %}
-
         {{ topic_form.non_field_errors }}
 
-        <div class="fieldWrapper control-group {% if topic_form.help_text %}input-append{% endif %}">
-            <label class="control-label" for="{{ topic_form.name.auto_id }}">{{ topic_form.name.label }}</label>
-            <div class="controls">
-                {{ topic_form.name.errors }}
-                <div>
-                    {{ topic_form.name }}
-                    {% if topic_form.help_text %}<span class="add-on">?</span>{% endif %}
-                </div>
-                <span class="help_text">{{ topic_form.help_text }}</span>
-             </div>
-        </div>
-
-        {% post_editor post_form %}
+        {% crispy topic_form %}
+        {{ post_form }}
 
         {{ poll_formset.management_form }}
         {{ poll_formset.non_form_errors }}
@@ -41,33 +23,7 @@
         {% for poll_form in poll_formset.forms %}
             <div class="poll_edit">
                 {{ poll_form.non_field_errors }}
-                {{ poll_form.id }}
-                {{ poll_form.topic }}
-                {{ poll_form.DELETE }}
-
-                <div class="fieldWrapper control-group {% if poll_form.title.help_text %}input-append{% endif %} {{ fieldset.classes }}">
-                    <label class="control-label" for="{{ poll_form.title.auto_id }}">{{ poll_form.title.label }}</label>
-                    <div class="controls">
-                        {{ poll_form.title.errors }}
-                        <div>
-                            {{ poll_form.title }}
-                            {% if poll_form.title.help_text %}<span class="add-on">?</span>{% endif %}
-                        </div>
-                        <span class="help_text">{{ poll_form.title.help_text }}</span>
-                    </div>
-                </div>
-
-                <div class="fieldWrapper control-group {% if poll_form.expires.help_text %}input-append{% endif %} {{ fieldset.classes }}">
-                    <label class="control-label" for="{{ poll_form.expires.auto_id }}">{{ poll_form.expires.label }}</label>
-                    <div class="controls">
-                        {{ poll_form.expires.errors }}
-                        <div>
-                            {{ poll_form.expires }}
-                            {% if poll_form.expires.help_text %}<span class="add-on">?</span>{% endif %}
-                        </div>
-                        <span class="help_text">{{ poll_form.expires.help_text }}</span>
-                    </div>
-                </div>
+                {{ poll_form }}
 
                 <div class="choices">
                     <div class="choices_title">
@@ -78,35 +34,25 @@
                     {{ poll_form.choice_formset.non_form_errors }}
 
                     {% for choice_form in poll_form.choice_formset.forms %}
-                        <div class="choice">
-                            {{ choice_form.non_field_errors }}
-                            {{ choice_form.id }}
-                            {{ choice_form.poll }}
-
-                            <div class="fieldWrapper control-group">
-                                <label class="control-label" for="{{ field.auto_id }}">{{ forloop.counter }}.</label>
-                                <div class="controls">
-                                    {{ field.errors }}
-                                    {{ choice_form.title }}
-                                </div>
-                            </div>
-
-                        </div>
+                    <div class="choice">
+                        {{ choice_form.non_field_errors }}
+                        {{ choice_form }}
+                    </div>
                     {% endfor %}
                 </div>
 
-                <div class="btn-group">
-                    <button type="submit" class="btn add_choice">Add poll choice</button>
-                    <button type="submit" class="btn delete_poll">Delete poll</button>
+                <div class="form-actions btn-group">
+                    <button type="submit" class="btn btn-default add_choice">Add poll choice</button>
+                    <button type="submit" class="btn btn-default delete_poll">Delete poll</button>
                 </div>
 
             </div>
         {% endfor %}
 
-        <div class="btn-group">
-            <button type="submit" class="btn">Create topic</button>
-            <button type="submit" class="btn"" id="add_poll_button">Add poll</button>
-            <button type="submit" class="btn" id="preview_button">Preview</button>
+        <div class="form-actions btn-group">
+            <button type="submit" class="btn btn-default">Create topic</button>
+            <button type="submit" class="btn btn-default" id="add_poll_button">Add poll</button>
+            <button type="submit" class="btn btn-default" id="preview_button">Preview</button>
         </div>
 
     </form>
@@ -114,10 +60,10 @@
 
 
 {% block extrascript %}
-<script type="text/javascript" src="{{ MEDIA_URL }}js//plugins/jquery.scrollto.js"></script>
+<script type="text/javascript" src="/static/js/plugins/jquery.scrollto.js"></script>
+<script type="text/javascript" src="/static/js/plugins/jquery.sceditor.bbcode.min.js"></script>
 
 <script type="text/javascript" language="javascript">
-//<![CDATA[
     $(document).ready(function(){
         // Hidden text collapse toggle
         $('.hidden-header').on('click', function(e){
@@ -129,9 +75,9 @@
             e.preventDefault();
             $(this).addClass('disabled');
             $(this).text('Wait...');
-            
+
             $.post(
-                '{% url post_preview %}',
+                "{% url post_preview %}",
                 $('#add_topic_form').serialize(),
                 function(data){
                     $('#preview').html(data).scrollTo(500);
@@ -145,7 +91,7 @@
 
         // Hide delete poll checkbox
         $('input[id$=-DELETE]').hide();
-        
+
         // Hide all polls forms except filled
         $('div.poll_edit').each(function(){
             var poll = $(this);
@@ -170,7 +116,7 @@
         $('button#add_poll_button').click(function(e){
             e.preventDefault();
             var poll = $('div.poll_edit:not(:visible):first');
-            
+
             // Hide poll choices except first two
             poll.find('div.choice').each(function(index){
                 if (index >= 2) {
@@ -182,7 +128,7 @@
             poll.find('input:text').val('');
             poll.find('input[name$=-DELETE]').removeAttr('checked');
             poll.show();
-            
+
             if (!poll.next('.poll_edit').length) {
                 $(this).hide()
             }
@@ -208,6 +154,42 @@
             }
         });
     });
-//]]>
+
+    var loadCSS = function(url, callback){
+        var link = document.createElement('link');
+        link.type = 'text/css';
+        link.rel = 'stylesheet';
+        link.href = url;
+        link.id = 'theme-style';
+
+        document.getElementsByTagName('head')[0].appendChild(link);
+
+        var img = document.createElement('img');
+        img.onerror = function(){
+            if(callback) callback(link);
+        }
+        img.src = url;
+    }
+
+    $(document).ready(function(){
+        $("textarea.bbcode").sceditor({
+            plugins: 'bbcode',
+            style: "/static/css/jquery.sceditor.default.min.css",
+            emoticonsRoot: "/static/images/",
+            resizeWidth: false,
+            height: 300,
+            width: 'auto',
+            toolbar: "bold,italic,underline,strike,subscript,superscript|left,center,right,justify|size,color,removeformat|bulletlist,orderedlist|code,quote|horizontalrule,image,email,link,unlink|emoticon,youtube,date,time|source"
+        });
+
+        $('textarea.bbcode').sceditor('instance').nodeChanged(function(e) {
+            $('textarea.bbcode').sceditor('instance').updateOriginal();
+        });
+
+        $('textarea.bbcode').sceditor('instance').selectionChanged(function(e) {
+            $('textarea.bbcode').sceditor('instance').updateOriginal();
+        });
+
+    });
 </script>
 {% endblock %}

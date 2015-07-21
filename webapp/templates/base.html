@@ -1,0 +1,128 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Neural System Prediction and Identification Challenge" />
+    <meta name="keywords" content="nuSPIC, NEST, g-node, BCF" />
+
+    <link type="text/css" rel="stylesheet" href="/static/css/bootstrap.min.css" />
+    <link type="text/css" rel="stylesheet" href="/static/css/font-awesome.min.css" />
+    <link type="text/css" rel="stylesheet" href="/static/css/default.css" />
+    {%block css %}{% endblock %}
+
+    <title>{% block title %}{% endblock %}</title>
+    <link type="image/x-icon" rel="icon" href="/static/nuSPIC_blue.ico" />
+    <link type="image/x-icon" rel="shortcut icon" href="/static/nuSPIC_blue.ico" />
+    {% block feeds %}{% endblock %}
+</head>
+
+<body>
+    {% load webapp_tags %}
+
+    <header>
+        <nav class="navbar navbar-inverse navbar-static-top" style="margin-bottom:0">
+            <div class="container-fluid">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="{% url mainpage %}">nuSPIC</a>
+                </div>
+
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+                        <li title="Home"><a href="{% url mainpage %}">
+                            <i class="fa fa-home"></i> <span class="hidden-lg hidden-md hidden-sm">Home</span></a></li>
+                        <li class="" title="Networks"><a href="{% url network_list %}">
+                            <i class="fa fa-leaf"></i> <span class="hidden-md hidden-sm">Networks</span>
+                            <span class="sr-only">(current)</span></a></li>
+                        <li class="" title="Discussions"><a href="{% url forum %}">
+                            <span class="glyphicon glyphicon-tree-deciduous"></span> <span class="hidden-md hidden-sm">Discussions</span></a></li>
+                        <li class="" title="Tutorials"><a href="#">
+                            <i class="fa fa-graduation-cap"></i> <span class="hidden-md hidden-sm">Tutorials</span></a></li>
+                        <li class="" title="News"><a href="{% url news_archive %}">
+                            <i class="fa fa-newspaper-o"></i> <span class="hidden-md hidden-sm">News</span></a></li>
+                        <li class="" title="Community"><a href="{% url accounts %}">
+                            <i class="fa fa-users"></i> <span class="hidden-md hidden-sm">Community</span></a></li>
+                        <li class="" title="About"><a href="/about/">
+                            <i class="fa fa-info-circle"></i> <span class="hidden-md hidden-sm">About</span></a></li>
+                        <li class="" title="FAQ"><a href="/faq/">
+                            <i class="fa fa-question-circle"></i> <span class="hidden-md hidden-sm">FAQ</span></a></li>
+                    </ul>
+
+                    <ul class="nav navbar-nav navbar-right">
+                        {% if user.is_authenticated %}
+                        {% if user.is_staff %}
+                        <li><a href="/admin/">Admin</a></li>
+                        {% endif %}
+                        <li class="">
+                            <a href="{% url profile user.profile.id %}">
+                                <i class="fa fa-user"></i> {{user.get_full_name }}
+                            </a>
+                        </li>
+                        <li><a href="{% url logout %}">
+                                <i class="fa fa-sign-out"></i> Logout
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="">
+                            <a href="{% url login %}">
+                                <i class="fa fa-sign-in"></i> Login
+                            </a>
+                        </li>
+                        <li class="">
+                            <a href="{% url registration %}">
+                                <i class="fa fa-edit"></i> Register
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+
+                </div><!-- /.navbar-collapse -->
+            </div>
+        </nav>
+    </header>
+
+    {% block content %}{% endblock %}
+
+    {% block footer %}
+    <footer class="footer" style="margin-top:30px">
+        <div class="container text-center">
+            {% block footer_feeds %}{% endblock %}
+            <div><i class="fa fa-copyright"></i> Copyright 2011-2015 by the nuSPIC team. License: BSD 2-clause.</div>
+            <a target="_blank" href="http://getbootstrap.com/" >Bootstrap 3.3.5.</a> licensed under
+            <a target="_blank" href="http://www.apache.org/licenses/LICENSE-2.0">Apache License v2.0</a>.
+        </div>
+    </footer>
+    {% endblock %}
+
+    <!-- child of the body tag -->
+    <span id="top-link-block" class="hidden">
+        <a href="#top" class="well well-sm" onclick="$('html,body').animate({scrollTop:0},'slow');return false;">
+            <i class="glyphicon glyphicon-chevron-up"></i> Back to Top
+        </a>
+    </span><!-- /top-link-block -->
+
+    <script type="text/javascript" src="/static/js/vendor/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="/static/js/plugins/jquery-ui.min.js"></script>      <!-- post_list -->
+    <script type="text/javascript" src="/static/js/vendor/bootstrap.min.js"></script>
+    <script>
+    // Only enable if the document has a long scroll bar
+    // Note the window height + offset
+    if ( ($(window).height() + 100) < $(document).height() ) {
+        $('#top-link-block').removeClass('hidden').affix({
+            // how far to scroll down before link "slides" into view
+            offset: {top:100}
+        });
+    }
+    </script>
+    {% block extrascript %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,82 @@
+html {
+    overflow: auto;
+}
+
+body {
+    font-family: Verdana,Arial,Helvetica,sans-serif;
+    font-size: 13px;
+}
+
+.jumbotron {
+    position: relative;
+    background: transparent;
+    padding: 0;
+}
+
+.parallax-window {
+    min-height: 350px;
+    background: transparent;
+}
+
+#logo div{
+    text-align: center;
+    vertical-align: middle;
+    margin: 10px 0;
+}
+
+.footer {
+    /*margin-top: 20px;*/
+    border-top: 1px solid #e5e5e5;
+    padding: 30px;
+    background: #f5f5f5;
+    width: 100%;
+}
+
+#top-link-block.affix-top {
+    position: absolute; /* allows it to "slide" up into view */
+    bottom: -82px;
+    right: 10px;
+}
+
+#top-link-block.affix {
+    position: fixed; /* keeps it on the bottom once in view */
+    bottom: 18px;
+    right: 10px;
+}
+
+
+/* Flatpages
+*********************/
+
+.flatpage {
+    font-size: 1.2em;
+    line-height: 1.5em;
+}
+
+/* Form
+*********************/
+
+.help-block {
+    font-size: 10px;
+    margin: 2px;
+}
+
+.form-actions {
+    margin: 10px;
+}
+
+/* News
+*********************/
+
+.news-block {
+}
+
+.news-block .news-date {
+    float: left;
+    width: 150px;
+}
+.news-block .news-separator {
+    float: left;
+    padding-left: 0;
+    padding-right: 25px;
+}

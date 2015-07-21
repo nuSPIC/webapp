@@ -5,6 +5,7 @@ import re
 import time
 
 from celery.contrib.abortable import AbortableAsyncResult
+from celery.result import AsyncResult
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -12,13 +13,13 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 
-from lib.decorators import render_to
-from lib.delivery import networkx
-from lib.helpers import get_flatpage_or_none
-from lib.tasks import Simulation
+from webapp.decorators import render_to
+from webapp.helpers import get_flatpage_or_none
 
-from network.forms import NetworkForm, NetworkCommentForm, LinkForm, NodesCSVForm, NodeForm
-from network.models import SPIC, Network
+from .delivery import networkx
+from .forms import NetworkForm, NetworkCommentForm, LinkForm, NodesCSVForm, NodeForm
+from .models import SPIC, Network
+from .tasks import SimulationTask
 
 
 @render_to('network_list.html')
@@ -30,7 +31,7 @@ def network_list(request):
     return {
         'flatpage': flatpage,
         'network_list': network_list,
-    }  
+    }
 
 
 @login_required
@@ -38,7 +39,7 @@ def network_initial(request, SPIC_group, SPIC_id):
     """ Get the first network or create a copied network from architect."""
     SPIC_obj = get_object_or_404(SPIC, group=SPIC_group, local_id=SPIC_id)
     network_obj, created = Network.objects.get_or_create(user_id=request.user.pk, SPIC=SPIC_obj, local_id=0, deleted=False)
-    
+
     if created is True:
         # Check if prototype exists
         prototype = get_object_or_404(Network, user_id=0, SPIC=SPIC_obj)
@@ -228,36 +229,39 @@ def simulate(request, network_id):
                 sim_obj.status_json = json.dumps(root_status)
                 sim_obj.save()
                 time.sleep(1)
-                task = Simulation.delay(sim_obj.pk)
+                task = SimulationTask.delay(sim_obj.pk)
 
                 return HttpResponse(task.task_id)
 
     return HttpResponse()
 
-def abort(request, task_id):
+# Celery event handler
+def status(request):
+    res = AsyncResult(request.GET['task_id'])
+    res.ready()
+    return HttpResponse(json.dumps({'status': res.status, 'result': res.result }), content_type='application/json')
 
-    abortable_async_result = AbortableAsyncResult(task_id)
+def abort(request):
+    abortable_async_result = AbortableAsyncResult(request.GET['task_id'])
     abortable_async_result.abort()
-
     return HttpResponse()
 
 def data(request, network_id):
     network_obj = get_object_or_404(Network, pk=network_id)
-    
+
     response = {
         'nodes': network_obj.nodes(),
         'links': network_obj.links(),
         'result' : {}
     }
-    
+
     if network_obj.has_voltmeter:
         response['result']['voltmeter'] = network_obj.voltmeter_data()
-        
+
     if network_obj.has_spike_detector:
         response['result']['spike_detector'] = network_obj.spike_detector_data()
-    
+
     response = HttpResponse(json.dumps(response), mimetype='application/force-download')
     response['Content-Disposition'] = 'attachment; filename=%s_%s_%s.json' %(network_obj.date_simulated.strftime('%y%m%d'), network_obj.SPIC, network_obj.local_id)
 
     return response
-

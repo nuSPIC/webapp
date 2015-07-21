@@ -4,7 +4,7 @@ You have requested to alter the primary e-mail for your account with the login n
 
 Otherwise, here is the link to confirm your new e-mail address:
 
-{{ protocol }}://{{ domain }}{% url email_change_confirm uidb36=uid token=token %}
+{{ protocol }}://{{ domain }}{% url 'email_change_confirm' uidb36=uid token=token %}
 
 Please follow it in your browser to change your primary e-mail address.
 

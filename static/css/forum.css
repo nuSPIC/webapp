@@ -1,0 +1,153 @@
+.forum td {
+    vertical-align: middle !important;
+}
+
+
+/* Forum and topics icons
+***********************************/
+
+.status_icon .fa:hover {
+    text-decoration: none;
+}
+
+
+#topic_list .topic_name .first_post .topic_pagination {
+    float: right;
+}
+#topic_list .topic_name .first_post .topic_pagination .page_link, #topic_list .topic_name .first_post .topic_pagination .page_link:visited {
+    background-color: #eeeeee;
+    color: #ffffff;
+    font-size: 0.9em;
+    font-weight: bold;
+    padding: 1px 5px;
+    text-align: center;
+}
+#topic_list .topic_name .first_post .topic_pagination .page_link:hover {
+    background-color: #777777;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+
+/* Topic actions
+***************************/
+
+.topic_action {
+
+}
+
+
+/* Post
+******************************/
+
+#post_list {
+    padding-bottom: 5px;
+}
+
+    #post_list .topic_actions {
+    }
+
+    #post_list .topic_menu {
+        float: right;
+    }
+
+.post-striped > .post:nth-child(2n+1) {
+   background-color: #f8f8f8;
+}
+
+.post {
+	padding : 10px 10px 10px 0px;
+	overflow: hidden;
+}
+
+.anchor {
+	position  : absolute;
+	margin-top: -15%;
+}
+
+    .post .date {
+        text-align: right;
+        font-size: small;
+        color: #AAAAAA;
+    }
+
+    .post .profile {
+    }
+
+        .post .profile .username {
+            font-weight: bold;
+        }
+
+            .post .profile .username a.insert_username {
+                text-decoration: none;
+                border-bottom: 1px dashed;
+            }
+
+    .post .offset {
+        padding-top: 25px;
+    }
+
+    .post .body {
+        text-align: justify;
+    }
+
+        .post .body .actions {
+            color	   : #AAAAAA;
+            font-size  : small;
+            padding-top: 10px;
+        }
+
+        .post .body ul,
+        .post .body ol {
+            padding: 0px 25px;
+        }
+
+        .post .body li {
+            padding: 2px 0px;
+        }
+
+        .post .body big {
+            font-weight: bold;
+        }
+
+        .post .body blockquote {
+            background-color: #FFFFD0;
+            padding: 5px 10px 5px 30px;
+            margin: 5px 0px;
+            border-top: 1px solid #CCCCCC;
+            border-bottom: 1px solid #CCCCCC;
+            font-size: small;
+        }
+
+        .post .body hr {
+            color: #BBBBBB;
+        }
+
+        .post .body img {
+            padding: 2px 7px;
+        }
+
+        .post .body .video {
+            text-align: center;
+            padding: 2px 0px;
+        }
+
+        .post .body .hidden-header {
+            font-size       : 0.9em;
+            font-weight     : bold;
+            color           : #FFFFFF;
+            background-color: #EEEEEE;
+            padding         : 3px 15px;
+            margin-top      : 5px;
+            cursor          : pointer;
+        }
+
+        .post .body .hidden-header:hover {
+            color           : #FFFFFF;
+            background-color: #777777;
+        }
+
+        .post .body .hidden-text {
+            border: 1px solid #EEEEEE;
+            padding: 7px;
+        }

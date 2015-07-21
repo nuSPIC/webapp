@@ -1,18 +1,16 @@
-# coding: utf-8
-
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 
-from news.models import News
-from lib.decorators import render_to
-from lib.helpers import get_flatpage_or_none
+from webapp.decorators import render_to
+from webapp.helpers import get_flatpage_or_none
 
+from .models import News
 
 @render_to('mainpage.html')
 def mainpage(request):
     """
     Site main page
-    
+
     Shows content from flatpage and latest news list
     """
 

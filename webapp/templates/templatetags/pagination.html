@@ -1,0 +1,45 @@
+{% load humanize %}
+
+{% if page.has_other_pages %}
+    <nav>
+        <ul class="pagination">
+            {% if page.has_previous %}
+            <li>
+                <a href="?page={{ page.previous_page_number }}{{ query_string }}" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+            </li>
+            {% else %}
+            <li class="disabled"><a aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
+            {% endif %}
+
+            {% if left_range %}
+            {% for i in left_range %}
+            <li><a href="?page={{ i }}{{ query_string }}">{{ i }}</a></li>
+            {% endfor %}
+            <li class="disabled"><a class="break">...</a></li>
+            {% endif %}
+
+            {% for i in main_range %}
+            <li {% if page.number == i %}class="active"{% endif %}><a href="?page={{ i }}{{ query_string }}">{{ i }}</a></li>
+            {% endfor %}
+
+            {% if right_range %}
+            <li class="disabled"><a class="break">...</a></li>
+            {% for i in right_range %}
+            <li><a href="?page={{ i }}{{ query_string }}">{{ i }}</a></li>
+            {% endfor %}
+            {% endif %}
+
+            {% if page.has_next %}
+            <li>
+                <a href="?page={{ page.next_page_number }}{{ query_string }}" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+            </li>
+            {% else %}
+            <li class="disabled"><a aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>
+            {% endif %}
+        </ul>
+
+        <span class="pull-right">
+            ({{ page.paginator.count|intcomma }} {{ objects_caption }}{{ page.paginator.count|pluralize }})
+        </apan>
+    </nav>
+{% endif %}

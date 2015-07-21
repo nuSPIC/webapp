@@ -1,0 +1,27 @@
+
+/* Nodes Table, Weights table, Delay table
+************************/
+
+tr {
+    cursor: pointer;
+}
+
+tr.active td {
+    background-color: #b8dc6f; #fff2a8;
+}
+
+/*Connection matrix
+************************/
+
+/*hide rows*/
+#connection_matrix tr.spike_detector, #connection_matrix tr.spike_detector td {
+    display: none;
+}
+/*hide cols*/
+#connection_matrix th.voltmeter, #connection_matrix td.voltmeter {
+    display: none;
+}
+/*hide cols*/
+#connection_matrix th.input, #connection_matrix td.input {
+    display: none;
+}

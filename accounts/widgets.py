@@ -1,5 +1,3 @@
-# coding: utf-8
-
 from django.forms.widgets import Widget
 from django.utils.safestring import mark_safe
 from django.conf import settings
@@ -15,5 +13,5 @@ class ReCaptcha(Widget):
         return mark_safe(u'%s' % captcha.displayhtml(settings.RECAPTCHA_PUBLIC_KEY))
 
     def value_from_datadict(self, data, files, name):
-        return [data.get(self.recaptcha_challenge_name, None), 
+        return [data.get(self.recaptcha_challenge_name, None),
             data.get(self.recaptcha_response_name, None)]

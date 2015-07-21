@@ -1,24 +1,17 @@
-{% extends "base.html" %}
+{% extends "forum_base.html" %}
 
 {% load forum_tags %}
 
 {% block title %}Discussions &raquo; {{ forum.name }} &raquo; Move topic{% endblock %}
 
-{% block extrahead %}
-<link href="{{ MEDIA_URL }}css/forum.css" type="text/css" rel="stylesheet" />
-{% endblock %}
+{% block page-header %}Move topic{% endblock %}
 
-{% block content %}
-    <h2>Move topic</h2>
-    <hr>
-
-    <div class="breadcrumbs">&raquo; <a href="{% url forum %}">Discussions</a> &raquo; <a href="{{ forum.get_absolute_url }}">{{ forum.name }}</a> &raquo; <a href="{{ topic.get_absolute_url }}">{{ topic.name }}</a></div>
-
-    <form action="." method="post" id="move_topic_form">
+{% block forum %}
+    <form id="move_topic_form" class="form-horizontal"  action="." method="post">
         {% csrf_token %}
 
-        {{ topic_form.as_div }}
+        {{ topic_form }}
 
-        <button type="submit" class="btn">Move topic</button>
+        <button type="submit" class="btn btn-default">Move topic</button>
     </form>
 {% endblock %}

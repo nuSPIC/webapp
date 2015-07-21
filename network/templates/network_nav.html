@@ -1,0 +1,66 @@
+{% load webapp_tags %}
+
+<nav>
+<div class="nav navbar" style="margin-bottom:0">
+    <div class="breadcrumb" style="margin-bottom:0">
+        <a href="{% url network_list %}">Network</a>
+         &raquo; <span title="{{ SPIC_obj.description }}"><i class="fa fa-leaf"></i> {{ SPIC_obj.title }}</span> &raquo;
+         <span class="dropdown">
+             <button id="dropdownHistory" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                 {{ network_obj.local_id }} <span id="network_label">{{ network_obj.label|default_if_none:'' }}</span>
+                ( <i class="fa fa-history"></i> {{ network_obj.date_simulated|timesince|default:"not simulated" }}{% if network_obj.date_simulated %} ago{% endif %} )
+                <span class="caret"></span>
+            </button>
+
+             <ul id="history-list" class="dropdown-menu" aria-labelledby="dropdownHistory">
+                 <li>
+                     <a href="{% url network_history SPIC_obj.group SPIC_obj.local_id %}" tabindex="-1">
+                         Overview
+                     </a>
+                 </li>
+                 {% for network in network_list %}
+                 <li id="history_{{ network.local_id }}">
+                     <a id="{{ network.local_id }}" href="{% url network SPIC_obj.group SPIC_obj.local_id network.local_id|default_if_none:0 %}" tabindex="-1">
+                         {% if network %}
+                             <span class="pull-right"><i class="favorite {% if network.favorite %}fa fa-thumbs-up{% endif %}"></i></span>
+                             <span style="display: inline-block; width: 15px"><b>{{ network.local_id }}</b></span>
+                             <span style="margin: 0 10px">{{ network.date_simulated|timesince|default:"not simulated" }}{% if network.date_simulated %} ago {% endif %}</span>
+                         {% else %}
+                             NaN - no network found
+                         {% endif %}
+                     </a>
+                 </li>
+                 {% endfor %}
+
+             </ul>
+         </span>
+         <a role="button" class="btn btn-default btn-xs" href="{% url network SPIC_obj.group SPIC_obj.local_id 0 %}"><i class="fa fa-reply"></i> Reset</a>
+
+         <div class="pull-right">
+             <span><i class="fa fa-th"></i></span>
+             <span><i class="fa fa-th-large"></i></span>
+             <button id="network-comment" class="btn btn-default btn-xs" data-toggle="button"><i class="fa fa-edit"></i> Comment</button>
+             <button id="network-like" class="btn btn-default btn-xs {% if network_obj.favorite %}hide fade{% endif %}"><i class="fa fa-thumbs-o-up"></i> Like</button>
+             <button id="network-dislike" class="btn btn-default btn-xs {% if not network_obj.favorite %}hide fade{% endif %}"><i class="fa fa-thumbs-o-down"></i> Dislike</button>
+        </div>
+
+        {% if network_obj.SPIC.solution %}
+            <a href="/network/{{network_obj.SPIC.group}}/{{network_obj.SPIC.local_id}}/solution/">
+                Solution
+            </a>
+        {% endif %}
+    </div>
+    
+    <div id="network-comment-form" class="hide fade">
+        <div class="container">
+            <div class="message"></div>
+            <form id="id-comment-form" class="form-horizontal" action="." method="POST">
+                {% csrf_token %}
+                {% crispy comment_form %}
+                <button type="submit" class="form-actions btn btn-default">Save</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+</nav>

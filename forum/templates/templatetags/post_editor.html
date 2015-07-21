@@ -1,48 +1,9 @@
-<!--<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.textarearesizer.compressed.js"></script>-->
-<!--<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.bbcodeeditor-1.0.js"></script>-->
-<!--<script type="text/javascript" language="javascript">-->
-<!--//<![CDATA[-->
-<!--    $(document).ready(function(){-->
-<!--        $('textarea.resizable:not(.processed)').TextAreaResizer();-->
-<!--        $('textarea.bbcode').bbcodeeditor(-->
-<!--        {-->
-<!--            bold:$('.bold'),italic:$('.italic'),underline:$('.underline'),hidden_text:$('.hidden_text'),link:$('.link'),quote:$('.quote'),-->
-<!--            video:$('.video'),image:$('.image'),usize:$('.usize'),dsize:$('.dsize'),nlist:$('.nlist'),blist:$('.blist'),litem:$('.litem'),-->
-<!--            back:$('.bb-back'),forward:$('.bb-forward'),back_disable:'bb-btn bb-back_disable',forward_disable:'bb-btn bb-forward_disable',-->
-<!--            exit_warning:false-->
-<!--        });-->
-<!--    });-->
-<!--//]]>-->
-<!--</script>-->
-
-<!--<div style="padding: 3px 0; overflow:hidden">-->
-<!--    <div class="bb-btn bold" title="Bold"></div>-->
-<!--    <div class="bb-btn italic" title="Italic"></div>-->
-<!--    <div class="bb-btn underline" title="Underline"></div>-->
-<!--    <div class="bb-btn hidden_text" title="Hidden text"></div>-->
-<!--    <div class="bb-btn link" title="Link"></div>-->
-<!--    <div class="bb-btn quote" title="Quote"></div>-->
-<!--    <div class="bb-btn image" title="Image"></div>-->
-<!--    <div class="bb-btn video" title="Video"></div>-->
-<!--    <div class="bb-btn usize" title="Increase font size"></div>-->
-<!--    <div class="bb-btn dsize" title="Decrease font size"></div>-->
-<!--    <div class="bb-btn nlist" title="Numbered list"></div>-->
-<!--    <div class="bb-btn blist" title="Bulleted list"></div>-->
-<!--    <div class="bb-btn litem" title="List item"></div>-->
-<!--    <div class="bb-btn bb-back" title="Undo last action"></div>-->
-<!--    <div class="bb-btn bb-forward" title="Redo last action"></div>-->
-<!--</div>-->
-
-
-<link rel="stylesheet" type="text/css" media="all" href="{{ MEDIA_URL }}/themes/default.min.css" />
-
 <style>
 .sceditor-container {
     margin-bottom: 10px;
 }
 </style>
-
-<script src="{{ MEDIA_URL }}js/plugins/jquery.sceditor.bbcode.min.js"></script>
+<script type="text/javascript" src="/static/js/plugins/jquery.sceditor.bbcode.min.js"></script>
 <script>
 //<![CDATA[
     var loadCSS = function(url, callback){
@@ -65,23 +26,13 @@
         var initEditor = function() {
             $("textarea.bbcode").sceditor({
                 plugins: 'bbcode',
-                style: "{{ MEDIA_URL}}css/jquery.sceditor.default.min.css",
-                emoticonsRoot: "{{ MEDIA_URL}}/img/",
+                style: "/static/css/jquery.sceditor.default.min.css",
+                emoticonsRoot: "/static/images/",
                 resizeWidth: false,
                 height: 300,
                 toolbar: "bold,italic,underline,strike,subscript,superscript|left,center,right,justify|size,color,removeformat|bulletlist,orderedlist|code,quote|horizontalrule,image,email,link,unlink|emoticon,youtube,date,time|source"
             });
         }
-
-<!--        $("#theme").change(function() {-->
-<!--            var theme = "{{ MEDIA_URL }}/themes/" + $(this).val() + ".min.css";-->
-
-<!--            $("textarea.bbcode").sceditor("instance").destroy();-->
-<!--            $("link:first").remove();-->
-<!--            $("#theme-style").remove();-->
-
-<!--            loadCSS(theme, initEditor);-->
-<!--        });-->
 
         initEditor();
 
@@ -96,19 +47,3 @@
     });
 //]]>
 </script>
-
-<!--<div>-->
-<!--    <label for="theme">Theme:</label>-->
-<!--    <select id="theme">-->
-<!--        <option value="default">Default</option>-->
-<!--        <option value="modern">Modern</option>-->
-<!--        <option value="office-toolbar">Office Toolbar</option>-->
-<!--        <option value="office">Office</option>-->
-<!--        <option value="square">Square</option>-->
-<!--    </select>-->
-<!--</div>-->
-
-{{ post_form.as_div }}
-
-
-

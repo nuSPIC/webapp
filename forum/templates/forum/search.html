@@ -1,71 +1,67 @@
-{% extends "base.html" %}
+{% extends "forum_base.html" %}
 
-{% load lib_tags %}
+{% load humanize %}
+{% load webapp_tags %}
 {% load forum_tags %}
 {% load forum_filters %}
-{% load humanize %}
 
 {% block title %}Discussions &raquo; Search{% endblock %}
 
-{% block extrahead %}
-<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/forum.css"/>
-{% endblock %}
+{% block page-header %}Search results{% endblock %}
 
-{% block content %}
-<div id="search_results">
-    <h2>Search results</h2>
-    <hr>
-
-    <div class="breadcrumbs">&raquo; <a href="{% url forum %}">Discussions</a></div>
-
+{% block forum_nav %}
+<nav class="nav navbar">
     <div class="forum_search">
-        <form action="{% url search %}" method="get" class="form-search">
-            <div class="input-append">
-                {{ search_form.non_field_errors }}
-                {{ search_form.term.errors }}
-                {{ search_form.term }}
-                <button class="btn" type="submit" >Search</button>
-            </div>
+        <form action="{% url 'search' %}" method="get" class="form-search form-inline">
+            {{ search_form.non_field_errors }}
+            {{ search_form }}
+            <button class="btn btn-default" type="submit" >Search</button>
         </form>
     </div>
-            
+</nav>
+{% endblock %}
+
+{% block forum %}
+<div id="search_results">
+
     <div class="posts">
         {% for post in post_list.object_list %}
-            {% ifchanged %}
-                <h3>{{ post.topic }}</h3>
-            {% endifchanged %}
-            <hr>
+        {% ifchanged %}
+            <h3 class="page-header">{{ post.topic }}</h3>
+        {% endifchanged %}
+        <div class="post row">
 
-            <div class="post">
-                <div id="post{{ post.id }}" class="anchor">&nbsp;</div>
-                
-                <div class="date">
-                    {{ post.date|timesince }} ago
+            <div class="date">
+                {{ post.date|timesince }} ago
+            </div>
+
+            <div class="profile row col-lg-2 col-md-2 col-sm-2">
+                <div class="username col-lg-12 col-md-12 col-sm-12 col-xs-3">
+                    <a href="#" class="insert_username" title="Insert username in the new post form">{{ post.profile.user.get_full_name }}</a>
                 </div>
 
-                <div class="profile">
-                    <div class="username">
-                        <a href="#" class="insert_username">{{ post.profile.user.username }}</a>
-                    </div>
-                    
-                    <div class="status">
-                        <span class="member_{{ post.profile.forum_group.slug }}">{{ post.profile.forum_group.member_title }}</span><br />
-                        Posts count: {{ post.profile.post_count|intcomma }}
-                    </div>
-                    
-                    <div class="links">
-                        <a href="{{ post.profile.get_absolute_url }}" title="Go to profile">Profile</a>
-                    </div>
+                <div class="status col-lg-12 col-md-12 col-sm-12 col-xs-3">
+                    <span class="member_{{ post.profile.forum_group.slug }}">{{ post.profile.forum_group.member_title }}</span>
                 </div>
-                
-                <div class="body">
-                    {{ post.message_html|highlight:search_term|safe }}
-                    
-                    <div class="actions">
-                        <a href="{{ post.get_absolute_url }}" title="Permanent link">Link</a>
-                    </div>
+
+                <div class="counts col-lg-12 col-md-12 col-sm-12 col-xs-3">
+                    Posts count: {{ post.profile.post_count|intcomma }}
+                </div>
+
+                <div class="links col-lg-12 col-md-12 col-sm-12 col-xs-3">
+                    <a href="{{ post.profile.get_absolute_url }}" title="Go to profile">Profile</a>
                 </div>
             </div>
+
+            <div class="body col-lg-10 col-md-10 col-sm-10">
+                {{ post.message_html|highlight:search_term|safe }}
+
+                <div class="actions">
+                    <a href="{{ post.get_absolute_url }}" title="Permanent link">Link</a>
+                </div>
+            </div>
+        </div>
+        {% if not forloop.last or not user.is_anonymous %}<hr>{% endif %}
         {% empty %}
             <div class="empty">
                 No posts met your search criteria
@@ -74,18 +70,15 @@
     </div>
 
     {% pagination post_list "post" search_term %}
-</div>
 {% endblock %}
 
 {% block extrascript %}
 <script type="text/javascript" language="javascript">
-//<![CDATA[
-....$(document).ready(function(){
-        // Hidden text collapse toggle
-        $('.hidden-header').on('click', function(e){
-            $(this).next('.hidden-text').toggle();
-        });
-....});
-//]]>
+$(document).ready(function(){
+    // Hidden text collapse toggle
+    $('.hidden-header').on('click', function(e){
+        $(this).next('.hidden-text').toggle();
+    });
+});
 </script>
 {% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% load webapp_tags %}
+
+{% block title %}Log in{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="page-header">Please sign in</h2>
+
+    <div class="col-sm-8 col-sm-offset-2">
+        <form method="post" action="{% url login %}" id="login-form">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            {% crispy form %}
+            <button type="submit" class="btn btn-lg btn-primary">Sign in</button>
+            <input type="hidden" name="next" value="{{ next }}" />
+        </form>
+        <div style="float:left">
+            <a href="{% url password_reset %}">Forgot your password?</a>
+        </div>
+        <div style="float:right">
+            <a href="{% url registration %}">Register</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}{% endblock %}

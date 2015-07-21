@@ -4,7 +4,7 @@ import numpy as np
 from django.contrib.auth.models import User
 from django.db import models
 
-from network.network_settings import ALL_PARAMS_ORDER
+from .network_settings import ALL_PARAMS_ORDER
 
 SPIC_CHOICES = (('0','Sandbox'),
                 ('1','SPIC1'),
@@ -21,7 +21,7 @@ class SPIC(models.Model):
     tooltip_json = models.TextField(blank=True)
     msg_json = models.TextField(blank=True)
 
-    solution = models.BooleanField()
+    solution = models.BooleanField(default=False)
 
     def __unicode__(self):
         return self.title
@@ -53,13 +53,13 @@ class Network(models.Model):
     nodes_json = models.TextField(blank=True, verbose_name='Nodes')
     links_json = models.TextField(blank=True, verbose_name='Links')
 
-    has_voltmeter = models.BooleanField()
-    has_spike_detector = models.BooleanField()
+    has_voltmeter = models.BooleanField(default=False)
+    has_spike_detector = models.BooleanField(default=False)
     voltmeter_json = models.TextField(blank=True, verbose_name='Voltmeter')
     spike_detector_json = models.TextField(blank=True, verbose_name='Spike Detector')
 
-    favorite = models.BooleanField()
-    deleted = models.BooleanField()
+    favorite = models.BooleanField(default=False)
+    deleted = models.BooleanField(default=False)
 
     class Meta:
         ordering = ('user_id', 'SPIC', 'local_id')
@@ -85,7 +85,7 @@ class Network(models.Model):
         new_kwargs['has_voltmeter'] = False
         new_kwargs['has_spike_detector'] = False
         new_kwargs['voltmeter_json'] = '{"meta":{"neurons":[]}}'
-        new_kwargs['spike_detector_json'] = '{"meta":{"neurons":[]}}'
+        new_kwargs['spike_detector_json'] = '{"meta":{"neurons":[]}, "senders":[], "times":[]}'
 
         new_kwargs['favorite'] = False
         new_kwargs['deleted'] = False
@@ -101,6 +101,9 @@ class Network(models.Model):
             return 'architect'
         else:
             return User.objects.get(pk=self.user_id)
+
+    def count(self, user_id=0):
+        return len(Network.objects.filter(SPIC=self.SPIC, user_id=user_id))
 
     def root_status(self):
         """ Returns status data from the field status_json."""
@@ -277,6 +280,7 @@ class Network(models.Model):
         connect_to = [link['target']['id'] for link in self.links(out='object') if link['source']['status']['model'] == 'voltmeter']
         meta = {'neurons': [], 'connect_to': connect_to}
 
+
         if self.has_voltmeter:
             def prep_to_vis(values):
                 return {'values': values.tolist(), 'values_reduced': values[::5].tolist()}
@@ -288,14 +292,14 @@ class Network(models.Model):
                 if 'V_m' in vm_E:
                     V_m = vm_E['V_m']
                     if len(V_m) > 0:
-
-                        V_m = np.reshape(np.array(V_m), [-1, len(meta['neurons'])]).T
+                        try:
+                            V_m = np.reshape(np.array(V_m), [-1, len(meta['neurons'])]).T
+                        except:
+                            V_m = np.reshape(np.array(V_m), [-1, 1]).T
                         meta['Vm_max'] = np.max(V_m)
                         meta['Vm_min'] = np.min(V_m)
 
-                    times = np.arange(1., self.duration, 1.)
-
-                    return {'V_m': map(prep_to_vis, V_m), 'times':times.tolist(), 'times_reduced':times[::5].tolist(), 'meta':meta}
+                        times = np.arange(1., self.duration, 1.)
+                        return {'V_m': map(prep_to_vis, V_m), 'times':times.tolist(), 'times_reduced':times[::5].tolist(), 'meta':meta}
 
         return {'meta': meta}
-

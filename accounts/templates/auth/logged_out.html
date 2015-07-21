@@ -3,11 +3,13 @@
 {% block title %}Logged out{% endblock %}
 
 {% block content %}
-    <h2>Logged out</h2>
-    
-    <p>Thanks for spending some quality time with our website today.</p>
-    
-    <p>
-        <a href="{% url login %}">Log in again</a>
-    </p>
+<div class="container">
+    <h2 class="page-header">Logged out</h2>
+
+    <div class="col-sm-8 col-sm-offset-2">
+        <p>Thanks for spending some quality time with our website today.</p>
+
+        <a role="button" class="btn btn-default" href="{% url login %}">Log in again</a>
+    </div>
+</div>
 {% endblock %}

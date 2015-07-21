@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-# coding: utf-8
-
 from django.template import Library
 from django.template.defaultfilters import stringfilter
 
@@ -27,7 +24,7 @@ def itemize(s, label=None):
         if label:
             st = ''
             params = PARAMS_ORDER.get(str(label))
-            
+
             if params:
                 params = params[0] + params[1]
                 for param in params[1:]:
@@ -46,7 +43,7 @@ def itemize(s, label=None):
                                 except:
                                     st += '%s: %s, ' %(param, s[param])
                 st = st[:-2]
-                return st   
+                return st
         l = s.items()
         l.sort()
         l = ["%s: %s" %(str(i[0]),str(i[1])) for i in l]
@@ -79,3 +76,7 @@ def truncate_float(s, max_len):
         return str(int(f)) + str(abs(f%1.))[1:int(max_len)+1]
     except:
         return s
+
+@register.filter
+def count(obj, user_id):
+    return obj.count(user_id)

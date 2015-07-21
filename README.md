@@ -73,9 +73,9 @@ optional (useful for developer)
 
 Synchronizing multiple databases
 ------------
- 
+
 Insert DATABASE_ROUTERS in local_settings
- 
+
 Create empty tables in database
 
     $ python manage.py sqlall reversion | python manage.py dbshell
@@ -131,4 +131,4 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-lib/decorators.py: (c) 2006-2009 Alexander Solovyov, new BSD License
+webapp/decorators.py: (c) 2006-2009 Alexander Solovyov, new BSD License
