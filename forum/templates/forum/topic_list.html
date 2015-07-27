@@ -56,7 +56,7 @@
             <tr>
                 <td class="status_icon">
                     {% if topic.unread %}
-                        <a href="{% url 'unread_post_redirect' topic.id %}" title="Go to first unread post" class="status_icon fa fa-comment fa-2x"></a>
+                        <a href="{% url unread_post_redirect topic.id %}" title="Go to first unread post" class="status_icon fa fa-comment fa-2x"></a>
                     {% else %}
                         <a href="{{ topic.get_absolute_url }}" title="No new posts"><i class="status_icon fa fa-comment-o fa-2x"></i></a>
                     {% endif %}

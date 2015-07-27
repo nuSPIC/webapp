@@ -42,9 +42,9 @@
 
                 <td>
                 {% if subscription.content_type.model == "topic" %}
-                    <a href="{% url 'subscribe_topic' subscription.content_object.id %}">Unsubscribe</a>
+                    <a href="{% url subscribe_topic subscription.content_object.id %}">Unsubscribe</a>
                 {% else %}
-                    <a href="{% url 'subscribe_forum' subscription.content_object.id %}">Unsubscribe</a>
+                    <a href="{% url subscribe_forum subscription.content_object.id %}">Unsubscribe</a>
                 {% endif %}
                 </td>
             </tr>
