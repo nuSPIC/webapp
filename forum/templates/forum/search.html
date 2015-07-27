@@ -12,7 +12,7 @@
 {% block forum_nav %}
 <nav class="nav navbar">
     <div class="forum_search">
-        <form action="{% url 'search' %}" method="get" class="form-search form-inline">
+        <form action="{% url search %}" method="get" class="form-search form-inline">
             {{ search_form.non_field_errors }}
             {{ search_form }}
             <button class="btn btn-default" type="submit" >Search</button>
