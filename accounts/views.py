@@ -26,8 +26,8 @@ def registration(request):
 
     if request.POST:
         user_form = UserRegistrationForm(request.POST, prefix='user_form')
-        profile_form = ProfileRegistrationForm(request.POST, prefix='profile_form')
-        if user_form.is_valid() and profile_form.is_valid():
+        # profile_form = ProfileRegistrationForm(request.POST, prefix='profile_form')
+        if user_form.is_valid():
             # Create new inactive user
             user = user_form.save()
             user.set_password(user_form.cleaned_data['password'])
@@ -36,8 +36,8 @@ def registration(request):
 
             # Fill user profile with data from registration form
             profile = user.get_profile()
-            profile_form = ProfileRegistrationForm(request.POST, instance=profile, prefix='profile_form')
-            profile = profile_form.save()
+            # profile_form = ProfileRegistrationForm(request.POST, instance=profile, prefix='profile_form')
+            # profile = profile_form.save()
 
             # Save IP address
             profile.ip_address = request.META.get('REMOTE_ADDR', None)
@@ -66,11 +66,11 @@ def registration(request):
             return HttpResponseRedirect(reverse('registration_done'))
     else:
         user_form = UserRegistrationForm(prefix='user_form')
-        profile_form = ProfileRegistrationForm(prefix='profile_form')
+        # profile_form = ProfileRegistrationForm(prefix='profile_form')
 
     return {
         'user_form': user_form,
-        'profile_form': profile_form,
+        # 'profile_form': profile_form,
     }
 
 
